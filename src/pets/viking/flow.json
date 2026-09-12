@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "viking",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "march": {
       "asset": "walk.png",
@@ -32,8 +32,17 @@
     "idle": {
       "completion": "restart",
       "flow": {
-        "type": "hide",
-        "durationMs": 1000
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "ponder"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1800
+          }
+        ]
       }
     },
     "working": {
@@ -73,10 +82,19 @@
       }
     },
     "done": {
-      "completion": "hold",
+      "completion": "restart",
       "flow": {
-        "type": "play",
-        "clip": "forge"
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "forge"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1600
+          }
+        ]
       }
     },
     "unknown": {

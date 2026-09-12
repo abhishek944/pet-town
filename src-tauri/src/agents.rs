@@ -29,6 +29,7 @@ struct AgentListResult {
 #[derive(Debug, Deserialize)]
 struct RawAgent {
     pane_id: String,
+    name: Option<String>,
     #[serde(default)]
     agent_status: String,
     agent_session: Option<RawAgentSession>,
@@ -100,7 +101,8 @@ pub(crate) fn parse_agent_list(text: &str) -> Result<Vec<ParsedAgent>, serde_jso
                 view: AgentView {
                     id: agent.pane_id,
                     status: normalized_status(&agent.agent_status),
-                    label: safe_project_name(project_path),
+                    label: safe_display_label(agent.name.as_deref())
+                        .unwrap_or_else(|| safe_project_name(project_path)),
                 },
                 tab_id: agent.tab_id,
                 workspace_id: agent.workspace_id,
@@ -117,5 +119,25 @@ pub(crate) fn unavailable_snapshot() -> AgentSnapshot {
     AgentSnapshot {
         available: false,
         agents: Vec::new(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn named_sessions_are_distinguishable_in_the_same_folder() {
+        let agents = parse_agent_list(r#"{"result":{"agents":[
+            {"pane_id":"w1:p1","name":"api-worker","agent_status":"blocked","cwd":"/private/project"},
+            {"pane_id":"w1:p2","name":"ui-worker","agent_status":"done","cwd":"/private/project"},
+            {"pane_id":"w1:p3","name":" \n ","agent_status":"future","cwd":"/private/project"}
+        ]}}"#).unwrap();
+        assert_eq!(agents[0].view.label, "api-worker");
+        assert_eq!(agents[0].view.status, "blocked");
+        assert_eq!(agents[1].view.label, "ui-worker");
+        assert_eq!(agents[1].view.status, "done");
+        assert_eq!(agents[2].view.label, "project");
+        assert_eq!(agents[2].view.status, "unknown");
     }
 }

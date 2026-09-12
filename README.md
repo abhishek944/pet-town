@@ -51,15 +51,15 @@ user permissions, so review the manifest and source before installing.
 - Selects a validated declarative behavior flow solely from agent state:
   - `working` → continuously move through distinct walk and action animations
   - `blocked` → waiting flow
-  - `idle` → hidden through the pack's ordinary `hide` flow action
+  - `idle` → gentle stationary play that keeps every citizen visible
   - `unknown` → each pet's cautious fallback flow
-  - `done` → celebration flow
+  - `done` → celebration flow that replays instead of freezing on a final pose
 - Keeps each pet's `flow.json` and APNG assets together in one self-contained folder; see [the behavior pack format](docs/behavior-packs.md).
 - Gives the Viking a working cycle that alternates walking and hammering, plus a seated thinking animation when blocked.
-- Uses no floating status symbols; the sprite animation communicates the current state.
+- Draws each citizen's name as a clickable status-colored badge — Working (blue), Needs reply (amber), Done (green), Ready (violet), or Unknown (slate) — so the state reads at a glance next to the sprite animation.
 - Waits for three missed polls before a departed citizen fades away.
 - Shrinks citizens automatically for large crowds.
-- Labels each character with its Herdr pane name when present, otherwise its custom tab name, otherwise the current folder name.
+- Labels each character with its Herdr pane name when present, otherwise its custom tab name, otherwise its agent name or the current folder name.
 - Focuses the matching Herdr agent directly when its pet is clicked.
 - Keeps the window transparent, undecorated, always on top, and visible across
   macOS workspaces. Empty pixels are click-through while citizen pixels remain
@@ -150,9 +150,9 @@ GitHub Actions also builds both macOS targets with the declared Rust 1.88 minimu
 
 1. Run `./scripts/build.sh` and link the plugin.
 2. Invoke `herdr-pets.village-on` while at least two Herdr agents exist.
-3. Confirm citizens appear centered just above the Dock, empty window space passes clicks through, and clicking a pet focuses its exact Herdr agent pane.
+3. Confirm citizens appear centered just above the Dock, empty window space passes clicks through, and clicking either a pet or its name/status badge focuses its exact Herdr agent pane.
 4. Confirm each pet moves to a screen edge, turns only there, and continues in the direction it faces with its project name following above.
-5. Change agents between working, blocked, done, idle, and unknown; confirm idle flows hide the complete citizen while the other states restore it.
+5. Change agents between working, blocked, done, idle, and unknown; confirm idle keeps each citizen visible with a gentle stationary loop, done replays its celebration instead of freezing, and every name badge shows the matching status word and color.
 6. Watch working pets use distinct movement and action animations. Confirm the Viking hammers, Ember practices with a sword, Mossback bows, Skiff scans, Mira checks her route map and drills with a spear, Jun repairs his bird, Brassbell sorts parcels, and Pebble blocks and flourishes its spoon.
 7. Invoke `herdr-pets.village-off` and confirm the strip disappears.
 

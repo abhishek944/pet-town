@@ -255,7 +255,7 @@ node - "$ROOT" "$TMP/flow-runtime.js" <<'CHECK_PACKS'
 const fs = require("node:fs");
 const path = require("node:path");
 const root = process.argv[2];
-const { compileBehaviorPack } = require(process.argv[3]);
+const { BehaviorMachine, compileBehaviorPack } = require(process.argv[3]);
 const petsDirectory = path.join(root, "src/pets");
 const petDirectories = fs.readdirSync(petsDirectory, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -272,6 +272,43 @@ function collectAssets(directory, current = directory) {
     }),
   );
 }
+function firstAction(node) {
+  if (node.type === "sequence") return firstAction(node.steps[0]);
+  if (node.type === "repeat") return firstAction(node.flow);
+  if (node.type === "choose") return firstAction(node.choices[0].flow);
+  return node;
+}
+function actionDurationMs(pack, node) {
+  return node.type === "play" ? pack.clips[node.clip].durationMs * node.count : node.durationMs;
+}
+function maximumCycleMs(pack, node) {
+  if (node.type === "play") return pack.clips[node.clip].durationMs * node.count;
+  if (node.type === "move" || node.type === "wait" || node.type === "hide") return node.durationMs;
+  if (node.type === "sequence") return node.steps.reduce((sum, step) => sum + maximumCycleMs(pack, step), 0);
+  if (node.type === "repeat") return node.count * maximumCycleMs(pack, node.flow);
+  return Math.max(...node.choices.map((choice) => maximumCycleMs(pack, choice.flow)));
+}
+function runCycles(pack, agentId, state, cycles) {
+  const machine = new BehaviorMachine(pack, agentId, state);
+  const cycleMs = maximumCycleMs(pack, pack.states[state].flow);
+  const totalMs = cycles * cycleMs + Math.floor(cycleMs / 2);
+  const epochs = new Set();
+  let movingMs = 0;
+  let distancePx = 0;
+  for (let elapsed = 0; elapsed < totalMs; elapsed += 40) {
+    const advance = machine.advance(Math.min(40, totalMs - elapsed));
+    const sample = advance.sample;
+    if (sample.state !== state) throw new Error(`${agentId}: flow drifted to ${sample.state}`);
+    if (!sample.visible) throw new Error(`${agentId}: ${state} hid the citizen at ${elapsed}ms`);
+    if (sample.held) throw new Error(`${agentId}: ${state} held mid-flow at ${elapsed}ms`);
+    if (sample.failed) throw new Error(`${agentId}: ${state} flow failed at ${elapsed}ms`);
+    if (!sample.clip) throw new Error(`${agentId}: ${state} lost its clip at ${elapsed}ms`);
+    epochs.add(sample.clipEpoch);
+    if (sample.moving) movingMs += 40;
+    distancePx += advance.distancePx;
+  }
+  return { epochs: epochs.size, movingMs, distancePx };
+}
 const workingFlowSignatures = new Set();
 for (const pet of petDirectories) {
   const directory = path.join(petsDirectory, pet);
@@ -280,7 +317,29 @@ for (const pet of petDirectories) {
   const result = compileBehaviorPack(manifest, assets);
   if (!result.pack) throw new Error(`${pet}/flow.json: ${JSON.stringify(result.diagnostics)}`);
   if (result.pack.id !== pet) throw new Error(`${pet}/flow.json: pack id must match its folder`);
-  if (result.pack.states.idle.flow.type !== "hide") throw new Error(`${pet}/flow.json: idle visibility is not flow-authored`);
+  for (const state of ["idle", "working", "blocked", "done", "unknown"]) {
+    const opening = firstAction(result.pack.states[state].flow);
+    if (opening.type !== "play" && opening.type !== "move") throw new Error(`${pet}/flow.json: ${state} flow must open with a visible clip action`);
+    const run = runCycles(result.pack, `${pet}:${state}`, state, 2);
+    if (run.epochs < 3) throw new Error(`${pet}/flow.json: ${state} did not keep restarting across multiple cycles`);
+    if (state === "working" && (run.movingMs <= 0 || run.distancePx <= 0)) throw new Error(`${pet}/flow.json: working flow never moved`);
+  }
+  const walker = new BehaviorMachine(result.pack, `${pet}:transitions`, "working");
+  walker.advance(0);
+  for (const next of ["blocked", "done", "idle", "working"]) {
+    const before = walker.sample().clipEpoch;
+    if (!walker.setStatus(next)) throw new Error(`${pet}: status change to ${next} was ignored`);
+    const entry = walker.advance(0).sample;
+    if (entry.state !== next) throw new Error(`${pet}: status change to ${next} did not enter the new state`);
+    if (entry.clipEpoch <= before) throw new Error(`${pet}: entering ${next} kept the previous clip epoch`);
+    walker.advance(Math.floor(actionDurationMs(result.pack, firstAction(result.pack.states[next].flow)) / 2));
+    const polled = walker.sample().clipEpoch;
+    if (walker.setStatus(next)) throw new Error(`${pet}: unchanged ${next} poll reported a state change`);
+    const afterPoll = walker.advance(1).sample;
+    if (afterPoll.state !== next) throw new Error(`${pet}: unchanged ${next} poll left the state`);
+    if (afterPoll.clipEpoch !== polled) throw new Error(`${pet}: unchanged ${next} poll restarted the flow`);
+  }
+  if (!walker.sample().visible) throw new Error(`${pet}: citizen not visible after the full transition loop`);
   workingFlowSignatures.add(JSON.stringify(result.pack.states.working.flow));
 }
 if (workingFlowSignatures.size !== petDirectories.length) throw new Error("working pet flows are not distinct");

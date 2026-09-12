@@ -10,7 +10,9 @@ Only these five top-level state keys are allowed and required:
 - `done`
 - `unknown`
 
-A repeated poll with the same normalized state keeps the current flow position. A different state cancels the old flow immediately while preserving screen position and facing, then evaluates the new flow from a visible baseline. Visibility is flow-authored: no state name is treated specially by the renderer.
+A repeated poll with the same normalized state keeps the current flow position. A different state cancels the old flow immediately while preserving screen position and facing, then evaluates the new flow from a visible baseline. Visibility is flow-authored: no state name is treated specially by the renderer. Outside the pack, the renderer draws each citizen's name as a clickable status-colored badge — Working, Needs reply, Done, Ready, or Unknown — and focuses that agent's Herdr pane on click; pack data only drives the sprites.
+
+Bundled packs keep every state visible and alive: `idle` plays one gentle stationary clip followed by a 1800 ms wait, and `done` replays its clip followed by a 1600 ms wait, both with `completion: "restart"`, so no bundled pet hides while idle or freezes forever on a final pose. Custom packs remain free to use `hide` in `idle` or `hold` in `done`; the runtime semantics for those actions are unchanged.
 
 ## Add a pet
 
@@ -47,7 +49,13 @@ The runtime discovers pet IDs from these folders and assigns distinct packs befo
   "states": {
     "idle": {
       "completion": "restart",
-      "flow": { "type": "hide", "durationMs": 1000 }
+      "flow": {
+        "type": "sequence",
+        "steps": [
+          { "type": "play", "clip": "jump" },
+          { "type": "wait", "durationMs": 1800 }
+        ]
+      }
     },
     "working": {
       "completion": "restart",
@@ -69,8 +77,14 @@ The runtime discovers pet IDs from these folders and assigns distinct packs befo
       "flow": { "type": "wait", "durationMs": 1000 }
     },
     "done": {
-      "completion": "hold",
-      "flow": { "type": "play", "clip": "jump" }
+      "completion": "restart",
+      "flow": {
+        "type": "sequence",
+        "steps": [
+          { "type": "play", "clip": "jump" },
+          { "type": "wait", "durationMs": 1600 }
+        ]
+      }
     },
     "unknown": {
       "completion": "restart",

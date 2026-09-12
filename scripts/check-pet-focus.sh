@@ -14,6 +14,7 @@ class FakeElement {
     this.classes = new Set(classes);
     this.parent = parent;
     this.dataset = agentId ? { agentId } : {};
+    this.classList = { contains: (name) => this.classes.has(name) };
   }
   closest(selector) {
     if (this.classes.has(selector.slice(1))) return this;
@@ -27,7 +28,16 @@ const citizen = new FakeElement(["citizen"], null, "session:w1:p2");
 const pet = new FakeElement(["pet"], citizen);
 const label = new FakeElement(["project"], citizen);
 assert(agentIdForPetClick(pet) === "session:w1:p2", "pet did not resolve its agent");
-assert(agentIdForPetClick(label) === null, "label unexpectedly focused an agent");
+assert(agentIdForPetClick(label) === "session:w1:p2", "label did not focus its pane");
+const status = new FakeElement(["project-status"], label);
+assert(agentIdForPetClick(status) === "session:w1:p2", "nested status did not focus its pane");
+assert(agentIdForPetClick(citizen) === null, "empty citizen area captured clicks");
+citizen.hidden = true;
+assert(agentIdForPetClick(pet) === null, "hidden citizen captured clicks");
+citizen.hidden = false;
+citizen.classes.add("retiring");
+assert(agentIdForPetClick(label) === null, "departing citizen captured clicks");
+citizen.classes.delete("retiring");
 assert(agentIdForPetClick(null) === null, "null target resolved an agent");
 let listener = null;
 const root = {
@@ -35,12 +45,28 @@ const root = {
   removeEventListener(type, next) { if (type === "click" && listener === next) listener = null; },
 };
 const focused = [];
-const dispose = installPetFocus(root, (id) => focused.push(id));
-listener({ target: label });
-listener({ target: pet });
-assert(JSON.stringify(focused) === JSON.stringify(["session:w1:p2"]), "click routing was not pet-only");
-dispose();
-assert(listener === null, "click listener was not removed");
-console.log("pet focus checks: pass");
+const settle = () => new Promise(setImmediate);
+(async () => {
+  const dispose = installPetFocus(root, (id) => { focused.push(id); });
+  for (const target of [label, pet, status]) {
+    listener({ target });
+    assert(citizen.dataset.focusPending === "true", "pending click was not recorded");
+    listener({ target });
+    await settle();
+    assert(!citizen.dataset.focusPending, "pending state did not clear");
+  }
+  assert(JSON.stringify(focused) === JSON.stringify(Array(3).fill("session:w1:p2")), "pet and badge routing or duplicate prevention failed");
+  dispose();
+  assert(listener === null, "click listener was not removed");
+  let attempts = 0;
+  installPetFocus(root, () => { if (++attempts === 1) throw new Error("agent exited"); });
+  listener({ target: label });
+  await settle();
+  assert(citizen.dataset.focusError === "true", "focus failure was hidden");
+  listener({ target: pet });
+  await settle();
+  assert(!citizen.dataset.focusError && attempts === 2, "failed focus could not be retried");
+  console.log("pet focus checks: pass");
+})().catch((error) => { console.error(error); process.exitCode = 1; });
 CHECK
 node "$TMP/check.cjs"

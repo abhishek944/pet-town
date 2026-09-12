@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "mossback-turtle-monk",
-  "packVersion": "1",
+  "packVersion": "2",
   "clips": {
     "staff-walk": {
       "asset": "walk.png",
@@ -23,8 +23,17 @@
     "idle": {
       "completion": "restart",
       "flow": {
-        "type": "hide",
-        "durationMs": 1000
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "gentle-bow"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1800
+          }
+        ]
       }
     },
     "working": {
@@ -70,10 +79,19 @@
       }
     },
     "done": {
-      "completion": "hold",
+      "completion": "restart",
       "flow": {
-        "type": "play",
-        "clip": "gentle-bow"
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "gentle-bow"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1600
+          }
+        ]
       }
     },
     "unknown": {

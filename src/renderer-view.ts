@@ -1,5 +1,10 @@
 import type { FlowSample } from "./flow-runtime";
 import type { CitizenState } from "./village";
+import { normalizeHerdrState } from "./flow-utils";
+
+export const STATUS_LABELS = {
+  working: "Working", blocked: "Needs reply", done: "Done", idle: "Ready", unknown: "Unknown",
+} as const;
 
 export interface HitRegion {
   x: number;
@@ -32,6 +37,11 @@ export function createCitizenElement(): HTMLElement {
 
   const project = document.createElement("span");
   project.className = "project";
+  const name = document.createElement("span");
+  name.className = "project-name";
+  const status = document.createElement("span");
+  status.className = "project-status";
+  project.append(name, status);
 
   const stack = document.createElement("span");
   stack.className = "pet-stack";
@@ -54,10 +64,17 @@ export function createCitizenElement(): HTMLElement {
 export function updateCitizenElement(element: HTMLElement, citizen: CitizenState): void {
   element.className = `citizen${citizen.retiring ? " retiring" : ""}`;
   element.dataset.agentId = citizen.id;
-  element.setAttribute("aria-label", `${citizen.label}, ${citizen.status}`);
+  const status = normalizeHerdrState(citizen.status);
+  element.dataset.status = status;
+  const description = `${citizen.label}, ${STATUS_LABELS[status]}. Click to focus this Herdr pane.`;
+  element.setAttribute("aria-label", description);
 
   const project = element.querySelector<HTMLElement>(".project");
-  if (project && project.textContent !== citizen.label) project.textContent = citizen.label;
+  if (project) project.title = description;
+  const name = element.querySelector<HTMLElement>(".project-name");
+  if (name && name.textContent !== citizen.label) name.textContent = citizen.label;
+  const label = element.querySelector<HTMLElement>(".project-status");
+  if (label && label.textContent !== STATUS_LABELS[status]) label.textContent = STATUS_LABELS[status];
 }
 
 function syncCitizenVisibility(

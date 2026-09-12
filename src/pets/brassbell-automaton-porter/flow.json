@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "brassbell-automaton-porter",
-  "packVersion": "1",
+  "packVersion": "2",
   "clips": {
     "heavy-march": {
       "asset": "walk.png",
@@ -23,8 +23,17 @@
     "idle": {
       "completion": "restart",
       "flow": {
-        "type": "hide",
-        "durationMs": 1000
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "parcel-sort"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1800
+          }
+        ]
       }
     },
     "working": {
@@ -70,10 +79,19 @@
       }
     },
     "done": {
-      "completion": "hold",
+      "completion": "restart",
       "flow": {
-        "type": "play",
-        "clip": "parcel-sort"
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "parcel-sort"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1600
+          }
+        ]
       }
     },
     "unknown": {

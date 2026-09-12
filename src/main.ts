@@ -21,11 +21,7 @@ const renderer = new VillageRenderer(village, (regions: HitRegion[]) => {
     // The macOS hit-test bridge is optional on unsupported desktop targets.
   });
 });
-installPetFocus(village, (id) => {
-  void invoke("focus_agent", { id }).catch(() => {
-    // The agent may have exited or moved since the latest poll.
-  });
-});
+installPetFocus(village, (id) => invoke<void>("focus_agent", { id }));
 
 function render(): void {
   renderer.render(citizens, window.innerWidth);

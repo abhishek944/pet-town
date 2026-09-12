@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "cat",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "stalk": {
       "asset": "walk.png",
@@ -23,8 +23,17 @@
     "idle": {
       "completion": "restart",
       "flow": {
-        "type": "hide",
-        "durationMs": 1000
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "watch"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1800
+          }
+        ]
       }
     },
     "working": {
@@ -64,10 +73,19 @@
       }
     },
     "done": {
-      "completion": "hold",
+      "completion": "restart",
       "flow": {
-        "type": "play",
-        "clip": "watch"
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "watch"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1600
+          }
+        ]
       }
     },
     "unknown": {

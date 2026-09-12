@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "dog",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "sprint": {
       "asset": "walk.png",
@@ -23,8 +23,17 @@
     "idle": {
       "completion": "restart",
       "flow": {
-        "type": "hide",
-        "durationMs": 1000
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "listen"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1800
+          }
+        ]
       }
     },
     "working": {
@@ -68,10 +77,19 @@
       }
     },
     "done": {
-      "completion": "hold",
+      "completion": "restart",
       "flow": {
-        "type": "play",
-        "clip": "listen"
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "listen"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1600
+          }
+        ]
       }
     },
     "unknown": {

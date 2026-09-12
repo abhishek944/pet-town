@@ -50,7 +50,13 @@ To add a pet:
   "states": {
     "idle": {
       "completion": "restart",
-      "flow": { "type": "hide", "durationMs": 1000 }
+      "flow": {
+        "type": "sequence",
+        "steps": [
+          { "type": "play", "clip": "work" },
+          { "type": "wait", "durationMs": 1800 }
+        ]
+      }
     },
     "working": {
       "completion": "restart",
@@ -72,8 +78,14 @@ To add a pet:
       "flow": { "type": "play", "clip": "work" }
     },
     "done": {
-      "completion": "hold",
-      "flow": { "type": "play", "clip": "work" }
+      "completion": "restart",
+      "flow": {
+        "type": "sequence",
+        "steps": [
+          { "type": "play", "clip": "work" },
+          { "type": "wait", "durationMs": 1600 }
+        ]
+      }
     },
     "unknown": {
       "completion": "restart",
@@ -93,7 +105,7 @@ Every pack must define exactly these states:
 - `done`
 - `unknown`
 
-Visibility is ordinary flow data. No state receives special renderer behavior. For example, bundled pets disappear while idle only because their `idle` flow uses `hide`.
+Visibility is ordinary flow data. No state receives special renderer behavior. Bundled pets stay visible while `idle` with one gentle stationary play followed by a 1800 ms wait, and their `done` flow replays its clip followed by a 1600 ms wait instead of freezing, so neither state ever parks on a single frame. A custom pack may still disappear while idle by using `hide`, or freeze on a final pose with `hold`, and the renderer treats those identically.
 
 Entering a different state starts from a visible baseline. A `hide` action hides the complete citizen, including its pet, label, shadow, and clickable area. A later `play` or `move` action shows it again. A `wait` in the same flow preserves the current visibility.
 
@@ -142,7 +154,7 @@ Example weighted choice:
 }
 ```
 
-`completion: "restart"` starts the state's root flow again when it finishes. `completion: "hold"` keeps the final pose and visibility without movement. The validator requires `holdAsset` for clips reachable from a visible `hold` flow, so the APNG cannot keep looping.
+`completion: "restart"` starts the state's root flow again when it finishes. `completion: "hold"` keeps the final pose and visibility without movement. The validator requires `holdAsset` for clips reachable from a visible `hold` flow, so the APNG cannot keep looping. Every bundled pack uses `restart` for `done` — one celebration play followed by a 1600 ms wait — and the APNG continues animating during the wait.
 
 ## APNG requirements
 

@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "jun-clockwork-apprentice",
-  "packVersion": "1",
+  "packVersion": "2",
   "clips": {
     "tool-belt-walk": {
       "asset": "walk.png",
@@ -23,8 +23,17 @@
     "idle": {
       "completion": "restart",
       "flow": {
-        "type": "hide",
-        "durationMs": 1000
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "bird-repair"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1800
+          }
+        ]
       }
     },
     "working": {
@@ -69,10 +78,19 @@
       }
     },
     "done": {
-      "completion": "hold",
+      "completion": "restart",
       "flow": {
-        "type": "play",
-        "clip": "bird-repair"
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "bird-repair"
+          },
+          {
+            "type": "wait",
+            "durationMs": 1600
+          }
+        ]
       }
     },
     "unknown": {
