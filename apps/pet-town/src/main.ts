@@ -76,9 +76,11 @@ systemReducedMotion.addEventListener("change", (event) => {
   renderer.setSystemReducedMotion(event.matches);
 });
 installPetInteractions(village, {
-  focusAgent: (id) => {
-    void invoke("focus_agent", { id }).catch((error) => console.warn("Could not open pet", error));
-  },
+  focusAgent: (id) =>
+    invoke<void>("focus_agent", { id }).catch((error) => {
+      console.warn("Could not open pet", error);
+      throw error;
+    }),
   openPreferences: (id) => {
     const petId = citizens.get(id)?.sprite;
     if (petId) void invoke("open_preferences", { petId });

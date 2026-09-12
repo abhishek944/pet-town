@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "nib-dragon-hatchling",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "toddle-hop": {
       "asset": "walk.webp",
@@ -35,8 +35,9 @@
   },
   "states": {
     "idle": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "working": {
       "animation": "toddle-hop",
@@ -51,8 +52,9 @@
       "action": "idle"
     },
     "unknown": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "listening": {
       "animation": "flame-puff",

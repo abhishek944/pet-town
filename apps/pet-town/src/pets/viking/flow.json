@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "viking",
-  "packVersion": "5",
+  "packVersion": "6",
   "clips": {
     "march": {
       "asset": "walk.webp",
@@ -46,8 +46,9 @@
   },
   "states": {
     "idle": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "working": {
       "animation": "march",
@@ -62,8 +63,9 @@
       "action": "idle"
     },
     "unknown": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "listening": {
       "animation": "ponder",

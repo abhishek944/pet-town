@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "ember-fox-ronin",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "scout": {
       "asset": "walk.webp",
@@ -35,8 +35,9 @@
   },
   "states": {
     "idle": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "working": {
       "animation": "scout",
@@ -51,8 +52,9 @@
       "action": "idle"
     },
     "unknown": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "listening": {
       "animation": "sword-practice",

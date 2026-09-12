@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "human-male",
-  "packVersion": "5",
+  "packVersion": "6",
   "clips": {
     "patrol": {
       "asset": "walk.webp",
@@ -35,8 +35,9 @@
   },
   "states": {
     "idle": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "working": {
       "animation": "patrol",
@@ -51,8 +52,9 @@
       "action": "idle"
     },
     "unknown": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "listening": {
       "animation": "inspect",
