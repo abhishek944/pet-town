@@ -1,9 +1,10 @@
-# Herdr Pets
+# Pet Village
 
-Herdr Pets turns every live Herdr agent into a small animated citizen in a
-transparent village along the bottom of your desktop.
+Pet Village turns live Herdr, Claude Code, Codex, OpenCode, Pi, Factory Droid,
+and Cursor sessions into small animated citizens in a transparent village along
+the bottom of your desktop.
 
-![Herdr Pets demo — 13s from Screen Recording (1:17–1:30) showing 15 agents + village pets](assets/pets-demo.gif)
+![Pet Village demo — 13s from Screen Recording (1:17–1:30) showing 15 agents + village pets](assets/pets-demo.gif)
 
 <p align="center">
   <a href="assets/pets-demo.mp4">MP4 (642 KB, 1280×832)</a> · GIF autoplays above (2.0 MB, 800×520, 12 fps) — full 13s clip at <code>1:17–1:30</code>
@@ -15,37 +16,28 @@ village—never one window per agent and never an arbitrary agent limit.
 
 ## Install
 
-Herdr Pets is a Herdr plugin. Install it from GitHub:
+Pet Village is a standalone macOS desktop app. Download the release app for
+your Mac, or keep the matching `bin/macos-*` package together and open its
+`pet-village` executable. Each package includes the private Node/Pi runtime used
+by the optional voice orchestrator; users do not install Node.js, Pi, or Rust.
+The village discovers configured coding-agent connections without requiring
+Herdr.
+
+Herdr users can additionally install the optional Herdr adapter:
 
 ```bash
-herdr plugin install abhishek944/herdr-pets
+herdr plugin install abhishek944/pet-village
 ```
 
-Herdr clones the repository, shows the manifest and the commands it will run for
-review, then registers it. It is also listed in the [Herdr marketplace](https://herdr.dev/plugins/) — search for **herdr-pets**, or open its card from
-any marketplace listing page.
-
-The village starts automatically on the next Herdr startup (or live handoff)
-because the plugin declares a startup hook. Prebuilt macOS arm64 and x64
-binaries are bundled in the repository, so **no Node.js or Rust toolchain is
-required to install** — you only need macOS and Herdr 0.8 or newer.
-
-Control it with the plugin actions once it is running:
-
-```bash
-herdr plugin action invoke herdr-pets.village-on
-herdr plugin action invoke herdr-pets.village-off
-herdr plugin action invoke herdr-pets.village-status
-```
-
-Marketplace listings are discovered automatically from the public
-`herdr-plugin` topic and are **not reviewed**. Herdr runs plugin code with your
-user permissions, so review the manifest and source before installing.
+That adapter starts the same desktop app with Herdr and contributes validated
+Herdr sessions. Its optional actions remain available for village status,
+Preferences, reload, and start/stop control. Marketplace plugins run with your
+user permissions, so review their manifest and source before installing.
 
 ## What it does
 
 - Polls every registered Herdr session once per second through safe Rust commands (no shell), with a two-second timeout and a 1 MiB output limit.
-- Assigns agents from an approved cast of eleven companions: cat, corgi, walking man, Viking, fox ronin, turtle monk, raccoon sky pirate, dune scout, clockwork apprentice, automaton porter, and slime knight.
+- Assigns agents from an approved cast of twenty companions, with distinct packs reused only after every character has appeared.
 - Runs state-authored sprite flows across the full screen while each name follows its character.
 - Turns characters only at screen edges and always faces them in their movement direction.
 - Selects a validated declarative behavior flow solely from agent state:
@@ -53,44 +45,62 @@ user permissions, so review the manifest and source before installing.
   - `blocked` → waiting flow
   - `idle` → hidden through the pack's ordinary `hide` flow action
   - `unknown` → each pet's cautious fallback flow
-  - `done` → celebration flow
+  - `done` → celebrates once, then loops a clearly visible sleeping animation with floating Zs
 - Keeps each pet's `flow.json` and APNG assets together in one self-contained folder; see [the behavior pack format](docs/behavior-packs.md).
 - Gives the Viking a working cycle that alternates walking and hammering, plus a seated thinking animation when blocked.
 - Uses no floating status symbols; the sprite animation communicates the current state.
 - Waits for three missed polls before a departed citizen fades away.
 - Shrinks citizens automatically for large crowds.
-- Labels each character with its Herdr pane name when present, otherwise its custom tab name, otherwise the current folder name.
-- Focuses the matching Herdr agent directly when its pet is clicked.
+- Labels each character with its Herdr pane name when present, otherwise `{space-name}-{tab}` (for example `pet-village-1`), and uses the current folder name only when Herdr naming is unavailable.
+- Focuses an exact revalidated Herdr pane when its pet is clicked, or the best already-running application known for a standalone harness without launching or resuming anything.
+- Lets users drag a pet horizontally; it pauses while held and resumes its existing movement from the drop point.
+- Builds each pet's right-click menu from validated `flow.json` actions; every bundled pet currently exposes **Wave**.
+- Opens a native macOS Settings window from **Preferences…** in that menu or the Herdr plugin action, with per-character controls, a **Pet Studio**, and an **Agents** tab for atomic, reversible setup of all six standalone harness integrations.
+- Lets users choose between creating a new pet and extending an existing pet. New pets can use a newly generated reference or an existing pet as their reference; extensions can import or generate APNGs, optionally replace individual state animations, and add menu actions without modifying bundled assets or rebuilding.
+- Adds a user-named voice orchestrator that waits for “Hey, <name>” with on-device recognition, connects to GPT-Live 1 only after activation, and delegates computer work to a persistent Pi agent in a dedicated Herdr pane.
+- Runs that Pi agent with GPT-5.6 Luna at medium thinking, supports push-to-talk and spoken/task cancellation, and keeps voice transcripts ephemeral.
+- Lets Pet Studio assign user-reviewed APNGs to exactly two orchestrator states: Walking normally and Listening only while the user speaks.
+- Includes every character in random assignment by default, lets users deselect unwanted characters, and immediately replaces visible deselected pets after Apply while preserving allowed assignments.
+- Optionally hides completed sleeping pets after 1, 5, 15, 30, or 60 minutes while continuing to monitor them and restoring them immediately when their state changes.
+- Pauses the visible village while Settings edits a draft; **Apply** saves the complete versioned file at `~/.pet-village/preferences.json`, while closing discards unapplied changes and resumes current agent states.
 - Keeps the window transparent, undecorated, always on top, and visible across
   macOS workspaces. Empty pixels are click-through while citizen pixels remain
   interactive.
-- Starts and stops through Herdr plugin actions instead of a login item.
+- Runs directly as a standalone app; the optional Herdr adapter can also start and stop it through plugin actions.
 
 ## Architecture
 
 ```text
-Herdr plugin (herdr-plugin.toml)
-  └─ scripts/supervisor.sh
-       └─ Tauri process
-            ├─ Rust: reads agent state, routes focus, and caches pane and tab labels
-            └─ WebView: TypeScript state, pet clicks, CSS citizens, and animations
+Standalone Tauri process
+  ├─ Rust adapter broker: lifecycle records, Herdr discovery, and focus routes
+  ├─ Rust orchestrator state: local wake bridge, GPT-Live session creation, and Pi lifecycle
+  ├─ WebView: village, Settings, and ephemeral WebRTC voice conversation
+  └─ dedicated Herdr pane: bundled Pi → GPT-5.6 Luna / medium → Herdr skill
+       ↑
+optional Herdr plugin adapter (herdr-plugin.toml + scripts/supervisor.sh)
 ```
 
-The plugin is only a lifecycle supervisor. Every Herdr startup registers its
-session socket in the shared plugin state; the one Tauri process polls those
+The optional Herdr plugin is only an adapter and lifecycle convenience. Every
+Herdr startup registers its session socket; the desktop process polls those
 sessions in parallel and namespaces pane IDs before merging them. If Herdr is
-unavailable, the village quietly empties and retries.
+unavailable, standalone harness pets continue normally.
+
+The backend places Herdr and six standalone harness sources behind one adapter
+broker. Reversible lifecycle hooks or plugins feed a 24-hour-retained, fail-open local
+event bridge; validated Herdr ownership prevents duplicate pets. See the
+[multi-harness adapter architecture](docs/multi-harness-adapters.md) and
+[Agent connections guide](docs/agent-connections.md).
 
 ## Requirements
 
 **To install and run:**
 
 - macOS (arm64 or x86_64)
-- Herdr 0.8 or newer
+- Herdr 0.9 or newer when using the optional adapter or voice orchestrator
 
-The plugin registers with `platforms = ["macos"]`, so Herdr refuses to install it
-on Linux or Windows. On a supported Mac, nothing else is needed — the prebuilt
-binaries are bundled with the repository.
+The optional plugin registers with `platforms = ["macos"]`. On a supported Mac,
+nothing else is needed—the prebuilt standalone binaries are bundled with the
+repository.
 
 **To build from source instead** (for example, during development or to apply a
 change to the bundled renderer), additionally need:
@@ -109,8 +119,10 @@ added later; always-on-top behavior on Linux depends on the desktop compositor.
 ./scripts/build.sh
 ```
 
-The release executable is written to `src-tauri/target/release/herdr-pets` and
-copied into the matching `bin/macos-*` plugin package directory.
+The release executable is written to `src-tauri/target/release/pet-village` and
+copied into the matching `bin/macos-*` plugin package directory. The build also
+downloads a pinned Node release and installs a pinned Pi package into that
+architecture's bundled runtime directory.
 
 For development:
 
@@ -149,17 +161,27 @@ GitHub Actions also builds both macOS targets with the declared Rust 1.88 minimu
 ## Manual visual check
 
 1. Run `./scripts/build.sh` and link the plugin.
-2. Invoke `herdr-pets.village-on` while at least two Herdr agents exist.
+2. Invoke `pet-village.village-on` while at least two Herdr agents exist.
 3. Confirm citizens appear centered just above the Dock, empty window space passes clicks through, and clicking a pet focuses its exact Herdr agent pane.
 4. Confirm each pet moves to a screen edge, turns only there, and continues in the direction it faces with its project name following above.
 5. Change agents between working, blocked, done, idle, and unknown; confirm idle flows hide the complete citizen while the other states restore it.
 6. Watch working pets use distinct movement and action animations. Confirm the Viking hammers, Ember practices with a sword, Mossback bows, Skiff scans, Mira checks her route map and drills with a spear, Jun repairs his bird, Brassbell sorts parcels, and Pebble blocks and flourishes its spoon.
-7. Invoke `herdr-pets.village-off` and confirm the strip disappears.
+7. Complete an agent and confirm its pet celebrates once, then continues sleeping with animated Zs until its state changes.
+8. Drag a pet horizontally, release it, and confirm it resumes movement from the drop point without focusing the agent.
+9. Right-click several pets, choose **Wave**, and confirm each waves once before resuming its exact prior behavior. Change an agent's state during Wave and confirm the new state interrupts it.
+10. Right-click a pet and choose **Preferences…**. Confirm one native Settings window opens for that character, every visible pet freezes, the preview reflects walking speed and reduced movement, and hovering the preview pauses its travel when **Stop walking while hovered** is enabled. Deselect that character from the random cast, Apply, close Settings, and confirm any visible copy is replaced while allowed pets keep their assignments.
+11. Enable **Hide completed pets**, select a delay, and Apply. Confirm completed pets disappear after that delay, no longer affect crowd sizing or clicks, and return immediately if they begin working or become blocked.
+12. Confirm reduced movement or hover pauses only horizontal travel while the pet keeps animating; also confirm closing Settings discards any unapplied draft and resumes current Herdr states.
+13. Edit `~/.pet-village/preferences.json`, invoke `pet-village.reload-preferences`, and confirm valid changes load while invalid JSON is preserved and rejected.
+14. Invoke `pet-village.village-off` and confirm the strip disappears.
 
 ## Privacy
 
-The app makes no network requests. It reads Herdr's local agent and label data and sends a local focus command only when a pet is clicked.
-Only public agent IDs, normalized status, and sanitized pane, tab, or folder labels cross into the web interface. Full paths and prompts are never displayed.
+Ordinary village monitoring remains local. It does not send coding-agent prompts, code, tool arguments, output, credentials, full paths, or raw harness session IDs to OpenAI. Only opaque public IDs, normalized status, source names, and sanitized labels cross into the village interface.
+
+Voice is off by default. Local wake detection uses Apple's on-device speech recognition and sends no audio to OpenAI before activation. During an active conversation, microphone audio and ephemeral transcripts pass through GPT-Live 1 over WebRTC; only delegated conversation context and the concise Pi result are routed between GPT-Live and the dedicated Pi agent. Ending the conversation stops microphone capture immediately and clears app-held transcripts; five minutes without user speech also ends the paid Live session. The OpenAI API key stays in Rust memory and may come from `OPENAI_API_KEY` or the macOS Keychain item with service `pet-village.openai` and account `api-key`.
+
+Pet Studio makes an OpenAI request only after the user presses a generation button; imported APNGs stay local. That request contains the Studio prompt and, when creating an animation, the character reference the user approved. API charges may apply. The OpenAI API key stays in the Rust backend, is sent only to the fixed OpenAI endpoint, and is never placed in preferences or frontend state. Generated references, sheets, APNGs, preferences, and short-lived event records remain under `~/.pet-village/` unless the user exports them. Existing-pet extensions are stored separately under `~/.pet-village/pet-packs/extensions/` as validated, versioned overlays, so bundled pet files remain immutable.
 
 ## License
 

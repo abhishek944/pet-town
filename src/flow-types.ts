@@ -58,10 +58,27 @@ export interface RepeatNode {
   flow: FlowNode;
 }
 
-export type FlowNode = SequenceNode | PlayNode | MoveNode | WaitNode | HideNode | ChooseNode | RepeatNode;
+export interface LoopNode {
+  type: "loop";
+  flow: FlowNode;
+}
+
+export type FlowNode = SequenceNode | PlayNode | MoveNode | WaitNode | HideNode | ChooseNode | RepeatNode | LoopNode;
 
 export interface StateFlowManifest {
   completion: "restart" | "hold";
+  flow: FlowNode;
+}
+
+export const ACTIONS_MAX = 8;
+
+export interface PackActionManifest {
+  label: string;
+  flow: FlowNode;
+}
+
+export interface CompiledAction {
+  label: string;
   flow: FlowNode;
 }
 
@@ -71,6 +88,8 @@ export interface BehaviorPackManifest {
   packVersion: string;
   clips: Record<string, ClipManifest>;
   states: Record<HerdrState, StateFlowManifest>;
+  actions?: Record<string, PackActionManifest>;
+  orchestratorAnimations?: OrchestratorAnimations | null;
 }
 
 export interface PackDiagnostic {
@@ -92,6 +111,11 @@ export interface CompiledClip {
   scale: number;
 }
 
+export interface OrchestratorAnimations {
+  walking: string;
+  listening: string;
+}
+
 export interface CompiledBehaviorPack {
   readonly formatVersion: 1;
   readonly id: string;
@@ -99,6 +123,8 @@ export interface CompiledBehaviorPack {
   readonly fingerprint: string;
   readonly clips: Readonly<Record<string, CompiledClip>>;
   readonly states: Readonly<Record<HerdrState, StateFlowManifest>>;
+  readonly actions: Readonly<Record<string, CompiledAction>>;
+  readonly orchestratorAnimations: Readonly<OrchestratorAnimations> | null;
 }
 
 export interface PackCompilation {
@@ -122,5 +148,6 @@ export const LIMITS = {
   nestingMax: 16,
   nodesMax: 512,
   choicesMax: 32,
+  loopMinMs: 100,
   transitionBudget: 2_048,
 } as const;

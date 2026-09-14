@@ -102,10 +102,11 @@ export function validateNode(
     }
     const results = value.steps.map((step, index) => validateNode(step, `${path}/steps/${index}`, depth + 1, context));
     if (results.some((result) => result.node === null)) return { node: null, minimumMs: 0, maximumMs: 0 };
+    const cap = Number.MAX_SAFE_INTEGER;
     return {
       node: { type: "sequence", steps: results.map((result) => result.node as FlowNode) },
-      minimumMs: results.reduce((sum, result) => sum + result.minimumMs, 0),
-      maximumMs: results.reduce((sum, result) => sum + result.maximumMs, 0),
+      minimumMs: results.reduce((sum, result) => (sum >= cap || result.minimumMs === cap) ? cap : sum + result.minimumMs, 0),
+      maximumMs: results.reduce((sum, result) => (sum >= cap || result.maximumMs === cap) ? cap : sum + result.maximumMs, 0),
     };
   }
 
@@ -122,6 +123,25 @@ export function validateNode(
       node: { type: "repeat", count: value.count, flow: child.node },
       minimumMs: child.minimumMs * value.count,
       maximumMs: child.maximumMs * value.count,
+    };
+  }
+
+  if (value.type === "loop") {
+    rejectUnknownFields(context, value, ["type", "flow"], path);
+    const child = validateNode(value.flow, `${path}/flow`, depth + 1, context);
+    if (child.node === null) return { node: null, minimumMs: 0, maximumMs: 0 };
+    if (child.maximumMs === Number.MAX_SAFE_INTEGER) {
+      diagnostic(context, "E_LOOP_NESTED", `${path}/flow`, "Loop bodies cannot contain another loop");
+      return { node: null, minimumMs: 0, maximumMs: 0 };
+    }
+    if (child.minimumMs < LIMITS.loopMinMs) {
+      diagnostic(context, "E_LOOP_CYCLE", `${path}/flow`, `Loop body must take at least ${LIMITS.loopMinMs} ms`);
+      return { node: null, minimumMs: 0, maximumMs: 0 };
+    }
+    return {
+      node: { type: "loop", flow: child.node },
+      minimumMs: child.minimumMs,
+      maximumMs: Number.MAX_SAFE_INTEGER,
     };
   }
 

@@ -12,10 +12,11 @@ root = Path(sys.argv[1])
 files = []
 for directory in (root / "src", root / "src-tauri"):
     for path in directory.rglob("*"):
-        if not path.is_file() or "target" in path.relative_to(root).parts:
+        relative = path.relative_to(root).parts
+        if not path.is_file() or "target" in relative or "resources" in relative:
             continue
         files.append(path)
-for name in ("index.html", "package.json", "package-lock.json", "tsconfig.json", "vite.config.ts"):
+for name in ("index.html", "settings.html", "assistant.html", "package.json", "package-lock.json", "tsconfig.json", "vite.config.ts", "scripts/build.sh", "scripts/check-packaged.sh", "scripts/prepare-pi-runtime.sh", "scripts/pi-runtime-package-lock.json"):
     path = root / name
     if path.is_file():
         files.append(path)

@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "viking",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "march": {
       "asset": "walk.png",
@@ -26,6 +26,22 @@
       "sourceFacing": "right",
       "mirror": true,
       "scale": 1.2
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.7
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.7
     }
   },
   "states": {
@@ -73,10 +89,22 @@
       }
     },
     "done": {
-      "completion": "hold",
+      "completion": "restart",
       "flow": {
-        "type": "play",
-        "clip": "forge"
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "forge"
+          },
+          {
+            "type": "loop",
+            "flow": {
+              "type": "play",
+              "clip": "sleep"
+            }
+          }
+        ]
       }
     },
     "unknown": {
@@ -93,6 +121,15 @@
             "durationMs": 900
           }
         ]
+      }
+    }
+  },
+  "actions": {
+    "wave": {
+      "label": "Wave",
+      "flow": {
+        "type": "play",
+        "clip": "wave"
       }
     }
   }

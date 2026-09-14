@@ -1,34 +1,10 @@
-import { HERDR_STATES, LIMITS, type CompiledBehaviorPack, type FlowNode, type HerdrState, type PackCompilation, type StateFlowManifest } from "./flow-types";
+import { containsLoop, entryCycleMinimumMs, holdOutcomes } from "./flow-analysis";
 import { diagnostic, rejectUnknownFields, validateNode, type ValidationContext } from "./flow-node-validation";
+import { compilePackActions } from "./pack-action-validation";
+import { HERDR_STATES, LIMITS, type CompiledBehaviorPack, type HerdrState, type PackCompilation, type StateFlowManifest } from "./flow-types";
 import { IDENTIFIER_PATTERN, deepFreeze, fnv1a, hasOwn, isFiniteBetween, isIntegerBetween, isRecord, normalizeAssetPath, stableStringify } from "./flow-utils";
 
 const COMPILED_PACKS = new WeakSet<object>();
-
-type HoldOutcome = string | null;
-
-function holdOutcomes(node: FlowNode, inputs: ReadonlySet<HoldOutcome>): Set<HoldOutcome> {
-  if (node.type === "play" || node.type === "move") return new Set([node.clip]);
-  if (node.type === "hide") return new Set([""]);
-  if (node.type === "wait") return new Set(inputs);
-  if (node.type === "sequence") {
-    return node.steps.reduce<Set<HoldOutcome>>(
-      (outcomes, step) => holdOutcomes(step, outcomes),
-      new Set(inputs),
-    );
-  }
-  if (node.type === "repeat") {
-    let outcomes = new Set(inputs);
-    for (let count = 0; count < node.count; count += 1) {
-      outcomes = holdOutcomes(node.flow, outcomes);
-    }
-    return outcomes;
-  }
-  const outcomes = new Set<HoldOutcome>();
-  for (const choice of node.choices) {
-    for (const outcome of holdOutcomes(choice.flow, inputs)) outcomes.add(outcome);
-  }
-  return outcomes;
-}
 
 export function compileBehaviorPack(
   input: unknown,
@@ -38,7 +14,7 @@ export function compileBehaviorPack(
   if (!isRecord(input)) {
     return { pack: null, diagnostics: [{ code: "E_MANIFEST", path: "", message: "Pack manifest must be an object" }] };
   }
-  rejectUnknownFields(context, input, ["formatVersion", "id", "packVersion", "clips", "states"], "");
+  rejectUnknownFields(context, input, ["formatVersion", "id", "packVersion", "clips", "states", "actions", "orchestratorAnimations"], "");
   if (input.formatVersion !== 1) diagnostic(context, "E_FORMAT_VERSION", "/formatVersion", "Only formatVersion 1 is supported");
   if (typeof input.id !== "string" || !IDENTIFIER_PATTERN.test(input.id)) {
     diagnostic(context, "E_PACK_ID", "/id", "Pack id must be a lowercase identifier");
@@ -120,10 +96,14 @@ export function compileBehaviorPack(
       if (!Number.isSafeInteger(result.minimumMs) || !Number.isSafeInteger(result.maximumMs)) {
         diagnostic(context, "E_DURATION_OVERFLOW", `${statePath}/flow`, "Flow duration exceeds the safe logical-time range");
       }
-      if (
-        stateValue.completion === "restart" &&
-        (result.minimumMs < LIMITS.restartMinMs || result.maximumMs > LIMITS.restartMaxMs)
-      ) diagnostic(context, "E_STATE_CYCLE_DURATION", statePath, "Restarting state cycle is outside the supported duration range");
+      if (stateValue.completion === "restart" && result.node) {
+        const firstCycleMs = entryCycleMinimumMs(result.node, context.clips);
+        if (
+          firstCycleMs < LIMITS.restartMinMs ||
+          firstCycleMs > LIMITS.restartMaxMs ||
+          (result.maximumMs !== Number.MAX_SAFE_INTEGER && result.maximumMs > LIMITS.restartMaxMs)
+        ) diagnostic(context, "E_STATE_CYCLE_DURATION", statePath, "Restarting state cycle is outside the supported duration range");
+      }
       if ((stateValue.completion === "restart" || stateValue.completion === "hold") && result.node) {
         compiledStates[state] = { completion: stateValue.completion, flow: result.node };
       }
@@ -133,12 +113,41 @@ export function compileBehaviorPack(
   for (const state of HERDR_STATES) {
     const compiledState = compiledStates[state];
     if (compiledState?.completion !== "hold") continue;
+    if (containsLoop(compiledState.flow)) {
+      diagnostic(context, "E_HOLD_LOOP", `/states/${state}/flow`, "Hold states cannot contain a loop");
+      continue;
+    }
     const outcomes = holdOutcomes(compiledState.flow, new Set([null]));
     for (const outcome of outcomes) {
       if (outcome === null) {
         diagnostic(context, "E_HOLD_TERMINAL", `/states/${state}/flow`, "Every hold path must finish with a clip or hidden");
       } else if (outcome && !context.clips[outcome]?.holdAssetPath) {
         diagnostic(context, "E_HOLD_ASSET", `/states/${state}/flow`, `Held clip ${outcome} requires holdAsset`);
+      }
+    }
+  }
+
+  const compiledActions = compilePackActions(input.actions, context);
+  let orchestratorAnimations: { walking: string; listening: string } | null = null;
+  if (input.orchestratorAnimations !== undefined && input.orchestratorAnimations !== null) {
+    const value = input.orchestratorAnimations;
+    if (!isRecord(value)) {
+      diagnostic(context, "E_ORCHESTRATOR", "/orchestratorAnimations", "Orchestrator animations must be an object");
+    } else {
+      rejectUnknownFields(context, value, ["walking", "listening"], "/orchestratorAnimations");
+      const walking = typeof value.walking === "string" ? value.walking : "";
+      const listening = typeof value.listening === "string" ? value.listening : "";
+      if (!hasOwn(context.clips, walking) || context.clips[walking]?.role !== "locomotion") {
+        diagnostic(context, "E_ORCHESTRATOR_WALK", "/orchestratorAnimations/walking", "Walking must reference a locomotion clip");
+      }
+      if (!hasOwn(context.clips, listening)) {
+        diagnostic(context, "E_ORCHESTRATOR_LISTEN", "/orchestratorAnimations/listening", "Listening must reference a clip");
+      }
+      if (walking && walking === listening) {
+        diagnostic(context, "E_ORCHESTRATOR_DISTINCT", "/orchestratorAnimations", "Walking and Listening must use different clips");
+      }
+      if (hasOwn(context.clips, walking) && hasOwn(context.clips, listening)) {
+        orchestratorAnimations = { walking, listening };
       }
     }
   }
@@ -154,6 +163,8 @@ export function compileBehaviorPack(
     fingerprint,
     clips: context.clips,
     states: compiledStates,
+    actions: compiledActions,
+    orchestratorAnimations,
   });
   COMPILED_PACKS.add(pack);
   return { pack, diagnostics: [] };

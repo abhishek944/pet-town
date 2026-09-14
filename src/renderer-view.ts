@@ -1,5 +1,7 @@
 import type { FlowSample } from "./flow-runtime";
 import type { CitizenState } from "./village";
+import { syncCitizenVisibility } from "./renderer-visibility";
+export { setPreferenceHidden } from "./renderer-visibility";
 
 export interface HitRegion {
   x: number;
@@ -11,6 +13,43 @@ export interface HitRegion {
 export const ASSET_READY_TIMEOUT_MS = 1_500;
 export const CITIZEN_TRACK_WIDTH = 104;
 export const SUSPENSION_GAP_MS = 250;
+
+const visibleTopRatioByAsset = new Map<string, number>();
+
+function visibleTopRatio(image: HTMLImageElement, assetUrl: string): number {
+  const cached = visibleTopRatioByAsset.get(assetUrl);
+  if (cached !== undefined) return cached;
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context || canvas.height < 1) return 0;
+    context.drawImage(image, 0, 0);
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    let top = 0;
+    outer: for (; top < canvas.height; top += 1) {
+      for (let x = 0; x < canvas.width; x += 1) {
+        if (pixels[(top * canvas.width + x) * 4 + 3] > 8) break outer;
+      }
+    }
+    const ratio = top < canvas.height ? top / canvas.height : 0;
+    visibleTopRatioByAsset.set(assetUrl, ratio);
+    return ratio;
+  } catch {
+    return 0;
+  }
+}
+
+export function refreshCitizenLabelPosition(element: HTMLElement): void {
+  const pet = element.querySelector<HTMLImageElement>("img.pet");
+  const project = element.querySelector<HTMLElement>(".project");
+  const ratio = Number(pet?.dataset.visibleTopRatio ?? 0);
+  if (!pet || !project || !Number.isFinite(ratio)
+    || typeof pet.getBoundingClientRect !== "function") return;
+  const height = pet.getBoundingClientRect().height;
+  project.style.setProperty("--label-offset-y", `${(height * ratio).toFixed(2)}px`);
+}
 
 export function distanceWhileAssetPending(sample: FlowSample, elapsedMs: number): number {
   if (!sample.moving || !Number.isFinite(sample.speedPxPerSecond)) return 0;
@@ -54,21 +93,15 @@ export function createCitizenElement(): HTMLElement {
 export function updateCitizenElement(element: HTMLElement, citizen: CitizenState): void {
   element.className = `citizen${citizen.retiring ? " retiring" : ""}`;
   element.dataset.agentId = citizen.id;
-  element.setAttribute("aria-label", `${citizen.label}, ${citizen.status}`);
+  element.dataset.characterId = citizen.sprite;
+  element.dataset.status = citizen.status;
+  element.dataset.doneSinceMs = citizen.doneSinceMs === null ? "" : String(citizen.doneSinceMs);
+  const announced = citizen.source === "orchestrator"
+    ? (citizen.status === "blocked" ? "Listening" : "Walking") : citizen.status;
+  element.setAttribute("aria-label", `${citizen.label}, ${announced}`);
 
   const project = element.querySelector<HTMLElement>(".project");
   if (project && project.textContent !== citizen.label) project.textContent = citizen.label;
-}
-
-function syncCitizenVisibility(
-  element: HTMLElement,
-  pet: HTMLImageElement,
-  onGeometryChange: () => void,
-): void {
-  const hidden = element.dataset.flowVisible !== "true" || pet.hidden;
-  if (element.hidden === hidden) return;
-  element.hidden = hidden;
-  onGeometryChange();
 }
 
 function applyPetPresentation(pet: HTMLImageElement, sample: FlowSample): void {
@@ -93,7 +126,7 @@ export function applyFlowSample(
   fallbackAssetUrl = "",
   onGeometryChange: () => void = () => {},
 ): boolean {
-  const pet = element.querySelector<HTMLImageElement>(".pet");
+  const pet = element.querySelector<HTMLImageElement>("img.pet");
   if (!pet) return true;
 
   element.dataset.flowVisible = String(sample.visible);
@@ -128,7 +161,9 @@ export function applyFlowSample(
         pet.removeAttribute("src");
         pet.src = assetUrl;
         pet.hidden = false;
+        pet.dataset.visibleTopRatio = String(visibleTopRatio(loader, assetUrl));
         pet.dataset.assetReadyKey = assetKey;
+        refreshCitizenLabelPosition(element);
         syncCitizenVisibility(element, pet, onGeometryChange);
       }).catch(() => {
         globalThis.clearTimeout(releaseTimer);

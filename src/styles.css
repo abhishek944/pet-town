@@ -35,7 +35,6 @@ body { pointer-events: none; }
   width: 104px;
   height: 140px;
   pointer-events: none;
-  opacity: 1;
   will-change: transform;
   transition: opacity 480ms ease;
 }
@@ -59,6 +58,7 @@ body { pointer-events: none; }
   display: block;
   width: calc(var(--citizen-size) * var(--clip-scale, 1));
   height: auto;
+  opacity: var(--citizen-opacity, 1);
   pointer-events: auto;
   filter: drop-shadow(0 2px 1px rgb(0 0 0 / 0.35));
   transform-origin: 50% 100%;
@@ -66,6 +66,17 @@ body { pointer-events: none; }
 }
 
 .pet[hidden] { display: none; }
+.pet-freeze-source { visibility: hidden; }
+.pet-freeze { pointer-events: none; }
+
+/* The original image keeps its flex slot so labels and double-click targets stay
+   stable. Overlay the frozen canvas instead of adding a second sprite row. */
+.pet-stack > .pet-freeze {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+}
 
 .direction-right .pet.clip-mirror-safe.clip-source-right,
 .direction-left .pet.clip-mirror-safe.clip-source-left,
@@ -81,6 +92,73 @@ body { pointer-events: none; }
 
 .pet:hover {
   filter: drop-shadow(0 3px 2px rgb(0 0 0 / 0.42)) brightness(1.08);
+}
+
+.pet { cursor: grab; }
+.pet:active { cursor: grabbing; }
+
+.pet-menu-backdrop {
+  position: absolute;
+  z-index: 19;
+  inset: 0;
+  pointer-events: auto;
+}
+
+.pet-menu {
+  position: absolute;
+  z-index: 20;
+  min-width: 92px;
+  padding: 4px;
+  pointer-events: auto;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  border-radius: 9px;
+  background: rgb(18 23 32 / 0.94);
+  box-shadow: 0 5px 18px rgb(0 0 0 / 0.42);
+  backdrop-filter: blur(7px);
+}
+
+.pet-menu button {
+  width: 100%;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 6px;
+  color: white;
+  background: transparent;
+  font: 600 11px/15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pet-menu button svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pet-menu button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pet-menu-separator {
+  height: 1px;
+  margin: 3px 5px;
+  border: 0;
+  background: rgb(255 255 255 / 0.14);
+}
+
+.pet-menu button:hover,
+.pet-menu button:focus-visible {
+  outline: none;
+  background: rgb(255 255 255 / 0.14);
 }
 
 .shadow {
@@ -109,13 +187,19 @@ body { pointer-events: none; }
   color: rgb(255 255 255 / 0.98);
   background: rgb(18 23 32 / 0.82);
   box-shadow: 0 2px 7px rgb(0 0 0 / 0.3);
-  font-size: 9px;
+  font-size: calc(9px * var(--label-scale, 1));
   font-weight: 650;
   line-height: 13px;
   text-overflow: ellipsis;
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.72);
   white-space: nowrap;
   backdrop-filter: blur(4px);
+  transform: translateY(var(--label-offset-y, 0));
 }
 
+.citizen[data-label-visibility="hidden"] .project { display: none; }
+.citizen[data-label-visibility="hover"] .project,
+.citizen[data-label-overlap-hidden="true"] .project { opacity: 0; pointer-events: none; }
+.citizen[data-label-visibility="hover"]:hover .project,
+.citizen[data-label-overlap-hidden="true"]:hover .project { opacity: 1; pointer-events: auto; }
 .retiring { opacity: 0; }

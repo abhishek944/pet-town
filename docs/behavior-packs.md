@@ -10,7 +10,15 @@ Only these five top-level state keys are allowed and required:
 - `done`
 - `unknown`
 
-A repeated poll with the same normalized state keeps the current flow position. A different state cancels the old flow immediately while preserving screen position and facing, then evaluates the new flow from a visible baseline. Visibility is flow-authored: no state name is treated specially by the renderer.
+A repeated poll with the same normalized state keeps the current flow position. A different state cancels the old flow or user-requested action immediately while preserving screen position and facing, then evaluates the new flow from a visible baseline. Baseline visibility is flow-authored: flow execution treats no state name specially. Separately, the app-level **Hide completed pets** preference may hide a citizen whose Herdr state is `done` after the selected delay.
+
+The `blocked` state is also the permission-approval animation slot. In an interactive Pi TUI with the Herdr integration loaded, the global permission-gate extension emits `herdr:blocked` with `{ active: true, label }` before displaying a Yes/No dialog and emits the matching `{ active: false, label }` when the dialog settles or is cancelled. The Herdr integration counts these open/close pairs so overlapping waits stay blocked until every wait closes. Pet Village then runs that pet's `states.blocked` flow while approval is pending. Print and JSON modes reject confirmation-covered commands without prompting. RPC mode can request confirmation and wait for its response, but the TUI-only Herdr integration does not report that RPC wait as a pet state. A pet can therefore reference a dedicated approval APNG from its blocked flow; packs that already define `blocked` remain compatible without changes.
+
+A pack may also define an optional top-level `actions` object. Each entry supplies a short menu `label` and a finite `flow`. Only declared actions appear when the user right-clicks that pet. Actions use the same safe flow nodes as states, pause the current state flow, and resume it at the same point when complete.
+
+Pet Studio can extend an existing bundled or user pet without modifying its original pack. It stores validated APNG clips and optional state or action replacements as a private, versioned overlay under `~/.pet-village/pet-packs/extensions/<pet-id>/`. Activation switches an `active` version pointer only after every file and hash is written. At load time, the overlay is merged onto the original manifest and the complete result passes through the normal behavior-pack compiler. Choosing **Keep existing behavior** preserves that state's currently installed flow, including any earlier extension; restoring the bundled base flow is not currently offered.
+
+Pet Studio packs may define `orchestratorAnimations` with exactly `walking` and `listening` clip IDs. Walking is used whenever the named orchestrator is not hearing user speech; Listening is used only while its local microphone meter reports user speech. Both entries must reference reviewed, pack-local APNG clips. Pet Village adds no rings, halos, glows, or generated effects.
 
 ## Add a pet
 
@@ -42,6 +50,16 @@ The runtime discovers pet IDs from these folders and assigns distinct packs befo
       "holdAsset": "done.png",
       "durationMs": 500,
       "role": "stationary"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary"
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary"
     }
   },
   "states": {
@@ -69,12 +87,24 @@ The runtime discovers pet IDs from these folders and assigns distinct packs befo
       "flow": { "type": "wait", "durationMs": 1000 }
     },
     "done": {
-      "completion": "hold",
-      "flow": { "type": "play", "clip": "jump" }
+      "completion": "restart",
+      "flow": {
+        "type": "sequence",
+        "steps": [
+          { "type": "play", "clip": "jump" },
+          { "type": "loop", "flow": { "type": "play", "clip": "sleep" } }
+        ]
+      }
     },
     "unknown": {
       "completion": "restart",
       "flow": { "type": "play", "clip": "jump" }
+    }
+  },
+  "actions": {
+    "wave": {
+      "label": "Wave",
+      "flow": { "type": "play", "clip": "wave" }
     }
   }
 }
@@ -95,13 +125,29 @@ A clip may set a generic `scale` from `0.5` through `2.5` when its composition n
 - `hide` hides the whole pet, including its label, shadow, and hit region, for a fixed duration.
 - `choose` selects one positive-integer-weighted branch deterministically for that agent and state entry.
 - `repeat` runs one child flow a finite positive number of times.
+- `loop` repeats one time-consuming child until the Herdr state changes. A loop cannot contain another loop and cannot be used by a menu action.
 
-A later `play` or `move` action restores visibility after `hide`. A `wait` in the same flow preserves the hidden state, while entry into a different Herdr state starts visible unless its new flow hides again. This makes hiding available to any state or sequence without state-specific renderer logic.
+A later `play` or `move` action restores visibility after `hide`. A `wait` in the same flow preserves the hidden state, while entry into a different Herdr state starts visible unless its new flow hides again. This makes flow-authored hiding available to any state or sequence without state-specific flow logic; the optional app-level completed-pet preference is a separate presentation override.
 
-A state with `completion: "restart"` begins again when its root flow finishes. A state with `completion: "hold"` keeps its final pose and visibility without movement, using the final clip's required `holdAsset`. Flows cannot request directions, coordinates, turns, state changes, expressions, callbacks, or code execution.
+A state with `completion: "restart"` begins again when its root flow finishes. A state with `completion: "hold"` keeps its final pose and visibility without movement, using the final clip's required `holdAsset`. `completion` is never reached when a flow enters `loop`; use `restart` for that state because `hold` deliberately rejects loops. Flows cannot request directions, coordinates, turns, state changes, expressions, callbacks, or code execution.
 
 ## Validation and fallback
 
 `compileBehaviorPack()` rejects unknown fields, missing states or clips, unsafe asset paths, missing pack-local files, unsafe clip scales, stationary movement clips, unsafe locomotion mirroring, invalid weights or timing, excessive nesting, and flows that can complete without consuming time. The asset check also rejects corrupt or misordered PNG chunks, invalid animation sequence numbers, unsafe dimensions, finite loops, invalid frame operations, timing mismatches, opaque canvases, effectively blank frames, hidden-RGB-only changes, and animations without perceptible visible changes. Bundled pack IDs must match their folder names. `resolveBehaviorPack()` returns a hidden built-in safe pack when standalone compilation fails.
 
-The runtime owns movement and facing. A pack can only request forward movement. Direction changes happen only when the character reaches a screen edge; resizes preserve proportional position without turning the character.
+The runtime owns movement and facing. A pack can only request forward movement. Direction changes happen only when the character reaches a screen edge; resizes preserve proportional position without turning the character. Horizontal drag-and-drop is therefore a village interaction rather than flow data: movement pauses while held and resumes from the released position without saving that position across app restarts.
+
+User preferences are also outside flow data. The stable pack `id` keys one per-character preference entry for random-cast inclusion, size, opacity, labels, and motion comfort. Global preferences may also hide completed citizens after a delay. These settings may select packs or alter presentation, but they never add, remove, reorder, or reinterpret state and action nodes. Repeated citizens using the same pack intentionally share its preferences.
+
+## Custom right-click actions
+
+Action identifiers follow the same lowercase naming rule as clips. Labels must be trimmed and contain 1–24 characters. A pack may expose up to eight actions. Every action must finish within five minutes, so `loop` is rejected inside actions. A real Herdr state change always cancels the menu action immediately.
+
+To add an action such as `wave`:
+
+1. Add its transparent APNG to the pet folder.
+2. Define a stationary clip with the APNG's exact cycle duration.
+3. Add an `actions.wave` entry whose `flow` plays that clip.
+4. Run `./scripts/check.sh` and rebuild the application.
+
+Bundled pet folders are discovered at build time and remain immutable. Pet Studio saves user-created packs under `~/.pet-village/pet-packs/packs/` and reloads them immediately after a successful atomic activation. The runtime compiles those manifests through the same safe flow compiler and rejects bundled-ID collisions. Loose external folders are never watched or loaded.

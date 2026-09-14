@@ -1,16 +1,18 @@
 {
-  "name": "herdr-pets",
+  "name": "pet-village",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.4",
   "description": "A transparent desktop village for live Herdr agents",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "check": "npm run check:lines && npm run check:flow && npm run check:focus && npm run build && cargo check --manifest-path src-tauri/Cargo.toml && cargo test --manifest-path src-tauri/Cargo.toml",
+    "check": "npm run check:lines && npm run check:flow && npm run check:focus && npm run check:interactions && npm run check:preferences && npm run build && cargo check --manifest-path src-tauri/Cargo.toml && cargo test --manifest-path src-tauri/Cargo.toml",
     "check:lines": "sh scripts/check-source-lines.sh",
     "check:flow": "sh scripts/check-flow-runtime.sh",
     "check:focus": "sh scripts/check-pet-focus.sh",
+    "check:interactions": "sh scripts/check-pet-interactions.sh",
+    "check:preferences": "sh scripts/check-preferences.sh",
     "tauri": "tauri"
   },
   "dependencies": {

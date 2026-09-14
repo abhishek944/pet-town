@@ -1,12 +1,12 @@
-id = "herdr-pets"
-name = "Herdr Pets"
-version = "0.1.1"
-min_herdr_version = "0.8.0"
+id = "pet-village"
+name = "Pet Village"
+version = "0.1.4"
+min_herdr_version = "0.9.0"
 description = "A transparent desktop village for live Herdr agents"
 platforms = ["macos"]
 
 [[startup]]
-command = ["sh", "scripts/supervisor.sh", "on"]
+command = ["sh", "scripts/supervisor.sh", "startup"]
 
 [[actions]]
 id = "village-on"
@@ -25,3 +25,15 @@ id = "village-status"
 title = "Show Herdr pet village status"
 contexts = ["workspace"]
 command = ["sh", "scripts/supervisor.sh", "status"]
+
+[[actions]]
+id = "preferences"
+title = "Open Pet Village preferences"
+contexts = ["workspace"]
+command = ["sh", "scripts/supervisor.sh", "preferences"]
+
+[[actions]]
+id = "reload-preferences"
+title = "Reload Pet Village preferences"
+contexts = ["workspace"]
+command = ["sh", "scripts/supervisor.sh", "reload-preferences"]

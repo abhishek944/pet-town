@@ -1,0 +1,209 @@
+.assistant-panel {
+  padding: 24px;
+}
+
+.assistant-heading {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.assistant-heading h1,
+.assistant-heading p {
+  margin: 0 0 6px;
+}
+
+.assistant-badge {
+  background: color-mix(in srgb, #45a868 18%, var(--panel, #28292e));
+  border-radius: 999px;
+  color: var(--muted, #a4a8b1);
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.assistant-badge[data-ready="true"],
+.assistant-card .row b[data-ready="true"] {
+  color: #7ee2aa;
+}
+
+.assistant-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
+}
+
+.assistant-main,
+.assistant-side {
+  display: grid;
+  gap: 14px;
+}
+
+.assistant-card {
+  background: var(--group-background, #ffffff07);
+  border: 1px solid var(--border, #ffffff16);
+  border-radius: 14px;
+  padding: 17px;
+}
+
+.assistant-card h2 {
+  font-size: 14px;
+  letter-spacing: 0;
+  margin-top: 0;
+  text-transform: none;
+}
+
+.assistant-card label,
+.assistant-card small {
+  display: block;
+}
+
+.assistant-card input,
+.assistant-card select {
+  background: #34363c;
+  border: 1px solid var(--border, #ffffff19);
+  border-radius: 8px;
+  color: inherit;
+  height: 36px;
+  margin-top: 7px;
+  padding: 7px 10px;
+  width: 100%;
+}
+
+.assistant-fields {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.assistant-wake {
+  align-items: center;
+  background: color-mix(in srgb, #7655ee 10%, var(--group-background, #28292e));
+  border-radius: 11px;
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+}
+
+.assistant-wake small {
+  color: var(--muted, #a4a8b1);
+  margin-top: 3px;
+}
+
+.assistant-pulse {
+  background: #7655ee;
+  border-radius: 50%;
+  box-shadow: 0 0 0 6px #7655ee24;
+  height: 11px;
+  width: 11px;
+}
+
+.assistant-wake .switch {
+  margin-left: auto;
+}
+
+.assistant-pet {
+  align-items: center;
+  background: linear-gradient(145deg, #f7dcd3, #e5dcff);
+  border-radius: 15px;
+  color: #251e32;
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
+  justify-content: center;
+  min-height: 190px;
+}
+
+.assistant-pet span {
+  font-size: 70px;
+  margin-bottom: 10px;
+}
+
+.assistant-pet img {
+  display: block;
+  height: 138px;
+  max-width: 72%;
+  object-fit: contain;
+}
+
+.assistant-pet img[hidden] {
+  display: none;
+}
+
+.assistant-pet b {
+  background: #fff;
+  border-radius: 999px;
+  padding: 7px 12px;
+}
+
+#assistant-save {
+  background: #7655ee;
+}
+
+:root[data-theme="light"] .assistant-panel {
+  background: #fbf9f6;
+}
+
+:root[data-theme="light"] .assistant-card {
+  background: #fff;
+  border-color: #e8e5dd;
+  box-shadow: 0 1px 2px #0000000f;
+}
+
+:root[data-theme="light"] .assistant-card input,
+:root[data-theme="light"] .assistant-card select {
+  background: #fff;
+  border-color: #e8e5dd;
+  color: #111;
+}
+
+:root[data-theme="light"] .assistant-wake {
+  background: #f1efff;
+}
+:root[data-theme="light"] .assistant-wake small { color: #535866; }
+
+:root[data-theme="light"] .assistant-badge {
+  background: #e6f8ec;
+  color: #176b37;
+}
+:root[data-theme="light"] .assistant-badge[data-ready="true"],
+:root[data-theme="light"] .assistant-card .row b[data-ready="true"] { color: #176b37; }
+
+:root[data-theme="light"] #assistant-disable {
+  background: #f1efff;
+  color: #4b3f9c;
+}
+
+.assistant-panel .primary { background: #0868c7; }
+
+.assistant-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.assistant-open {
+  margin-top: 14px;
+  width: 100%;
+}
+
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] .assistant-panel { background: #fbf9f6; }
+  :root[data-theme="system"] .assistant-card { background: #fff; border-color: #e8e5dd; box-shadow: 0 1px 2px #0000000f; }
+  :root[data-theme="system"] .assistant-card input,
+  :root[data-theme="system"] .assistant-card select { background: #fff; border-color: #e8e5dd; color: #111; }
+  :root[data-theme="system"] .assistant-wake { background: #f1efff; }
+  :root[data-theme="system"] .assistant-wake small { color: #535866; }
+  :root[data-theme="system"] .assistant-badge { background: #e6f8ec; color: #176b37; }
+  :root[data-theme="system"] .assistant-badge[data-ready="true"],
+  :root[data-theme="system"] .assistant-card .row b[data-ready="true"] { color: #176b37; }
+  :root[data-theme="system"] #assistant-disable { background: #f1efff; color: #4b3f9c; }
+}
+
+@media (max-width: 760px) {
+  .assistant-grid,
+  .assistant-fields {
+    grid-template-columns: 1fr;
+  }
+}

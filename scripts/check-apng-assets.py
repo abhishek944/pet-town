@@ -156,7 +156,9 @@ def clear_frame_area(canvas: bytearray, canvas_width: int, control: tuple) -> No
         canvas[start : start + len(clear_row)] = clear_row
 
 
-def validate_apng(path: Path, expected_duration_ms: int | None = None) -> None:
+def validate_apng(
+    path: Path, expected_duration_ms: int | None = None, require_sleep_z_trail: bool = False
+) -> None:
     canvas = None
     animation = None
     frames: list[dict] = []
@@ -223,6 +225,8 @@ def validate_apng(path: Path, expected_duration_ms: int | None = None) -> None:
     declared_frames, plays = animation
     if declared_frames < 2 or declared_frames != len(frames):
         fail(path, "APNG frame count is invalid")
+    if require_sleep_z_trail and (canvas != (320, 320) or declared_frames != 8):
+        fail(path, "sleep APNG must use the selected 320x320 eight-frame visual contract")
     if plays != 0:
         fail(path, "APNG must loop indefinitely")
     canvas_width, canvas_height = canvas
@@ -247,6 +251,20 @@ def validate_apng(path: Path, expected_duration_ms: int | None = None) -> None:
         transparent = sum(alpha == 0 for alpha in alphas)
         if transparent < max(16, canvas_width * canvas_height // 100):
             fail(path, f"frame {index} lacks a meaningful fully transparent area")
+        if require_sleep_z_trail:
+            upper = displayed[: canvas_width * 90 * 4]
+            cyan_signal = sum(
+                upper[offset + 3] > 100
+                and upper[offset + 2] > 180
+                and upper[offset + 1] > 110
+                and upper[offset + 2] - upper[offset] > 60
+                for offset in range(0, len(upper), 4)
+            )
+            if cyan_signal < 100:
+                fail(path, f"frame {index} lacks the electric rising Z signal")
+            lower_alphas = displayed[canvas_width * (canvas_height // 2) * 4 :][3::4]
+            if sum(alpha > 16 for alpha in lower_alphas) < 1_000:
+                fail(path, f"frame {index} loses the sleeping character body")
         if previous_display is not None:
             changed = sum(
                 displayed[offset : offset + 4] != previous_display[offset : offset + 4]
@@ -411,7 +429,7 @@ def mutate_chunk_kind(payload: bytes, target: bytes, replacement: bytes) -> byte
 
 
 def self_test(source: Path) -> None:
-    with tempfile.TemporaryDirectory(prefix="herdr-pets-apng-") as directory:
+    with tempfile.TemporaryDirectory(prefix="pet-village-apng-") as directory:
         temp = Path(directory)
         payload = source.read_bytes()
         unknown_critical = temp / "unknown-critical.png"
@@ -501,7 +519,7 @@ def main() -> None:
                 if path in animations and animations[path] != duration:
                     fail(manifest_path, f"shared asset {asset} has conflicting clip durations")
                 if path not in animations:
-                    validate_apng(path, duration)
+                    validate_apng(path, duration, require_sleep_z_trail=path.name == "sleep.png")
                     animations[path] = duration
             hold_asset = clip.get("holdAsset")
             if hold_asset:

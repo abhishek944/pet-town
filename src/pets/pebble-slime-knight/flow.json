@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "pebble-slime-knight",
-  "packVersion": "1",
+  "packVersion": "2",
   "clips": {
     "wobbly-march": {
       "asset": "walk.png",
@@ -17,6 +17,20 @@
       "sourceFacing": "right",
       "mirror": true,
       "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
     }
   },
   "states": {
@@ -77,10 +91,22 @@
       }
     },
     "done": {
-      "completion": "hold",
+      "completion": "restart",
       "flow": {
-        "type": "play",
-        "clip": "lid-block"
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "lid-block"
+          },
+          {
+            "type": "loop",
+            "flow": {
+              "type": "play",
+              "clip": "sleep"
+            }
+          }
+        ]
       }
     },
     "unknown": {
@@ -94,6 +120,15 @@
           "durationMs": 850,
           "speedPxPerSecond": 20
         }
+      }
+    }
+  },
+  "actions": {
+    "wave": {
+      "label": "Wave",
+      "flow": {
+        "type": "play",
+        "clip": "wave"
       }
     }
   }

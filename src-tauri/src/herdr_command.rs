@@ -119,6 +119,7 @@ pub(crate) fn run_herdr_command(
 ) -> Option<String> {
     let mut command = Command::new(herdr);
     command
+        .env_remove("OPENAI_API_KEY")
         .args(arguments)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())

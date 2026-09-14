@@ -2,7 +2,7 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-TMP=$(mktemp -d "${TMPDIR:-/tmp}/herdr-pets-focus.XXXXXX")
+TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-focus.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
 cd "$ROOT"
 

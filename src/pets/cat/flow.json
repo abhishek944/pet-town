@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "cat",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "stalk": {
       "asset": "walk.png",
@@ -17,6 +17,20 @@
       "sourceFacing": "right",
       "mirror": true,
       "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
     }
   },
   "states": {
@@ -64,10 +78,22 @@
       }
     },
     "done": {
-      "completion": "hold",
+      "completion": "restart",
       "flow": {
-        "type": "play",
-        "clip": "watch"
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "watch"
+          },
+          {
+            "type": "loop",
+            "flow": {
+              "type": "play",
+              "clip": "sleep"
+            }
+          }
+        ]
       }
     },
     "unknown": {
@@ -86,6 +112,15 @@
             "durationMs": 1200
           }
         ]
+      }
+    }
+  },
+  "actions": {
+    "wave": {
+      "label": "Wave",
+      "flow": {
+        "type": "play",
+        "clip": "wave"
       }
     }
   }

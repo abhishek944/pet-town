@@ -7,6 +7,8 @@ cd "$ROOT"
 npm run check:lines
 npm run check:flow
 npm run check:focus
+npm run check:interactions
+npm run check:preferences
 npm run build
 cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 cargo check --manifest-path src-tauri/Cargo.toml

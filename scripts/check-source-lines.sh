@@ -2,7 +2,7 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-FILES=$(mktemp "${TMPDIR:-/tmp}/herdr-pets-lines.XXXXXX")
+FILES=$(mktemp "${TMPDIR:-/tmp}/pet-village-lines.XXXXXX")
 trap 'rm -f "$FILES"' EXIT INT TERM
 MAX_LINES=199
 failed=0

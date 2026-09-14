@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "mira-dune-spear-scout",
-  "packVersion": "1",
+  "packVersion": "2",
   "clips": {
     "dune-patrol": {
       "asset": "walk.png",
@@ -25,6 +25,20 @@
       "sourceFacing": "right",
       "mirror": true,
       "scale": 1
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
     }
   },
   "states": {
@@ -78,10 +92,22 @@
       }
     },
     "done": {
-      "completion": "hold",
+      "completion": "restart",
       "flow": {
-        "type": "play",
-        "clip": "spear-drill"
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "play",
+            "clip": "spear-drill"
+          },
+          {
+            "type": "loop",
+            "flow": {
+              "type": "play",
+              "clip": "sleep"
+            }
+          }
+        ]
       }
     },
     "unknown": {
@@ -100,6 +126,15 @@
             "clip": "spear-drill"
           }
         ]
+      }
+    }
+  },
+  "actions": {
+    "wave": {
+      "label": "Wave",
+      "flow": {
+        "type": "play",
+        "clip": "wave"
       }
     }
   }

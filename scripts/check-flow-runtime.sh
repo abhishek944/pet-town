@@ -2,7 +2,7 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-TMP=$(mktemp -d "${TMPDIR:-/tmp}/herdr-pets-flow.XXXXXX")
+TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-flow.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
 
 cd "$ROOT"
@@ -94,6 +94,39 @@ machine.setStatus("done");
 machine.advance(100);
 assert(machine.sample().held, "done flow did not hold");
 equal(machine.advance(50, true).remainingMs, 0, "held flow retained elapsed time");
+const interactiveManifest = structuredClone(manifest);
+interactiveManifest.actions = {
+  wave: { label: "Wave", flow: { type: "play", clip: "rest" } },
+};
+interactiveManifest.states.done = { completion: "restart", flow: { type: "sequence", steps: [
+  { type: "play", clip: "jump" },
+  { type: "loop", flow: { type: "play", clip: "rest" } },
+] } };
+const interactive = compileBehaviorPack(interactiveManifest);
+assert(interactive.pack, JSON.stringify(interactive.diagnostics));
+equal(interactive.pack.actions.wave.label, "Wave", "action label was not compiled");
+const actionMachine = new BehaviorMachine(interactive.pack, "agent-action", "working");
+actionMachine.advance(50);
+assert(actionMachine.startAction("wave"), "declared action did not start");
+assert(!actionMachine.startAction("wave"), "active action was replaced");
+equal(actionMachine.advance(50).distancePx, 0, "action did not pause normal movement");
+actionMachine.advance(50);
+equal(actionMachine.advance(50).distancePx, 2.5, "normal flow did not resume at its paused point");
+assert(actionMachine.startAction("wave"), "action could not start again after completion");
+assert(actionMachine.setStatus("blocked"), "state did not preempt an action");
+equal(actionMachine.advance(0).sample.state, "blocked", "preempted action remained visible");
+const sleepMachine = new BehaviorMachine(interactive.pack, "agent-sleep", "done");
+equal(sleepMachine.advance(0).sample.clip.name, "jump", "done celebration did not start");
+equal(sleepMachine.advance(100).sample.clip.name, "rest", "sleep loop did not follow celebration");
+const firstSleepEpoch = sleepMachine.sample().clipEpoch;
+equal(sleepMachine.advance(100).sample.clip.name, "rest", "sleep loop restarted the whole done flow");
+assert(sleepMachine.sample().clipEpoch > firstSleepEpoch, "sleep loop did not repeat its APNG");
+const loopingAction = structuredClone(interactiveManifest);
+loopingAction.actions.wave.flow = { type: "loop", flow: { type: "play", clip: "rest" } };
+assert(!compileBehaviorPack(loopingAction).pack, "non-terminating menu action was accepted");
+const heldLoop = structuredClone(interactiveManifest);
+heldLoop.states.done.completion = "hold";
+assert(!compileBehaviorPack(heldLoop).pack, "hold state accepted a loop");
 const repeatMachine = new BehaviorMachine(compiled.pack, "agent-repeat", "unknown");
 const firstRestEpoch = repeatMachine.advance(0).sample.clipEpoch;
 const secondRestEpoch = repeatMachine.advance(100).sample.clipEpoch;
@@ -144,6 +177,7 @@ const {
   applyFlowSample,
   ASSET_READY_TIMEOUT_MS,
   distanceWhileAssetPending,
+  setPreferenceHidden,
 } = require("./renderer-view.cjs");
 function assert(condition, message) { if (!condition) throw new Error(message); }
 class FakeStyle {
@@ -204,6 +238,12 @@ const fireLatestTimer = () => {
   await new Promise(setImmediate);
   assert(applyFlowSample(element, sample(1, 1)), "decoded first asset was not ready");
   assert(pet.style.getPropertyValue("--clip-scale") === "1", "first scale was not committed");
+  setPreferenceHidden(element, true);
+  assert(element.hidden, "preference did not hide a flow-visible citizen");
+  applyFlowSample(element, sample(1, 1));
+  assert(element.hidden, "flow update overrode preference-hidden visibility");
+  setPreferenceHidden(element, false);
+  assert(!element.hidden, "clearing preference hide did not restore a flow-visible citizen");
   assert(!applyFlowSample(element, sample(2, 2)), "new clip epoch did not restart loading");
   assert(pet.style.getPropertyValue("--clip-scale") === "1", "presentation changed before decode");
   FakeLoader.pending.shift().resolve();
@@ -281,6 +321,9 @@ for (const pet of petDirectories) {
   if (!result.pack) throw new Error(`${pet}/flow.json: ${JSON.stringify(result.diagnostics)}`);
   if (result.pack.id !== pet) throw new Error(`${pet}/flow.json: pack id must match its folder`);
   if (result.pack.states.idle.flow.type !== "hide") throw new Error(`${pet}/flow.json: idle visibility is not flow-authored`);
+  if (result.pack.actions.wave?.label !== "Wave") throw new Error(`${pet}/flow.json: Wave action is not flow-authored`);
+  const done = JSON.stringify(result.pack.states.done.flow);
+  if (!done.includes('"type":"loop"') || !done.includes('"clip":"sleep"')) throw new Error(`${pet}/flow.json: done does not loop sleep`);
   workingFlowSignatures.add(JSON.stringify(result.pack.states.working.flow));
 }
 if (workingFlowSignatures.size !== petDirectories.length) throw new Error("working pet flows are not distinct");

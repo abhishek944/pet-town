@@ -95,7 +95,7 @@ pub(crate) fn create_village_window(
     app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
     tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
-        .title("Herdr Pets")
+        .title("Pet Village")
         .inner_size(1100.0, 150.0)
         .min_inner_size(320.0, 150.0)
         .resizable(true)
@@ -142,15 +142,6 @@ pub(crate) fn configure_window(app: &mut tauri::App) -> Result<(), Box<dyn std::
             area.position.y + area.size.height as i32 - window_height as i32 - WINDOW_BOTTOM_MARGIN;
         window.set_position(PhysicalPosition::new(x, y))?;
     }
-
-    #[cfg(target_os = "macos")]
-    unsafe {
-        use objc2_app_kit::NSWindow;
-        let native_window: &NSWindow = &*window.ns_window()?.cast();
-        native_window.orderFrontRegardless();
-    }
-    #[cfg(not(target_os = "macos"))]
-    window.show()?;
 
     Ok(())
 }

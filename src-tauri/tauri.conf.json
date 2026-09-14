@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Herdr Pets",
-  "version": "0.1.1",
-  "identifier": "dev.herdr.pets",
+  "productName": "Pet Village",
+  "version": "0.1.4",
+  "identifier": "dev.pet.village",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -19,6 +19,7 @@
   "bundle": {
     "active": true,
     "targets": ["app", "dmg"],
+    "resources": ["resources"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

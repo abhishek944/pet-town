@@ -5,8 +5,10 @@ use std::collections::{HashMap, HashSet};
 use std::ffi::OsString;
 use std::path::Path;
 use std::process::Command;
+use std::time::{Duration, Instant};
 
 const MAX_PROCESS_OUTPUT_BYTES: usize = 1024 * 1024;
+const ACTIVATION_TIMEOUT: Duration = Duration::from_secs(1);
 
 #[derive(Deserialize)]
 struct SessionList {
@@ -46,6 +48,7 @@ fn session_name(herdr: &OsString, socket: Option<&str>) -> Option<String> {
 
 fn process_snapshot() -> Result<Vec<ProcessRecord>, String> {
     let output = Command::new("/bin/ps")
+        .env_remove("OPENAI_API_KEY")
         .args(["-axo", "pid=,ppid=,command="])
         .output()
         .map_err(|_| "could not inspect the Herdr UI host".to_string())?;
@@ -139,10 +142,17 @@ pub(crate) fn activate_herdr_host(herdr: &OsString, socket: Option<&str>) -> Res
         .ok_or_else(|| "the Herdr UI application exited".to_string())?;
     let options = NSApplicationActivationOptions::ActivateAllWindows;
     application.unhide();
-    application
-        .activateWithOptions(options)
-        .then_some(())
-        .ok_or_else(|| "macOS refused to activate the Herdr UI application".to_string())
+    if !application.activateWithOptions(options) {
+        return Err("macOS refused to activate the Herdr UI application".to_string());
+    }
+    let deadline = Instant::now() + ACTIVATION_TIMEOUT;
+    while !application.isActive() {
+        if Instant::now() >= deadline {
+            return Err("the Herdr UI application did not become active".to_string());
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    Ok(())
 }
 
 #[cfg(test)]

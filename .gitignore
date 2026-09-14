@@ -1,5 +1,6 @@
 # Local workflow evidence
 var/
+.pi/loops/
 
 # Web dependencies and output
 node_modules/
@@ -11,6 +12,8 @@ __pycache__/
 
 # Rust/Tauri output
 src-tauri/target/
+src-tauri/resources/pet-village-pi-runtime/
+src-tauri/resources/pet-village-pi-runtime.tar.gz
 target/
 
 # Editors and operating systems

@@ -35,16 +35,32 @@ struct TabListResult {
 }
 
 #[derive(Debug, Deserialize)]
-struct RawTabLabel {
-    tab_id: String,
+pub(crate) struct RawTabLabel {
+    pub(crate) tab_id: String,
+    pub(crate) label: Option<String>,
+    pub(crate) number: Option<u32>,
+}
+
+#[derive(Debug, Deserialize)]
+struct WorkspaceListEnvelope {
+    result: WorkspaceListResult,
+}
+
+#[derive(Debug, Deserialize)]
+struct WorkspaceListResult {
+    workspaces: Vec<RawWorkspaceLabel>,
+}
+
+#[derive(Debug, Deserialize)]
+struct RawWorkspaceLabel {
+    workspace_id: String,
     label: Option<String>,
-    number: Option<u32>,
 }
 
 #[derive(Clone, Default)]
 pub(crate) struct SessionLabels {
     pub(crate) pane_labels: HashMap<String, String>,
-    pub(crate) tab_labels: HashMap<String, String>,
+    pub(crate) tab_fallback_labels: HashMap<String, String>,
 }
 
 #[derive(Default)]
@@ -55,12 +71,36 @@ struct CachedSessionLabels {
 
 static LABEL_CACHE: OnceLock<Mutex<HashMap<String, CachedSessionLabels>>> = OnceLock::new();
 
+pub(crate) fn space_tab_label(space_name: &str, tab: &RawTabLabel) -> String {
+    let tab_name = safe_display_label(tab.label.as_deref())
+        .or_else(|| tab.number.map(|number| number.to_string()))
+        .unwrap_or_else(|| "?".to_string());
+    format!("{space_name}-{tab_name}")
+}
+
 fn query_session_labels(
     herdr: &OsString,
     socket: Option<&str>,
     workspaces: &[String],
 ) -> SessionLabels {
     let mut labels = SessionLabels::default();
+    let workspace_arguments = vec!["workspace".to_string(), "list".to_string()];
+    let space_names: HashMap<String, String> =
+        run_herdr_command(herdr, socket, &workspace_arguments)
+            .and_then(|text| serde_json::from_str::<WorkspaceListEnvelope>(&text).ok())
+            .map(|envelope| {
+                envelope
+                    .result
+                    .workspaces
+                    .into_iter()
+                    .filter_map(|space| {
+                        safe_display_label(space.label.as_deref())
+                            .map(|name| (space.workspace_id, name))
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+
     for workspace in workspaces {
         let pane_arguments = vec![
             "pane".to_string(),
@@ -88,12 +128,9 @@ fn query_session_labels(
             .and_then(|text| serde_json::from_str::<TabListEnvelope>(&text).ok())
         {
             for tab in envelope.result.tabs {
-                if let Some(label) = safe_display_label(tab.label.as_deref()) {
-                    let is_default_number =
-                        tab.number.is_some_and(|number| label == number.to_string());
-                    if !is_default_number {
-                        labels.tab_labels.insert(tab.tab_id, label);
-                    }
+                if let Some(space_name) = space_names.get(workspace) {
+                    let fallback = space_tab_label(space_name, &tab);
+                    labels.tab_fallback_labels.insert(tab.tab_id, fallback);
                 }
             }
         }

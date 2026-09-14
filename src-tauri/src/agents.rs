@@ -7,6 +7,7 @@ pub struct AgentView {
     pub id: String,
     pub status: String,
     pub label: String,
+    pub source: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -101,6 +102,7 @@ pub(crate) fn parse_agent_list(text: &str) -> Result<Vec<ParsedAgent>, serde_jso
                     id: agent.pane_id,
                     status: normalized_status(&agent.agent_status),
                     label: safe_project_name(project_path),
+                    source: "unknown".to_string(),
                 },
                 tab_id: agent.tab_id,
                 workspace_id: agent.workspace_id,

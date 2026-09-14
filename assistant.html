@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Pet Village Orchestrator</title>
+  <link rel="stylesheet" href="/src/assistant.css" />
+  <script type="module" src="/src/assistant.ts" defer></script>
+</head>
+<body>
+  <header><div><span class="eyebrow">Pet Village</span><h1 id="assistant-title">Orchestrator</h1></div><span id="connection" class="status">Disconnected</span></header>
+  <main>
+    <section class="voice-stage" aria-live="polite"><div id="voice-orb" class="voice-orb" aria-hidden="true"></div><strong id="voice-state">Ready to connect</strong><p id="wake-status">Your wake phrase stays on this Mac until activation.</p></section>
+    <label class="workspace">Herdr workspace<select id="workspace"><option value="">Loading…</option></select></label>
+    <section id="transcript" class="transcript" aria-label="Ephemeral conversation transcript"><p class="empty">This conversation disappears when the window closes.</p></section>
+    <p id="error" class="error" role="alert"></p>
+  </main>
+  <footer><button id="retry" class="secondary" type="button">Retry status</button><button id="cancel" class="secondary" type="button" disabled>Stop Pi task</button><button id="disconnect" class="secondary" type="button" disabled>End voice</button><button id="connect" class="primary" type="button">Push to talk</button></footer>
+</body>
+</html>
