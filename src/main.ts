@@ -3,7 +3,15 @@ import { listen } from "@tauri-apps/api/event";
 import { installPetFocus } from "./pet-focus";
 import { installPetInteractions } from "./pet-interactions";
 import { VillageRenderer, type HitRegion } from "./renderer";
-import { allCharacterIds, behaviorPackForCharacter, CHARACTER_IDS, installUserPacks, type CharacterId, type PetExtensionPayload, type UserPackPayload } from "./character-packs";
+import {
+  allCharacterIds,
+  behaviorPackForCharacter,
+  CHARACTER_IDS,
+  installUserPacks,
+  type CharacterId,
+  type PetExtensionPayload,
+  type UserPackPayload,
+} from "./character-packs";
 type PetExtensionCatalog = { extensions: PetExtensionPayload[]; warnings: string[] };
 import {
   applyActiveCast,
@@ -13,7 +21,11 @@ import {
 } from "./village";
 import { installVillagePreferences } from "./village-preferences";
 import type { PreferencesFile } from "./preferences-types";
-import { applyOrchestratorCitizen, orchestratorPack, type OrchestratorView } from "./orchestrator-pet";
+import {
+  applyOrchestratorCitizen,
+  orchestratorPack,
+  type OrchestratorView,
+} from "./orchestrator-pet";
 
 const POLL_INTERVAL_MS = 1_000;
 const RETIRE_ANIMATION_MS = 520;
@@ -29,14 +41,18 @@ const retirementTimers = new Map<string, number>();
 let villagePaused = false;
 let orchestratorView: OrchestratorView | null = null;
 let pendingOrchestratorView: OrchestratorView | null = null;
-const renderer = new VillageRenderer(village, (regions: HitRegion[]) => {
-  void invoke("set_hit_regions", { regions }).catch(() => {
-    // The macOS hit-test bridge is optional on unsupported desktop targets.
-  });
-}, (citizen) => {
-  const pack = behaviorPackForCharacter(citizen.sprite);
-  return citizen.source === "orchestrator" ? orchestratorPack(pack) : pack;
-});
+const renderer = new VillageRenderer(
+  village,
+  (regions: HitRegion[]) => {
+    void invoke("set_hit_regions", { regions }).catch(() => {
+      // The macOS hit-test bridge is optional on unsupported desktop targets.
+    });
+  },
+  (citizen) => {
+    const pack = behaviorPackForCharacter(citizen.sprite);
+    return citizen.source === "orchestrator" ? orchestratorPack(pack) : pack;
+  },
+);
 const systemReducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 renderer.setSystemReducedMotion(systemReducedMotion.matches);
 systemReducedMotion.addEventListener("change", (event) => {
@@ -100,12 +116,17 @@ async function reloadUserPacks(): Promise<void> {
     try {
       const catalog = await invoke<PetExtensionCatalog>("list_pet_extensions");
       extensions = catalog.extensions;
-    } catch { /* Optional extensions never prevent base pets from loading. */ }
+    } catch {
+      /* Optional extensions never prevent base pets from loading. */
+    }
     installUserPacks(packs, extensions);
     orchestratorView = validOrchestratorView(pendingOrchestratorView);
-    activePetIds = allCharacterIds().filter((id) => latestPreferences?.pets[id]?.includedInRandomCast ?? true);
+    activePetIds = allCharacterIds().filter(
+      (id) => latestPreferences?.pets[id]?.includedInRandomCast ?? true,
+    );
     citizens = applyActiveCast(citizens, activePetIds);
-    citizens = applyOrchestratorCitizen(citizens, orchestratorView); render(true);
+    citizens = applyOrchestratorCitizen(citizens, orchestratorView);
+    render(true);
   } catch {
     // Invalid or unavailable user packs never prevent bundled pets from loading.
   }
@@ -115,11 +136,15 @@ function validOrchestratorView(view: OrchestratorView | null): OrchestratorView 
   if (!view) return null;
   try {
     return view.petId && behaviorPackForCharacter(view.petId).orchestratorAnimations ? view : null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 async function start(): Promise<void> {
-  await listen("user-packs-changed", () => { void reloadUserPacks(); });
+  await listen("user-packs-changed", () => {
+    void reloadUserPacks();
+  });
   await listen<OrchestratorView>("orchestrator-pet-state", (event) => {
     pendingOrchestratorView = event.payload;
     orchestratorView = validOrchestratorView(event.payload);
@@ -127,16 +152,29 @@ async function start(): Promise<void> {
     render(true);
   });
   await reloadUserPacks();
-  try { pendingOrchestratorView = await invoke<OrchestratorView>("get_orchestrator_pet_state"); orchestratorView = validOrchestratorView(pendingOrchestratorView); }
-  catch { pendingOrchestratorView = null; orchestratorView = null; }
+  try {
+    pendingOrchestratorView = await invoke<OrchestratorView>("get_orchestrator_pet_state");
+    orchestratorView = validOrchestratorView(pendingOrchestratorView);
+  } catch {
+    pendingOrchestratorView = null;
+    orchestratorView = null;
+  }
   citizens = applyOrchestratorCitizen(citizens, orchestratorView);
   await installVillagePreferences(
     renderer,
-    () => { village.dispatchEvent(new Event("village-pause")); villagePaused = true; },
-    () => { villagePaused = false; render(); },
+    () => {
+      village.dispatchEvent(new Event("village-pause"));
+      villagePaused = true;
+    },
+    () => {
+      villagePaused = false;
+      render();
+    },
     (preferences) => {
       latestPreferences = preferences;
-      activePetIds = allCharacterIds().filter((id) => preferences.pets[id]?.includedInRandomCast ?? true);
+      activePetIds = allCharacterIds().filter(
+        (id) => preferences.pets[id]?.includedInRandomCast ?? true,
+      );
       citizens = applyActiveCast(citizens, activePetIds);
       render(true);
     },

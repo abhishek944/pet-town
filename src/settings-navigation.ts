@@ -9,7 +9,10 @@ export class SettingsNavigation {
   private readonly message = document.getElementById("message")!;
   private readonly tabs = [...document.querySelectorAll<HTMLButtonElement>(".toolbar [data-tab]")];
 
-  constructor(openPet: (id: string) => void, private readonly selectedPet: () => string) {
+  constructor(
+    openPet: (id: string) => void,
+    private readonly selectedPet: () => string,
+  ) {
     this.gallery = new SettingsGallery(openPet);
     this.tabs.forEach((tab, index) => {
       tab.addEventListener("click", () => {
@@ -26,7 +29,9 @@ export class SettingsNavigation {
         next.focus();
       });
     });
-    document.getElementById("all-pets")!.addEventListener("click", () => this.show("gallery", true));
+    document
+      .getElementById("all-pets")!
+      .addEventListener("click", () => this.show("gallery", true));
   }
 
   show(name: string, focus = false): void {

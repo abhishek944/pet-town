@@ -1,3 +1,4 @@
+use super::sheet_layout;
 use crc32fast::Hasher;
 use flate2::{write::ZlibEncoder, Compression};
 use image::{imageops::FilterType, DynamicImage, GenericImageView, ImageFormat, RgbaImage};
@@ -43,6 +44,7 @@ fn frame_bounds(cell: &RgbaImage) -> Result<Bounds, String> {
     if visible < 512 || bounds.2 <= bounds.0 || bounds.3 <= bounds.1 {
         return Err("A sprite-sheet cell is blank or too faint.".into());
     }
+    sheet_layout::validate_clearance(bounds, width, height)?;
     Ok(bounds)
 }
 
@@ -69,6 +71,7 @@ fn normalize(cell: &RgbaImage, bounds: Bounds) -> RgbaImage {
 pub fn split_sheet(bytes: &[u8]) -> Result<Vec<RgbaImage>, String> {
     let image = validate_png(bytes)?.to_rgba8();
     let (width, height) = image.dimensions();
+    sheet_layout::validate_dimensions(width, height)?;
     if width % 2 != 0 || height % 4 != 0 {
         return Err("Sprite sheet must divide evenly into 2 columns and 4 rows.".into());
     }

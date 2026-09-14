@@ -7,9 +7,18 @@ NODE_VERSION=22.21.1
 PI_VERSION=0.85.1
 
 case "$TARGET" in
-  macos-arm64|aarch64-apple-darwin) ARCH=arm64; PACKAGE=macos-arm64 ;;
-  macos-x64|x86_64-apple-darwin) ARCH=x64; PACKAGE=macos-x64 ;;
-  *) echo "usage: $0 macos-arm64|macos-x64" >&2; exit 2 ;;
+macos-arm64 | aarch64-apple-darwin)
+  ARCH=arm64
+  PACKAGE=macos-arm64
+  ;;
+macos-x64 | x86_64-apple-darwin)
+  ARCH=x64
+  PACKAGE=macos-x64
+  ;;
+*)
+  echo "usage: $0 macos-arm64|macos-x64" >&2
+  exit 2
+  ;;
 esac
 
 DEST="$ROOT/bin/$PACKAGE/pet-village-pi-runtime.tar.gz"
@@ -31,14 +40,14 @@ NODE_ROOT="$WORK/node-v$NODE_VERSION-darwin-$ARCH"
 install -m 755 "$NODE_ROOT/bin/node" "$WORK/runtime/node"
 install -m 644 "$NODE_ROOT/LICENSE" "$WORK/runtime/NODE-LICENSE.txt"
 
-cat > "$WORK/runtime/package/package.json" <<JSON
+cat >"$WORK/runtime/package/package.json" <<JSON
 {"name":"pet-village-pi-runtime","private":true,"version":"0.0.0","dependencies":{"@earendil-works/pi-coding-agent":"$PI_VERSION"}}
 JSON
 cp "$ROOT/scripts/pi-runtime-package-lock.json" "$WORK/runtime/package/package-lock.json"
-(cd "$WORK/runtime/package" && \
+(cd "$WORK/runtime/package" &&
   npm_config_arch="$ARCH" npm_config_cpu="$ARCH" npm_config_platform=darwin npm ci \
-  --omit=dev --ignore-scripts --no-audit --no-fund >/dev/null)
-cat > "$WORK/runtime/bin/pi" <<'SH'
+    --omit=dev --ignore-scripts --no-audit --no-fund >/dev/null)
+cat >"$WORK/runtime/bin/pi" <<'SH'
 #!/bin/sh
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 exec "$ROOT/node" "$ROOT/package/node_modules/@earendil-works/pi-coding-agent/dist/cli.js" "$@"

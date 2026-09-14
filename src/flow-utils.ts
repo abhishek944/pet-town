@@ -11,12 +11,20 @@ export function hasOwn(value: object, key: PropertyKey): boolean {
   return OWN.call(value, key);
 }
 
-export function isIntegerBetween(value: unknown, minimum: number, maximum: number): value is number {
-  return typeof value === "number" && Number.isInteger(value) && value >= minimum && value <= maximum;
+export function isIntegerBetween(
+  value: unknown,
+  minimum: number,
+  maximum: number,
+): value is number {
+  return (
+    typeof value === "number" && Number.isInteger(value) && value >= minimum && value <= maximum
+  );
 }
 
 export function isFiniteBetween(value: unknown, minimum: number, maximum: number): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= minimum && value <= maximum;
+  return (
+    typeof value === "number" && Number.isFinite(value) && value >= minimum && value <= maximum
+  );
 }
 
 export function normalizeAssetPath(value: string): string | null {
@@ -24,9 +32,11 @@ export function normalizeAssetPath(value: string): string | null {
     value.length === 0 ||
     value.length > 240 ||
     value.includes("\\") ||
+    // eslint-disable-next-line no-control-regex -- Asset paths must reject ASCII control characters.
     /[\u0000-\u001f\u007f]/.test(value) ||
     /^(?:[a-z]+:|\/)/i.test(value)
-  ) return null;
+  )
+    return null;
   const normalized = value.startsWith("./") ? value.slice(2) : value;
   const parts = normalized.split("/");
   if (parts.some((part) => part === "" || part === "." || part === "..")) return null;
@@ -74,17 +84,16 @@ export function advanceTrack(
 
   const period = maximumX * 2;
   const unfoldedStart = direction === 1 ? start : period - start;
-  const phase = ((unfoldedStart + distancePx) % period + period) % period;
+  const phase = (((unfoldedStart + distancePx) % period) + period) % period;
   if (phase === 0) return { x: 0, direction: 1 };
   if (phase === maximumX) return { x: maximumX, direction: -1 };
-  return phase < maximumX
-    ? { x: phase, direction: 1 }
-    : { x: period - phase, direction: -1 };
+  return phase < maximumX ? { x: phase, direction: 1 } : { x: period - phase, direction: -1 };
 }
 
 export function remapTrackPosition(x: number, oldMaximumX: number, newMaximumX: number): number {
   if (!Number.isFinite(newMaximumX) || newMaximumX <= 0) return 0;
-  if (!Number.isFinite(oldMaximumX) || oldMaximumX <= 0) return Math.min(newMaximumX, Math.max(0, x));
+  if (!Number.isFinite(oldMaximumX) || oldMaximumX <= 0)
+    return Math.min(newMaximumX, Math.max(0, x));
   return Math.min(newMaximumX, Math.max(0, (x / oldMaximumX) * newMaximumX));
 }
 

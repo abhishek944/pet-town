@@ -41,7 +41,7 @@ read_pid() {
   [ -f "$PID_FILE" ] || return 1
   pid=$(cat "$PID_FILE" 2>/dev/null || true)
   case "$pid" in
-    ''|*[!0-9]*) return 1 ;;
+  '' | *[!0-9]*) return 1 ;;
   esac
   printf '%s\n' "$pid"
 }
@@ -110,18 +110,17 @@ resolve_binary() {
   system=$(uname -s)
   machine=$(uname -m)
   case "$system:$machine" in
-    Darwin:arm64) packaged="$PLUGIN_ROOT/bin/macos-arm64/pet-village" ;;
-    Darwin:x86_64) packaged="$PLUGIN_ROOT/bin/macos-x64/pet-village" ;;
-    Linux:x86_64) packaged="$PLUGIN_ROOT/bin/linux-x64/pet-village" ;;
-    Linux:aarch64) packaged="$PLUGIN_ROOT/bin/linux-arm64/pet-village" ;;
-    *) packaged="$PLUGIN_ROOT/bin/unsupported/pet-village" ;;
+  Darwin:arm64) packaged="$PLUGIN_ROOT/bin/macos-arm64/pet-village" ;;
+  Darwin:x86_64) packaged="$PLUGIN_ROOT/bin/macos-x64/pet-village" ;;
+  Linux:x86_64) packaged="$PLUGIN_ROOT/bin/linux-x64/pet-village" ;;
+  Linux:aarch64) packaged="$PLUGIN_ROOT/bin/linux-arm64/pet-village" ;;
+  *) packaged="$PLUGIN_ROOT/bin/unsupported/pet-village" ;;
   esac
 
   for candidate in \
     "$packaged" \
     "$PLUGIN_ROOT/src-tauri/target/release/pet-village" \
-    "$PLUGIN_ROOT/src-tauri/target/release/bundle/macos/Pet Village.app/Contents/MacOS/pet-village"
-  do
+    "$PLUGIN_ROOT/src-tauri/target/release/bundle/macos/Pet Village.app/Contents/MacOS/pet-village"; do
     if absolute_executable "$candidate"; then
       return 0
     fi
@@ -266,11 +265,14 @@ reload_preferences() {
 
 register_session
 case "${1:-}" in
-  startup) start_from_preferences ;;
-  on|start) start_renderer ;;
-  off|stop) stop_renderer ;;
-  preferences) open_preferences ;;
-  reload-preferences) reload_preferences ;;
-  status) show_status ;;
-  *) echo "usage: $0 startup|on|off|preferences|reload-preferences|status" >&2; exit 2 ;;
+startup) start_from_preferences ;;
+on | start) start_renderer ;;
+off | stop) stop_renderer ;;
+preferences) open_preferences ;;
+reload-preferences) reload_preferences ;;
+status) show_status ;;
+*)
+  echo "usage: $0 startup|on|off|preferences|reload-preferences|status" >&2
+  exit 2
+  ;;
 esac

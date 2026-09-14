@@ -12,6 +12,7 @@ pub fn install(archive: &Path) -> Result<PathBuf, String> {
     let lock_path = base.join("pi-runtime.lock");
     let lock = OpenOptions::new()
         .create(true)
+        .truncate(false)
         .read(true)
         .write(true)
         .open(lock_path)
@@ -25,7 +26,7 @@ pub fn install(archive: &Path) -> Result<PathBuf, String> {
     if fs::read_to_string(&identity).ok().as_deref() == Some(expected)
         && super::runtime_verify::validate(&target).is_ok()
     {
-        let _ = lock.unlock();
+        let _ = FileExt::unlock(&lock);
         return Ok(target);
     }
     let staging = base.join(format!("pi-runtime-next-{}", uuid::Uuid::new_v4()));
@@ -45,7 +46,7 @@ pub fn install(archive: &Path) -> Result<PathBuf, String> {
     if result.is_err() {
         let _ = fs::remove_dir_all(&staging);
     }
-    let _ = lock.unlock();
+    let _ = FileExt::unlock(&lock);
     result.map(|_| target)
 }
 

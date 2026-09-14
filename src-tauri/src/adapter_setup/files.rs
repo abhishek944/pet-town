@@ -74,10 +74,12 @@ pub(super) fn read_regular_file(path: &Path, label: &str) -> Result<Option<Vec<u
     Ok(Some(bytes))
 }
 
+type JsonWithOriginal = (Map<String, Value>, Option<Vec<u8>>);
+
 pub(super) fn read_json_with_original(
     path: &Path,
     label: &str,
-) -> Result<(Map<String, Value>, Option<Vec<u8>>), String> {
+) -> Result<JsonWithOriginal, String> {
     let original = read_regular_file(path, label)?;
     let Some(bytes) = original.as_deref() else {
         return Ok((Map::new(), None));

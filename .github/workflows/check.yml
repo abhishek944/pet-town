@@ -20,6 +20,8 @@ jobs:
       - name: Install Rust 1.88
         run: rustup toolchain install 1.88.0 --profile minimal --target ${{ matrix.target }}
       - run: npm ci
+      - name: Install quality tools
+        run: brew install actionlint ruff shellcheck shfmt taplo
       - name: Prepare pinned Pi runtime for target
         run: |
           case "${{ matrix.target }}" in
@@ -28,6 +30,7 @@ jobs:
           esac
           ./scripts/prepare-pi-runtime.sh "$package"
           cp "bin/$package/pet-village-pi-runtime.tar.gz" src-tauri/resources/
+      - run: npm run check:quality
       - run: npm run check:lines
       - run: npm run check:flow
       - run: npm run check:focus

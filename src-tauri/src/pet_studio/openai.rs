@@ -91,15 +91,20 @@ pub async fn edit(
     model: &str,
     quality: &str,
     reference: Vec<u8>,
+    template: Vec<u8>,
 ) -> Result<Vec<u8>, String> {
     validate(model, quality, prompt)?;
-    if reference.len() > MAX_IMAGE_BYTES {
-        return Err("Reference image exceeds the 20 MB limit.".into());
+    if reference.len() > MAX_IMAGE_BYTES || template.len() > MAX_IMAGE_BYTES {
+        return Err("A sprite-sheet input image exceeds the 20 MB limit.".into());
     }
-    let image = multipart::Part::bytes(reference)
-        .file_name("reference.png")
+    let reference = multipart::Part::bytes(reference)
+        .file_name("character-reference.png")
         .mime_str("image/png")
-        .map_err(|_| "Could not prepare the reference image.".to_string())?;
+        .map_err(|_| "Could not prepare the character reference.".to_string())?;
+    let template = multipart::Part::bytes(template)
+        .file_name("eight-cell-template.png")
+        .mime_str("image/png")
+        .map_err(|_| "Could not prepare the sprite-sheet template.".to_string())?;
     let form = multipart::Form::new()
         .text("model", model.to_string())
         .text("prompt", prompt.to_string())
@@ -108,7 +113,9 @@ pub async fn edit(
         .text("quality", quality.to_string())
         .text("background", "transparent")
         .text("output_format", "png")
-        .part("image", image);
+        .text("input_fidelity", "high")
+        .part("image[]", reference)
+        .part("image[]", template);
     let response = client()?
         .post("https://api.openai.com/v1/images/edits")
         .bearer_auth(key()?)

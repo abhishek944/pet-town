@@ -1,6 +1,7 @@
 use super::draft_commands::data_url;
 use super::images;
 use super::openai;
+use super::sheet_layout;
 use super::store;
 use super::types::*;
 use super::{with_draft, PetStudioState};
@@ -56,6 +57,7 @@ pub async fn generate_pet_animation(
         &request.model,
         &request.quality,
         reference,
+        sheet_layout::template_png()?,
     )
     .await?;
     images::split_sheet(&bytes)?;
@@ -137,5 +139,5 @@ pub fn assemble_pet_animation(
 }
 
 fn animation_prompt(user: &str) -> String {
-    format!("Production 2D animation sprite sheet for a transparent desktop pet. Image 1 is the exact character identity, costume, palette, proportions, equipment, linework, shading, scale, and facing reference. Canvas: exactly 2 columns by 4 rows, eight equal landscape cells, read left-to-right then top-to-bottom. Transparent background. No gutters, borders, grid lines, labels, captions, floor, scenery, checkerboard, or cropped limbs. One complete character per cell, centered on the same baseline and at the same scale. Eight successive frames form a smooth seamless loop. Preserve identity exactly; no redesign, camera movement, zoom, added limbs, or duplicated props. The physical action must read without motion symbols. Action: {}", user.trim())
+    format!("Production 2D animation sprite sheet for a transparent desktop pet. Image 1 is the exact character identity, costume, palette, proportions, equipment, linework, shading, scale, and facing reference. Image 2 is a rigid 2-column by 4-row layout template with eight empty outlined boxes, read left-to-right then top-to-bottom. Fill every box with exactly one complete successive animation frame. Keep every character, limb, prop, and effect comfortably inside its own box with clear transparent space at every edge; never let content cross or leak into a neighboring box. Keep the character centered on the same baseline and at the same scale. Return a clean transparent 1024x1536 sheet without the cyan template outlines, borders, labels, captions, floor, scenery, checkerboard, or cropped limbs. Eight successive frames form a smooth seamless loop. Preserve identity exactly; no redesign, camera movement, zoom, added limbs, or duplicated props. The physical action must read without motion symbols. Action: {}", user.trim())
 }

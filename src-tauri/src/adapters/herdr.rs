@@ -58,7 +58,7 @@ fn query_session(herdr: &OsString, socket: Option<String>) -> Option<Vec<Adapter
     Some(
         parsed
             .into_iter()
-            .filter_map(|mut agent| {
+            .map(|mut agent| {
                 agent.view.label = labels
                     .pane_labels
                     .get(&agent.view.id)
@@ -83,12 +83,12 @@ fn query_session(herdr: &OsString, socket: Option<String>) -> Option<Vec<Adapter
                 });
                 agent.view.id = public_id;
                 agent.view.source = "herdr".to_string();
-                Some(AdapterAgent {
+                AdapterAgent {
                     owner_key,
                     hosted_owner_key: None,
                     view: agent.view,
                     focus_route,
-                })
+                }
             })
             .collect(),
     )

@@ -52,7 +52,10 @@ export class SettingsGallery {
       const excluded = !draft.pets[id].includedInRandomCast;
       card.classList.toggle("excluded", excluded);
       card.querySelector<HTMLElement>(".veil")!.hidden = !excluded;
-      card.setAttribute("aria-label", `${characterDisplayName(id) ?? friendlyPetName(id)}, ${excluded ? "excluded from" : "included in"} random cast`);
+      card.setAttribute(
+        "aria-label",
+        `${characterDisplayName(id) ?? friendlyPetName(id)}, ${excluded ? "excluded from" : "included in"} random cast`,
+      );
     }
     if (this.visible) this.loadPortraits();
   }

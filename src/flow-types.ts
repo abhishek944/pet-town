@@ -63,7 +63,8 @@ export interface LoopNode {
   flow: FlowNode;
 }
 
-export type FlowNode = SequenceNode | PlayNode | MoveNode | WaitNode | HideNode | ChooseNode | RepeatNode | LoopNode;
+export type FlowNode =
+  SequenceNode | PlayNode | MoveNode | WaitNode | HideNode | ChooseNode | RepeatNode | LoopNode;
 
 export interface StateFlowManifest {
   completion: "restart" | "hold";

@@ -9,7 +9,7 @@ grep -q 'dispatchEvent(new Event("citizen-hidden", { bubbles: true }))' src/rend
 
 npx esbuild src/pet-interactions.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/pet-interactions.cjs"
-cat > "$TMP/check.cjs" <<'CHECK'
+cat >"$TMP/check.cjs" <<'CHECK'
 class FakeElement {
   constructor(className = "", parent = null) {
     this.tag = "";

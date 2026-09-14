@@ -35,7 +35,7 @@ fn compile_wake_bridge() {
             "-emit-library",
             "-static",
             "-target",
-            &target,
+            target,
             "src/orchestrator/wake_bridge.swift",
             "-o",
         ])

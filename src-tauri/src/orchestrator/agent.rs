@@ -183,9 +183,7 @@ fn close_tab(tab_id: &str) {
 
 fn string(value: &Value, path: &[&str]) -> Result<String, String> {
     path.iter()
-        .fold(Some(value), |item, key| {
-            item.and_then(|value| value.get(*key))
-        })
+        .try_fold(value, |item, key| item.get(*key))
         .and_then(Value::as_str)
         .map(str::to_string)
         .ok_or_else(|| "Herdr omitted a required orchestrator identifier.".to_string())

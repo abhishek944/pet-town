@@ -13,8 +13,8 @@ npx tsc \
   --skipLibCheck \
   --outDir "$TMP" \
   src/flow-runtime.ts
-printf '%s\n' '{"type":"commonjs"}' > "$TMP/package.json"
-cat > "$TMP/check.cjs" <<'CHECK'
+printf '%s\n' '{"type":"commonjs"}' >"$TMP/package.json"
+cat >"$TMP/check.cjs" <<'CHECK'
 const {
   advanceTrack,
   BehaviorMachine,
@@ -172,7 +172,7 @@ console.log("flow runtime checks: pass");
 CHECK
 node "$TMP/check.cjs"
 npx esbuild src/renderer-view.ts --bundle --platform=node --format=cjs --log-level=error --outfile="$TMP/renderer-view.cjs"
-cat > "$TMP/check-renderer.cjs" <<'CHECK_RENDERER'
+cat >"$TMP/check-renderer.cjs" <<'CHECK_RENDERER'
 const {
   applyFlowSample,
   ASSET_READY_TIMEOUT_MS,

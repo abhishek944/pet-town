@@ -30,7 +30,7 @@
 .assistant-grid {
   display: grid;
   gap: 18px;
-  grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
 }
 
 .assistant-main,
@@ -161,21 +161,27 @@
 :root[data-theme="light"] .assistant-wake {
   background: #f1efff;
 }
-:root[data-theme="light"] .assistant-wake small { color: #535866; }
+:root[data-theme="light"] .assistant-wake small {
+  color: #535866;
+}
 
 :root[data-theme="light"] .assistant-badge {
   background: #e6f8ec;
   color: #176b37;
 }
 :root[data-theme="light"] .assistant-badge[data-ready="true"],
-:root[data-theme="light"] .assistant-card .row b[data-ready="true"] { color: #176b37; }
+:root[data-theme="light"] .assistant-card .row b[data-ready="true"] {
+  color: #176b37;
+}
 
 :root[data-theme="light"] #assistant-disable {
   background: #f1efff;
   color: #4b3f9c;
 }
 
-.assistant-panel .primary { background: #0868c7; }
+.assistant-panel .primary {
+  background: #0868c7;
+}
 
 .assistant-actions {
   display: flex;
@@ -189,16 +195,38 @@
 }
 
 @media (prefers-color-scheme: light) {
-  :root[data-theme="system"] .assistant-panel { background: #fbf9f6; }
-  :root[data-theme="system"] .assistant-card { background: #fff; border-color: #e8e5dd; box-shadow: 0 1px 2px #0000000f; }
+  :root[data-theme="system"] .assistant-panel {
+    background: #fbf9f6;
+  }
+  :root[data-theme="system"] .assistant-card {
+    background: #fff;
+    border-color: #e8e5dd;
+    box-shadow: 0 1px 2px #0000000f;
+  }
   :root[data-theme="system"] .assistant-card input,
-  :root[data-theme="system"] .assistant-card select { background: #fff; border-color: #e8e5dd; color: #111; }
-  :root[data-theme="system"] .assistant-wake { background: #f1efff; }
-  :root[data-theme="system"] .assistant-wake small { color: #535866; }
-  :root[data-theme="system"] .assistant-badge { background: #e6f8ec; color: #176b37; }
+  :root[data-theme="system"] .assistant-card select {
+    background: #fff;
+    border-color: #e8e5dd;
+    color: #111;
+  }
+  :root[data-theme="system"] .assistant-wake {
+    background: #f1efff;
+  }
+  :root[data-theme="system"] .assistant-wake small {
+    color: #535866;
+  }
+  :root[data-theme="system"] .assistant-badge {
+    background: #e6f8ec;
+    color: #176b37;
+  }
   :root[data-theme="system"] .assistant-badge[data-ready="true"],
-  :root[data-theme="system"] .assistant-card .row b[data-ready="true"] { color: #176b37; }
-  :root[data-theme="system"] #assistant-disable { background: #f1efff; color: #4b3f9c; }
+  :root[data-theme="system"] .assistant-card .row b[data-ready="true"] {
+    color: #176b37;
+  }
+  :root[data-theme="system"] #assistant-disable {
+    background: #f1efff;
+    color: #4b3f9c;
+  }
 }
 
 @media (max-width: 760px) {

@@ -1,0 +1,34 @@
+.pi/settings.json
+assets/
+bin/
+dist/
+node_modules/
+review-artifacts/
+src-tauri/gen/
+src-tauri/resources/
+src-tauri/target/
+var/
+package-lock.json
+scripts/pi-runtime-package-lock.json
+
+# This template has compact markup assertions in the repository checks.
+settings.html
+
+# These modules intentionally stay under the repository's 199-line source limit.
+src/assistant.ts
+src/behavior-pack.ts
+src/flow-node-validation.ts
+src/pet-interactions.ts
+src/renderer-view.ts
+src/renderer.ts
+src/settings-adapters.ts
+src/settings-studio.ts
+src/settings.ts
+src/state-flow-machine.ts
+
+*.gif
+*.gz
+*.icns
+*.ico
+*.mp4
+*.png

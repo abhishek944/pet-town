@@ -11,9 +11,21 @@ function setSwitch(id: string, checked: boolean): void {
 }
 
 export function setSettingsReadOnly(readOnly: boolean): void {
-  const ids = ["pet-select", "pet-size", "pet-opacity", "label-visibility", "label-size",
-    "motion-level", "reduced-motion", "pause-hover", "open-with-herdr", "settings-appearance"];
-  ids.forEach((id) => { byId<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>(id).disabled = readOnly; });
+  const ids = [
+    "pet-select",
+    "pet-size",
+    "pet-opacity",
+    "label-visibility",
+    "label-size",
+    "motion-level",
+    "reduced-motion",
+    "pause-hover",
+    "open-with-herdr",
+    "settings-appearance",
+  ];
+  ids.forEach((id) => {
+    byId<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>(id).disabled = readOnly;
+  });
 }
 
 export function renderChoiceControls(
@@ -21,12 +33,14 @@ export function renderChoiceControls(
   snapshot: PreferencesSnapshot,
   item: PetPreferences,
 ): void {
-  const includedCount = Object.values(draft.pets)
-    .filter((candidate) => candidate.includedInRandomCast).length;
+  const includedCount = Object.values(draft.pets).filter(
+    (candidate) => candidate.includedInRandomCast,
+  ).length;
   setSwitch("include-random-cast", item.includedInRandomCast);
-  byId<HTMLButtonElement>("include-random-cast").disabled = snapshot.readOnly
-    || (item.includedInRandomCast && includedCount === 1);
-  byId<HTMLElement>("cast-count").textContent = `${includedCount} of ${snapshot.petIds.length} pets included`;
+  byId<HTMLButtonElement>("include-random-cast").disabled =
+    snapshot.readOnly || (item.includedInRandomCast && includedCount === 1);
+  byId<HTMLElement>("cast-count").textContent =
+    `${includedCount} of ${snapshot.petIds.length} pets included`;
   setSwitch("hide-completed-pets", draft.app.hideCompletedPets);
   byId<HTMLButtonElement>("hide-completed-pets").disabled = snapshot.readOnly;
   const completedDelay = byId<HTMLSelectElement>("completed-hide-delay");

@@ -1,7 +1,4 @@
-import {
-  compileBehaviorPack,
-  type CompiledBehaviorPack,
-} from "./flow-runtime";
+import { compileBehaviorPack, type CompiledBehaviorPack } from "./flow-runtime";
 
 const manifestModules = import.meta.glob("./pets/*/flow.json", {
   eager: true,
@@ -55,9 +52,7 @@ export const CHARACTER_BEHAVIOR_PACKS = Object.freeze(
   >,
 );
 
-export const CHARACTER_IDS = Object.freeze(
-  compiled.map((pack) => pack.id as CharacterId),
-);
+export const CHARACTER_IDS = Object.freeze(compiled.map((pack) => pack.id as CharacterId));
 
 export interface UserPackPayload {
   id: string;
@@ -82,16 +77,30 @@ const extendedPacks = new Map<CharacterId, CompiledBehaviorPack>();
 
 function record(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, unknown>
+    ? (value as Record<string, unknown>)
     : null;
 }
 
 export function compilePetExtension(extension: PetExtensionPayload) {
   const source = bundledSources.get(extension.baseId) ?? userSources.get(extension.baseId);
   const base = source ? record(structuredClone(source.manifest)) : null;
-  if (!source || !base) return { pack: null, diagnostics: [{ code: "E_EXTENSION_BASE", path: "/baseId", message: "The base pet is unavailable" }] };
-  const clips = record(base.clips); const states = record(base.states); const actions = record(base.actions) ?? {};
-  if (!clips || !states) return { pack: null, diagnostics: [{ code: "E_EXTENSION_BASE", path: "/baseId", message: "The base pet is invalid" }] };
+  if (!source || !base)
+    return {
+      pack: null,
+      diagnostics: [
+        { code: "E_EXTENSION_BASE", path: "/baseId", message: "The base pet is unavailable" },
+      ],
+    };
+  const clips = record(base.clips);
+  const states = record(base.states);
+  const actions = record(base.actions) ?? {};
+  if (!clips || !states)
+    return {
+      pack: null,
+      diagnostics: [
+        { code: "E_EXTENSION_BASE", path: "/baseId", message: "The base pet is invalid" },
+      ],
+    };
   base.packVersion = extension.extensionVersion;
   base.clips = { ...clips, ...extension.clips };
   base.states = { ...states, ...extension.states };
@@ -105,19 +114,32 @@ export function installUserPacks(
   payloads: readonly UserPackPayload[],
   extensions: readonly PetExtensionPayload[] = [],
 ): { rejectedPacks: string[]; rejectedExtensions: string[] } {
-  userPacks.clear(); userPackNames.clear(); userSources.clear(); extendedPacks.clear();
-  const rejectedPacks: string[] = []; const rejectedExtensions: string[] = [];
+  userPacks.clear();
+  userPackNames.clear();
+  userSources.clear();
+  extendedPacks.clear();
+  const rejectedPacks: string[] = [];
+  const rejectedExtensions: string[] = [];
   for (const payload of payloads) {
-    if (CHARACTER_BEHAVIOR_PACKS[payload.id]) { rejectedPacks.push(payload.id); continue; }
+    if (CHARACTER_BEHAVIOR_PACKS[payload.id]) {
+      rejectedPacks.push(payload.id);
+      continue;
+    }
     const result = compileBehaviorPack(payload.manifest, payload.assets);
-    if (!result.pack || result.pack.id !== payload.id) { rejectedPacks.push(payload.id); continue; }
+    if (!result.pack || result.pack.id !== payload.id) {
+      rejectedPacks.push(payload.id);
+      continue;
+    }
     userPacks.set(payload.id, result.pack);
     userPackNames.set(payload.id, payload.displayName);
     userSources.set(payload.id, { manifest: payload.manifest, assets: payload.assets });
   }
   for (const extension of extensions) {
     const result = compilePetExtension(extension);
-    if (!result.pack) { rejectedExtensions.push(extension.baseId); continue; }
+    if (!result.pack) {
+      rejectedExtensions.push(extension.baseId);
+      continue;
+    }
     extendedPacks.set(extension.baseId, result.pack);
   }
   return { rejectedPacks, rejectedExtensions };

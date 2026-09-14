@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core"; import { characterDisplayName } from "./character-packs"; import { friendlyPetName } from "./preferences-types"; import { saveExtension, type ExtensionSaveResult, type MenuAction } from "./settings-studio-extension";
-import { StudioOrchestrator } from "./studio-orchestrator"; import { advanceStudioWizard } from "./settings-studio-steps"; import { loadStudioApiStatus } from "./settings-studio-status"; import { existingPetReference, StudioWorkflow } from "./settings-studio-workflow"; import { StudioWizard } from "./settings-studio-wizard";
+import { StudioOrchestrator } from "./studio-orchestrator"; import { setStudioBusy, type StudioBusyOperation, waitForStudioPaint } from "./settings-studio-progress"; import { advanceStudioWizard } from "./settings-studio-steps"; import { loadStudioApiStatus } from "./settings-studio-status"; import { existingPetReference, StudioWorkflow } from "./settings-studio-workflow"; import { StudioWizard } from "./settings-studio-wizard";
 type DraftView = { draftId: string; displayName: string }; type AssetView = { dataUrl: string }; type AnimationAssetView = AssetView & { animationId: string }; type AnimationRestoreView = { apngDataUrl: string; sheetDataUrl: string | null }; type DraftDiscardResult = { cleanupWarning: string | null };
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T; const slots = ["walk", "work", "blocked", "celebrate", "sleep", "unknown"] as const;
 export class PetStudio {
@@ -41,7 +41,7 @@ export class PetStudio {
     const output = $<HTMLElement>("studio-message"); output.textContent = message; output.dataset.success = String(success);
   }
   showExtensionWarning(message: string): void { this.status(message); }
-  private setBusy(value: boolean): void { this.busy = value; $<HTMLElement>("panel-studio").setAttribute("aria-busy", String(value)); this.syncControls(); }
+  private setBusy(value: boolean, operation: StudioBusyOperation = null): void { this.busy = value; setStudioBusy(value, operation); this.syncControls(); }
   private syncControls(): void {
     $<HTMLButtonElement>("studio-start").disabled = this.busy;
     $<HTMLButtonElement>("studio-wizard-next").disabled = this.busy;
@@ -118,11 +118,11 @@ export class PetStudio {
   private async generateAnimation(): Promise<void> {
     const animationId = this.animationId(); const prompt = $<HTMLTextAreaElement>("studio-animation-prompt").value.trim();
     if (!this.draftId || !animationId || !prompt || this.busy) { this.status("Enter an animation name and physical action."); return; }
-    this.setBusy(true);
+    this.setBusy(true, "generate-sheet"); this.status("Generating all eight frames inside the sheet template…"); await waitForStudioPaint();
     try { const asset = await invoke<AnimationAssetView>("generate_pet_animation", { request: { draftId: this.draftId, animationId, prompt, model: this.model(), quality: this.quality() } }); this.pendingAnimationId = asset.animationId; this.generated.set(asset.animationId, asset.dataUrl); this.created.delete(asset.animationId); this.candidates.add(asset.animationId); this.referenceLocked = true; this.refreshApproved(); this.refreshGenerated(); this.show("studio-sheet-preview", asset.dataUrl); this.show("studio-sheet-full", asset.dataUrl); $<HTMLImageElement>("studio-apng-preview").hidden = true; $("studio-inspect-sheet").hidden = false; this.status("Review all eight cells, then create and approve the APNG.", true); }
     catch (error) { this.status(String(error)); } finally { this.setBusy(false); }
   }
-  private async createAnimation(): Promise<void> { const animationId = this.pendingAnimationId; if (!animationId || this.busy) return; this.setBusy(true);
+  private async createAnimation(): Promise<void> { const animationId = this.pendingAnimationId; if (!animationId || this.busy) return; this.setBusy(true, "create-animation"); this.status("Creating the APNG from eight isolated frames…"); await waitForStudioPaint();
     try { const asset = await invoke<AssetView>("assemble_pet_animation", { request: { draftId: this.draftId, animationId, durationMs: Number($<HTMLInputElement>("studio-duration").value), role: $<HTMLSelectElement>("studio-role").value } }); this.created.set(animationId, asset.dataUrl); this.candidates.add(animationId); this.show("studio-apng-preview", asset.dataUrl); this.syncControls(); this.status("APNG created. Review the loop, then approve the animation.", true); } catch (error) { this.status(String(error)); } finally { this.setBusy(false); }
   }
   private async approveAnimation(): Promise<void> { const animationId = this.pendingAnimationId; const source = this.created.get(animationId); if (!source || this.busy) return; this.setBusy(true);

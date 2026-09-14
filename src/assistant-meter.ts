@@ -12,12 +12,18 @@ export function startSpeechMeter(
   const tick = () => {
     analyser.getFloatTimeDomainData(samples);
     const mean = samples.reduce((sum, value) => sum + value * value, 0) / samples.length;
-    const loud = Math.sqrt(mean) > .025;
+    const loud = Math.sqrt(mean) > 0.025;
     quietFrames = loud ? 0 : quietFrames + 1;
     const next = loud || (speaking && quietFrames < 6);
-    if (next !== speaking) { speaking = next; onChange(next); }
+    if (next !== speaking) {
+      speaking = next;
+      onChange(next);
+    }
   };
   tick();
   const timer = window.setInterval(tick, 50);
-  return () => { clearInterval(timer); void context.close(); };
+  return () => {
+    clearInterval(timer);
+    void context.close();
+  };
 }

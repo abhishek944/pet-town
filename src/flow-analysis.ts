@@ -2,10 +2,7 @@ import type { CompiledClip, FlowNode } from "./flow-types";
 
 export type HoldOutcome = string | null;
 
-export function holdOutcomes(
-  node: FlowNode,
-  inputs: ReadonlySet<HoldOutcome>,
-): Set<HoldOutcome> {
+export function holdOutcomes(node: FlowNode, inputs: ReadonlySet<HoldOutcome>): Set<HoldOutcome> {
   if (node.type === "play" || node.type === "move") return new Set([node.clip]);
   if (node.type === "loop") return holdOutcomes(node.flow, inputs);
   if (node.type === "hide") return new Set([""]);
@@ -50,9 +47,10 @@ export function entryCycleMinimumMs(
     }
     return total;
   }
-  if (node.type === "repeat") return containsLoop(node.flow)
-    ? entryCycleMinimumMs(node.flow, clips)
-    : entryCycleMinimumMs(node.flow, clips) * node.count;
+  if (node.type === "repeat")
+    return containsLoop(node.flow)
+      ? entryCycleMinimumMs(node.flow, clips)
+      : entryCycleMinimumMs(node.flow, clips) * node.count;
   if (node.type === "choose") {
     return Math.min(...node.choices.map((choice) => entryCycleMinimumMs(choice.flow, clips)));
   }

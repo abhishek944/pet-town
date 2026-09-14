@@ -25,8 +25,8 @@ pub fn generation() -> u64 {
 
 pub fn supported() -> bool {
     #[cfg(target_os = "macos")]
-    unsafe {
-        return pv_wake_supported();
+    {
+        unsafe { pv_wake_supported() }
     }
     #[cfg(not(target_os = "macos"))]
     false

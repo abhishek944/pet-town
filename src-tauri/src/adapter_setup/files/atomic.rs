@@ -90,8 +90,7 @@ fn publish(
                 "{label} appeared while it was being updated; try again"
             ));
         }
-        return fs::remove_file(displaced)
-            .map_err(|_| format!("could not finish replacing {label}"));
+        fs::remove_file(displaced).map_err(|_| format!("could not finish replacing {label}"))
     }
     #[cfg(not(target_os = "macos"))]
     fs::rename(temporary, path).map_err(|_| {

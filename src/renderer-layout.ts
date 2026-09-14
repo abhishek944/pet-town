@@ -25,7 +25,8 @@ export function collectHitRegions(
       .filter((element) => !element.classList.contains("retiring"))
       .flatMap((element) => [element.querySelector(".pet"), element.querySelector(".project")]),
     ...root.querySelectorAll(".pet-menu, .pet-menu-backdrop"),
-  ].filter((element): element is Element => element !== null)
+  ]
+    .filter((element): element is Element => element !== null)
     .map(regionFor)
     .filter((region): region is HitRegion => region !== null);
 }

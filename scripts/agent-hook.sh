@@ -12,11 +12,11 @@ if [ -n "${PET_VILLAGE_BINARY:-}" ] && [ -x "$PET_VILLAGE_BINARY" ]; then
   BINARY=$PET_VILLAGE_BINARY
 else
   case "$(uname -s):$(uname -m)" in
-    Darwin:arm64) BINARY="$PLUGIN_ROOT/bin/macos-arm64/pet-village" ;;
-    Darwin:x86_64) BINARY="$PLUGIN_ROOT/bin/macos-x64/pet-village" ;;
-    Linux:x86_64) BINARY="$PLUGIN_ROOT/bin/linux-x64/pet-village" ;;
-    Linux:aarch64) BINARY="$PLUGIN_ROOT/bin/linux-arm64/pet-village" ;;
-    *) exit 0 ;;
+  Darwin:arm64) BINARY="$PLUGIN_ROOT/bin/macos-arm64/pet-village" ;;
+  Darwin:x86_64) BINARY="$PLUGIN_ROOT/bin/macos-x64/pet-village" ;;
+  Linux:x86_64) BINARY="$PLUGIN_ROOT/bin/linux-x64/pet-village" ;;
+  Linux:aarch64) BINARY="$PLUGIN_ROOT/bin/linux-arm64/pet-village" ;;
+  *) exit 0 ;;
   esac
 fi
 

@@ -31,12 +31,5 @@ export {
   type TrackPosition,
 } from "./flow-utils";
 export { compileBehaviorPack } from "./behavior-pack";
-export {
-  BUILT_IN_BEHAVIOR_PACK,
-  resolveBehaviorPack,
-} from "./default-behavior-pack";
-export {
-  BehaviorMachine,
-  type FlowAdvance,
-  type FlowSample,
-} from "./behavior-machine";
+export { BUILT_IN_BEHAVIOR_PACK, resolveBehaviorPack } from "./default-behavior-pack";
+export { BehaviorMachine, type FlowAdvance, type FlowSample } from "./behavior-machine";

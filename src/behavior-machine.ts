@@ -3,10 +3,7 @@ import type { CompiledBehaviorPack, HerdrState, StateFlowManifest } from "./flow
 
 export type { FlowAdvance, FlowSample } from "./state-flow-machine";
 
-function actionPack(
-  pack: CompiledBehaviorPack,
-  name: string,
-): CompiledBehaviorPack {
+function actionPack(pack: CompiledBehaviorPack, name: string): CompiledBehaviorPack {
   const action = pack.actions[name];
   const state: StateFlowManifest = { completion: "hold", flow: action.flow };
   const states = {

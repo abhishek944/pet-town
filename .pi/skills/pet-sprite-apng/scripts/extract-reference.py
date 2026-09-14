@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Extract one composited RGBA frame from an APNG for image-model reference."""
-from pathlib import Path
+
 import argparse
+from pathlib import Path
+
 from PIL import Image
 
 parser = argparse.ArgumentParser()

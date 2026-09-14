@@ -28,7 +28,7 @@ pub(super) fn with_lock<T>(action: impl FnOnce() -> Result<T, String>) -> Result
     lock.lock_exclusive()
         .map_err(|_| "could not lock adapter registry".to_string())?;
     let result = action();
-    let _ = lock.unlock();
+    let _ = FileExt::unlock(&lock);
     result
 }
 

@@ -7,6 +7,7 @@ export function mergeOrchestratorEdits(
 ): OrchestratorPreferences {
   const merged = { ...current };
   const keys = ["enabled", "displayName", "model", "thinking", "wakeEnabled"] as const;
-  for (const key of keys) if (pending[key] !== previous[key]) Object.assign(merged, { [key]: pending[key] });
+  for (const key of keys)
+    if (pending[key] !== previous[key]) Object.assign(merged, { [key]: pending[key] });
   return merged;
 }

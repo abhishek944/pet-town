@@ -3,8 +3,10 @@ export function syncCitizenVisibility(
   pet: HTMLImageElement,
   onGeometryChange: () => void,
 ): void {
-  const hidden = element.dataset.flowVisible !== "true"
-    || element.dataset.preferenceHidden === "true" || pet.hidden;
+  const hidden =
+    element.dataset.flowVisible !== "true" ||
+    element.dataset.preferenceHidden === "true" ||
+    pet.hidden;
   if (element.hidden === hidden) return;
   element.hidden = hidden;
   if (hidden && typeof element.dispatchEvent === "function") {

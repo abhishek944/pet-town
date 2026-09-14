@@ -16,11 +16,12 @@ pub fn exclusive<T>(
         .read(true)
         .write(true)
         .create(true)
+        .truncate(false)
         .open(path)
         .map_err(|_| "could not open the preferences lock".to_string())?;
     file.lock_exclusive()
         .map_err(|_| "could not lock preferences".to_string())?;
     let result = action();
-    let _ = file.unlock();
+    let _ = FileExt::unlock(&file);
     result
 }

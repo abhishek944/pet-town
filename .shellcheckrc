@@ -1,0 +1,4 @@
+shell=sh
+external-sources=true
+# `CDPATH= cd` intentionally clears inherited lookup behavior for portable path discovery.
+disable=SC1007

@@ -308,6 +308,7 @@ grep -q 'Unapplied changes' settings.html
 grep -q '>Pet</span>' settings.html
 [ "$(grep -o '<button[^>]*data-tab=' settings.html | wc -l | tr -d ' ')" = 6 ]
 [ "$(grep -o 'class="toolbar-glyph"' settings.html | wc -l | tr -d ' ')" = 6 ]
+grep -q '<svg viewBox="0 0 24 24" focusable="false">' settings.html
 grep -q 'id="animation-select"' settings.html
 grep -q 'getElementById("preview")!.hidden = !detail' src/settings-navigation.ts
 grep -q 'getElementById("preview-selectors")!.hidden = !detail' src/settings-navigation.ts
@@ -340,29 +341,52 @@ grep -q 'classList.remove("settings-loading")' src/settings.ts
 grep -q 'await invoke("show_settings")' src/settings.ts
 grep -q 'settings_window::show_settings' src-tauri/src/lib.rs
 grep -A14 'WebviewWindowBuilder::new' src-tauri/src/settings_window.rs | grep -q '\.visible(false)'
-if grep -q '\.on_page_load' src-tauri/src/lib.rs; then echo "native window still shows before initialization" >&2; exit 1; fi
-if grep -A30 'pub(crate) fn configure_window' src-tauri/src/window.rs | grep -Eq 'orderFrontRegardless|window\.show'; then echo "village configure still shows before initialization" >&2; exit 1; fi
+if grep -q '\.on_page_load' src-tauri/src/lib.rs; then
+  echo "native window still shows before initialization" >&2
+  exit 1
+fi
+if grep -A30 'pub(crate) fn configure_window' src-tauri/src/window.rs | grep -Eq 'orderFrontRegardless|window\.show'; then
+  echo "village configure still shows before initialization" >&2
+  exit 1
+fi
 grep -q 'session.ready' src-tauri/src/settings_window.rs
 [ ! -e src-tauri/src/preferences_migration.rs ]
 grep -q 'pub const SCHEMA_VERSION: u32 = 3' src-tauri/src/preferences_model.rs
 grep -q 'state.read_only = protect_source' src-tauri/src/preferences.rs
-if grep -A20 'window.emit("settings-selection"' src-tauri/src/settings_window.rs | head -20 | grep -q 'to_string())?'; then echo "Settings event error bypasses cleanup" >&2; exit 1; fi
+if grep -A20 'window.emit("settings-selection"' src-tauri/src/settings_window.rs | head -20 | grep -q 'to_string())?'; then
+  echo "Settings event error bypasses cleanup" >&2
+  exit 1
+fi
 grep -q '<option value="60">60 minutes</option>' settings.html
 grep -q 'arm_readiness_timeout' src-tauri/src/settings_window.rs
 grep -q 'window.hide().is_ok()' src-tauri/src/settings_window_lifecycle.rs
 grep -q 'settings_window::is_settings_open' src-tauri/src/lib.rs
-grep -q ':root\[data-theme="light"\] \.row small{color:#50535a}' src/settings.css
-grep -q ':root\[data-theme="light"\] code{background:#0000000a;color:#35373d}' src/settings.css
+grep -A3 -q '^:root\[data-theme="light"\] \.row small {' src/settings.css
+grep -A3 '^:root\[data-theme="light"\] \.row small {' src/settings.css | grep -q 'color: #50535a;'
+grep -A4 '^:root\[data-theme="light"\] code {' src/settings.css | grep -q 'background: #0000000a;'
+grep -A4 '^:root\[data-theme="light"\] code {' src/settings.css | grep -q 'color: #35373d;'
 grep -q ':root:not(\[data-theme="dark"\]) \.secondary' src/settings.css
 grep -q 'bindSwitch("open-with-herdr"' src/settings.ts
 [ "$(grep -o 'type="checkbox"' settings.html | wc -l | tr -d ' ')" = 1 ]
 grep -q 'id="studio-assign-orchestrator" type="checkbox"' settings.html
 grep -q 'selectedPreviewAnimationId(animationOptions, remembered)' src/settings.ts
+grep -q 'id="studio-sheet-loading".*Generating eight isolated frames' settings.html
+grep -q 'id="studio-animation-loading".*Creating the APNG loop' settings.html
+grep -q 'id="studio-operation-status".*aria-live="polite"' settings.html
+grep -q 'grid-template-rows: auto 240px auto' src/settings-studio.css
+grep -q 'setBusy(true, "generate-sheet")' src/settings-studio.ts
+grep -q 'setBusy(true, "create-animation")' src/settings-studio.ts
+grep -q 'sheet_layout::template_png()' src-tauri/src/pet_studio/generation_commands.rs
+grep -q '\.part("image\[\]", reference)' src-tauri/src/pet_studio/openai.rs
+grep -q '\.part("image\[\]", template)' src-tauri/src/pet_studio/openai.rs
+grep -q 'crosses a cell safety edge' src-tauri/src/pet_studio/sheet_layout.rs
+grep -q 'exactly 1024x1536' src-tauri/src/pet_studio/sheet_layout.rs
 grep -q 'data-locomotion="true"' src/settings.css
 grep -q 'calc(-50% - 24px)' src/settings.css
 grep -q 'data-reduced-movement="true"' src/settings.css
 grep -q 'data-pause-on-hover="true"' src/settings.css
-grep -q '@media(prefers-reduced-motion:reduce){.preview-stage\[data-locomotion="true"\] .pet{animation:none}}' src/settings.css
+grep -A5 '^@media (prefers-reduced-motion: reduce) {' src/settings.css | grep -q 'data-locomotion="true"'
+grep -A5 '^@media (prefers-reduced-motion: reduce) {' src/settings.css | grep -q 'animation: none;'
 grep -q 'motion.behavior.advance(elapsedMs + motion.pendingElapsedMs' src/renderer.ts
 grep -q 'render(true)' src/main.ts
 grep -q 'const distance = travelDistanceFor(' src/renderer.ts
@@ -378,7 +402,7 @@ if grep -qE '>Editing<|Village paused|data-tab="motion"|>Open with Herdr<|<h1>Pe
   echo "obsolete Settings chrome or copy remains" >&2
   exit 1
 fi
-grep -q '^\.pet-freeze { pointer-events: none; }' src/styles.css
+grep -A2 '^\.pet-freeze {' src/styles.css | grep -q 'pointer-events: none;'
 grep -A5 '^\.pet-stack > \.pet-freeze {' src/styles.css | grep -q 'position: absolute;'
 grep -A5 '^\.pet-stack > \.pet-freeze {' src/styles.css | grep -q 'bottom: 0;'
 grep -A5 '^\.pet-stack > \.pet-freeze {' src/styles.css | grep -q 'translate: -50% 0;'

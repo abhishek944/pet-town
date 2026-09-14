@@ -8,7 +8,7 @@ cd "$ROOT"
 
 npx esbuild src/pet-focus.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/pet-focus.cjs"
-cat > "$TMP/check.cjs" <<'CHECK'
+cat >"$TMP/check.cjs" <<'CHECK'
 class FakeElement {
   constructor(classes = [], parent = null, agentId = null) {
     this.classes = new Set(classes);

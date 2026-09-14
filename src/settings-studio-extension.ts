@@ -21,7 +21,9 @@ export async function saveExtension(input: SaveInput): Promise<ExtensionSaveResu
         request: { baseId: input.baseId, candidateId: candidate.candidateId },
       });
       candidate = null;
-      throw new Error(`Extension is not compatible: ${compilation.diagnostics.map((item) => item.message).join("; ")}`);
+      throw new Error(
+        `Extension is not compatible: ${compilation.diagnostics.map((item) => item.message).join("; ")}`,
+      );
     }
     const result = await invoke<ExtensionSaveResult>("activate_pet_extension", {
       request: { draftId: input.draftId, baseId: input.baseId, candidateId: candidate.candidateId },

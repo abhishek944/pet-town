@@ -11,8 +11,7 @@ interface OrchestratorStatus {
   message: string;
 }
 
-const byId = <T extends HTMLElement>(id: string): T =>
-  document.getElementById(id) as T;
+const byId = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
 export class AssistantSettings {
   private status: OrchestratorStatus = {
@@ -34,7 +33,8 @@ export class AssistantSettings {
       this.renderStatus();
     });
     void listen<string>("orchestrator-wake-status", (event) => {
-      this.status = { ...this.status, message: event.payload }; this.renderStatus();
+      this.status = { ...this.status, message: event.payload };
+      this.renderStatus();
     });
   }
 
@@ -43,8 +43,10 @@ export class AssistantSettings {
     byId<HTMLInputElement>("assistant-name").value = value.displayName;
     byId<HTMLSelectElement>("assistant-model").value = value.model;
     byId<HTMLSelectElement>("assistant-thinking").value = value.thinking;
-    byId<HTMLButtonElement>("assistant-wake-enabled")
-      .setAttribute("aria-checked", String(value.wakeEnabled));
+    byId<HTMLButtonElement>("assistant-wake-enabled").setAttribute(
+      "aria-checked",
+      String(value.wakeEnabled),
+    );
     byId<HTMLElement>("assistant-wake-phrase").textContent =
       `Wake it by saying “Hey, ${value.displayName.trim() || "your chosen name"}.”`;
     byId<HTMLElement>("assistant-intro").textContent =
@@ -59,18 +61,17 @@ export class AssistantSettings {
 
   private bind(): void {
     byId<HTMLInputElement>("assistant-name").addEventListener("input", (event) => {
-      this.draft().app.orchestrator.displayName =
-        (event.currentTarget as HTMLInputElement).value;
+      this.draft().app.orchestrator.displayName = (event.currentTarget as HTMLInputElement).value;
       this.changed();
     });
     byId<HTMLSelectElement>("assistant-model").addEventListener("change", (event) => {
-      this.draft().app.orchestrator.model =
-        (event.currentTarget as HTMLSelectElement).value as PreferencesFile["app"]["orchestrator"]["model"];
+      this.draft().app.orchestrator.model = (event.currentTarget as HTMLSelectElement)
+        .value as PreferencesFile["app"]["orchestrator"]["model"];
       this.changed();
     });
     byId<HTMLSelectElement>("assistant-thinking").addEventListener("change", (event) => {
-      this.draft().app.orchestrator.thinking =
-        (event.currentTarget as HTMLSelectElement).value as PreferencesFile["app"]["orchestrator"]["thinking"];
+      this.draft().app.orchestrator.thinking = (event.currentTarget as HTMLSelectElement)
+        .value as PreferencesFile["app"]["orchestrator"]["thinking"];
       this.changed();
     });
     byId<HTMLButtonElement>("assistant-wake-enabled").addEventListener("click", () => {
@@ -94,7 +95,8 @@ export class AssistantSettings {
     byId<HTMLButtonElement>("assistant-test-wake").addEventListener("click", () => {
       const name = this.draft().app.orchestrator.displayName;
       void invoke("test_wake_phrase", { name }).catch((error) => {
-        this.status = { ...this.status, message: String(error) }; this.renderStatus();
+        this.status = { ...this.status, message: String(error) };
+        this.renderStatus();
       });
     });
   }
@@ -114,15 +116,22 @@ export class AssistantSettings {
     const herdr = byId<HTMLElement>("assistant-herdr-status");
     ready.textContent = this.status.message;
     ready.dataset.ready = String(this.status.available && this.status.herdrConnected);
-    live.textContent = this.status.liveConnected ? "Connected" : this.status.available ? "Available" : "Key missing";
+    live.textContent = this.status.liveConnected
+      ? "Connected"
+      : this.status.available
+        ? "Available"
+        : "Key missing";
     live.dataset.ready = String(this.status.available);
     herdr.textContent = this.status.herdrConnected ? "Connected" : "Disconnected";
     herdr.dataset.ready = String(this.status.herdrConnected);
   }
 
   private modelLabel(model: string): string {
-    return model.replace("gpt-", "GPT-").replace("luna", "Luna")
-      .replace("sol", "Sol").replace("terra", "Terra");
+    return model
+      .replace("gpt-", "GPT-")
+      .replace("luna", "Luna")
+      .replace("sol", "Sol")
+      .replace("terra", "Terra");
   }
 }
 
@@ -134,8 +143,12 @@ function renderPet(petId: string | null): void {
     const clip = pack?.orchestratorAnimations?.walking;
     const source = clip ? pack?.clips[clip]?.assetUrl : null;
     if (!source) throw new Error("No assigned preview");
-    image.src = source; image.hidden = false; placeholder.hidden = true;
+    image.src = source;
+    image.hidden = false;
+    placeholder.hidden = true;
   } catch {
-    image.removeAttribute("src"); image.hidden = true; placeholder.hidden = false;
+    image.removeAttribute("src");
+    image.hidden = true;
+    placeholder.hidden = false;
   }
 }

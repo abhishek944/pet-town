@@ -69,7 +69,9 @@ def paeth(left: int, above: int, upper_left: int) -> int:
     return (left, above, upper_left)[distances.index(min(distances))]
 
 
-def frame_payload(path: Path, width: int, height: int, compressed: list[bytes]) -> tuple[int, bytes]:
+def frame_payload(
+    path: Path, width: int, height: int, compressed: list[bytes]
+) -> tuple[int, bytes]:
     try:
         raw = zlib.decompress(b"".join(compressed))
     except zlib.error as error:
@@ -119,7 +121,10 @@ def composite_over(destination: bytes, source: bytes) -> bytes:
     if output_alpha == 0:
         return b"\0\0\0\0"
     channels = [
-        (source[index] * source_alpha * 255 + destination[index] * destination_alpha * (255 - source_alpha))
+        (
+            source[index] * source_alpha * 255
+            + destination[index] * destination_alpha * (255 - source_alpha)
+        )
         // (output_alpha * 255)
         for index in range(3)
     ]
@@ -177,7 +182,9 @@ def validate_apng(
                 fail(path, "duplicate IHDR")
             if len(data) != 13:
                 fail(path, "IHDR payload length is invalid")
-            width, height, depth, color, compression, filter_method, interlace = struct.unpack(">IIBBBBB", data)
+            width, height, depth, color, compression, filter_method, interlace = struct.unpack(
+                ">IIBBBBB", data
+            )
             canvas = (width, height)
             if depth != 8 or color != 6:
                 fail(path, "assets must use 8-bit RGBA pixels")
@@ -282,7 +289,10 @@ def validate_apng(
     if len(frame_signatures) < 2:
         fail(path, "APNG displayed frames do not change")
     if expected_duration_ms is not None and total_duration != expected_duration_ms:
-        fail(path, f"APNG duration {float(total_duration):g}ms does not match clip duration {expected_duration_ms}ms")
+        fail(
+            path,
+            f"APNG duration {float(total_duration):g}ms does not match clip duration {expected_duration_ms}ms",
+        )
 
 
 def validate_still_png(path: Path) -> None:
@@ -298,10 +308,19 @@ def validate_still_png(path: Path) -> None:
         if kind == b"IHDR":
             if canvas is not None or len(data) != 13:
                 fail(path, "static PNG has an invalid IHDR")
-            width, height, depth, color, compression, filter_method, interlace = struct.unpack(">IIBBBBB", data)
+            width, height, depth, color, compression, filter_method, interlace = struct.unpack(
+                ">IIBBBBB", data
+            )
             if (
-                depth != 8 or color != 6 or compression != 0 or filter_method != 0 or interlace != 0
-                or width < 1 or height < 1 or width > 2048 or height > 2048
+                depth != 8
+                or color != 6
+                or compression != 0
+                or filter_method != 0
+                or interlace != 0
+                or width < 1
+                or height < 1
+                or width > 2048
+                or height > 2048
             ):
                 fail(path, "static PNG must use safe non-interlaced 8-bit RGBA dimensions")
             canvas = (width, height)
@@ -384,7 +403,9 @@ def write_fixture_still(path: Path, split_idat: bool) -> None:
     pixel = lambda x, y: (255, 0, 0, 255) if y == 0 else (0, 0, 0, 0)
     compressed = fixture_frame(width, height, pixel)
     midpoint = len(compressed) // 2
-    payload = PNG_SIGNATURE + fixture_chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
+    payload = PNG_SIGNATURE + fixture_chunk(
+        b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0)
+    )
     payload += fixture_chunk(b"IDAT", compressed[:midpoint] if split_idat else compressed)
     if split_idat:
         payload += fixture_chunk(b"tEXt", b"gap") + fixture_chunk(b"IDAT", compressed[midpoint:])
@@ -397,7 +418,9 @@ def write_fixture_apng(path: Path, first_pixel, second_pixel, split_idat: bool =
     payload = PNG_SIGNATURE
     payload += fixture_chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
     payload += fixture_chunk(b"acTL", struct.pack(">II", 2, 0))
-    payload += fixture_chunk(b"fcTL", struct.pack(">IIIIIHHBB", 0, width, height, 0, 0, 1, 10, 0, 0))
+    payload += fixture_chunk(
+        b"fcTL", struct.pack(">IIIIIHHBB", 0, width, height, 0, 0, 1, 10, 0, 0)
+    )
     first_payload = fixture_frame(width, height, first_pixel)
     if split_idat:
         midpoint = len(first_payload) // 2
@@ -406,8 +429,12 @@ def write_fixture_apng(path: Path, first_pixel, second_pixel, split_idat: bool =
         payload += fixture_chunk(b"IDAT", first_payload[midpoint:])
     else:
         payload += fixture_chunk(b"IDAT", first_payload)
-    payload += fixture_chunk(b"fcTL", struct.pack(">IIIIIHHBB", 1, width, height, 0, 0, 1, 10, 0, 0))
-    payload += fixture_chunk(b"fdAT", struct.pack(">I", 2) + fixture_frame(width, height, second_pixel))
+    payload += fixture_chunk(
+        b"fcTL", struct.pack(">IIIIIHHBB", 1, width, height, 0, 0, 1, 10, 0, 0)
+    )
+    payload += fixture_chunk(
+        b"fdAT", struct.pack(">I", 2) + fixture_frame(width, height, second_pixel)
+    )
     payload += fixture_chunk(b"IEND", b"")
     path.write_bytes(payload)
 
@@ -445,19 +472,27 @@ def self_test(source: Path) -> None:
         expect_rejected(missing_iend)
 
         bad_sequence = temp / "bad-sequence.png"
-        bad_sequence.write_bytes(mutate_chunk(payload, b"fcTL", lambda data: struct.pack(">I", 99) + data[4:]))
+        bad_sequence.write_bytes(
+            mutate_chunk(payload, b"fcTL", lambda data: struct.pack(">I", 99) + data[4:])
+        )
         expect_rejected(bad_sequence)
 
         partial_first = temp / "partial-first-frame.png"
-        partial_first.write_bytes(mutate_chunk(payload, b"fcTL", lambda data: data[:4] + struct.pack(">I", 1) + data[8:]))
+        partial_first.write_bytes(
+            mutate_chunk(payload, b"fcTL", lambda data: data[:4] + struct.pack(">I", 1) + data[8:])
+        )
         expect_rejected(partial_first)
 
         bad_disposal = temp / "bad-disposal.png"
-        bad_disposal.write_bytes(mutate_chunk(payload, b"fcTL", lambda data: data[:-2] + bytes((9, data[-1]))))
+        bad_disposal.write_bytes(
+            mutate_chunk(payload, b"fcTL", lambda data: data[:-2] + bytes((9, data[-1])))
+        )
         expect_rejected(bad_disposal)
 
         bad_filter = temp / "bad-filter.png"
-        bad_filter.write_bytes(mutate_chunk(payload, b"IHDR", lambda data: data[:11] + b"\1" + data[12:]))
+        bad_filter.write_bytes(
+            mutate_chunk(payload, b"IHDR", lambda data: data[:11] + b"\1" + data[12:])
+        )
         expect_rejected(bad_filter)
 
         bad_interlace = temp / "bad-interlace.png"
@@ -530,7 +565,9 @@ def main() -> None:
                     validate_still_png(path)
                     stills.add(path)
     self_test(next(iter(animations)))
-    print(f"APNG asset checks: pass ({len(animations)} animations, {len(stills)} hold stills, negative fixtures rejected)")
+    print(
+        f"APNG asset checks: pass ({len(animations)} animations, {len(stills)} hold stills, negative fixtures rejected)"
+    )
 
 
 if __name__ == "__main__":
@@ -538,4 +575,4 @@ if __name__ == "__main__":
         main()
     except (OSError, ValueError, struct.error, json.JSONDecodeError) as error:
         print(error, file=sys.stderr)
-        raise SystemExit(1)
+        raise SystemExit(1) from None

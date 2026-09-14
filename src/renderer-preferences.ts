@@ -22,7 +22,7 @@ export function applyCitizenPreferences(
   preferences: PreferencesFile | null,
 ): void {
   const value = preferencesFor(element, preferences);
-  const preferredSize = 44 * value.appearance.scalePercent / 100;
+  const preferredSize = (44 * value.appearance.scalePercent) / 100;
   element.style.setProperty("--citizen-size", `${Math.min(baseSize, preferredSize)}px`);
   element.style.setProperty("--citizen-opacity", String(value.appearance.opacityPercent / 100));
   element.style.setProperty("--label-scale", String(value.labels.textScalePercent / 100));
@@ -34,8 +34,12 @@ export function shouldHideCompleted(
   preferences: PreferencesFile | null,
   nowMs = Date.now(),
 ): boolean {
-  if (!preferences?.app.hideCompletedPets || citizen.status !== "done"
-    || citizen.doneSinceMs === null) return false;
+  if (
+    !preferences?.app.hideCompletedPets ||
+    citizen.status !== "done" ||
+    citizen.doneSinceMs === null
+  )
+    return false;
   const delayMs = preferences.app.completedHideDelayMinutes * 60_000;
   return nowMs - citizen.doneSinceMs >= delayMs;
 }
@@ -46,9 +50,12 @@ export function shouldHideCompletedElement(
   nowMs = Date.now(),
 ): boolean {
   const doneSinceMs = Number(element.dataset.doneSinceMs);
-  return Boolean(preferences?.app.hideCompletedPets && element.dataset.status === "done"
-    && element.dataset.doneSinceMs && nowMs - doneSinceMs
-      >= preferences.app.completedHideDelayMinutes * 60_000);
+  return Boolean(
+    preferences?.app.hideCompletedPets &&
+    element.dataset.status === "done" &&
+    element.dataset.doneSinceMs &&
+    nowMs - doneSinceMs >= preferences.app.completedHideDelayMinutes * 60_000,
+  );
 }
 
 export function travelDistanceFor(

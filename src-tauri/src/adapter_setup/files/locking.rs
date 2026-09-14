@@ -33,6 +33,6 @@ pub(crate) fn with_file_lock<T>(
     lock.lock_exclusive()
         .map_err(|_| format!("could not lock {label}"))?;
     let result = action();
-    let _ = lock.unlock();
+    let _ = FileExt::unlock(&lock);
     result
 }

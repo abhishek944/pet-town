@@ -1,0 +1,6 @@
+include = ["herdr-plugin.toml", "src-tauri/Cargo.toml"]
+
+[formatting]
+align_entries = false
+column_width = 100
+reorder_keys = false

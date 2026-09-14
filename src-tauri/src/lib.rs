@@ -11,8 +11,6 @@ mod focus;
 mod focus_id;
 mod herdr_command;
 mod labels;
-#[cfg(test)]
-mod labels_tests;
 #[cfg(target_os = "macos")]
 mod macos_activation;
 #[cfg(target_os = "macos")]

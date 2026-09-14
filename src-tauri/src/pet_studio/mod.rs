@@ -11,6 +11,7 @@ mod images;
 mod manifest;
 mod openai;
 pub(crate) mod pack_commands;
+mod sheet_layout;
 mod store;
 mod types;
 

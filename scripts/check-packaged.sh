@@ -14,7 +14,8 @@ EXPECTED_SOURCE=$("$ROOT/scripts/package-source-fingerprint.sh")
 file "$ARM" | grep -q 'Mach-O 64-bit executable arm64'
 file "$X64" | grep -q 'Mach-O 64-bit executable x86_64'
 for item in "macos-arm64:arm64" "macos-x64:x64"; do
-  package=${item%%:*}; arch=${item#*:}
+  package=${item%%:*}
+  arch=${item#*:}
   archive="$ROOT/bin/$package/pet-village-pi-runtime.tar.gz"
   [ -f "$archive" ]
   runtime_hash=$(shasum -a 256 "$archive" | cut -d' ' -f1)
@@ -39,24 +40,24 @@ assert not any(path.is_symlink() for path in root.rglob('*'))
 esbuild=f"package/node_modules/@earendil-works/pi-coding-agent/node_modules/@esbuild/darwin-{sys.argv[2]}/bin/esbuild"
 assert esbuild in actual
 PY
-  file "$runtime/node" | grep -q "$( [ "$arch" = arm64 ] && echo arm64 || echo x86_64 )"
-  file "$runtime/package/node_modules/@earendil-works/pi-coding-agent/node_modules/@esbuild/darwin-$arch/bin/esbuild" | grep -q "$( [ "$arch" = arm64 ] && echo arm64 || echo x86_64 )"
+  file "$runtime/node" | grep -q "$([ "$arch" = arm64 ] && echo arm64 || echo x86_64)"
+  file "$runtime/package/node_modules/@earendil-works/pi-coding-agent/node_modules/@esbuild/darwin-$arch/bin/esbuild" | grep -q "$([ "$arch" = arm64 ] && echo arm64 || echo x86_64)"
   rm -rf "$runtime"
   trap - EXIT INT TERM
 done
 
 if [ "${CHECK_PACKAGED_SKIP_BINARY_COMPARE:-0}" != 1 ]; then
   case "$(uname -m)" in
-    arm64)
-      native="$ROOT/src-tauri/target/aarch64-apple-darwin/release/pet-village"
-      [ -x "$native" ] || native="$ROOT/src-tauri/target/release/pet-village"
-      cmp "$native" "$ARM"
-      ;;
-    x86_64)
-      native="$ROOT/src-tauri/target/x86_64-apple-darwin/release/pet-village"
-      [ -x "$native" ] || native="$ROOT/src-tauri/target/release/pet-village"
-      cmp "$native" "$X64"
-      ;;
+  arm64)
+    native="$ROOT/src-tauri/target/aarch64-apple-darwin/release/pet-village"
+    [ -x "$native" ] || native="$ROOT/src-tauri/target/release/pet-village"
+    cmp "$native" "$ARM"
+    ;;
+  x86_64)
+    native="$ROOT/src-tauri/target/x86_64-apple-darwin/release/pet-village"
+    [ -x "$native" ] || native="$ROOT/src-tauri/target/release/pet-village"
+    cmp "$native" "$X64"
+    ;;
   esac
   if [ -x "$ROOT/src-tauri/target/x86_64-apple-darwin/release/pet-village" ]; then
     cmp "$ROOT/src-tauri/target/x86_64-apple-darwin/release/pet-village" "$X64"

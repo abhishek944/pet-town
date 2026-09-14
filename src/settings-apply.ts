@@ -19,10 +19,17 @@ export function mergeAppliedDraft(
   };
 }
 
-export function shouldShowApplyError(generation: number, current: number, revision: number, expected: number): boolean {
+export function shouldShowApplyError(
+  generation: number,
+  current: number,
+  revision: number,
+  expected: number,
+): boolean {
   return generation === current && revision === expected;
 }
 
 export function settingsMessage(operation: string, warning?: string | null): string {
-  return [operation, warning].filter((item, index, items) => item && items.indexOf(item) === index).join(" ");
+  return [operation, warning]
+    .filter((item, index, items) => item && items.indexOf(item) === index)
+    .join(" ");
 }

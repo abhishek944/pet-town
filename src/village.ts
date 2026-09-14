@@ -58,14 +58,16 @@ export function applyActiveCast(
   for (const citizen of current.values()) {
     if (allowed.has(citizen.sprite)) used.add(citizen.sprite);
   }
-  return new Map([...current.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([id, citizen]) => {
-      if (allowed.has(citizen.sprite)) return [id, citizen];
-      const sprite = spriteForAgent(id, used, candidates);
-      used.add(sprite);
-      return [id, { ...citizen, sprite }];
-    }));
+  return new Map(
+    [...current.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([id, citizen]) => {
+        if (allowed.has(citizen.sprite)) return [id, citizen];
+        const sprite = spriteForAgent(id, used, candidates);
+        used.add(sprite);
+        return [id, { ...citizen, sprite }];
+      }),
+  );
 }
 
 export function reconcileCitizens(
@@ -89,13 +91,17 @@ export function reconcileCitizens(
     seen.add(agent.id);
     const previous = current.get(agent.id);
     const existing = previous?.sprite;
-    const sprite = existing && allowed.has(existing)
-      ? existing
-      : spriteForAgent(agent.id, usedSprites, candidates);
+    const sprite =
+      existing && allowed.has(existing)
+        ? existing
+        : spriteForAgent(agent.id, usedSprites, candidates);
     usedSprites.add(sprite);
-    const doneSinceMs = agent.status === "done"
-      ? previous?.status === "done" ? previous.doneSinceMs ?? nowMs : nowMs
-      : null;
+    const doneSinceMs =
+      agent.status === "done"
+        ? previous?.status === "done"
+          ? (previous.doneSinceMs ?? nowMs)
+          : nowMs
+        : null;
     next.set(agent.id, {
       ...agent,
       sprite,

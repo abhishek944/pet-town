@@ -11,12 +11,16 @@ export class StudioWizard {
     this.render();
   }
 
-  current(): number { return this.step; }
+  current(): number {
+    return this.step;
+  }
   go(step: number): void {
     this.step = Math.max(0, Math.min(LAST_STEP, step));
     this.render(true);
   }
-  reset(): void { this.go(0); }
+  reset(): void {
+    this.go(0);
+  }
   setFocusedRoute(focused: boolean): void {
     this.focusedRoute = focused;
     this.render();
@@ -25,7 +29,9 @@ export class StudioWizard {
   private render(moveFocus = false): void {
     let active: HTMLElement | undefined;
     document.querySelectorAll<HTMLElement>("[data-studio-step]").forEach((section) => {
-      section.hidden = this.focusedRoute ? section.dataset.studioStep !== "3" : Number(section.dataset.studioStep) !== this.step;
+      section.hidden = this.focusedRoute
+        ? section.dataset.studioStep !== "3"
+        : Number(section.dataset.studioStep) !== this.step;
       if (!section.hidden) active = section;
     });
     const navigation = $("studio-wizard-nav");

@@ -1,4 +1,4 @@
-use crate::preferences_model::{PetPreferences, PreferencesFile, SCHEMA_VERSION};
+use crate::preferences_model::{PreferencesFile, SCHEMA_VERSION};
 use crate::preferences_permissions::{restrict_directory, restrict_file};
 use serde_json::Value;
 use std::fs::{self, File, OpenOptions};
@@ -63,10 +63,7 @@ fn reconcile_user_pets(preferences: &mut PreferencesFile, ids: &[String]) {
         .pets
         .retain(|id, _| ids.contains(id) || !id.starts_with("user-"));
     for id in ids.iter().filter(|id| id.starts_with("user-")) {
-        preferences
-            .pets
-            .entry(id.clone())
-            .or_insert_with(PetPreferences::default);
+        preferences.pets.entry(id.clone()).or_default();
     }
     if preferences
         .app

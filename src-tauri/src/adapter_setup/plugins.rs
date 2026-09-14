@@ -63,7 +63,7 @@ pub(super) fn configure(source_name: &str, enabled: bool) -> Result<(), String> 
             };
             let text = std::str::from_utf8(&bytes)
                 .map_err(|_| "adapter plugin is not valid UTF-8".to_string())?;
-            if !has_managed_header(&text) {
+            if !has_managed_header(text) {
                 return Err("the adapter plugin path is owned by another file".to_string());
             }
             write_private_backup(&path, &bytes, "adapter plugin")?;

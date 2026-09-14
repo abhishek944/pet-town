@@ -1,6 +1,10 @@
 function overlaps(left: DOMRect, right: DOMRect): boolean {
-  return left.left < right.right + 2 && left.right + 2 > right.left
-    && left.top < right.bottom + 2 && left.bottom + 2 > right.top;
+  return (
+    left.left < right.right + 2 &&
+    left.right + 2 > right.left &&
+    left.top < right.bottom + 2 &&
+    left.bottom + 2 > right.top
+  );
 }
 
 export function resolveLabelOverlaps(elements: Iterable<HTMLElement>): void {

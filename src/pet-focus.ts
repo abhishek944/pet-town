@@ -5,10 +5,7 @@ export function agentIdForPetClick(target: EventTarget | null): string | null {
   return citizen?.dataset.agentId || null;
 }
 
-export function installPetFocus(
-  root: HTMLElement,
-  focusAgent: (id: string) => void,
-): () => void {
+export function installPetFocus(root: HTMLElement, focusAgent: (id: string) => void): () => void {
   const handleClick = (event: MouseEvent): void => {
     const id = agentIdForPetClick(event.target);
     if (id) focusAgent(id);

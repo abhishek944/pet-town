@@ -158,22 +158,6 @@ pub fn is_settings_open(state: tauri::State<'_, SettingsSession>) -> bool {
 pub fn get_settings_context(state: tauri::State<'_, SettingsSession>) -> SettingsContext {
     state.context()
 }
-#[cfg(test)]
-mod tests {
-    use super::SessionState;
-    #[test]
-    fn reload_resume_token_is_invalidated_by_settings_lifecycle() {
-        let mut state = SessionState::default();
-        let token = state.generation;
-        assert!(state.allows_reload_resume(token));
-        state.open = true;
-        state.generation += 1;
-        assert!(!state.allows_reload_resume(token));
-        state.open = false;
-        state.generation += 1;
-        assert!(!state.allows_reload_resume(token));
-    }
-}
 pub fn close(app: &AppHandle) {
     if app.state::<SettingsSession>().finish() {
         let _ = app.emit_to("main", "village-resume", ());

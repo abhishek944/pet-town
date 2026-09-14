@@ -36,41 +36,6 @@ impl FocusTargets {
     fn get_route(&self, id: &str) -> Option<FocusRoute> {
         self.0.lock().ok()?.get(id).cloned()
     }
-
-    #[cfg(test)]
-    fn get(&self, id: &str) -> Option<FocusTarget> {
-        match self.get_route(id)? {
-            FocusRoute::Herdr {
-                pane_id,
-                socket,
-                agent_session_id,
-            } => Some(FocusTarget {
-                pane_id,
-                socket,
-                agent_session_id: Some(agent_session_id),
-            }),
-            FocusRoute::Application { .. } => None,
-        }
-    }
-}
-
-#[cfg(test)]
-#[derive(Clone)]
-struct FocusTarget {
-    pane_id: String,
-    socket: Option<String>,
-    agent_session_id: Option<String>,
-}
-
-#[cfg(test)]
-impl From<FocusTarget> for FocusRoute {
-    fn from(target: FocusTarget) -> Self {
-        FocusRoute::Herdr {
-            pane_id: target.pane_id,
-            socket: target.socket,
-            agent_session_id: target.agent_session_id.unwrap_or_default(),
-        }
-    }
 }
 
 fn herdr_binary() -> OsString {
@@ -95,11 +60,6 @@ fn run_focus_route(herdr: &OsString, target: &FocusRoute) -> Result<(), String> 
             Err("application focus is unavailable on this platform".to_string())
         }
     }
-}
-
-#[cfg(test)]
-fn run_focus_target(herdr: &OsString, target: &FocusTarget) -> Result<(), String> {
-    run_focus_route(herdr, &target.clone().into())
 }
 
 fn run_user_focus_route(herdr: &OsString, target: &FocusRoute) -> Result<(), String> {

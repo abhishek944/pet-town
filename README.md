@@ -105,9 +105,10 @@ repository.
 **To build from source instead** (for example, during development or to apply a
 change to the bundled renderer), additionally need:
 
-- Node.js 20 or newer
+- Node.js 20.19 or newer
 - Rust 1.88 or newer
 - Xcode Command Line Tools
+- Ruff, ShellCheck, shfmt, actionlint, and Taplo (`brew install ruff shellcheck shfmt actionlint taplo`)
 
 The window uses Tauri's macOS private API for transparency. That is suitable for
 direct distribution but not for Apple's Mac App Store. Linux and Windows can be
@@ -154,9 +155,9 @@ unbounded background log.
 ./scripts/check.sh
 ```
 
-The checks cover declarative flow validation, deterministic choices, safe state interruption, edge-only direction changes, TypeScript and production frontend builds, Rust formatting and compilation, and packaged arm64/x86_64 binaries. Validation runs from repository scripts without a checked-in test suite or Vitest dependency.
+The checks cover declarative flow validation, deterministic choices, safe state interruption, edge-only direction changes, TypeScript and production frontend builds, and packaged arm64/x86_64 binaries. They also run ESLint and Prettier for web files, Clippy and rustfmt for Rust, Ruff for Python, ShellCheck and shfmt for shell scripts, actionlint for GitHub Actions, and Taplo for TOML. The repository intentionally uses non-unit validation scripts instead of checked-in unit tests or a Vitest dependency.
 
-GitHub Actions also builds both macOS targets with the declared Rust 1.88 minimum.
+Use `npm run check:quality` for only formatting, linting, and type checks. Use `npm run format` to apply all configured formatters. GitHub Actions installs the non-Node quality tools and builds both macOS targets with the declared Rust 1.88 minimum.
 
 ## Manual visual check
 
