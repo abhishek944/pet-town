@@ -5,7 +5,7 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-flow.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
 
-cd "$ROOT"
+cd "$ROOT/apps/pet-village"
 npx tsc \
   --target ES2020 \
   --module commonjs \
@@ -171,7 +171,7 @@ equal(remapTrackPosition(25, 100, 200), 50, "resize remapping changed position r
 console.log("flow runtime checks: pass");
 CHECK
 node "$TMP/check.cjs"
-npx esbuild src/renderer-view.ts --bundle --platform=node --format=cjs --log-level=error --outfile="$TMP/renderer-view.cjs"
+pnpm exec esbuild src/renderer-view.ts --bundle --platform=node --format=cjs --log-level=error --outfile="$TMP/renderer-view.cjs"
 cat >"$TMP/check-renderer.cjs" <<'CHECK_RENDERER'
 const {
   applyFlowSample,
@@ -291,7 +291,7 @@ const fireLatestTimer = () => {
 })().catch((error) => { console.error(error); process.exitCode = 1; });
 CHECK_RENDERER
 node "$TMP/check-renderer.cjs"
-node - "$ROOT" "$TMP/flow-runtime.js" <<'CHECK_PACKS'
+node - "$ROOT/apps/pet-village" "$TMP/flow-runtime.js" <<'CHECK_PACKS'
 const fs = require("node:fs");
 const path = require("node:path");
 const root = process.argv[2];
@@ -329,4 +329,4 @@ for (const pet of petDirectories) {
 if (workingFlowSignatures.size !== petDirectories.length) throw new Error("working pet flows are not distinct");
 console.log("bundled pet pack checks: pass");
 CHECK_PACKS
-python3 scripts/check-apng-assets.py
+python3 "$ROOT/scripts/check-apng-assets.py"

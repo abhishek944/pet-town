@@ -1,0 +1,30 @@
+{
+  "name": "@pet-village/desktop",
+  "private": true,
+  "version": "0.1.4",
+  "description": "Pet Village desktop application",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "pnpm run typecheck && vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "pnpm run lint:eslint",
+    "lint:eslint": "eslint src vite.config.ts --config ../../eslint.config.js",
+    "lint:rust": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-features --lib --bins -- -D warnings",
+    "check:rust": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@abhishek944/pi-image-gen": "0.4.1",
+    "@tauri-apps/api": "^2"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "esbuild": "^0.25.12",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3"
+  }
+}

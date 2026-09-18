@@ -9,15 +9,41 @@ import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
+app_choice = os.environ.get("PET_VILLAGE_APP", "v1")
+if app_choice not in {"v1", "v2"}:
+    raise SystemExit("PET_VILLAGE_APP must be v1 or v2")
+app = root / "apps" / ("pet-village-v2" if app_choice == "v2" else "pet-village")
 files = []
-for directory in (root / "src", root / "src-tauri"):
+directories = [app / "src", app / "src-tauri", app / "public"]
+if app_choice == "v2":
+    directories.append(root / "packages" / "pet-village-core" / "src")
+for directory in directories:
     for path in directory.rglob("*"):
         relative = path.relative_to(root).parts
         if not path.is_file() or "target" in relative or "resources" in relative:
             continue
         files.append(path)
-for name in ("index.html", "settings.html", "assistant.html", "package.json", "package-lock.json", "tsconfig.json", "vite.config.ts", "scripts/build.sh", "scripts/check-packaged.sh", "scripts/prepare-pi-runtime.sh", "scripts/pi-runtime-package-lock.json"):
-    path = root / name
+for path in (
+    app / "index.html",
+    app / "settings.html",
+    app / "assistant.html",
+    app / "playroom.html",
+    app / "package.json",
+    app / "tsconfig.json",
+    app / "vite.config.ts",
+    app / "scripts" / "pet-studio-image-worker.mjs",
+    root / "package.json",
+    root / "pnpm-lock.yaml",
+    root / "pnpm-workspace.yaml",
+    root / "turbo.json",
+    root / "scripts" / "build.sh",
+    root / "scripts" / "check-packaged.sh",
+    root / "scripts" / "select-desktop-app.mjs",
+    root / "scripts" / "prepare-pi-runtime.sh",
+    root / "scripts" / "pi-runtime-package-lock.json",
+    root / "packages" / "pet-village-core" / "package.json" if app_choice == "v2" else root / ".missing",
+    root / "packages" / "pet-village-core" / "tsconfig.json" if app_choice == "v2" else root / ".missing",
+):
     if path.is_file():
         files.append(path)
 digest = hashlib.sha256()

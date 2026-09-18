@@ -3,28 +3,30 @@ assets/
 bin/
 dist/
 node_modules/
+.pnpm-store/
+.turbo/
 review-artifacts/
-src-tauri/gen/
-src-tauri/resources/
-src-tauri/target/
+apps/*/src-tauri/gen/
+apps/*/src-tauri/resources/
+apps/*/src-tauri/target/
 var/
-package-lock.json
+pnpm-lock.yaml
 scripts/pi-runtime-package-lock.json
 
 # This template has compact markup assertions in the repository checks.
-settings.html
+apps/pet-village/settings.html
 
 # These modules intentionally stay under the repository's 199-line source limit.
-src/assistant.ts
-src/behavior-pack.ts
-src/flow-node-validation.ts
-src/pet-interactions.ts
-src/renderer-view.ts
-src/renderer.ts
-src/settings-adapters.ts
-src/settings-studio.ts
-src/settings.ts
-src/state-flow-machine.ts
+apps/pet-village/src/assistant.ts
+apps/pet-village/src/behavior-pack.ts
+apps/pet-village/src/flow-node-validation.ts
+apps/pet-village/src/pet-interactions.ts
+apps/pet-village/src/renderer-view.ts
+apps/pet-village/src/renderer.ts
+apps/pet-village/src/settings-adapters.ts
+apps/pet-village/src/settings-studio.ts
+apps/pet-village/src/settings.ts
+apps/pet-village/src/state-flow-machine.ts
 
 *.gif
 *.gz

@@ -1,6 +1,6 @@
 # Behavior pack format
 
-Behavior packs are data, not scripts. Each bundled pet owns one folder under `src/pets/<pet-id>/`. The folder contains `flow.json` and every APNG asset referenced by that file. During the build, each folder is discovered, validated as a complete unit, and compiled into immutable data before an agent can use it.
+Behavior packs are data, not scripts. Each bundled pet owns one folder under `apps/pet-village/src/pets/<pet-id>/`. The folder contains `flow.json` and every APNG asset referenced by that file. During the build, each folder is discovered, validated as a complete unit, and compiled into immutable data before an agent can use it.
 
 Only these five top-level state keys are allowed and required:
 
@@ -22,9 +22,9 @@ Pet Studio packs may define `orchestratorAnimations` with exactly `walking` and 
 
 ## Add a pet
 
-1. Create `src/pets/my-pet/`.
+1. Create `apps/pet-village/src/pets/my-pet/`.
 2. Add transparent APNG assets such as `walk.png` and `work.png` inside that folder.
-3. Add `src/pets/my-pet/flow.json` with an `id` matching the folder name.
+3. Add `apps/pet-village/src/pets/my-pet/flow.json` with an `id` matching the folder name.
 4. Reference assets relative to that folder and author all five state flows.
 5. Run `./scripts/check.sh`. Invalid references, states, durations, movement clips, or APNG payloads fail the build-time checks instead of partially loading the pack.
 

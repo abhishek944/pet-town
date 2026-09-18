@@ -72,6 +72,35 @@ pid_matches_identity() {
   [ "$(process_started "$pid")" = "$expected_start" ] || return 1
 }
 
+is_repo_renderer() {
+  case "$1" in
+  "$PLUGIN_ROOT"/bin/*/pet-village | "$PLUGIN_ROOT"/bin/*/pet-village.bin | \
+    "$PLUGIN_ROOT"/apps/pet-village/src-tauri/target/debug/pet-village | \
+    "$PLUGIN_ROOT"/apps/pet-village/src-tauri/target/release/pet-village | \
+    "$PLUGIN_ROOT"/apps/pet-village/src-tauri/target/*/bundle/macos/Pet\ Village.app/Contents/MacOS/pet-village) return 0 ;;
+  *) return 1 ;;
+  esac
+}
+
+stop_duplicate_renderers() {
+  active_pid=$1
+  ps -ww -axo pid=,comm= | while read -r candidate executable; do
+    [ "$candidate" != "$active_pid" ] || continue
+    is_repo_renderer "$executable" || continue
+    started=$(process_started "$candidate")
+    [ -n "$started" ] || continue
+    kill "$candidate" 2>/dev/null || continue
+    attempts=0
+    while process_matches_expected "$candidate" "$executable" "$started" && [ "$attempts" -lt 50 ]; do
+      attempts=$((attempts + 1))
+      sleep 0.1
+    done
+    if process_matches_expected "$candidate" "$executable" "$started"; then
+      kill -KILL "$candidate" 2>/dev/null || true
+    fi
+  done
+}
+
 running_pid() {
   pid=$(read_pid) || return 1
   kill -0 "$pid" 2>/dev/null || return 1
@@ -93,6 +122,17 @@ renderer_matches_binary() {
   expected_digest=$(cat "$DIGEST_FILE" 2>/dev/null || true)
   [ -n "$expected_digest" ] || return 1
   [ "$(binary_digest "$candidate")" = "$expected_digest" ]
+}
+
+inherit_openai_key() {
+  [ -z "${OPENAI_API_KEY:-}" ] || return 0
+  [ "$(uname -s)" = Darwin ] || return 0
+  [ -x /bin/launchctl ] || return 0
+  launchd_key=$(/bin/launchctl getenv OPENAI_API_KEY 2>/dev/null || true)
+  [ -n "$launchd_key" ] || return 0
+  OPENAI_API_KEY=$launchd_key
+  export OPENAI_API_KEY
+  unset launchd_key
 }
 
 absolute_executable() {
@@ -119,8 +159,8 @@ resolve_binary() {
 
   for candidate in \
     "$packaged" \
-    "$PLUGIN_ROOT/src-tauri/target/release/pet-village" \
-    "$PLUGIN_ROOT/src-tauri/target/release/bundle/macos/Pet Village.app/Contents/MacOS/pet-village"; do
+    "$PLUGIN_ROOT/apps/pet-village/src-tauri/target/release/pet-village" \
+    "$PLUGIN_ROOT/apps/pet-village/src-tauri/target/release/bundle/macos/Pet Village.app/Contents/MacOS/pet-village"; do
     if absolute_executable "$candidate"; then
       return 0
     fi
@@ -136,6 +176,7 @@ start_renderer() {
 
   if pid=$(running_pid); then
     if renderer_matches_binary "$binary"; then
+      stop_duplicate_renderers "$pid"
       echo "pet-village: running (pid $pid)"
       return 0
     fi
@@ -145,6 +186,7 @@ start_renderer() {
 
   # The renderer is intentionally quiet; discarding output prevents a faulty
   # WebView process from filling the plugin state directory indefinitely.
+  inherit_openai_key
   PET_VILLAGE_SESSION_REGISTRY="$SESSIONS_DIR" \
     PET_VILLAGE_RELOAD_RESULT="$RELOAD_RESULT_FILE" \
     nohup "$binary" >/dev/null 2>&1 &
@@ -186,6 +228,7 @@ start_renderer() {
     echo "pet-village: renderer identity changed during startup" >&2
     return 1
   fi
+  stop_duplicate_renderers "$pid"
   echo "pet-village: started (pid $pid)"
 }
 

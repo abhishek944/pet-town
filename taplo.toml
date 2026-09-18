@@ -1,4 +1,4 @@
-include = ["herdr-plugin.toml", "src-tauri/Cargo.toml"]
+include = ["herdr-plugin.toml", "apps/pet-village/src-tauri/Cargo.toml"]
 
 [formatting]
 align_entries = false

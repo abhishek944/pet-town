@@ -4,9 +4,9 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-focus.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
-cd "$ROOT"
+cd "$ROOT/apps/pet-village"
 
-npx esbuild src/pet-focus.ts --bundle --platform=node --format=cjs \
+pnpm exec esbuild src/pet-focus.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/pet-focus.cjs"
 cat >"$TMP/check.cjs" <<'CHECK'
 class FakeElement {

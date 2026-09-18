@@ -4,10 +4,10 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-interactions.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
-cd "$ROOT"
+cd "$ROOT/apps/pet-village"
 grep -q 'dispatchEvent(new Event("citizen-hidden", { bubbles: true }))' src/renderer.ts
 
-npx esbuild src/pet-interactions.ts --bundle --platform=node --format=cjs \
+pnpm exec esbuild src/pet-interactions.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/pet-interactions.cjs"
 cat >"$TMP/check.cjs" <<'CHECK'
 class FakeElement {

@@ -13,13 +13,16 @@ jobs:
         target: [aarch64-apple-darwin, x86_64-apple-darwin]
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
       - name: Install Rust 1.88
         run: rustup toolchain install 1.88.0 --profile minimal --target ${{ matrix.target }}
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
       - name: Install quality tools
         run: brew install actionlint ruff shellcheck shfmt taplo
       - name: Prepare pinned Pi runtime for target
@@ -29,25 +32,25 @@ jobs:
             x86_64-apple-darwin) package=macos-x64 ;;
           esac
           ./scripts/prepare-pi-runtime.sh "$package"
-          cp "bin/$package/pet-village-pi-runtime.tar.gz" src-tauri/resources/
-      - run: npm run check:quality
-      - run: npm run check:lines
-      - run: npm run check:flow
-      - run: npm run check:focus
-      - run: npm run check:interactions
-      - run: npm run check:preferences
-      - run: npm run build
+          cp "bin/$package/pet-village-pi-runtime.tar.gz" apps/pet-village/src-tauri/resources/
+      - run: pnpm run check:quality
+      - run: pnpm run check:lines
+      - run: pnpm run check:flow
+      - run: pnpm run check:focus
+      - run: pnpm run check:interactions
+      - run: pnpm run check:preferences
+      - run: pnpm run build
       - name: Check locked Rust build at the declared MSRV
-        run: cargo +1.88.0 check --locked --manifest-path src-tauri/Cargo.toml --target ${{ matrix.target }}
+        run: cargo +1.88.0 check --locked --manifest-path apps/pet-village/src-tauri/Cargo.toml --target ${{ matrix.target }}
       - name: Verify packaged source fingerprints
         run: |
           expected=$(./scripts/package-source-fingerprint.sh)
           test "$(cat bin/macos-arm64/pet-village.source.sha256)" = "$expected"
           test "$(cat bin/macos-x64/pet-village.source.sha256)" = "$expected"
       - name: Build locked Tauri target at the declared MSRV
-        run: cargo +1.88.0 build --locked --manifest-path src-tauri/Cargo.toml --release --target ${{ matrix.target }}
+        run: cargo +1.88.0 build --locked --manifest-path apps/pet-village/src-tauri/Cargo.toml --release --target ${{ matrix.target }}
       - name: Verify architecture
-        run: file src-tauri/target/${{ matrix.target }}/release/pet-village
+        run: file apps/pet-village/src-tauri/target/${{ matrix.target }}/release/pet-village
       - name: Validate checked-in package fingerprints and architectures
         run: CHECK_PACKAGED_SKIP_BINARY_COMPARE=1 ./scripts/check-packaged.sh
       - name: Record reproducible source and runtime provenance
@@ -55,4 +58,4 @@ jobs:
           # Compiler and Apple SDK paths make Mach-O bytes host-specific. The
           # package check instead verifies architecture, source fingerprints,
           # complete runtime manifests, and embedded runtime identities.
-          file "src-tauri/target/${{ matrix.target }}/release/pet-village"
+          file "apps/pet-village/src-tauri/target/${{ matrix.target }}/release/pet-village"

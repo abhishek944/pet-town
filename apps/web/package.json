@@ -1,0 +1,22 @@
+{
+  "name": "@pet-village/web",
+  "private": true,
+  "version": "0.1.4",
+  "description": "Pet Village landing page",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "pnpm run typecheck && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src vite.config.ts --config ../../eslint.config.js"
+  },
+  "devDependencies": {
+    "tar": "^7.4.3",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3"
+  }
+}

@@ -13,7 +13,7 @@ from fractions import Fraction
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PETS = ROOT / "src" / "pets"
+PETS = ROOT / "apps" / "pet-village" / "src" / "pets"
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 KNOWN_CRITICAL_CHUNKS = {b"IHDR", b"PLTE", b"IDAT", b"IEND"}
 
@@ -539,7 +539,7 @@ def self_test(source: Path) -> None:
 def main() -> None:
     manifests = sorted(PETS.glob("*/flow.json"))
     if not manifests:
-        raise ValueError("src/pets must contain at least one flow.json")
+        raise ValueError("apps/pet-village/src/pets must contain at least one flow.json")
     animations: dict[Path, int] = {}
     stills: set[Path] = set()
     for manifest_path in manifests:

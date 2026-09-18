@@ -4,9 +4,9 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-preferences.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
-cd "$ROOT"
+cd "$ROOT/apps/pet-village"
 
-npx esbuild src/renderer-preferences.ts --bundle --platform=node --format=cjs \
+pnpm exec esbuild src/renderer-preferences.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/renderer-preferences.cjs"
 cat >"$TMP/check.cjs" <<'CHECK'
 const { applyCitizenPreferences, travelDistanceFor } = require("./renderer-preferences.cjs");
@@ -44,7 +44,7 @@ console.log("preference renderer checks: pass");
 CHECK
 node "$TMP/check.cjs"
 
-npx esbuild src/village.ts src/renderer-preferences.ts --bundle --platform=node --format=cjs \
+pnpm exec esbuild src/village.ts src/renderer-preferences.ts --bundle --platform=node --format=cjs \
   --loader:.png=dataurl --define:import.meta.glob=globalThis.__testGlob \
   --log-level=error --outdir="$TMP/cast"
 cat >"$TMP/cast-check.cjs" <<'CHECK'
@@ -83,7 +83,7 @@ console.log("cast and completion visibility checks: pass");
 CHECK
 node "$TMP/cast-check.cjs"
 
-npx esbuild src/renderer.ts --bundle --platform=node --format=cjs --loader:.png=dataurl \
+pnpm exec esbuild src/renderer.ts --bundle --platform=node --format=cjs --loader:.png=dataurl \
   --define:import.meta.glob=globalThis.__testGlob --log-level=error --outfile="$TMP/renderer.cjs"
 cat >"$TMP/renderer-check.cjs" <<'CHECK'
 let nextFrame = null;
@@ -165,7 +165,7 @@ console.log("renderer walking integration checks: pass");
 CHECK
 node "$TMP/renderer-check.cjs"
 
-npx esbuild src/settings-preview.ts --bundle --platform=node --format=cjs \
+pnpm exec esbuild src/settings-preview.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/settings-preview.cjs"
 cat >"$TMP/preview.cjs" <<'CHECK'
 const { previewAnimations, selectedPreviewAnimationId } = require("./settings-preview.cjs");
@@ -184,7 +184,7 @@ console.log("settings animation preview checks: pass");
 CHECK
 node "$TMP/preview.cjs"
 
-npx esbuild src/pet-freeze.ts --bundle --platform=node --format=cjs \
+pnpm exec esbuild src/pet-freeze.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/pet-freeze.cjs"
 cat >"$TMP/freeze.cjs" <<'CHECK'
 let canvas = null;
@@ -215,7 +215,7 @@ console.log("preference freeze checks: pass");
 CHECK
 node "$TMP/freeze.cjs"
 
-npx esbuild src/village-preferences.ts --bundle --platform=node --format=cjs \
+pnpm exec esbuild src/village-preferences.ts --bundle --platform=node --format=cjs \
   --external:@tauri-apps/api/core --external:@tauri-apps/api/event \
   --log-level=error --outfile="$TMP/village-preferences.cjs"
 cat >"$TMP/village-preferences-check.cjs" <<'CHECK'
@@ -259,7 +259,7 @@ function assert(value, message) { if (!value) throw new Error(message); }
 CHECK
 node "$TMP/village-preferences-check.cjs"
 
-npx esbuild src/settings-apply.ts --bundle --platform=node --format=cjs \
+pnpm exec esbuild src/settings-apply.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/settings-apply.cjs"
 node - "$TMP/settings-apply.cjs" <<'CHECK'
 const { mergeAppliedDraft, settingsMessage, shouldShowApplyError } = require(process.argv[2]);
@@ -274,7 +274,7 @@ if (!shouldShowApplyError(2, 2, 0, 0)) throw new Error("current Apply failure wa
 console.log("settings Apply merge checks: pass");
 CHECK
 
-npx esbuild src/settings-startup.ts --bundle --platform=node --format=cjs \
+pnpm exec esbuild src/settings-startup.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/settings-startup.cjs"
 node - "$TMP/settings-startup.cjs" <<'CHECK'
 const { SettingsStartupBuffer } = require(process.argv[2]);
@@ -300,9 +300,9 @@ show_line=$(grep -n 'show_village' src/main.ts | cut -d: -f1)
 poll_line=$(grep -n 'void poll' src/main.ts | cut -d: -f1)
 [ "$pref_line" -lt "$show_line" ] && [ "$pref_line" -lt "$poll_line" ]
 
-grep -q 'id = "preferences"' herdr-plugin.toml
-grep -q 'id = "reload-preferences"' herdr-plugin.toml
-grep -q 'command = \["sh", "scripts/supervisor.sh", "startup"\]' herdr-plugin.toml
+grep -q 'id = "preferences"' "$ROOT/herdr-plugin.toml"
+grep -q 'id = "reload-preferences"' "$ROOT/herdr-plugin.toml"
+grep -q 'command = \["sh", "scripts/supervisor.sh", "startup"\]' "$ROOT/herdr-plugin.toml"
 grep -q 'Preferences…' src/pet-interactions.ts
 grep -q 'Unapplied changes' settings.html
 grep -q '>Pet</span>' settings.html
@@ -318,7 +318,7 @@ if grep -q 'freezePetFrame' src/settings.ts; then
   exit 1
 fi
 grep -q 'preview.dataset.pauseOnHover' src/settings.ts
-[ "$(grep -o 'class="switch"[^>]*role="switch"' settings.html | wc -l | tr -d ' ')" = 6 ]
+[ "$(grep -o 'class="switch"[^>]*role="switch"' settings.html | wc -l | tr -d ' ')" = 5 ]
 grep -q 'bindSwitch("reduced-motion"' src/settings.ts
 grep -q 'bindSwitch("pause-hover"' src/settings.ts
 grep -q 'bindSwitch("include-random-cast"' src/settings.ts
@@ -370,17 +370,40 @@ grep -q 'bindSwitch("open-with-herdr"' src/settings.ts
 [ "$(grep -o 'type="checkbox"' settings.html | wc -l | tr -d ' ')" = 1 ]
 grep -q 'id="studio-assign-orchestrator" type="checkbox"' settings.html
 grep -q 'selectedPreviewAnimationId(animationOptions, remembered)' src/settings.ts
-grep -q 'id="studio-sheet-loading".*Generating eight isolated frames' settings.html
+grep -q 'id="studio-sheet-loading".*Generating and checking one sprite sheet' settings.html
 grep -q 'id="studio-animation-loading".*Creating the APNG loop' settings.html
 grep -q 'id="studio-operation-status".*aria-live="polite"' settings.html
 grep -q 'grid-template-rows: auto 240px auto' src/settings-studio.css
+grep -q 'grid-template-rows: repeat(2, minmax(0, 1fr))' src/settings-studio.css
+grep -Fq 'role: $<HTMLSelectElement>("studio-role").value' src/settings-studio.ts
+grep -q 'generatedRoles.set(asset.animationId, asset.role)' src/settings-studio.ts
+grep -Fq '!this.candidates.has(this.pendingAnimationId)' src/settings-studio.ts
+grep -q 'candidate_role = Some(request.role.clone())' src-tauri/src/pet_studio/animation_generation.rs
+grep -q 'animation kind changed after frame generation' src-tauri/src/pet_studio/generation_commands.rs
+grep -q 'SPRITE_PROMPT_VERSION' src-tauri/src/pet_studio/animation_generation.rs
+grep -q 'runSpritePipeline' scripts/pet-studio-image-worker.mjs
+grep -q 'repeat nearly the same pose' src-tauri/src/pet_studio/generated_frame_validation.rs
 grep -q 'setBusy(true, "generate-sheet")' src/settings-studio.ts
 grep -q 'setBusy(true, "create-animation")' src/settings-studio.ts
-grep -q 'sheet_layout::template_png()' src-tauri/src/pet_studio/generation_commands.rs
-grep -q '\.part("image\[\]", reference)' src-tauri/src/pet_studio/openai.rs
-grep -q '\.part("image\[\]", template)' src-tauri/src/pet_studio/openai.rs
-grep -q 'crosses a cell safety edge' src-tauri/src/pet_studio/sheet_layout.rs
-grep -q 'exactly 1024x1536' src-tauri/src/pet_studio/sheet_layout.rs
+grep -Fq 'disabled = this.busy || !nextReady' src/settings-studio.ts
+grep -Fq 'this.approved.size > 0' src/settings-studio.ts
+grep -Fq 'if (!this.draftId && !(await this.startDraft("generate-reference"))) return' src/settings-studio.ts
+grep -q 'id="studio-reference-loading".*Generating character reference' settings.html
+grep -q 'operation: "generate-reference"' src/settings-studio-progress.ts
+grep -q 'operation: "import-animation"' src/settings-studio-progress.ts
+grep -q 'setBusy(true, "import-animation")' src/settings-studio.ts
+grep -Fq 'dataset.ready !== "true"' src/settings-studio.ts
+grep -q 'await this.show("studio-reference-preview"' src/settings-studio.ts
+grep -q 'await renderFrameGrid("studio-frame-preview"' src/settings-studio.ts
+grep -q '^inherit_openai_key() {' "$ROOT/scripts/supervisor.sh"
+grep -Fq '/bin/launchctl getenv OPENAI_API_KEY' "$ROOT/scripts/supervisor.sh"
+grep -q 'generation_worker::sprite' src-tauri/src/pet_studio/animation_generation.rs
+grep -q 'generateImage' scripts/pet-studio-image-worker.mjs
+grep -q 'runSpritePipeline' scripts/pet-studio-image-worker.mjs
+[ ! -e src-tauri/src/pet_studio/openai.rs ]
+[ ! -e src-tauri/src/pet_studio/frame_generation.rs ]
+[ ! -e src-tauri/src/pet_studio/sheet_layout.rs ]
+grep -q 'const FRAME_COUNT: usize = 6' src-tauri/src/pet_studio/animation_generation.rs
 grep -q 'data-locomotion="true"' src/settings.css
 grep -q 'calc(-50% - 24px)' src/settings.css
 grep -q 'data-reduced-movement="true"' src/settings.css

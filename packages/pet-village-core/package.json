@@ -1,0 +1,17 @@
+{
+  "name": "@pet-village/core",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "pnpm run typecheck",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --config ../../eslint.config.js"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.2"
+  }
+}

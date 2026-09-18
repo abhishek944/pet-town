@@ -6,23 +6,23 @@ export default tseslint.config(
   {
     ignores: [
       "bin/**",
-      "dist/**",
+      "**/dist/**",
       "node_modules/**",
       "review-artifacts/**",
-      "src-tauri/target/**",
+      "**/src-tauri/target/**",
       "var/**",
     ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ["src/**/*.ts"],
+    files: ["**/src/**/*.ts"],
     languageOptions: {
       globals: globals.browser,
     },
   },
   {
-    files: ["eslint.config.js", "vite.config.ts"],
+    files: ["eslint.config.js", "**/vite.config.ts"],
     languageOptions: {
       globals: globals.node,
     },

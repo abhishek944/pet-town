@@ -4,16 +4,19 @@ var/
 
 # Web dependencies and output
 node_modules/
+.pnpm-store/
+.turbo/
 dist/
+apps/web/.downloads/
 *.log
 *.local
 __pycache__/
 *.py[cod]
 
 # Rust/Tauri output
-src-tauri/target/
-src-tauri/resources/pet-village-pi-runtime/
-src-tauri/resources/pet-village-pi-runtime.tar.gz
+apps/*/src-tauri/target/
+apps/*/src-tauri/resources/pet-village-pi-runtime/
+apps/*/src-tauri/resources/pet-village-pi-runtime.tar.gz
 target/
 
 # Editors and operating systems
