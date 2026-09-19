@@ -6,7 +6,7 @@ TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-flow.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
 
 cd "$ROOT/apps/pet-town"
-npx tsc \
+pnpm exec tsc \
   --target ES2020 \
   --module commonjs \
   --strict \
