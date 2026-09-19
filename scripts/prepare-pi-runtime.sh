@@ -57,6 +57,33 @@ chmod 755 "$WORK/runtime/bin/pi"
 install -m 600 "$ROOT/apps/pet-town/scripts/pet-studio-image-worker.mjs" \
   "$WORK/runtime/package/pet-studio-image-worker.mjs"
 
+if [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
+  if ! security find-identity -v -p codesigning 2>/dev/null | grep -qF "$APPLE_SIGNING_IDENTITY"; then
+    [ -n "${APPLE_CERTIFICATE:-}" ] && [ -n "${APPLE_CERTIFICATE_PASSWORD:-}" ] || {
+      echo "APPLE_SIGNING_IDENTITY is missing from keychains and APPLE_CERTIFICATE is incomplete" >&2
+      exit 1
+    }
+    sign_p12="${TMPDIR:-/tmp}/pet-town-runtime-signing-$$.p12"
+    printf '%s' "$APPLE_CERTIFICATE" | base64 -d >"$sign_p12"
+    chmod 600 "$sign_p12"
+    security import "$sign_p12" -k "$HOME/Library/Keychains/login.keychain-db" \
+      -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+    rm -f "$sign_p12"
+  fi
+  echo "signing nested runtime binaries" >&2
+  find "$WORK/runtime" -type f >"$WORK/runtime-files.txt"
+  while IFS= read -r candidate; do
+    case "$(file -b "$candidate")" in
+    *Mach-O*) ;;
+    *) continue ;;
+    esac
+    if codesign -d --verbose=4 "$candidate" 2>&1 | grep -q "^Authority="; then
+      continue
+    fi
+    codesign --sign "$APPLE_SIGNING_IDENTITY" --timestamp --options runtime --force "$candidate"
+  done <"$WORK/runtime-files.txt"
+fi
+
 python3 - "$WORK/runtime" "$NODE_VERSION" "$PI_VERSION" "$IMAGE_GEN_VERSION" "$ARCH" <<'PY'
 import hashlib,json,pathlib,sys
 root=pathlib.Path(sys.argv[1])
