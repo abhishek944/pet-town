@@ -2,10 +2,10 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-flow.XXXXXX")
+TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-flow.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
 
-cd "$ROOT/apps/pet-village"
+cd "$ROOT/apps/pet-town"
 npx tsc \
   --target ES2020 \
   --module commonjs \
@@ -291,7 +291,7 @@ const fireLatestTimer = () => {
 })().catch((error) => { console.error(error); process.exitCode = 1; });
 CHECK_RENDERER
 node "$TMP/check-renderer.cjs"
-node - "$ROOT/apps/pet-village" "$TMP/flow-runtime.js" <<'CHECK_PACKS'
+node - "$ROOT/apps/pet-town" "$TMP/flow-runtime.js" <<'CHECK_PACKS'
 const fs = require("node:fs");
 const path = require("node:path");
 const root = process.argv[2];

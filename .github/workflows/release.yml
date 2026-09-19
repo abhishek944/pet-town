@@ -1,0 +1,66 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  RUSTUP_TOOLCHAIN: 1.88.0
+
+jobs:
+  macos:
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: macos-arm64
+            asset: Pet-Town-macOS-Apple-Silicon.dmg
+          - package: macos-x64
+            asset: Pet-Town-macOS-Intel.dmg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install Rust 1.88
+        run: rustup toolchain install 1.88.0 --profile minimal --target aarch64-apple-darwin --target x86_64-apple-darwin
+      - run: pnpm install --frozen-lockfile
+      - name: Build DMG
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: ./scripts/build.sh
+      - name: Stage release asset
+        run: cp "bin/${{ matrix.package }}/pet-town.dmg" "${{ matrix.asset }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.asset }}
+          if-no-files-found: error
+
+  publish:
+    needs: macos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: Pet-Town-macOS-*.dmg
+          merge-multiple: true
+          path: dist
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/*.dmg --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$GITHUB_REF_NAME" dist/*.dmg --generate-notes --repo "$GITHUB_REPOSITORY"
+          fi

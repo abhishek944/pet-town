@@ -1,6 +1,6 @@
 # Behavior pack format
 
-Behavior packs are data, not scripts. Each bundled pet owns one folder under `apps/pet-village/src/pets/<pet-id>/`. The folder contains `flow.json` and every APNG asset referenced by that file. During the build, each folder is discovered, validated as a complete unit, and compiled into immutable data before an agent can use it.
+Behavior packs are data, not scripts. Each bundled pet owns one folder under `apps/pet-town/src/pets/<pet-id>/`. The folder contains `flow.json` and every APNG asset referenced by that file. During the build, each folder is discovered, validated as a complete unit, and compiled into immutable data before an agent can use it.
 
 Only these five top-level state keys are allowed and required:
 
@@ -12,19 +12,19 @@ Only these five top-level state keys are allowed and required:
 
 A repeated poll with the same normalized state keeps the current flow position. A different state cancels the old flow or user-requested action immediately while preserving screen position and facing, then evaluates the new flow from a visible baseline. Baseline visibility is flow-authored: flow execution treats no state name specially. Separately, the app-level **Hide completed pets** preference may hide a citizen whose Herdr state is `done` after the selected delay.
 
-The `blocked` state is also the permission-approval animation slot. In an interactive Pi TUI with the Herdr integration loaded, the global permission-gate extension emits `herdr:blocked` with `{ active: true, label }` before displaying a Yes/No dialog and emits the matching `{ active: false, label }` when the dialog settles or is cancelled. The Herdr integration counts these open/close pairs so overlapping waits stay blocked until every wait closes. Pet Village then runs that pet's `states.blocked` flow while approval is pending. Print and JSON modes reject confirmation-covered commands without prompting. RPC mode can request confirmation and wait for its response, but the TUI-only Herdr integration does not report that RPC wait as a pet state. A pet can therefore reference a dedicated approval APNG from its blocked flow; packs that already define `blocked` remain compatible without changes.
+The `blocked` state is also the permission-approval animation slot. In an interactive Pi TUI with the Herdr integration loaded, the global permission-gate extension emits `herdr:blocked` with `{ active: true, label }` before displaying a Yes/No dialog and emits the matching `{ active: false, label }` when the dialog settles or is cancelled. The Herdr integration counts these open/close pairs so overlapping waits stay blocked until every wait closes. Pet Town then runs that pet's `states.blocked` flow while approval is pending. Print and JSON modes reject confirmation-covered commands without prompting. RPC mode can request confirmation and wait for its response, but the TUI-only Herdr integration does not report that RPC wait as a pet state. A pet can therefore reference a dedicated approval APNG from its blocked flow; packs that already define `blocked` remain compatible without changes.
 
 A pack may also define an optional top-level `actions` object. Each entry supplies a short menu `label` and a finite `flow`. Only declared actions appear when the user right-clicks that pet. Actions use the same safe flow nodes as states, pause the current state flow, and resume it at the same point when complete.
 
-Pet Studio can extend an existing bundled or user pet without modifying its original pack. It stores validated APNG clips and optional state or action replacements as a private, versioned overlay under `~/.pet-village/pet-packs/extensions/<pet-id>/`. Activation switches an `active` version pointer only after every file and hash is written. At load time, the overlay is merged onto the original manifest and the complete result passes through the normal behavior-pack compiler. Choosing **Keep existing behavior** preserves that state's currently installed flow, including any earlier extension; restoring the bundled base flow is not currently offered.
+Pet Studio can extend an existing bundled or user pet without modifying its original pack. It stores validated APNG clips and optional state or action replacements as a private, versioned overlay under `~/.pet-town/pet-packs/extensions/<pet-id>/`. Activation switches an `active` version pointer only after every file and hash is written. At load time, the overlay is merged onto the original manifest and the complete result passes through the normal behavior-pack compiler. Choosing **Keep existing behavior** preserves that state's currently installed flow, including any earlier extension; restoring the bundled base flow is not currently offered.
 
-Pet Studio packs may define `orchestratorAnimations` with exactly `walking` and `listening` clip IDs. Walking is used whenever the named orchestrator is not hearing user speech; Listening is used only while its local microphone meter reports user speech. Both entries must reference reviewed, pack-local APNG clips. Pet Village adds no rings, halos, glows, or generated effects.
+Pet Studio packs may define `orchestratorAnimations` with exactly `walking` and `listening` clip IDs. Walking is used whenever the named orchestrator is not hearing user speech; Listening is used only while its local microphone meter reports user speech. Both entries must reference reviewed, pack-local APNG clips. Pet Town adds no rings, halos, glows, or generated effects.
 
 ## Add a pet
 
-1. Create `apps/pet-village/src/pets/my-pet/`.
+1. Create `apps/pet-town/src/pets/my-pet/`.
 2. Add transparent APNG assets such as `walk.png` and `work.png` inside that folder.
-3. Add `apps/pet-village/src/pets/my-pet/flow.json` with an `id` matching the folder name.
+3. Add `apps/pet-town/src/pets/my-pet/flow.json` with an `id` matching the folder name.
 4. Reference assets relative to that folder and author all five state flows.
 5. Run `./scripts/check.sh`. Invalid references, states, durations, movement clips, or APNG payloads fail the build-time checks instead of partially loading the pack.
 
@@ -150,4 +150,4 @@ To add an action such as `wave`:
 3. Add an `actions.wave` entry whose `flow` plays that clip.
 4. Run `./scripts/check.sh` and rebuild the application.
 
-Bundled pet folders are discovered at build time and remain immutable. Pet Studio saves user-created packs under `~/.pet-village/pet-packs/packs/` and reloads them immediately after a successful atomic activation. The runtime compiles those manifests through the same safe flow compiler and rejects bundled-ID collisions. Loose external folders are never watched or loaded.
+Bundled pet folders are discovered at build time and remain immutable. Pet Studio saves user-created packs under `~/.pet-town/pet-packs/packs/` and reloads them immediately after a successful atomic activation. The runtime compiles those manifests through the same safe flow compiler and rejects bundled-ID collisions. Loose external folders are never watched or loaded.

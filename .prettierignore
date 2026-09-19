@@ -14,19 +14,19 @@ pnpm-lock.yaml
 scripts/pi-runtime-package-lock.json
 
 # This template has compact markup assertions in the repository checks.
-apps/pet-village/settings.html
+apps/pet-town/settings.html
 
 # These modules intentionally stay under the repository's 199-line source limit.
-apps/pet-village/src/assistant.ts
-apps/pet-village/src/behavior-pack.ts
-apps/pet-village/src/flow-node-validation.ts
-apps/pet-village/src/pet-interactions.ts
-apps/pet-village/src/renderer-view.ts
-apps/pet-village/src/renderer.ts
-apps/pet-village/src/settings-adapters.ts
-apps/pet-village/src/settings-studio.ts
-apps/pet-village/src/settings.ts
-apps/pet-village/src/state-flow-machine.ts
+apps/pet-town/src/assistant.ts
+apps/pet-town/src/behavior-pack.ts
+apps/pet-town/src/flow-node-validation.ts
+apps/pet-town/src/pet-interactions.ts
+apps/pet-town/src/renderer-view.ts
+apps/pet-town/src/renderer.ts
+apps/pet-town/src/settings-adapters.ts
+apps/pet-town/src/settings-studio.ts
+apps/pet-town/src/settings.ts
+apps/pet-town/src/state-flow-machine.ts
 
 *.gif
 *.gz

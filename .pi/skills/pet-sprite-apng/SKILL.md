@@ -21,7 +21,7 @@ Use `image_generate` for the artwork and the bundled scripts for deterministic e
 2. Extract a clean reference frame:
    ```bash
    python3 .pi/skills/pet-sprite-apng/scripts/extract-reference.py \
-     apps/pet-village/src/pets/<pet>/walk.png var/pet-sprite-sheets/<pet>/reference.png
+     apps/pet-town/src/pets/<pet>/walk.png var/pet-sprite-sheets/<pet>/reference.png
    ```
 3. Generate **one 2-column × 4-row sprite sheet per action** with `image_generate`. Pass the extracted frame as `Image 1: character identity and style reference`. Use a 1024×1536 transparent canvas and high quality. Follow [the prompt contract](references/prompt-contract.md).
 4. Read and visually inspect the full sheet before conversion. Reject it if the gesture is ambiguous, the pet does not truly sleep or wave, identity drifts, cells are cropped, or the grid is not exactly 2×4.
@@ -29,7 +29,7 @@ Use `image_generate` for the artwork and the bundled scripts for deterministic e
    ```bash
    python3 .pi/skills/pet-sprite-apng/scripts/sheet-to-apng.py \
      var/pet-sprite-sheets/<pet>/<action>-sheet.png \
-     apps/pet-village/src/pets/<pet>/<action>.png --total-duration-ms <clip-durationMs> \
+     apps/pet-town/src/pets/<pet>/<action>.png --total-duration-ms <clip-durationMs> \
      --contact var/pet-sprite-sheets/<pet>/<action>-contact.png \
      --height 320
    ```
@@ -37,4 +37,4 @@ Use `image_generate` for the artwork and the bundled scripts for deterministic e
 6. Read the APNG and a contact sheet made from all frames. Confirm the complete motion, not only the first frame.
 7. Run `pnpm run check:flow`, `pnpm run check:interactions`, and `pnpm run build`.
 
-Do not overwrite an accepted APNG until its replacement sheet has passed visual inspection. Keep generated source sheets under `var/pet-sprite-sheets/` as evidence; only final APNGs belong in `apps/pet-village/src/pets/`.
+Do not overwrite an accepted APNG until its replacement sheet has passed visual inspection. Keep generated source sheets under `var/pet-sprite-sheets/` as evidence; only final APNGs belong in `apps/pet-town/src/pets/`.

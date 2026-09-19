@@ -2,28 +2,28 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-app_choice=${PET_VILLAGE_APP:-v1}
+app_choice=${PET_TOWN_APP:-v1}
 case "$app_choice" in
 v1)
-  app_dir=pet-village
-  artifact=pet-village
-  binary_name=pet-village
+  app_dir=pet-town
+  artifact=pet-town
+  binary_name=pet-town
   has_runtime=1
   ;;
 v2)
-  app_dir=pet-village-v2
-  artifact=pet-village-v2
-  binary_name=pet-village-v2
+  app_dir=pet-town-v2
+  artifact=pet-town-v2
+  binary_name=pet-town-v2
   has_runtime=0
   ;;
 *)
-  echo "PET_VILLAGE_APP must be v1 or v2, received: $app_choice" >&2
+  echo "PET_TOWN_APP must be v1 or v2, received: $app_choice" >&2
   exit 2
   ;;
 esac
 ARM="$ROOT/bin/macos-arm64/$artifact"
 X64="$ROOT/bin/macos-x64/$artifact"
-EXPECTED_SOURCE=$(PET_VILLAGE_APP="$app_choice" "$ROOT/scripts/package-source-fingerprint.sh")
+EXPECTED_SOURCE=$(PET_TOWN_APP="$app_choice" "$ROOT/scripts/package-source-fingerprint.sh")
 
 [ -L "$ARM" ] && [ "$(readlink "$ARM")" = "$artifact.bin" ]
 [ -L "$X64" ] && [ "$(readlink "$X64")" = "$artifact.bin" ]
@@ -36,11 +36,11 @@ if [ "$has_runtime" = 1 ]; then
   for item in "macos-arm64:arm64" "macos-x64:x64"; do
     package=${item%%:*}
     arch=${item#*:}
-    archive="$ROOT/bin/$package/pet-village-pi-runtime.tar.gz"
+    archive="$ROOT/bin/$package/pet-town-pi-runtime.tar.gz"
     [ -f "$archive" ]
     runtime_hash=$(shasum -a 256 "$archive" | cut -d' ' -f1)
-    strings "$ROOT/bin/$package/pet-village" | grep -F "$runtime_hash" >/dev/null
-    runtime=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-runtime-check.XXXXXX")
+    strings "$ROOT/bin/$package/pet-town" | grep -F "$runtime_hash" >/dev/null
+    runtime=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-runtime-check.XXXXXX")
     trap 'rm -rf "$runtime"' EXIT INT TERM
     tar -xzf "$archive" -C "$runtime"
     [ -x "$runtime/node" ] && [ -x "$runtime/bin/pi" ]

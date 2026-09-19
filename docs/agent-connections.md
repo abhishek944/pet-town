@@ -1,6 +1,6 @@
 # Agent connections
 
-Pet Village can show sessions from Herdr, Claude Code, Codex, OpenCode, Pi, Factory Droid, and Cursor in one village. Herdr is built in. The other tools use their normal hook or extension systems, so users keep launching each tool as usual.
+Pet Town can show sessions from Herdr, Claude Code, Codex, OpenCode, Pi, Factory Droid, and Cursor in one village. Herdr is built in. The other tools use their normal hook or extension systems, so users keep launching each tool as usual.
 
 ## Setup
 
@@ -8,7 +8,7 @@ Pet Village can show sessions from Herdr, Claude Code, Codex, OpenCode, Pi, Fact
 2. Open an adapter card. The overview groups Factory Droid and Cursor, but each has its own control in the detail view.
 3. Choose **Connect…** and review the confirmation.
 4. Restart the coding tool or begin a new session so it reloads its global configuration. Pi can also reload extensions with `/reload`.
-5. In Codex, open `/hooks` and verify the exact Pet Village hook definition. Codex skips new or changed non-managed hooks until they are trusted, but its trust hashes are not exposed to Pet Village, so Settings honestly remains **Verify in Codex**. If `[features] hooks = false` is set, enable hooks first. Pet Village checks Codex's Unix administrator files at `/etc/codex/requirements.toml` and `/etc/codex/managed_config.toml`; an enforced `allow_managed_hooks_only = true` policy blocks user hooks and must be changed by that administrator. Cloud-managed and macOS MDM policy still require confirmation in Codex.
+5. In Codex, open `/hooks` and verify the exact Pet Town hook definition. Codex skips new or changed non-managed hooks until they are trusted, but its trust hashes are not exposed to Pet Town, so Settings honestly remains **Verify in Codex**. If `[features] hooks = false` is set, enable hooks first. Pet Town checks Codex's Unix administrator files at `/etc/codex/requirements.toml` and `/etc/codex/managed_config.toml`; an enforced `allow_managed_hooks_only = true` policy blocks user hooks and must be changed by that administrator. Cloud-managed and macOS MDM policy still require confirmation in Codex.
 
 The app installs only marked entries or a dedicated marked plugin file:
 
@@ -19,13 +19,13 @@ The app installs only marked entries or a dedicated marked plugin file:
 - Factory Droid: global lifecycle hooks
 - Cursor: global editor hooks
 
-Setup preserves unrelated configuration, creates a private backup before replacing an existing file, and validates staged content before publishing each update with an exclusive atomic rename. **Remove…** deletes only entries or files marked as owned by Pet Village. If a dedicated plugin filename is already owned by another file, Settings reports **File in use** and does not overwrite it.
+Setup preserves unrelated configuration, creates a private backup before replacing an existing file, and validates staged content before publishing each update with an exclusive atomic rename. **Remove…** deletes only entries or files marked as owned by Pet Town. If a dedicated plugin filename is already owned by another file, Settings reports **File in use** and does not overwrite it.
 
-All hook entry points fail open. If Pet Village is stopped, unavailable, or receives an unsupported event, the coding tool continues normally.
+All hook entry points fail open. If Pet Town is stopped, unavailable, or receives an unsupported event, the coding tool continues normally.
 
 ## What is recorded
 
-A hook sends its event to the local Pet Village process. The process stores only:
+A hook sends its event to the local Pet Town process. The process stores only:
 
 - the adapter name;
 - a one-way opaque session key;

@@ -1,10 +1,10 @@
-# Pet Village
+# Pet Town
 
-Pet Village turns live Herdr, Claude Code, Codex, OpenCode, Pi, Factory Droid,
+Pet Town turns live Herdr, Claude Code, Codex, OpenCode, Pi, Factory Droid,
 and Cursor sessions into small animated citizens in a transparent village along
 the bottom of your desktop.
 
-![Pet Village demo — 13s from Screen Recording (1:17–1:30) showing 15 agents + village pets](assets/pets-demo.gif)
+![Pet Town demo — 13s from Screen Recording (1:17–1:30) showing 15 agents + village pets](assets/pets-demo.gif)
 
 <p align="center">
   <a href="assets/pets-demo.mp4">MP4 (642 KB, 1280×832)</a> · GIF autoplays above (2.0 MB, 800×520, 12 fps) — full 13s clip at <code>1:17–1:30</code>
@@ -16,17 +16,18 @@ village—never one window per agent and never an arbitrary agent limit.
 
 ## Install
 
-Pet Village is a standalone macOS desktop app. Download the release app for
-your Mac, or keep the matching `bin/macos-*` package together and open its
-`pet-village` executable. Each package includes the private Node/Pi runtime used
-by the optional voice orchestrator; users do not install Node.js, Pi, or Rust.
-The village discovers configured coding-agent connections without requiring
-Herdr.
+Pet Town is a standalone macOS desktop app. Download the DMG for your Mac,
+open it, and drag **Pet Town.app** into **Applications**. Launching the app opens
+Settings and starts the town; use **Show Town / Hide Town** in Settings, the app
+menu, or the tray menu without quitting the monitor. The application bundle
+includes the private Node/Pi runtime used by the optional voice orchestrator;
+users do not install Node.js, Pi, or Rust. The village discovers configured
+coding-agent connections without requiring Herdr.
 
 Herdr users can additionally install the optional Herdr adapter:
 
 ```bash
-herdr plugin install abhishek944/pet-village
+herdr plugin install abhishek944/pet-town
 ```
 
 That adapter starts the same desktop app with Herdr and contributes validated
@@ -51,18 +52,18 @@ user permissions, so review their manifest and source before installing.
 - Uses no floating status symbols; the sprite animation communicates the current state.
 - Waits for three missed polls before a departed citizen fades away.
 - Shrinks citizens automatically for large crowds.
-- Labels each character with its Herdr pane name when present, otherwise `{space-name}-{tab}` (for example `pet-village-1`), and uses the current folder name only when Herdr naming is unavailable.
+- Labels each character with its Herdr pane name when present, otherwise `{space-name}-{tab}` (for example `pet-town-1`), and uses the current folder name only when Herdr naming is unavailable.
 - Focuses an exact revalidated Herdr pane when its pet is clicked, or the best already-running application known for a standalone harness without launching or resuming anything.
 - Lets users drag a pet horizontally; it pauses while held and resumes its existing movement from the drop point.
 - Builds each pet's right-click menu from validated `flow.json` actions; every bundled pet currently exposes **Wave**.
-- Opens a native macOS Settings window from **Preferences…** in that menu or the Herdr plugin action, with per-character controls, a **Pet Studio**, and an **Agents** tab for atomic, reversible setup of all six standalone harness integrations.
+- Opens a native macOS Settings window when the installed app launches, from **Preferences…** in a pet menu, or from the Herdr plugin action, with direct **Show Town / Hide Town** controls, per-character controls, a **Pet Studio**, and an **Agents** tab for atomic, reversible setup of all six standalone harness integrations.
 - Lets users choose between creating a new pet and extending an existing pet. New pets can use a newly generated reference or an existing pet as their reference; animation generation uses one coherent 3-column × 2-row sheet, locally extracts six aligned frames, and keeps review and APNG approval explicit. Extensions can import or generate APNGs, optionally replace individual state animations, and add menu actions without modifying bundled assets or rebuilding.
 - Adds a user-named voice assistant that uses the bundled Mossback tortoise, listens locally for “Hey, <name>,” starts GPT-Live 1 without opening another visible window, and delegates computer work to a persistent Pi agent in a dedicated Herdr pane.
 - Runs that Pi agent with GPT-5.6 Luna at medium thinking, supports spoken task cancellation, and keeps voice transcripts ephemeral.
 - Keeps the assistant independent from Pet Studio: its bundled Mossback walking and listening animations are fixed and cannot be replaced by user pet creation or extensions.
 - Includes every character in random assignment by default, lets users deselect unwanted characters, and immediately replaces visible deselected pets after Apply while preserving allowed assignments.
 - Optionally hides completed sleeping pets after 1, 5, 15, 30, or 60 minutes while continuing to monitor them and restoring them immediately when their state changes.
-- Pauses the visible village while Settings edits a draft; **Apply** saves the complete versioned file at `~/.pet-village/preferences.json`, while closing discards unapplied changes and resumes current agent states.
+- Pauses the visible village while Settings edits a draft; **Apply** saves the complete versioned file at `~/.pet-town/preferences.json`, while closing discards unapplied changes and resumes current agent states.
 - Keeps the window transparent, undecorated, always on top, and visible across
   macOS workspaces. Empty pixels are click-through while citizen pixels remain
   interactive.
@@ -122,15 +123,19 @@ added later; always-on-top behavior on Linux depends on the desktop compositor.
 ```
 
 The release executable is written to
-`apps/pet-village/src-tauri/target/<rust-target>/release/pet-village` and copied
-into the matching `bin/macos-*` plugin package directory. The build also downloads a
-pinned Node release and installs a pinned Pi package into that architecture's
-bundled runtime directory.
+`apps/pet-town/src-tauri/target/<rust-target>/release/pet-town` and copied
+into the matching `bin/macos-*` plugin package directory for the optional Herdr
+adapter. The same build produces **Pet Town.app** and a standard drag-to-Applications
+DMG at `bin/macos-*/pet-town.dmg`. Tagged release builds upload those installers as
+GitHub Release assets, and the landing page links to the versioned release URLs rather
+than storing large installers in the website bundle. The build also downloads a pinned
+Node release and installs a pinned Pi package inside that architecture's application
+bundle.
 
 The repository is a pnpm workspace orchestrated by Turborepo. The released
-v1 desktop application lives in `apps/pet-village`; the greenfield Excalibur
-v2 application lives separately in `apps/pet-village-v2`, and its headless
-contracts live in `packages/pet-village-core`. The public landing page lives in
+v1 desktop application lives in `apps/pet-town`; the greenfield Excalibur
+v2 application lives separately in `apps/pet-town-v2`, and its headless
+contracts live in `packages/pet-town-core`. The public landing page lives in
 `apps/web`; repository scripts, plugin metadata, documentation, and checked-in
 packages remain at the root.
 
@@ -143,7 +148,7 @@ pnpm run tauri dev
 ```
 
 Run the v1 desktop frontend with `pnpm run dev` or the v2 frontend with
-`pnpm run dev:v2`. The selector defaults to v1; set `PET_VILLAGE_APP=v2` for
+`pnpm run dev:v2`. The selector defaults to v1; set `PET_TOWN_APP=v2` for
 `build:desktop`, `build:desktop:frontend`, `tauri`, or `./scripts/build.sh` to
 select v2. Each selected binary contains only that implementation. Start the
 landing page at `http://127.0.0.1:4173` with `pnpm run dev:web`. Root build,
@@ -179,7 +184,7 @@ Use `pnpm run check:quality` for only formatting, linting, and type checks. Use 
 ## Manual visual check
 
 1. Run `./scripts/build.sh` and link the plugin.
-2. Invoke `pet-village.village-on` while at least two Herdr agents exist.
+2. Invoke `pet-town.village-on` while at least two Herdr agents exist.
 3. Confirm citizens appear centered just above the Dock, empty window space passes clicks through, and clicking a pet focuses its exact Herdr agent pane.
 4. Confirm each pet moves to a screen edge, turns only there, and continues in the direction it faces with its project name following above.
 5. Change agents between working, blocked, done, idle, and unknown; confirm idle flows hide the complete citizen while the other states restore it.
@@ -190,16 +195,16 @@ Use `pnpm run check:quality` for only formatting, linting, and type checks. Use 
 10. Right-click a pet and choose **Preferences…**. Confirm one native Settings window opens for that character, every visible pet freezes, the preview reflects walking speed and reduced movement, and hovering the preview pauses its travel when **Stop walking while hovered** is enabled. Deselect that character from the random cast, Apply, close Settings, and confirm any visible copy is replaced while allowed pets keep their assignments.
 11. Enable **Hide completed pets**, select a delay, and Apply. Confirm completed pets disappear after that delay, no longer affect crowd sizing or clicks, and return immediately if they begin working or become blocked.
 12. Confirm reduced movement or hover pauses only horizontal travel while the pet keeps animating; also confirm closing Settings discards any unapplied draft and resumes current Herdr states.
-13. Edit `~/.pet-village/preferences.json`, invoke `pet-village.reload-preferences`, and confirm valid changes load while invalid JSON is preserved and rejected.
-14. Invoke `pet-village.village-off` and confirm the strip disappears.
+13. Edit `~/.pet-town/preferences.json`, invoke `pet-town.reload-preferences`, and confirm valid changes load while invalid JSON is preserved and rejected.
+14. Invoke `pet-town.village-off` and confirm the strip disappears.
 
 ## Privacy
 
 Ordinary village monitoring remains local. It does not send coding-agent prompts, code, tool arguments, output, credentials, full paths, or raw harness session IDs to OpenAI. Only opaque public IDs, normalized status, source names, and sanitized labels cross into the village interface.
 
-Voice is off until the user chooses **Start assistant** in Settings, and **Stop assistant** turns it off again. On-device recognition listens locally for the configured wake phrase; after the wake phrase is heard, microphone audio and ephemeral transcripts pass through GPT-Live 1 over WebRTC without opening another visible window. Only delegated conversation context and the concise Pi result are routed between GPT-Live and the dedicated Pi agent. Ending the conversation stops microphone capture immediately and clears app-held transcripts; five minutes without user speech also ends the paid Live session. The OpenAI API key stays in Rust memory and may come from `OPENAI_API_KEY` or the macOS Keychain item with service `pet-village.openai` and account `api-key`.
+Voice is off until the user chooses **Start assistant** in Settings, and **Stop assistant** turns it off again. On-device recognition listens locally for the configured wake phrase; after the wake phrase is heard, microphone audio and ephemeral transcripts pass through GPT-Live 1 over WebRTC without opening another visible window. Only delegated conversation context and the concise Pi result are routed between GPT-Live and the dedicated Pi agent. Ending the conversation stops microphone capture immediately and clears app-held transcripts; five minutes without user speech also ends the paid Live session. The OpenAI API key stays in Rust memory and may come from `OPENAI_API_KEY` or the macOS Keychain item with service `pet-town.openai` and account `api-key`.
 
-Pet Studio makes an OpenAI request only after the user presses a generation button; imported APNGs stay local. That request contains the Studio prompt and, when creating an animation, the character reference the user approved. Animation generation makes one provider request for a coherent 3-column × 2-row sheet, then `pi-image-gen` extracts and validates the six frames locally. API charges may apply. Rust passes the OpenAI API key to the private local Node worker only through its process environment; the key is sent only to the fixed OpenAI endpoint and is never placed in command arguments, request JSON, preferences, frontend state, or logs. Generated references, sheets, frames, APNGs, preferences, and short-lived event records remain under `~/.pet-village/` unless the user exports them. Existing-pet extensions are stored separately under `~/.pet-village/pet-packs/extensions/` as validated, versioned overlays, so bundled pet files remain immutable.
+Pet Studio makes an OpenAI request only after the user presses a generation button; imported APNGs stay local. That request contains the Studio prompt and, when creating an animation, the character reference the user approved. Animation generation makes one provider request for a coherent 3-column × 2-row sheet, then `pi-image-gen` extracts and validates the six frames locally. API charges may apply. Rust passes the OpenAI API key to the private local Node worker only through its process environment; the key is sent only to the fixed OpenAI endpoint and is never placed in command arguments, request JSON, preferences, frontend state, or logs. Generated references, sheets, frames, APNGs, preferences, and short-lived event records remain under `~/.pet-town/` unless the user exports them. Existing-pet extensions are stored separately under `~/.pet-town/pet-packs/extensions/` as validated, versioned overlays, so bundled pet files remain immutable.
 
 ## License
 

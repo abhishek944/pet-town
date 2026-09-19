@@ -1,6 +1,6 @@
 # Multi-harness adapter architecture
 
-Pet Village is a standalone desktop village whose agent sources are adapters. Herdr is an optional adapter and remains the authoritative source when it hosts another coding harness.
+Pet Town is a standalone desktop village whose agent sources are adapters. Herdr is an optional adapter and remains the authoritative source when it hosts another coding harness.
 
 ## Runtime boundary
 
@@ -25,7 +25,7 @@ Raw session identifiers, full paths, prompts, tool inputs, and agent output neve
 
 The packaged binary's private adapter-event mode is the shared fail-open bridge for Claude Code, Codex, OpenCode, Pi, Factory Droid, and Cursor. A short-lived relay reads the harness JSON event from standard input, keeps only approved fields in memory, and hands sanitized data to a detached recorder. Harnesses that support background hooks use them; the OpenCode and Pi integrations spawn the recorder detached. `scripts/agent-hook.sh` remains a portable non-blocking wrapper for manual integration and binds successive lifecycle events to its harness parent.
 
-The binary accepts only the six approved standalone source names, extracts a session identifier and safe project basename, maps the lifecycle event into the village state model, and atomically updates a bounded local registry under `~/.pet-village/agent-sessions/`. Installed hooks carry a private installation epoch, so events from removed or replaced hook generations stay rejected after reconnect. Disable, event publication, and record purge share one registry lock. The stored session key is opaque. A session-end event removes its record; stale records are reclaimed after 24 hours as a crash fallback. The registry has a 24-hour retention bound but no count cap: existing or new valid live records are not evicted, and end markers remain for the full window so delayed events cannot resurrect a pet.
+The binary accepts only the six approved standalone source names, extracts a session identifier and safe project basename, maps the lifecycle event into the village state model, and atomically updates a bounded local registry under `~/.pet-town/agent-sessions/`. Installed hooks carry a private installation epoch, so events from removed or replaced hook generations stay rejected after reconnect. Disable, event publication, and record purge share one registry lock. The stored session key is opaque. A session-end event removes its record; stale records are reclaimed after 24 hours as a crash fallback. The registry has a 24-hour retention bound but no count cap: existing or new valid live records are not evicted, and end markers remain for the full window so delayed events cannot resurrect a pet.
 
 The Agents Settings tab now installs and manages each harness through its supported global integration: lifecycle hooks for Claude Code, Codex, Factory Droid, and Cursor; a JavaScript plugin for OpenCode; and a TypeScript extension for Pi. Every write is previewed through a confirmation, preserves unrelated configuration, creates a private backup before replacement, and uses an atomic rename. Removal targets only marked entries or dedicated marked files. Hook failures always exit successfully so this observation layer cannot interrupt the harness.
 

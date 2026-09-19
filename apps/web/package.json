@@ -1,8 +1,8 @@
 {
-  "name": "@pet-village/web",
+  "name": "@pet-town/web",
   "private": true,
   "version": "0.1.4",
-  "description": "Pet Village landing page",
+  "description": "Pet Town landing page",
   "type": "module",
   "engines": {
     "node": ">=20.19.0"
@@ -15,7 +15,6 @@
     "lint": "eslint src vite.config.ts --config ../../eslint.config.js"
   },
   "devDependencies": {
-    "tar": "^7.4.3",
     "typescript": "~5.6.2",
     "vite": "^6.0.3"
   }

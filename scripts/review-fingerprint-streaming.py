@@ -40,7 +40,7 @@ digest.update(b"BASE\0" + base.encode() + b"\0TARGET\0WORKTREE")
 for scope in scopes:
     digest.update(b"\0SCOPE\0" + scope.encode())
 digest.update(b"\0DIFF\0")
-binary_scopes = {"bin/macos-arm64/pet-village", "bin/macos-x64/pet-village"}
+binary_scopes = {"bin/macos-arm64/pet-town", "bin/macos-x64/pet-town"}
 diff_scopes = [scope for scope in scopes if scope not in binary_scopes]
 pathspec = ["--", *diff_scopes]
 update_process(

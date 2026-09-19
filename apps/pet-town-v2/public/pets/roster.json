@@ -1,0 +1,567 @@
+{
+  "pets": [
+    {
+      "id": "bao-panda-chef",
+      "name": "Bao Panda Chef",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/bao-panda-chef/walk.png",
+          "frames": 4,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 200
+        },
+        "wave": {
+          "path": "/pets/bao-panda-chef/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/bao-panda-chef/done.png",
+          "frames": 1,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "bigfoot-yeti",
+      "name": "Bigfoot Yeti",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/bigfoot-yeti/walk.png",
+          "frames": 4,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 230
+        },
+        "wave": {
+          "path": "/pets/bigfoot-yeti/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/bigfoot-yeti/done.png",
+          "frames": 1,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "brassbell-automaton-porter",
+      "name": "Brassbell Automaton Porter",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/brassbell-automaton-porter/walk.png",
+          "frames": 6,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 155
+        },
+        "wave": {
+          "path": "/pets/brassbell-automaton-porter/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/brassbell-automaton-porter/done.png",
+          "frames": 1,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "cat",
+      "name": "Cat",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/cat/walk.png",
+          "frames": 8,
+          "frameWidth": 279,
+          "frameHeight": 224,
+          "frameDuration": 90
+        },
+        "wave": {
+          "path": "/pets/cat/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/cat/done.png",
+          "frames": 1,
+          "frameWidth": 279,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "dog",
+      "name": "Dog",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/dog/walk.png",
+          "frames": 8,
+          "frameWidth": 262,
+          "frameHeight": 224,
+          "frameDuration": 90
+        },
+        "wave": {
+          "path": "/pets/dog/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/dog/done.png",
+          "frames": 1,
+          "frameWidth": 262,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "ember-fox-ronin",
+      "name": "Ember Fox Ronin",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/ember-fox-ronin/walk.png",
+          "frames": 6,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 105
+        },
+        "wave": {
+          "path": "/pets/ember-fox-ronin/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/ember-fox-ronin/done.png",
+          "frames": 1,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "fern-potted-plant",
+      "name": "Fern Potted Plant",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/fern-potted-plant/walk.png",
+          "frames": 4,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 180
+        },
+        "wave": {
+          "path": "/pets/fern-potted-plant/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/fern-potted-plant/done.png",
+          "frames": 1,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "gus-mail-carrier",
+      "name": "Gus Mail Carrier",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/gus-mail-carrier/walk.png",
+          "frames": 4,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 200
+        },
+        "wave": {
+          "path": "/pets/gus-mail-carrier/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/gus-mail-carrier/done.png",
+          "frames": 1,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "human-male",
+      "name": "Human Male",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/human-male/walk.png",
+          "frames": 8,
+          "frameWidth": 138,
+          "frameHeight": 224,
+          "frameDuration": 100
+        },
+        "wave": {
+          "path": "/pets/human-male/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/human-male/done.png",
+          "frames": 1,
+          "frameWidth": 138,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "jun-clockwork-apprentice",
+      "name": "Jun Clockwork Apprentice",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/jun-clockwork-apprentice/walk.png",
+          "frames": 6,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 125
+        },
+        "wave": {
+          "path": "/pets/jun-clockwork-apprentice/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/jun-clockwork-apprentice/done.png",
+          "frames": 1,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "kip-penguin-postman",
+      "name": "Kip Penguin Postman",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/kip-penguin-postman/walk.png",
+          "frames": 4,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 180
+        },
+        "wave": {
+          "path": "/pets/kip-penguin-postman/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/kip-penguin-postman/done.png",
+          "frames": 1,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "mira-dune-spear-scout",
+      "name": "Mira Dune Spear Scout",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/mira-dune-spear-scout/walk.png",
+          "frames": 6,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 120
+        },
+        "wave": {
+          "path": "/pets/mira-dune-spear-scout/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/mira-dune-spear-scout/done.png",
+          "frames": 1,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "mossback-turtle-monk",
+      "name": "Mossback Turtle Monk",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/mossback-turtle-monk/walk.png",
+          "frames": 6,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 145
+        },
+        "wave": {
+          "path": "/pets/mossback-turtle-monk/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/mossback-turtle-monk/done.png",
+          "frames": 1,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "nib-dragon-hatchling",
+      "name": "Nib Dragon Hatchling",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/nib-dragon-hatchling/walk.png",
+          "frames": 4,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 190
+        },
+        "wave": {
+          "path": "/pets/nib-dragon-hatchling/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/nib-dragon-hatchling/done.png",
+          "frames": 1,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "pebble-slime-knight",
+      "name": "Pebble Slime Knight",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/pebble-slime-knight/walk.png",
+          "frames": 6,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 115
+        },
+        "wave": {
+          "path": "/pets/pebble-slime-knight/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/pebble-slime-knight/done.png",
+          "frames": 1,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "pudge-hedgehog",
+      "name": "Pudge Hedgehog",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/pudge-hedgehog/walk.png",
+          "frames": 4,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 170
+        },
+        "wave": {
+          "path": "/pets/pudge-hedgehog/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/pudge-hedgehog/done.png",
+          "frames": 1,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "skiff-raccoon-sky-pirate",
+      "name": "Skiff Raccoon Sky Pirate",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/skiff-raccoon-sky-pirate/walk.png",
+          "frames": 6,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 115
+        },
+        "wave": {
+          "path": "/pets/skiff-raccoon-sky-pirate/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/skiff-raccoon-sky-pirate/done.png",
+          "frames": 1,
+          "frameWidth": 202,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "sol-capybara",
+      "name": "Sol Capybara",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/sol-capybara/walk.png",
+          "frames": 4,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 220
+        },
+        "wave": {
+          "path": "/pets/sol-capybara/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/sol-capybara/done.png",
+          "frames": 1,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "viking",
+      "name": "Viking",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/viking/walk.png",
+          "frames": 6,
+          "frameWidth": 174,
+          "frameHeight": 224,
+          "frameDuration": 105
+        },
+        "wave": {
+          "path": "/pets/viking/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/viking/done.png",
+          "frames": 1,
+          "frameWidth": 175,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    },
+    {
+      "id": "wisp-little-ghost",
+      "name": "Wisp Little Ghost",
+      "capabilities": ["walk", "wave"],
+      "assets": {
+        "walk": {
+          "path": "/pets/wisp-little-ghost/walk.png",
+          "frames": 4,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 200
+        },
+        "wave": {
+          "path": "/pets/wisp-little-ghost/wave.png",
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 112
+        },
+        "done": {
+          "path": "/pets/wisp-little-ghost/done.png",
+          "frames": 1,
+          "frameWidth": 224,
+          "frameHeight": 224,
+          "frameDuration": 120
+        }
+      }
+    }
+  ],
+  "generator": {
+    "pillow": "12.3.0"
+  }
+}

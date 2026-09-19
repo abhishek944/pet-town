@@ -2,9 +2,9 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-interactions.XXXXXX")
+TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-interactions.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
-cd "$ROOT/apps/pet-village"
+cd "$ROOT/apps/pet-town"
 grep -q 'dispatchEvent(new Event("citizen-hidden", { bubbles: true }))' src/renderer.ts
 
 pnpm exec esbuild src/pet-interactions.ts --bundle --platform=node --format=cjs \

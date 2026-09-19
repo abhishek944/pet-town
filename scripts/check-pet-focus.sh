@@ -2,9 +2,9 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-focus.XXXXXX")
+TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-focus.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
-cd "$ROOT/apps/pet-village"
+cd "$ROOT/apps/pet-town"
 
 pnpm exec esbuild src/pet-focus.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/pet-focus.cjs"

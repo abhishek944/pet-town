@@ -2,9 +2,9 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-preferences.XXXXXX")
+TMP=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-preferences.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT INT TERM
-cd "$ROOT/apps/pet-village"
+cd "$ROOT/apps/pet-town"
 
 pnpm exec esbuild src/renderer-preferences.ts --bundle --platform=node --format=cjs \
   --log-level=error --outfile="$TMP/renderer-preferences.cjs"
@@ -296,9 +296,11 @@ console.log("settings startup event checks: pass");
 CHECK
 
 pref_line=$(grep -n 'await installVillagePreferences' src/main.ts | cut -d: -f1)
-show_line=$(grep -n 'show_village' src/main.ts | cut -d: -f1)
+ready_line=$(grep -n 'renderer_ready' src/main.ts | cut -d: -f1)
 poll_line=$(grep -n 'void poll' src/main.ts | cut -d: -f1)
-[ "$pref_line" -lt "$show_line" ] && [ "$pref_line" -lt "$poll_line" ]
+[ -n "$pref_line" ] && [ -n "$ready_line" ] && [ -n "$poll_line" ] || exit 1
+[ "$pref_line" -lt "$ready_line" ] || exit 1
+[ "$pref_line" -lt "$poll_line" ] || exit 1
 
 grep -q 'id = "preferences"' "$ROOT/herdr-plugin.toml"
 grep -q 'id = "reload-preferences"' "$ROOT/herdr-plugin.toml"
@@ -431,11 +433,11 @@ grep -A5 '^\.pet-stack > \.pet-freeze {' src/styles.css | grep -q 'bottom: 0;'
 grep -A5 '^\.pet-stack > \.pet-freeze {' src/styles.css | grep -q 'translate: -50% 0;'
 
 cargo build --quiet --manifest-path src-tauri/Cargo.toml
-BINARY=src-tauri/target/debug/pet-village
+BINARY=src-tauri/target/debug/pet-town
 HOME="$TMP/missing-home" "$BINARY" --startup-enabled
-[ ! -e "$TMP/missing-home/.pet-village" ]
-mkdir -p "$TMP/disabled-home/.pet-village"
-python3 - "$TMP/disabled-home/.pet-village/preferences.json" <<'PY'
+[ ! -e "$TMP/missing-home/.pet-town" ]
+mkdir -p "$TMP/disabled-home/.pet-town"
+python3 - "$TMP/disabled-home/.pet-town/preferences.json" <<'PY'
 import json, pathlib, sys
 ids=sorted(p.parent.name for p in pathlib.Path("src/pets").glob("*/flow.json"))
 pet={"includedInRandomCast":True,"appearance":{"scalePercent":100,"opacityPercent":100},"labels":{"visibility":"always","textScalePercent":100},"motion":{"level":"standard","reduced":False,"pauseOnHover":True}}

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Pet Town Settings</title>
+    <link rel="stylesheet" href="/src/settings.css" />
+    <link rel="stylesheet" href="/src/settings-gallery.css" />
+    <link rel="stylesheet" href="/src/settings-studio.css" />
+    <link rel="stylesheet" href="/src/settings-assistant.css" />
+    <script type="module" src="/src/settings.ts" defer></script>
+  </head>
+  <body class="settings-loading">
+    <nav class="toolbar" role="tablist" aria-label="Settings sections">
+      <button id="tab-pet" class="selected" data-tab="pet" role="tab" aria-selected="true" aria-controls="pets-gallery"><span class="toolbar-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 12.4c-3.7 0-6.7 2.7-6.7 5.8 0 1.7 1.3 2.8 3 2.8 1.4 0 2.4-.9 3.7-.9s2.3.9 3.7.9c1.7 0 3-1.1 3-2.8 0-3.1-3-5.8-6.7-5.8Z"/><circle cx="5.7" cy="9.1" r="2.2"/><circle cx="9.7" cy="5.5" r="2.2"/><circle cx="14.3" cy="5.5" r="2.2"/><circle cx="18.3" cy="9.1" r="2.2"/></svg></span><span>Pets</span></button>
+      <button id="tab-studio" data-tab="studio" role="tab" aria-selected="false" aria-controls="panel-studio" tabindex="-1"><span class="toolbar-glyph" aria-hidden="true">✦</span><span>Studio</span></button>
+      <button id="tab-assistant" data-tab="assistant" role="tab" aria-selected="false" aria-controls="panel-assistant" tabindex="-1"><span class="toolbar-glyph" aria-hidden="true">◉</span><span>Assistant</span></button>
+      <button id="tab-app" data-tab="app" role="tab" aria-selected="false" aria-controls="panel-app" tabindex="-1"><span class="toolbar-glyph" aria-hidden="true">☷</span><span>App</span></button>
+      <button id="tab-agents" data-tab="agents" role="tab" aria-selected="false" aria-controls="panel-agents" tabindex="-1"><span class="toolbar-glyph" aria-hidden="true">⌘</span><span>Agents</span></button>
+      <button id="tab-about" data-tab="about" role="tab" aria-selected="false" aria-controls="panel-about" tabindex="-1"><span class="toolbar-glyph" aria-hidden="true">ⓘ</span><span>About</span></button>
+    </nav>
+    <main id="pets-gallery" class="gallery" role="tabpanel" aria-labelledby="tab-pet" hidden>
+      <header><div><h1 id="gallery-title">All pets</h1><p>Choose a pet to adjust its settings.</p></div><span id="gallery-count" class="count">Loading pets…</span></header>
+      <div id="pet-collection" class="collection" role="group" aria-label="All pets"></div>
+    </main>
+    <main class="settings-layout" data-tab="pet">
+      <section id="preview" class="preview-stage" aria-label="Pet animation preview">
+        <img id="preview-pet" class="pet" alt="" />
+        <button id="all-pets" type="button" class="secondary gallery-back">‹ All pets</button>
+        <span class="preview-caption">Preview</span>
+      </section>
+      <section class="inspector">
+        <div id="preview-selectors" class="preview-selectors">
+          <label><span class="sr-only">Pet</span><select id="pet-select" aria-label="Pet"></select></label>
+          <label><span class="sr-only">Preview animation</span><select id="animation-select" aria-label="Preview animation"></select></label>
+        </div>
+        <section class="panel active" data-panel="pet">
+          <h2>Random cast</h2>
+          <div class="group">
+            <div class="row"><span>Include this pet<small id="cast-count">All pets are included</small></span><button id="include-random-cast" class="switch" type="button" role="switch" aria-checked="true" aria-label="Include this pet in the random cast"></button></div>
+          </div>
+          <h2>Appearance</h2>
+          <div class="group">
+            <label class="row"><span>Pet size</span><span class="range"><input id="pet-size" type="range" min="75" max="175" /><output id="pet-size-value"></output></span></label>
+            <label class="row"><span>Pet opacity</span><span class="range"><input id="pet-opacity" type="range" min="30" max="100" /><output id="pet-opacity-value"></output></span></label>
+          </div>
+          <h2>Name label</h2>
+          <div class="group">
+            <label class="row"><span>Visibility</span><select id="label-visibility"><option value="always">Always</option><option value="hover">While hovered</option><option value="hidden">Hidden</option></select></label>
+            <label class="row"><span>Text size</span><span class="range"><input id="label-size" type="range" min="75" max="160" /><output id="label-size-value"></output></span></label>
+          </div>
+          <h2>Walking</h2>
+          <div class="group">
+            <label class="row"><span>Walking speed</span><select id="motion-level"><option value="gentle">Gentle</option><option value="standard">Standard</option><option value="playful">Playful</option></select></label>
+            <div class="row"><span>Reduce movement<small>Keeps the pet in place while it animates</small></span><button id="reduced-motion" class="switch" type="button" role="switch" aria-checked="false" aria-label="Reduce movement"></button></div>
+            <div class="row"><span>Stop walking while hovered<small>Hover the preview to try it</small></span><button id="pause-hover" class="switch" type="button" role="switch" aria-checked="false" aria-label="Stop walking while hovered"></button></div>
+          </div>
+        </section>
+        <section id="panel-studio" class="panel studio-panel" data-panel="studio" role="tabpanel" aria-labelledby="tab-studio" hidden>
+          <header class="studio-heading"><div><h1 id="studio-heading-title">Pet Studio</h1><p id="studio-heading-copy">Create a local pet from reviewed animation frames.</p></div><span id="studio-api-status" class="studio-status">Checking OpenAI…</span></header>
+          <section class="studio-step studio-mode-step" data-studio-step="0">
+            <h2 tabindex="-1">1 · Choose what to make</h2>
+            <label>Studio workflow<select id="studio-mode"><option value="">Choose…</option><option value="new">Create a new pet</option><option value="extend">Extend an existing pet</option></select></label>
+            <p class="hint">Create starts a separate pet. Extend keeps the selected pet and adds approved APNGs, state animations, or menu actions.</p>
+          </section>
+          <section id="studio-character-step" class="studio-step" data-studio-step="1" hidden>
+            <h2 tabindex="-1">2 · Character</h2>
+            <div id="studio-new-fields">
+              <div class="studio-grid"><label>Name<input id="studio-name" maxlength="64" placeholder="Mochi Explorer" /></label><label>Reference choice<select id="studio-reference-kind"><option value="">Choose…</option><option value="new">Create a new reference</option><option value="existing">Use an existing pet reference</option></select></label><label id="studio-source-field" hidden>Reference pet<select id="studio-source"></select></label></div>
+            </div>
+            <label id="studio-existing-field" hidden>Pet to extend<select id="studio-existing"></select></label>
+            <label id="studio-character-prompt-field">Character description<textarea id="studio-character-prompt" maxlength="30000" rows="3" placeholder="A tiny teal dragon cartographer with a leather map case…"></textarea></label>
+            <div class="studio-options"><label>Model<select id="studio-model"><option value="gpt-image-2.5-sunburst">GPT Image 2.5 Sunburst</option><option value="gpt-image-2.5-flare">GPT Image 2.5 Flare</option></select></label><label>Quality<select id="studio-quality"><option>low</option><option selected>medium</option><option>high</option><option>xhigh</option><option>max</option></select></label></div>
+            <p class="hint">Generate reference starts a new-reference draft. If you chose an existing reference, Next starts the draft.</p>
+            <div class="studio-actions"><button id="studio-cancel" class="secondary" type="button" hidden>Cancel draft</button><button id="studio-start" class="secondary" type="button" hidden>Start draft</button><button id="studio-reference-generate" class="primary" type="button" disabled>Generate reference</button></div>
+            <span id="studio-reference-loading" class="studio-reference-loading" aria-hidden="true" hidden><i aria-hidden="true"></i>Generating character reference…</span>
+            <img id="studio-reference-preview" class="studio-preview" alt="Approved character reference" hidden />
+          </section>
+          <section id="studio-animation-step" class="studio-step" data-studio-step="2" hidden>
+            <h2 tabindex="-1">3 · Animation</h2>
+            <div class="studio-grid"><label>Animation name<input id="studio-animation-id" maxlength="48" placeholder="walk" /></label><label>Kind<select id="studio-role"><option value="stationary">Stationary</option><option value="locomotion">Walking</option></select></label><label>Loop duration<input id="studio-duration" type="number" min="128" max="60000" value="900" /> ms</label></div>
+            <label>Action description<textarea id="studio-animation-prompt" maxlength="19000" rows="3" placeholder="Walks forward with a light, confident two-step gait…"></textarea></label>
+            <div class="studio-actions"><label class="studio-import-button secondary">Import APNG<input id="studio-import-animation" type="file" accept="image/png,image/apng,.png,.apng" /></label><button id="studio-generate-animation" class="primary" type="button">Generate sprite sheet</button><button id="studio-create-animation" class="secondary" type="button" disabled>Create animation</button><button id="studio-approve-animation" class="secondary" type="button" disabled>Approve animation</button><button id="studio-discard-animation" class="secondary" type="button" disabled>Discard draft animation</button></div>
+            <p class="hint">One transparent sprite sheet produces six aligned frames. Review them, then create and approve the looping APNG.</p>
+            <div class="studio-review"><figure class="studio-frames-review"><figcaption>Six individual frames</figcaption><div id="studio-frame-preview" class="studio-frame-grid" data-ready="false"></div><span id="studio-sheet-loading" class="studio-review-loading" aria-hidden="true" hidden><i></i>Generating and checking one sprite sheet…</span><span class="studio-review-empty">Generate six frames to preview them here.</span></figure><figure><figcaption>APNG loop</figcaption><img id="studio-apng-preview" alt="APNG animation preview" hidden /><span id="studio-animation-loading" class="studio-review-loading" aria-hidden="true" hidden><i></i>Creating the APNG loop…</span><span class="studio-review-empty">Create or import an APNG to preview it here.</span></figure></div>
+            <p id="studio-approved" class="hint">No approved animations yet.</p>
+          </section>
+          <section id="studio-map-step" class="studio-step" data-studio-step="3" hidden>
+            <h2 tabindex="-1">4 · Assign and save</h2>
+            <p id="studio-mapping-hint" class="hint">Create and approve animations, then assign them to every required behavior.</p>
+            <div id="studio-mappings" class="studio-mappings"></div>
+            <section class="studio-orchestrator" aria-labelledby="studio-orchestrator-title"><div><h3 id="studio-orchestrator-title">Orchestrator animations</h3><p class="hint studio-orchestrator-note">The orchestrator walks normally. The listening APNG runs only while you are speaking.</p><button id="studio-focus-orchestrator" class="secondary" type="button">Open assignment view</button></div><div class="studio-orchestrator-slots"><label><b>Walking</b><span class="studio-orchestrator-preview"><img id="studio-orchestrator-walk-preview" alt="Walking APNG preview" hidden /></span><input id="studio-import-walking" type="file" accept="image/png,image/apng,.png,.apng" aria-label="Choose Walking APNG" /><select id="studio-orchestrator-walk" aria-label="Walking animation assignment"><option value="">Choose…</option></select><small>Default state</small></label><label><b>Listening</b><span class="studio-orchestrator-preview"><img id="studio-orchestrator-listening-preview" alt="Listening APNG preview" hidden /></span><input id="studio-import-listening" type="file" accept="image/png,image/apng,.png,.apng" aria-label="Choose Listening APNG" /><select id="studio-orchestrator-listening" aria-label="Listening animation assignment"><option value="">Choose…</option></select><small>Waiting for your voice</small></label></div><div class="studio-orchestrator-actions"><button id="studio-preview-sequence" class="secondary" type="button">Preview sequence</button><button id="studio-assign-now" class="primary" type="button">Assign to orchestrator</button></div><label class="studio-assign"><input id="studio-assign-orchestrator" type="checkbox" checked /> Assign this pet to the orchestrator when saved</label></section>
+            <div class="studio-action-row"><label>Action ID<input id="studio-action-id" placeholder="wave" maxlength="48" /></label><label>Menu label<input id="studio-action-label" placeholder="Wave" maxlength="24" /></label><label>Animation<select id="studio-action-animation"></select></label><button id="studio-add-action" class="secondary" type="button">Add menu action</button></div>
+            <p id="studio-actions-list" class="hint">No menu actions.</p>
+            <button id="studio-save" class="primary studio-save" type="button">Validate &amp; save pet</button>
+          </section>
+          <nav id="studio-wizard-nav" class="studio-wizard-nav" aria-label="Pet Studio steps"><button id="studio-wizard-previous" class="secondary" type="button">Previous</button><span id="studio-wizard-progress" role="status" aria-live="polite">Step 1 of 4</span><button id="studio-wizard-next" class="primary" type="button">Next</button></nav>
+          <p id="studio-message" class="studio-message" role="status" aria-live="polite"></p>
+        </section>
+        <p id="studio-operation-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+        <section id="panel-assistant" class="panel assistant-panel" data-panel="assistant" role="tabpanel" aria-labelledby="tab-assistant" hidden>
+          <header class="assistant-heading"><div><h1>Voice assistant</h1><p>Configure it here, start it, then speak to Mossback with your wake phrase.</p></div><span id="assistant-ready" class="assistant-badge" role="status" aria-live="polite">Checking…</span></header>
+          <div class="assistant-grid">
+            <div class="assistant-main">
+              <section class="assistant-card"><h2>Identity</h2><label>Assistant name<input id="assistant-name" maxlength="32" autocomplete="off" /></label><p id="assistant-wake-phrase" class="hint">Start the assistant to activate its local wake phrase.</p></section>
+              <section class="assistant-card"><h2>Pi execution model</h2><div class="assistant-fields"><label>Model<select id="assistant-model"><option value="gpt-5.6-luna">GPT-5.6 Luna</option><option value="gpt-5.6-sol">GPT-5.6 Sol</option><option value="gpt-5.6-terra">GPT-5.6 Terra</option></select></label><label>Thinking<select id="assistant-thinking"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="xhigh">X-high</option></select></label></div><p class="hint">GPT-Live handles speech. This Pi model performs terminal work and uses skills.</p></section>
+              <section class="assistant-card"><h2>Conversation</h2><div class="row"><span>Start in selected workspace project</span><b>On</b></div><div class="row"><span>Keep transcript after session</span><b>Off</b></div><div class="row"><span>Permission gates</span><b>Off</b></div><p class="hint">An active voice session sends microphone audio to OpenAI and may incur API charges.</p></section>
+              <div class="assistant-actions"><button id="assistant-toggle" class="primary" type="button">Start assistant</button></div>
+            </div>
+            <aside class="assistant-side"><section class="assistant-pet"><span id="assistant-pet-placeholder" aria-hidden="true">🐢</span><img id="assistant-pet-preview" alt="Mossback tortoise walking" hidden /><b id="assistant-intro">Hi, I’m your assistant.</b><small>Fixed assistant pet · cannot be changed</small></section><section class="assistant-card"><h2>Connection</h2><div class="row"><span>GPT-Live 1</span><b id="assistant-live-status">Unavailable</b></div><div class="row"><span>Herdr session</span><b id="assistant-herdr-status">Disconnected</b></div><div class="row"><span>Pi agent</span><b id="assistant-pi-status">GPT-5.6 Luna · medium</b></div><p class="hint">No separate conversation window opens. Say the wake phrase and continue speaking.</p></section></aside>
+          </div>
+        </section>
+        <section id="panel-app" class="panel" data-panel="app" role="tabpanel" aria-labelledby="tab-app" hidden>
+          <h1>App</h1>
+          <h2>Village</h2>
+          <div class="group">
+            <div class="row"><span>Town visibility<small id="town-visibility-status">Checking current state…</small></span><button id="town-visibility-toggle" class="secondary" type="button">Hide Town</button></div>
+            <div class="row"><span>Hide completed pets<small>They return if their status changes</small></span><button id="hide-completed-pets" class="switch" type="button" role="switch" aria-checked="false" aria-label="Hide completed pets after a delay"></button></div>
+            <label class="row"><span>Hide after</span><select id="completed-hide-delay"><option value="1">1 minute</option><option value="5">5 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">60 minutes</option></select></label>
+          </div>
+          <h2>General</h2>
+          <div class="group">
+            <label class="row"><span>Appearance</span><select id="settings-appearance"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+            <div class="row"><span>Also start with Herdr<small>Optional when you use Herdr alongside the standalone app.</small></span><button id="open-with-herdr" class="switch" type="button" role="switch" aria-checked="false" aria-label="Also start Pet Town when Herdr starts"></button></div>
+          </div>
+          <p class="hint">Manual file edits can be loaded with the Herdr action <code>pet-town.reload-preferences</code>.</p>
+          <button id="reset-all" class="secondary danger">Reset Everything…</button>
+        </section>
+        <section id="panel-agents" class="panel agents-panel" data-panel="agents" role="tabpanel" aria-labelledby="tab-agents" hidden>
+          <h1 id="agents-title">Agent connections</h1>
+          <p class="agents-intro">Connect the coding tools whose sessions should appear in your village.</p>
+          <div id="adapter-cards" class="adapter-cards" role="list" aria-busy="true"></div>
+          <p class="agents-privacy">Prompt and code fields are never stored, displayed, or sent over the network.</p>
+        </section>
+        <section id="panel-about" class="panel" data-panel="about" role="tabpanel" aria-labelledby="tab-about" hidden>
+          <h1>About Pet Town</h1>
+          <p class="about">A local desktop village for your live coding agents.</p>
+          <p class="hint">Version <span id="app-version">—</span> · Preferences and user pets stay under <code>~/.pet-town/</code> on this Mac. Ordinary village monitoring never sends prompts, project paths, or output to OpenAI. Voice sends delegated task context to the selected Pi model; Pet Studio sends only approved generation inputs.</p>
+          <a href="https://github.com/abhishek944/pet-town" target="_blank" rel="noreferrer">View project on GitHub</a>
+        </section>
+        <p id="message" class="message" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+    <p id="gallery-hint" class="hint" hidden>Choose a pet to adjust it, or open Studio to create one.</p>
+    <footer id="settings-footer"><button id="reset-pet" class="secondary" type="button">Reset pet</button><button id="agents-done" class="secondary" type="button" hidden>Done</button><span id="dirty" hidden>Unapplied changes</span><button id="apply" class="primary" type="button">Apply</button></footer>
+  </body>
+</html>

@@ -5,7 +5,7 @@
       "dependsOn": ["^build"],
       "inputs": [
         "$TURBO_DEFAULT$",
-        "$TURBO_ROOT$/apps/pet-village/src/pets/**",
+        "$TURBO_ROOT$/apps/pet-town/src/pets/**",
         "$TURBO_ROOT$/bin/macos-*/**"
       ],
       "outputs": ["dist/**"]

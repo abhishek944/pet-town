@@ -1,0 +1,29 @@
+{
+  "name": "@pet-town/desktop-v2",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Excalibur-native Pet Town v2 desktop application",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "pnpm run typecheck && vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src vite.config.ts --config ../../eslint.config.js",
+    "lint:rust": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-features --lib --bins -- -D warnings",
+    "check:rust": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@pet-town/core": "workspace:*",
+    "@tauri-apps/api": "^2",
+    "excalibur": "^0.32.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3"
+  }
+}

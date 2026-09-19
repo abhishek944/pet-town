@@ -8,6 +8,7 @@ node_modules/
 .turbo/
 dist/
 apps/web/.downloads/
+bin/macos-*/pet-town.dmg
 *.log
 *.local
 __pycache__/
@@ -15,8 +16,8 @@ __pycache__/
 
 # Rust/Tauri output
 apps/*/src-tauri/target/
-apps/*/src-tauri/resources/pet-village-pi-runtime/
-apps/*/src-tauri/resources/pet-village-pi-runtime.tar.gz
+apps/*/src-tauri/resources/pet-town-pi-runtime/
+apps/*/src-tauri/resources/pet-town-pi-runtime.tar.gz
 target/
 
 # Editors and operating systems

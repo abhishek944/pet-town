@@ -5,24 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Pet Village turns your AI coding sessions into a village of animated desktop companions."
+      content="Pet Town turns your AI coding sessions into a village of animated desktop companions."
     />
-    <title>Pet Village — Your agents, with a little more soul.</title>
+    <title>Pet Town — Your agents, with a little more soul.</title>
+    <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
     <header class="site-header">
       <div class="nav-shell">
-        <a class="brand" href="#top" aria-label="Pet Village home">
-          <svg viewBox="0 0 32 32" aria-hidden="true">
+        <a class="brand" href="#top" aria-label="Pet Town home">
+          <svg width="25" height="25" viewBox="0 0 32 32" aria-hidden="true">
             <path d="M8 11 6 5l7 4a14 14 0 0 1 6 0l7-4-2 6v8c0 5-3 8-8 8s-8-3-8-8z" />
             <path d="M12 17h.01M20 17h.01M14 21c1.3 1 2.7 1 4 0" />
           </svg>
-          <span>Pet Village</span>
+          <span>Pet Town</span>
         </a>
         <nav aria-label="Primary navigation">
           <a href="#village">The village</a>
           <a href="#cast">Meet the cast</a>
           <a href="#connections">Connections</a>
+          <a
+            href="https://github.com/abhishek944/pet-town"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
+          >
         </nav>
         <details class="mobile-nav">
           <summary>Menu</summary>
@@ -30,6 +37,12 @@
             <a href="#village">The village</a>
             <a href="#cast">Meet the cast</a>
             <a href="#connections">Connections</a>
+            <a
+              href="https://github.com/abhishek944/pet-town"
+              target="_blank"
+              rel="noopener noreferrer"
+              >GitHub</a
+            >
           </div>
         </details>
         <div class="nav-meta"><span>v0.1.4</span><b>Made for macOS</b></div>
@@ -49,8 +62,7 @@
         <div class="hero-actions">
           <a
             class="button primary js-primary-download"
-            href="/downloads/Pet-Village-macOS-Apple-Silicon.tar.gz"
-            download
+            href="https://github.com/abhishek944/pet-town/releases/download/v0.1.4/Pet-Town-macOS-Apple-Silicon.dmg"
           >
             <span aria-hidden="true">⇩</span>
             <span class="js-download-label">Download for macOS</span>
@@ -61,14 +73,22 @@
           Apple Silicon recommended · Intel option available
         </p>
         <div class="architecture-links" aria-label="Mac download choices">
-          <a href="/downloads/Pet-Village-macOS-Apple-Silicon.tar.gz" download>Apple Silicon</a>
+          <a
+            href="https://github.com/abhishek944/pet-town/releases/download/v0.1.4/Pet-Town-macOS-Apple-Silicon.dmg"
+            >Apple Silicon</a
+          >
           <span>·</span>
-          <a href="/downloads/Pet-Village-macOS-Intel.tar.gz" download>Intel Mac</a>
+          <a
+            href="https://github.com/abhishek944/pet-town/releases/download/v0.1.4/Pet-Town-macOS-Intel.dmg"
+            >Intel Mac</a
+          >
         </div>
-        <p class="micro">Complete preview archive · Not notarized · macOS may request approval</p>
+        <p class="micro">
+          Drag Pet Town to Applications · Not notarized · macOS may request approval
+        </p>
       </section>
 
-      <section class="preview-section" id="village" aria-label="Pet Village preview">
+      <section class="preview-section" id="village" aria-label="Pet Town preview">
         <div class="app-window section-shell">
           <div class="window-bar">
             <span class="traffic" aria-hidden="true">○ ○ ○</span>
@@ -80,7 +100,7 @@
               <div class="panel-label">
                 <span>village / welcome.ts</span><span>TypeScript</span>
               </div>
-              <pre><code><i>01</i>  const village = new PetVillage();
+              <pre><code><i>01</i>  const village = new PetTown();
 <i>02</i>
 <i>03</i>  village.welcome({
 <i>04</i>    companion: 'a little company',
@@ -168,27 +188,28 @@ Working on your next idea_</code></pre>
           <div class="cast-copy">
             <h2>Find your kind<br />of company.</h2>
             <p>
-              A panda chef. A fox ronin. A very polite ghost. Start with 20 bundled characters, and
-              let your village find its rhythm.
+              A panda chef. A fox ronin. A very polite ghost. Start with
+              <span class="js-character-total">20</span> bundled characters, and let your village
+              find its rhythm.
             </p>
             <p>
               Choose who joins the cast. Tune each pet’s size, labels, opacity, and walking speed—or
               keep things calm with reduced movement.
             </p>
-            <a class="button secondary" href="#cast-card">Meet six preview characters ↑</a>
+            <a class="button secondary" href="#cast-card">Meet the full cast ↑</a>
             <p class="micro inline-notes">
               Per-character preferences <span>Respects Reduce Motion</span>
             </p>
           </div>
           <div class="cast-card" id="cast-card">
             <div class="card-header">
-              <span>The neighborhood</span><span class="js-cast-count">01 / 06 previews</span>
+              <span>The neighborhood</span><span class="js-cast-count">Character previews</span>
             </div>
             <img class="featured-pet js-featured-pet" alt="" />
             <h3 class="js-cast-name"></h3>
             <p class="js-cast-description"></p>
             <div class="cast-thumbnails" aria-label="Character previews"></div>
-            <p class="micro">Concept illustrations of six bundled characters.</p>
+            <p class="micro">Concept illustrations of every bundled character.</p>
           </div>
         </div>
       </section>
@@ -261,8 +282,8 @@ Working on your next idea_</code></pre>
             <details>
               <summary>Do I need Herdr?</summary>
               <p>
-                No. Pet Village works as a standalone macOS app. Herdr adds exact agent-pane focus
-                and built-in session awareness.
+                No. Pet Town works as a standalone macOS app. Herdr adds exact agent-pane focus and
+                built-in session awareness.
               </p>
             </details>
             <details>
@@ -287,9 +308,9 @@ Working on your next idea_</code></pre>
               </p>
             </details>
             <details class="platform-faq">
-              <summary>Which platforms does Pet Village support?</summary>
+              <summary>Which platforms does Pet Town support?</summary>
               <p>
-                Pet Village currently ships for macOS on Apple Silicon and Intel. Windows and Linux
+                Pet Town currently ships for macOS on Apple Silicon and Intel. Windows and Linux
                 downloads are not available yet.
               </p>
             </details>
@@ -303,16 +324,21 @@ Working on your next idea_</code></pre>
         <p>Give the agents behind your next idea a place to call home.</p>
         <a
           class="button primary js-primary-download"
-          href="/downloads/Pet-Village-macOS-Apple-Silicon.tar.gz"
-          download
+          href="https://github.com/abhishek944/pet-town/releases/download/v0.1.4/Pet-Town-macOS-Apple-Silicon.dmg"
           ><span class="js-footer-download-label">Bring the village to your Mac ↓</span></a
         >
         <p class="download-hint js-platform-hint">
           Apple Silicon recommended · Intel option available
         </p>
         <div class="architecture-links">
-          <a href="/downloads/Pet-Village-macOS-Apple-Silicon.tar.gz" download>Apple Silicon</a
-          ><span>·</span><a href="/downloads/Pet-Village-macOS-Intel.tar.gz" download>Intel Mac</a>
+          <a
+            href="https://github.com/abhishek944/pet-town/releases/download/v0.1.4/Pet-Town-macOS-Apple-Silicon.dmg"
+            >Apple Silicon</a
+          ><span>·</span
+          ><a
+            href="https://github.com/abhishek944/pet-town/releases/download/v0.1.4/Pet-Town-macOS-Intel.dmg"
+            >Intel Mac</a
+          >
         </div>
         <p class="micro">macOS · v0.1.4 · MIT Licensed · Preview builds are not notarized</p>
       </section>
@@ -320,11 +346,17 @@ Working on your next idea_</code></pre>
 
     <footer>
       <div class="section-shell">
-        <a class="brand" href="#top">Pet Village</a>
+        <a class="brand" href="#top">Pet Town</a>
         <p>A little company for the work ahead.</p>
         <div>
           <a href="#village">The village</a><a href="#cast">Characters</a
-          ><a href="#connections">Connections</a><a href="#download">Download</a>
+          ><a href="#connections">Connections</a><a href="#download">Download</a
+          ><a
+            href="https://github.com/abhishek944/pet-town"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
+          >
         </div>
       </div>
     </footer>

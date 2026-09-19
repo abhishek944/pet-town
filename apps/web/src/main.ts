@@ -1,51 +1,11 @@
-import bao from "../../pet-village/src/pets/bao-panda-chef/walk.png";
-import cat from "../../pet-village/src/pets/cat/walk.png";
-import ember from "../../pet-village/src/pets/ember-fox-ronin/walk.png";
-import mossback from "../../pet-village/src/pets/mossback-turtle-monk/walk.png";
-import skiff from "../../pet-village/src/pets/skiff-raccoon-sky-pirate/walk.png";
-import wisp from "../../pet-village/src/pets/wisp-little-ghost/walk.png";
-import "./styles.css";
+import { characters } from "./characters";
 
-type Character = { name: string; description: string; image: string };
 type NavigatorWithHints = Navigator & {
   userAgentData?: {
     platform?: string;
     getHighEntropyValues?: (hints: string[]) => Promise<{ architecture?: string }>;
   };
 };
-
-const characters: Character[] = [
-  {
-    name: "Bao Panda Chef",
-    description: "Waddles through the village and gets busy chopping bamboo.",
-    image: bao,
-  },
-  {
-    name: "Ember Fox Ronin",
-    description: "Keeps a watchful eye on the work, blade close at hand.",
-    image: ember,
-  },
-  {
-    name: "Wisp Little Ghost",
-    description: "Floats quietly nearby and offers excellent moral support.",
-    image: wisp,
-  },
-  {
-    name: "Tabby Cat",
-    description: "Finds the warmest corner and supervises every open tab.",
-    image: cat,
-  },
-  {
-    name: "Mossback Turtle Monk",
-    description: "Takes the patient path and carries a tiny village garden.",
-    image: mossback,
-  },
-  {
-    name: "Skiff Raccoon Sky Pirate",
-    description: "Charts a daring course through even the messiest task list.",
-    image: skiff,
-  },
-];
 
 const featured = document.querySelector<HTMLImageElement>(".js-featured-pet");
 const castName = document.querySelector<HTMLElement>(".js-cast-name");
@@ -60,7 +20,9 @@ function selectCharacter(index: number): void {
   featured.alt = character.name;
   castName.textContent = character.name;
   description.textContent = character.description;
-  counter.textContent = `${String(index + 1).padStart(2, "0")} / 06 previews`;
+  const current = String(index + 1).padStart(2, "0");
+  const total = String(characters.length).padStart(2, "0");
+  counter.textContent = `${current} / ${total} previews`;
   thumbnails?.querySelectorAll("button").forEach((button, buttonIndex) => {
     button.setAttribute("aria-pressed", String(buttonIndex === index));
   });
@@ -79,6 +41,10 @@ async function posterFrame(source: string): Promise<string> {
 }
 
 async function initializeCharacters(): Promise<void> {
+  document.querySelectorAll<HTMLElement>(".js-character-total").forEach((element) => {
+    element.textContent = String(characters.length);
+  });
+
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   if (motion.matches) {
     const posters = await Promise.all(characters.map(({ image }) => posterFrame(image)));
@@ -88,15 +54,17 @@ async function initializeCharacters(): Promise<void> {
   }
   motion.addEventListener("change", () => window.location.reload());
 
-  const petImages = {
-    bao: characters[0].image,
-    ember: characters[1].image,
-    wisp: characters[2].image,
-    cat: characters[3].image,
+  const previewPets = {
+    bao: "bao-panda-chef",
+    ember: "ember-fox-ronin",
+    wisp: "wisp-little-ghost",
+    cat: "cat",
   };
-  for (const [key, source] of Object.entries(petImages)) {
+  const characterById = new Map(characters.map((character) => [character.id, character]));
+  for (const [key, characterId] of Object.entries(previewPets)) {
     const image = document.querySelector<HTMLImageElement>(`[data-pet="${key}"]`);
-    if (image) image.src = source;
+    const character = characterById.get(characterId);
+    if (image && character) image.src = character.image;
   }
 
   characters.forEach((character, index) => {
@@ -134,7 +102,7 @@ async function preferredMacDownload(): Promise<{ href: string; label: string; hi
     return {
       href: "#download",
       label: "View macOS downloads",
-      hint: `Detected ${os} · Pet Village currently ships for macOS only`,
+      hint: `Detected ${os} · Pet Town currently ships for macOS only`,
     };
   }
   const nav = navigator as NavigatorWithHints;
@@ -142,12 +110,12 @@ async function preferredMacDownload(): Promise<{ href: string; label: string; hi
   const intel = values?.architecture?.toLowerCase().includes("x86") ?? false;
   return intel
     ? {
-        href: "/downloads/Pet-Village-macOS-Intel.tar.gz",
+        href: "https://github.com/abhishek944/pet-town/releases/download/v0.1.4/Pet-Town-macOS-Intel.dmg",
         label: "Download for Intel Mac",
         hint: "Intel Mac detected · Apple Silicon option available",
       }
     : {
-        href: "/downloads/Pet-Village-macOS-Apple-Silicon.tar.gz",
+        href: "https://github.com/abhishek944/pet-town/releases/download/v0.1.4/Pet-Town-macOS-Apple-Silicon.dmg",
         label: "Download for macOS",
         hint: "Apple Silicon recommended · Intel option available",
       };

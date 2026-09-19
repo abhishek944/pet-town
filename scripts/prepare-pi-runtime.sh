@@ -22,10 +22,10 @@ macos-x64 | x86_64-apple-darwin)
   ;;
 esac
 
-DEST="$ROOT/bin/$PACKAGE/pet-village-pi-runtime.tar.gz"
-CACHE="${TMPDIR:-/tmp}/pet-village-runtime-cache"
+DEST="$ROOT/bin/$PACKAGE/pet-town-pi-runtime.tar.gz"
+CACHE="${TMPDIR:-/tmp}/pet-town-runtime-cache"
 ARCHIVE="$CACHE/node-v$NODE_VERSION-darwin-$ARCH.tar.xz"
-WORK=$(mktemp -d "${TMPDIR:-/tmp}/pet-village-pi-runtime.XXXXXX")
+WORK=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-pi-runtime.XXXXXX")
 trap 'rm -rf "$WORK"' EXIT INT TERM
 mkdir -p "$CACHE" "$WORK/runtime/bin" "$WORK/runtime/package"
 
@@ -42,7 +42,7 @@ install -m 755 "$NODE_ROOT/bin/node" "$WORK/runtime/node"
 install -m 644 "$NODE_ROOT/LICENSE" "$WORK/runtime/NODE-LICENSE.txt"
 
 cat >"$WORK/runtime/package/package.json" <<JSON
-{"name":"pet-village-pi-runtime","private":true,"version":"0.0.0","dependencies":{"@abhishek944/pi-image-gen":"$IMAGE_GEN_VERSION","@earendil-works/pi-coding-agent":"$PI_VERSION"}}
+{"name":"pet-town-pi-runtime","private":true,"version":"0.0.0","dependencies":{"@abhishek944/pi-image-gen":"$IMAGE_GEN_VERSION","@earendil-works/pi-coding-agent":"$PI_VERSION"}}
 JSON
 cp "$ROOT/scripts/pi-runtime-package-lock.json" "$WORK/runtime/package/package-lock.json"
 (cd "$WORK/runtime/package" &&
@@ -54,7 +54,7 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 exec "$ROOT/node" "$ROOT/package/node_modules/@earendil-works/pi-coding-agent/dist/cli.js" "$@"
 SH
 chmod 755 "$WORK/runtime/bin/pi"
-install -m 600 "$ROOT/apps/pet-village/scripts/pet-studio-image-worker.mjs" \
+install -m 600 "$ROOT/apps/pet-town/scripts/pet-studio-image-worker.mjs" \
   "$WORK/runtime/package/pet-studio-image-worker.mjs"
 
 python3 - "$WORK/runtime" "$NODE_VERSION" "$PI_VERSION" "$IMAGE_GEN_VERSION" "$ARCH" <<'PY'
@@ -86,5 +86,5 @@ with open(sys.argv[2],'wb') as raw, gzip.GzipFile(filename='',mode='wb',fileobj=
             else: archive.addfile(info)
 PY
 mv "$DEST.next" "$DEST"
-rm -rf "$ROOT/bin/$PACKAGE/pet-village-pi-runtime"
+rm -rf "$ROOT/bin/$PACKAGE/pet-town-pi-runtime"
 echo "prepared: $DEST"

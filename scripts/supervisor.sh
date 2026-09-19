@@ -2,7 +2,7 @@
 set -eu
 
 PLUGIN_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-STATE_DIR=${HERDR_PLUGIN_STATE_DIR:-"${HOME}/.local/state/herdr/plugins/pet-village"}
+STATE_DIR=${HERDR_PLUGIN_STATE_DIR:-"${HOME}/.local/state/herdr/plugins/pet-town"}
 PID_FILE="$STATE_DIR/renderer.pid"
 BINARY_FILE="$STATE_DIR/renderer.binary"
 START_FILE="$STATE_DIR/renderer.started"
@@ -10,13 +10,18 @@ DIGEST_FILE="$STATE_DIR/renderer.sha256"
 LOCK_FILE="$STATE_DIR/control.lock"
 SESSIONS_DIR="$STATE_DIR/sessions"
 RELOAD_RESULT_FILE="$STATE_DIR/preferences.reload-result"
+BRIDGE_DIR="${HOME}/.local/state/pet-town"
+BRIDGE_POINTER="$BRIDGE_DIR/herdr-state-dir"
+APP_LOCK_FILE="$BRIDGE_DIR/app.lock"
 
-mkdir -p "$STATE_DIR" "$SESSIONS_DIR"
+mkdir -p "$STATE_DIR" "$SESSIONS_DIR" "$BRIDGE_DIR"
+printf '%s\n' "$STATE_DIR" >"$BRIDGE_POINTER.tmp.$$"
+mv "$BRIDGE_POINTER.tmp.$$" "$BRIDGE_POINTER"
 
 # lockf holds a kernel-backed lock for the lifetime of the nested process. It has
 # no stale-PID or partially-written lock-file race after a crash.
-if [ "${PET_VILLAGE_LOCKED:-0}" != 1 ]; then
-  PET_VILLAGE_LOCKED=1 lockf -t 15 "$LOCK_FILE" sh "$0" "$@"
+if [ "${PET_TOWN_LOCKED:-0}" != 1 ]; then
+  PET_TOWN_LOCKED=1 lockf -t 15 "$LOCK_FILE" sh "$0" "$@"
   exit $?
 fi
 
@@ -72,40 +77,40 @@ pid_matches_identity() {
   [ "$(process_started "$pid")" = "$expected_start" ] || return 1
 }
 
-is_repo_renderer() {
-  case "$1" in
-  "$PLUGIN_ROOT"/bin/*/pet-village | "$PLUGIN_ROOT"/bin/*/pet-village.bin | \
-    "$PLUGIN_ROOT"/apps/pet-village/src-tauri/target/debug/pet-village | \
-    "$PLUGIN_ROOT"/apps/pet-village/src-tauri/target/release/pet-village | \
-    "$PLUGIN_ROOT"/apps/pet-village/src-tauri/target/*/bundle/macos/Pet\ Village.app/Contents/MacOS/pet-village) return 0 ;;
-  *) return 1 ;;
-  esac
-}
-
-stop_duplicate_renderers() {
-  active_pid=$1
-  ps -ww -axo pid=,comm= | while read -r candidate executable; do
-    [ "$candidate" != "$active_pid" ] || continue
-    is_repo_renderer "$executable" || continue
-    started=$(process_started "$candidate")
-    [ -n "$started" ] || continue
-    kill "$candidate" 2>/dev/null || continue
-    attempts=0
-    while process_matches_expected "$candidate" "$executable" "$started" && [ "$attempts" -lt 50 ]; do
-      attempts=$((attempts + 1))
-      sleep 0.1
-    done
-    if process_matches_expected "$candidate" "$executable" "$started"; then
-      kill -KILL "$candidate" 2>/dev/null || true
-    fi
-  done
-}
-
 running_pid() {
   pid=$(read_pid) || return 1
   kill -0 "$pid" 2>/dev/null || return 1
   pid_matches_identity "$pid" || return 1
   printf '%s\n' "$pid"
+}
+
+existing_renderer() {
+  [ -f "$APP_LOCK_FILE" ] || return 1
+  candidate=$(cat "$APP_LOCK_FILE" 2>/dev/null || true)
+  case "$candidate" in
+  '' | *[!0-9]*) return 1 ;;
+  esac
+  kill -0 "$candidate" 2>/dev/null || return 1
+  lsof -t -- "$APP_LOCK_FILE" 2>/dev/null | grep -qx "$candidate" || return 1
+  [ "$(ps -p "$candidate" -o uid= | tr -d ' ')" = "$(id -u)" ] || return 1
+  executable=$(process_executable "$candidate")
+  [ "$(basename "$executable")" = pet-town ] || return 1
+  printf '%s\n' "$candidate"
+}
+
+adopt_renderer() {
+  pid=$1
+  binary=$(process_executable "$pid")
+  started=$(process_started "$pid")
+  [ -n "$binary" ] && [ -n "$started" ] || return 1
+  printf '%s\n' "$binary" >"$BINARY_FILE.tmp"
+  printf '%s\n' "$started" >"$START_FILE.tmp"
+  printf '%s\n' "$(binary_digest "$binary")" >"$DIGEST_FILE.tmp"
+  printf '%s\n' "$pid" >"$PID_FILE.tmp"
+  mv "$BINARY_FILE.tmp" "$BINARY_FILE"
+  mv "$START_FILE.tmp" "$START_FILE"
+  mv "$DIGEST_FILE.tmp" "$DIGEST_FILE"
+  mv "$PID_FILE.tmp" "$PID_FILE"
 }
 
 clear_process_state() {
@@ -143,24 +148,26 @@ absolute_executable() {
 }
 
 resolve_binary() {
-  if [ -n "${PET_VILLAGE_BINARY:-}" ]; then
-    absolute_executable "$PET_VILLAGE_BINARY" && return 0
+  if [ -n "${PET_TOWN_BINARY:-}" ]; then
+    absolute_executable "$PET_TOWN_BINARY" && return 0
   fi
 
   system=$(uname -s)
   machine=$(uname -m)
   case "$system:$machine" in
-  Darwin:arm64) packaged="$PLUGIN_ROOT/bin/macos-arm64/pet-village" ;;
-  Darwin:x86_64) packaged="$PLUGIN_ROOT/bin/macos-x64/pet-village" ;;
-  Linux:x86_64) packaged="$PLUGIN_ROOT/bin/linux-x64/pet-village" ;;
-  Linux:aarch64) packaged="$PLUGIN_ROOT/bin/linux-arm64/pet-village" ;;
-  *) packaged="$PLUGIN_ROOT/bin/unsupported/pet-village" ;;
+  Darwin:arm64) packaged="$PLUGIN_ROOT/bin/macos-arm64/pet-town" ;;
+  Darwin:x86_64) packaged="$PLUGIN_ROOT/bin/macos-x64/pet-town" ;;
+  Linux:x86_64) packaged="$PLUGIN_ROOT/bin/linux-x64/pet-town" ;;
+  Linux:aarch64) packaged="$PLUGIN_ROOT/bin/linux-arm64/pet-town" ;;
+  *) packaged="$PLUGIN_ROOT/bin/unsupported/pet-town" ;;
   esac
 
   for candidate in \
+    "$HOME/Applications/Pet Town.app/Contents/MacOS/pet-town" \
+    "/Applications/Pet Town.app/Contents/MacOS/pet-town" \
     "$packaged" \
-    "$PLUGIN_ROOT/apps/pet-village/src-tauri/target/release/pet-village" \
-    "$PLUGIN_ROOT/apps/pet-village/src-tauri/target/release/bundle/macos/Pet Village.app/Contents/MacOS/pet-village"; do
+    "$PLUGIN_ROOT/apps/pet-town/src-tauri/target/release/pet-town" \
+    "$PLUGIN_ROOT/apps/pet-town/src-tauri/target/release/bundle/macos/Pet Town.app/Contents/MacOS/pet-town"; do
     if absolute_executable "$candidate"; then
       return 0
     fi
@@ -170,25 +177,29 @@ resolve_binary() {
 
 start_renderer() {
   binary=$(resolve_binary) || {
-    echo "pet-village: renderer binary is missing" >&2
+    echo "pet-town: renderer binary is missing" >&2
     return 1
   }
 
   if pid=$(running_pid); then
     if renderer_matches_binary "$binary"; then
-      stop_duplicate_renderers "$pid"
-      echo "pet-village: running (pid $pid)"
+      echo "pet-town: running (pid $pid)"
       return 0
     fi
     stop_renderer >/dev/null
+  fi
+  if existing=$(existing_renderer) && [ -n "$existing" ]; then
+    adopt_renderer "$existing"
+    echo "pet-town: running (pid $existing)"
+    return 0
   fi
   clear_process_state
 
   # The renderer is intentionally quiet; discarding output prevents a faulty
   # WebView process from filling the plugin state directory indefinitely.
   inherit_openai_key
-  PET_VILLAGE_SESSION_REGISTRY="$SESSIONS_DIR" \
-    PET_VILLAGE_RELOAD_RESULT="$RELOAD_RESULT_FILE" \
+  PET_TOWN_SESSION_REGISTRY="$SESSIONS_DIR" \
+    PET_TOWN_RELOAD_RESULT="$RELOAD_RESULT_FILE" \
     nohup "$binary" >/dev/null 2>&1 &
   pid=$!
 
@@ -203,14 +214,24 @@ start_renderer() {
     sleep 0.05
   done
   if [ -z "$started" ]; then
-    echo "pet-village: could not verify renderer startup" >&2
+    if existing=$(existing_renderer) && [ -n "$existing" ]; then
+      adopt_renderer "$existing"
+      echo "pet-town: running (pid $existing)"
+      return 0
+    fi
+    echo "pet-town: could not verify renderer startup" >&2
     return 1
   fi
 
   sleep 0.5
   if ! process_matches_expected "$pid" "$binary" "$started"; then
-    # Never signal a PID after its verified identity has changed.
-    echo "pet-village: renderer identity changed during startup" >&2
+    # A concurrent app launch may have won the application lock.
+    if existing=$(existing_renderer) && [ -n "$existing" ]; then
+      adopt_renderer "$existing"
+      echo "pet-town: running (pid $existing)"
+      return 0
+    fi
+    echo "pet-town: renderer identity changed during startup" >&2
     return 1
   fi
 
@@ -225,17 +246,37 @@ start_renderer() {
 
   if ! running_pid >/dev/null; then
     clear_process_state
-    echo "pet-village: renderer identity changed during startup" >&2
+    echo "pet-town: renderer identity changed during startup" >&2
     return 1
   fi
-  stop_duplicate_renderers "$pid"
-  echo "pet-village: started (pid $pid)"
+  echo "pet-town: started (pid $pid)"
+}
+
+show_renderer() {
+  start_renderer
+  pid=$(running_pid) || return 1
+  kill -CONT "$pid"
+  echo "pet-town: visible (pid $pid)"
+}
+
+hide_renderer() {
+  if ! pid=$(running_pid); then
+    if existing=$(existing_renderer) && [ -n "$existing" ]; then
+      adopt_renderer "$existing"
+      pid=$existing
+    else
+      echo "pet-town: stopped"
+      return 0
+    fi
+  fi
+  kill -HUP "$pid"
+  echo "pet-town: hidden (pid $pid)"
 }
 
 stop_renderer() {
   if ! pid=$(running_pid); then
     clear_process_state
-    echo "pet-village: stopped"
+    echo "pet-town: stopped"
     return 0
   fi
 
@@ -248,31 +289,31 @@ stop_renderer() {
     sleep 0.1
   done
   if pid_matches_identity "$pid" && kill -0 "$pid" 2>/dev/null; then
-    echo "pet-village: shutdown is waiting for assistant cleanup" >&2
+    echo "pet-town: shutdown is waiting for assistant cleanup" >&2
     return 1
   fi
   clear_process_state
-  echo "pet-village: stopped"
+  echo "pet-town: stopped"
 }
 
 show_status() {
   if pid=$(running_pid); then
-    echo "pet-village: running (pid $pid)"
+    echo "pet-town: running (pid $pid)"
   else
     clear_process_state
-    echo "pet-village: stopped"
+    echo "pet-town: stopped"
   fi
 }
 
 start_from_preferences() {
   binary=$(resolve_binary) || {
-    echo "pet-village: renderer binary is missing" >&2
+    echo "pet-town: renderer binary is missing" >&2
     return 1
   }
   if "$binary" --startup-enabled; then
     start_renderer
   else
-    echo "pet-village: startup disabled in preferences"
+    echo "pet-town: startup disabled in preferences"
   fi
 }
 
@@ -280,7 +321,7 @@ open_preferences() {
   start_renderer >/dev/null
   pid=$(running_pid) || return 1
   kill -USR1 "$pid"
-  echo "pet-village: preferences opened"
+  echo "pet-town: preferences opened"
 }
 
 reload_preferences() {
@@ -294,23 +335,25 @@ reload_preferences() {
     sleep 0.05
   done
   [ -f "$RELOAD_RESULT_FILE" ] || {
-    echo "pet-village: preference reload timed out" >&2
+    echo "pet-town: preference reload timed out" >&2
     return 1
   }
   result=$(cat "$RELOAD_RESULT_FILE")
   rm -f "$RELOAD_RESULT_FILE"
   [ "$result" = ok ] || {
-    echo "pet-village: ${result#error: }" >&2
+    echo "pet-town: ${result#error: }" >&2
     return 1
   }
-  echo "pet-village: preferences reloaded"
+  echo "pet-town: preferences reloaded"
 }
 
 register_session
 case "${1:-}" in
 startup) start_from_preferences ;;
-on | start) start_renderer ;;
-off | stop) stop_renderer ;;
+on) show_renderer ;;
+start) start_renderer ;;
+off) hide_renderer ;;
+stop) stop_renderer ;;
 preferences) open_preferences ;;
 reload-preferences) reload_preferences ;;
 status) show_status ;;
