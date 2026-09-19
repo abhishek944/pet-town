@@ -26,7 +26,14 @@ DEST="$ROOT/bin/$PACKAGE/pet-town-pi-runtime.tar.gz"
 CACHE="${TMPDIR:-/tmp}/pet-town-runtime-cache"
 ARCHIVE="$CACHE/node-v$NODE_VERSION-darwin-$ARCH.tar.xz"
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-pi-runtime.XXXXXX")
-trap 'rm -rf "$WORK"' EXIT INT TERM
+SIGN_KEYCHAIN=""
+cleanup() {
+  if [ -n "$SIGN_KEYCHAIN" ]; then
+    security delete-keychain "$SIGN_KEYCHAIN" >/dev/null 2>&1 || true
+  fi
+  rm -rf "$WORK"
+}
+trap cleanup EXIT INT TERM
 mkdir -p "$CACHE" "$WORK/runtime/bin" "$WORK/runtime/package"
 
 if [ ! -f "$ARCHIVE" ]; then
@@ -58,18 +65,35 @@ install -m 600 "$ROOT/apps/pet-town/scripts/pet-studio-image-worker.mjs" \
   "$WORK/runtime/package/pet-studio-image-worker.mjs"
 
 if [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
-  if ! security find-identity -v -p codesigning 2>/dev/null | grep -qF "$APPLE_SIGNING_IDENTITY"; then
-    [ -n "${APPLE_CERTIFICATE:-}" ] && [ -n "${APPLE_CERTIFICATE_PASSWORD:-}" ] || {
-      echo "APPLE_SIGNING_IDENTITY is missing from keychains and APPLE_CERTIFICATE is incomplete" >&2
+  if security find-identity -v -p codesigning 2>/dev/null | grep -qF "$APPLE_SIGNING_IDENTITY"; then
+    echo "using installed signing identity: $APPLE_SIGNING_IDENTITY" >&2
+  elif [ -n "${APPLE_CERTIFICATE:-}" ]; then
+    [ -n "${APPLE_CERTIFICATE_PASSWORD:-}" ] || {
+      echo "APPLE_CERTIFICATE_PASSWORD is required when APPLE_CERTIFICATE is set" >&2
       exit 1
     }
-    sign_p12="${TMPDIR:-/tmp}/pet-town-runtime-signing-$$.p12"
+    SIGN_KEYCHAIN="$WORK/runtime-signing.keychain-db"
+    sign_keychain_password=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
+    sign_p12="$WORK/runtime-signing.p12"
     printf '%s' "$APPLE_CERTIFICATE" | base64 -d >"$sign_p12"
     chmod 600 "$sign_p12"
-    security import "$sign_p12" -k "$HOME/Library/Keychains/login.keychain-db" \
+    security create-keychain -p "$sign_keychain_password" "$SIGN_KEYCHAIN"
+    security set-keychain-settings -lut 21600 "$SIGN_KEYCHAIN"
+    security unlock-keychain -p "$sign_keychain_password" "$SIGN_KEYCHAIN"
+    security import "$sign_p12" -k "$SIGN_KEYCHAIN" \
       -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+    security set-key-partition-list -S apple-tool:,apple:,codesign: -s \
+      -k "$sign_keychain_password" "$SIGN_KEYCHAIN" >/dev/null
     rm -f "$sign_p12"
+    security find-identity -v -p codesigning "$SIGN_KEYCHAIN" | grep -qF "$APPLE_SIGNING_IDENTITY" || {
+      echo "APPLE_SIGNING_IDENTITY was not found in APPLE_CERTIFICATE" >&2
+      exit 1
+    }
+  else
+    echo "APPLE_SIGNING_IDENTITY is missing and APPLE_CERTIFICATE was not provided" >&2
+    exit 1
   fi
+
   echo "signing nested runtime binaries" >&2
   find "$WORK/runtime" -type f >"$WORK/runtime-files.txt"
   while IFS= read -r candidate; do
@@ -77,10 +101,28 @@ if [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
     *Mach-O*) ;;
     *) continue ;;
     esac
-    if codesign -d --verbose=4 "$candidate" 2>&1 | grep -q "^Authority="; then
-      continue
+    relative_candidate=${candidate#"$WORK/runtime/"}
+    entitlements=""
+    if [ "$relative_candidate" = node ]; then
+      entitlements="$ROOT/scripts/node-runtime-entitlements.plist"
     fi
-    codesign --sign "$APPLE_SIGNING_IDENTITY" --timestamp --options runtime --force "$candidate"
+    echo "signing runtime binary: $relative_candidate" >&2
+    python3 - "$candidate" "$APPLE_SIGNING_IDENTITY" "$SIGN_KEYCHAIN" "$entitlements" <<'PY'
+import subprocess,sys
+candidate,identity,keychain,entitlements=sys.argv[1:]
+command=["/usr/bin/codesign","--sign",identity,"--timestamp","--options","runtime","--force"]
+if keychain:
+    command.extend(["--keychain",keychain])
+if entitlements:
+    command.extend(["--entitlements",entitlements])
+command.append(candidate)
+try:
+    result=subprocess.run(command,timeout=120)
+except subprocess.TimeoutExpired:
+    print(f"codesign timed out after 120 seconds: {candidate}",file=sys.stderr)
+    raise SystemExit(124)
+raise SystemExit(result.returncode)
+PY
   done <"$WORK/runtime-files.txt"
 fi
 

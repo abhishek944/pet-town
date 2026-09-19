@@ -14,6 +14,7 @@ env:
 jobs:
   macos:
     runs-on: macos-14
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -35,6 +36,7 @@ jobs:
         run: rustup toolchain install 1.88.0 --profile minimal --target aarch64-apple-darwin --target x86_64-apple-darwin
       - run: pnpm install --frozen-lockfile
       - name: Build DMG
+        timeout-minutes: 45
         env:
           PACKAGE: ${{ matrix.package }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
