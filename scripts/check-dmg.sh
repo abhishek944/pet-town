@@ -34,5 +34,11 @@ cmp "$executable" "$package_dir/pet-town.bin"
 cmp "$runtime" "$package_dir/pet-town-pi-runtime.tar.gz"
 [ "$(plutil -extract CFBundleIdentifier raw "$app/Contents/Info.plist")" = dev.pet.town ]
 [ "$(plutil -extract CFBundleShortVersionString raw "$app/Contents/Info.plist")" = "$expected_version" ]
+if [ "${REQUIRE_SIGNED:-0}" = "1" ]; then
+  [ -n "${EXPECTED_SIGNING_IDENTITY:-}" ]
+  codesign --verify --deep --strict "$app"
+  codesign -dv "$app" 2>&1 | grep -q "Authority=${EXPECTED_SIGNING_IDENTITY}"
+  xcrun stapler validate "$app"
+fi
 
 echo "Pet Town $package DMG: pass"
