@@ -34,11 +34,26 @@ extern "C" fn request_stop(_signal: libc::c_int) {
 pub fn install_signal_handlers() {
     #[cfg(unix)]
     unsafe {
-        libc::signal(libc::SIGUSR1, request_settings as libc::sighandler_t);
-        libc::signal(libc::SIGUSR2, request_reload as libc::sighandler_t);
-        libc::signal(libc::SIGCONT, request_show as libc::sighandler_t);
-        libc::signal(libc::SIGHUP, request_hide as libc::sighandler_t);
-        libc::signal(libc::SIGTERM, request_stop as libc::sighandler_t);
+        libc::signal(
+            libc::SIGUSR1,
+            request_settings as *const () as libc::sighandler_t,
+        );
+        libc::signal(
+            libc::SIGUSR2,
+            request_reload as *const () as libc::sighandler_t,
+        );
+        libc::signal(
+            libc::SIGCONT,
+            request_show as *const () as libc::sighandler_t,
+        );
+        libc::signal(
+            libc::SIGHUP,
+            request_hide as *const () as libc::sighandler_t,
+        );
+        libc::signal(
+            libc::SIGTERM,
+            request_stop as *const () as libc::sighandler_t,
+        );
     }
 }
 
