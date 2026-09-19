@@ -1,6 +1,6 @@
 id = "pet-town"
 name = "Pet Town"
-version = "0.1.4"
+version = "0.1.5"
 min_herdr_version = "0.9.0"
 description = "A transparent desktop village for live Herdr agents"
 platforms = ["macos"]
