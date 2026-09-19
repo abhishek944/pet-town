@@ -30,14 +30,18 @@ runtime=$(find "$app/Contents/Resources" -name pet-town-pi-runtime.tar.gz -type 
 [ -d "$app" ] && [ -L "$mount/Applications" ] && [ -x "$executable" ]
 [ -n "$runtime" ] && [ -f "$runtime" ]
 file "$executable" | grep -q "$architecture"
-cmp "$executable" "$package_dir/pet-town.bin"
+if [ "${REQUIRE_SIGNED:-0}" = "1" ]; then
+  [ "$(dwarfdump --uuid "$executable" | awk '{print $2}')" = "$(dwarfdump --uuid "$package_dir/pet-town.bin" | awk '{print $2}')" ]
+else
+  cmp "$executable" "$package_dir/pet-town.bin"
+fi
 cmp "$runtime" "$package_dir/pet-town-pi-runtime.tar.gz"
 [ "$(plutil -extract CFBundleIdentifier raw "$app/Contents/Info.plist")" = dev.pet.town ]
 [ "$(plutil -extract CFBundleShortVersionString raw "$app/Contents/Info.plist")" = "$expected_version" ]
 if [ "${REQUIRE_SIGNED:-0}" = "1" ]; then
   [ -n "${EXPECTED_SIGNING_IDENTITY:-}" ]
   codesign --verify --deep --strict "$app"
-  codesign -dv "$app" 2>&1 | grep -q "Authority=${EXPECTED_SIGNING_IDENTITY}"
+  codesign -d --verbose=4 "$app" 2>&1 | grep -q "Authority=${EXPECTED_SIGNING_IDENTITY}"
   xcrun stapler validate "$app"
 fi
 
