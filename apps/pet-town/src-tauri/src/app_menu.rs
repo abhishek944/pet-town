@@ -20,7 +20,7 @@ pub fn install(app: &tauri::App) -> tauri::Result<()> {
     app.set_menu(menu)?;
     app.on_menu_event(|handle, event| match event.id().as_ref() {
         "preferences" => {
-            let _ = crate::settings_window::open_internal(handle, None);
+            let _ = crate::settings_window::open_internal(handle, None, None);
         }
         "show-town" => {
             let _ = crate::village_visibility::set(handle, true);
@@ -51,7 +51,7 @@ pub fn install(app: &tauri::App) -> tauri::Result<()> {
         .menu(&tray_menu)
         .on_menu_event(|handle, event| match event.id().as_ref() {
             "tray-settings" => {
-                let _ = crate::settings_window::open_internal(handle, None);
+                let _ = crate::settings_window::open_internal(handle, None, None);
             }
             "tray-show-town" => {
                 let _ = crate::village_visibility::set(handle, true);

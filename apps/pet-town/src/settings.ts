@@ -188,7 +188,7 @@ async function start(): Promise<void> {
     villageVisibility.load(),
   ]);
   byId<HTMLElement>("app-version").textContent = version;
-  startup.finish(initial, openContext.selectedPetId, (next, selection) => { installSnapshot(next, selection); if (location.hash === "#studio-orchestrator") navigation.show("studio"); else if (location.hash === "#assistant") navigation.show("assistant"); else installSelection(selection ?? null, false, false); });
+  startup.finish(initial, openContext.selectedPetId, (next, selection) => { installSnapshot(next, selection); if (location.hash === "#studio-orchestrator") navigation.show("studio"); else if (location.hash === "#assistant") navigation.show("assistant"); else if (location.hash === "#app" || openContext.initialTab === "app") navigation.show("app"); else installSelection(selection ?? null, false, false); });
   await adapterSettings.load();
   document.body.classList.remove("settings-loading");
   await invoke("show_settings");

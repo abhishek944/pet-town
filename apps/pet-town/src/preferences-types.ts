@@ -47,6 +47,8 @@ export interface PreferencesSnapshot {
 export interface SettingsContext {
   /** Null means a general Settings entry, rather than an explicit pet. */
   selectedPetId: string | null;
+  /** "app" opens Settings on the App tab with the Preview switch. Null keeps the current tab. */
+  initialTab: string | null;
 }
 
 export function clonePreferences(value: PreferencesFile): PreferencesFile {

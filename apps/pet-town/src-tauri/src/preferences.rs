@@ -10,6 +10,7 @@ pub(crate) struct StoreState {
     pub applied: PreferencesFile,
     pub warning: Option<String>,
     pub read_only: bool,
+    pub first_run: bool,
 }
 pub struct PreferencesStore {
     pub(crate) path: Option<PathBuf>,
@@ -43,15 +44,16 @@ impl PreferencesStore {
                 applied,
                 warning: Some(warning),
                 read_only: true,
+                first_run: false,
             }),
         }
     }
     pub(crate) fn load(path: PathBuf, ids: Vec<String>) -> Self {
         let defaults = PreferencesFile::defaults(&ids);
-        let state = match preferences_io::read(&path, &ids) {
-            ReadResult::Missing => preferences_state::valid(defaults),
-            ReadResult::Valid(applied) => preferences_state::valid(applied),
-            ReadResult::Future(version) => StoreState {
+        let (state, first_run) = match preferences_io::read(&path, &ids) {
+            ReadResult::Missing => (preferences_state::valid(defaults), true),
+            ReadResult::Valid(applied) => (preferences_state::valid(applied), false),
+            ReadResult::Future(version) => (StoreState {
                 revision: 0,
                 ids: Vec::new(),
                 applied: defaults,
@@ -59,13 +61,23 @@ impl PreferencesStore {
                     "preferences are read-only because they use newer schema version {version}; update Pet Town"
                 )),
                 read_only: true,
-            },
-            ReadResult::Invalid(error) => preferences_state::invalid(&path, defaults, error),
+                first_run: false,
+            }, false),
+            ReadResult::Invalid(error) => (preferences_state::invalid(&path, defaults, error), false),
         };
         Self {
             path: Some(path),
-            state: Mutex::new(StoreState { ids, ..state }),
+            state: Mutex::new(StoreState {
+                ids,
+                first_run,
+                ..state
+            }),
         }
+    }
+
+    pub fn consume_first_run(&self) -> bool {
+        let mut state = self.state.lock().unwrap_or_else(|error| error.into_inner());
+        std::mem::replace(&mut state.first_run, false)
     }
 
     pub fn snapshot(&self) -> PreferencesSnapshot {

@@ -97,7 +97,11 @@ pub fn run() {
             control::start(app.handle().clone());
             orchestrator::commands::preferences_changed(app.handle());
             if app_launch::launched_from_app_bundle() {
-                let _ = settings_window::open_internal(app.handle(), None);
+                let first_run = app
+                    .state::<preferences::PreferencesStore>()
+                    .consume_first_run();
+                let initial_tab = first_run.then_some("app".to_owned());
+                let _ = settings_window::open_internal(app.handle(), None, initial_tab);
             }
             #[cfg(target_os = "macos")]
             window::start_hit_test_loop(app.handle().clone());
@@ -161,7 +165,7 @@ pub fn run() {
             }
             tauri::RunEvent::Exit => app.state::<pet_studio::PetStudioState>().cleanup(),
             tauri::RunEvent::Reopen { .. } => {
-                let _ = settings_window::open_internal(app, None);
+                let _ = settings_window::open_internal(app, None, None);
             }
             _ => {}
         });

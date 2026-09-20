@@ -75,7 +75,7 @@ pub fn start(app: AppHandle) {
             let target = app.clone();
             if app
                 .run_on_main_thread(move || {
-                    let _ = settings_window::open_internal(&target, None);
+                    let _ = settings_window::open_internal(&target, None, None);
                 })
                 .is_err()
             {

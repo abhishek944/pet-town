@@ -9,6 +9,7 @@ struct SessionState {
     ready: bool,
     generation: u64,
     selected_pet_id: Option<String>,
+    initial_tab: Option<String>,
 }
 impl SessionState {
     fn allows_reload_resume(&self, generation: u64) -> bool {
@@ -21,12 +22,18 @@ pub struct SettingsSession(Mutex<SessionState>);
 #[serde(rename_all = "camelCase")]
 pub struct SettingsContext {
     selected_pet_id: Option<String>,
+    initial_tab: Option<String>,
 }
 impl SettingsSession {
     fn lock(&self) -> std::sync::MutexGuard<'_, SessionState> {
         self.0.lock().unwrap_or_else(|error| error.into_inner())
     }
-    fn begin(&self, app: &AppHandle, requested: Option<String>) -> SettingsContext {
+    fn begin(
+        &self,
+        app: &AppHandle,
+        requested: Option<String>,
+        initial_tab: Option<String>,
+    ) -> SettingsContext {
         let store = app.state::<PreferencesStore>();
         let selected = requested.filter(|id| store.contains_id(id));
         let mut session = self.lock();
@@ -36,13 +43,16 @@ impl SettingsSession {
         session.open = true;
         session.generation = session.generation.wrapping_add(1);
         session.selected_pet_id = selected.clone();
+        session.initial_tab = initial_tab.clone();
         SettingsContext {
             selected_pet_id: selected,
+            initial_tab,
         }
     }
     fn context(&self) -> SettingsContext {
         SettingsContext {
             selected_pet_id: self.lock().selected_pet_id.clone(),
+            initial_tab: self.lock().initial_tab.clone(),
         }
     }
     pub fn is_open(&self) -> bool {
@@ -89,8 +99,14 @@ impl SettingsSession {
         was_open
     }
 }
-pub fn open_internal(app: &AppHandle, pet_id: Option<String>) -> Result<(), String> {
-    let context = app.state::<SettingsSession>().begin(app, pet_id);
+pub fn open_internal(
+    app: &AppHandle,
+    pet_id: Option<String>,
+    initial_tab: Option<String>,
+) -> Result<(), String> {
+    let context = app
+        .state::<SettingsSession>()
+        .begin(app, pet_id, initial_tab);
     if let Err(error) = app.emit_to("main", "village-pause", ()) {
         app.state::<SettingsSession>().finish();
         return Err(error.to_string());
@@ -128,7 +144,7 @@ pub fn open_internal(app: &AppHandle, pet_id: Option<String>) -> Result<(), Stri
 }
 #[tauri::command]
 pub fn open_preferences(app: AppHandle, pet_id: Option<String>) -> Result<(), String> {
-    open_internal(&app, pet_id)
+    open_internal(&app, pet_id, None)
 }
 #[tauri::command]
 pub fn show_settings(app: AppHandle) -> Result<(), String> {
