@@ -1,7 +1,7 @@
 {
   "name": "@pet-town/web",
   "private": true,
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Pet Town landing page",
   "type": "module",
   "engines": {

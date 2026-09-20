@@ -110,12 +110,12 @@ async function preferredMacDownload(): Promise<{ href: string; label: string; hi
   const intel = values?.architecture?.toLowerCase().includes("x86") ?? false;
   return intel
     ? {
-        href: "https://github.com/abhishek944/pet-town/releases/download/v0.1.6/Pet-Town-macOS-Intel.dmg",
+        href: "https://github.com/abhishek944/pet-town/releases/download/v0.1.7/Pet-Town-macOS-Intel.dmg",
         label: "Download for Intel Mac",
         hint: "Intel Mac detected · Apple Silicon option available",
       }
     : {
-        href: "https://github.com/abhishek944/pet-town/releases/download/v0.1.6/Pet-Town-macOS-Apple-Silicon.dmg",
+        href: "https://github.com/abhishek944/pet-town/releases/download/v0.1.7/Pet-Town-macOS-Apple-Silicon.dmg",
         label: "Download for macOS",
         hint: "Apple Silicon recommended · Intel option available",
       };
