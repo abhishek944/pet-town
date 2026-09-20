@@ -74,7 +74,33 @@ if [ -n "$rust_target" ]; then
       echo "missing application bundle: $app_bundle" >&2
       exit 1
     }
-    install -m 644 "$1" "$package_dir/$output_name.dmg"
+    # Tauri cannot dress the DMG window on headless builders, so repackage
+    # the signed app with dmgbuild, which writes the .DS_Store without Finder.
+    python3 -c 'import dmgbuild' 2>/dev/null || {
+      echo "dmgbuild is required: python3 -m pip install dmgbuild" >&2
+      exit 1
+    }
+    rm -f "$package_dir/$output_name.dmg"
+    python3 - "$app_bundle" "$package_dir/$output_name.dmg" \
+      "$ROOT/apps/pet-town/src-tauri/dmg-background.png" \
+      "$ROOT/apps/pet-town/src-tauri/icons/icon.icns" <<'PY'
+import dmgbuild
+import sys
+app_bundle, destination, background, volume_icon = sys.argv[1:5]
+dmgbuild.build_dmg(destination, "Pet Town", settings={
+    "window_rect": ((10, 60), (660, 400)),
+    "icon": volume_icon,
+    "icon_size": 128,
+    "background": background,
+    "icon_locations": {
+        "Pet Town.app": (180, 170),
+        "Applications": (480, 170),
+    },
+    "symlinks": {"Applications": "/Applications"},
+    "files": [app_bundle],
+    "format": "UDZO",
+})
+PY
     "$ROOT/scripts/check-dmg.sh" "$package"
     echo "packaged installer: $package_dir/$output_name.dmg"
   fi
