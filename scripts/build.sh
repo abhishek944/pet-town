@@ -91,7 +91,10 @@ dmgbuild.build_dmg(destination, "Pet Town", settings={
     "window_rect": ((10, 60), (660, 400)),
     "icon": volume_icon,
     "icon_size": 128,
+    # Finder does not scale background images when its window is resized. This
+    # oversized artwork extends beyond the opening viewport instead.
     "background": background,
+    "scroll_position": (0.0, 0.0),
     "icon_locations": {
         "Pet Town.app": (180, 170),
         "Applications": (480, 170),

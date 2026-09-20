@@ -39,6 +39,9 @@ cmp "$runtime" "$package_dir/pet-town-pi-runtime.tar.gz"
 [ "$(plutil -extract CFBundleIdentifier raw "$app/Contents/Info.plist")" = dev.pet.town ]
 [ "$(plutil -extract CFBundleShortVersionString raw "$app/Contents/Info.plist")" = "$expected_version" ]
 [ -f "$mount/.background.png" ]
+cmp "$mount/.background.png" "$ROOT/apps/pet-town/src-tauri/dmg-background.png"
+[ "$(sips -g pixelWidth "$mount/.background.png" | awk '/pixelWidth/ {print $2}')" = 1200 ]
+[ "$(sips -g pixelHeight "$mount/.background.png" | awk '/pixelHeight/ {print $2}')" = 800 ]
 [ -f "$mount/.DS_Store" ]
 if [ "${REQUIRE_SIGNED:-0}" = "1" ]; then
   [ -n "${EXPECTED_SIGNING_IDENTITY:-}" ]
