@@ -27,8 +27,16 @@ CACHE="${TMPDIR:-/tmp}/pet-town-runtime-cache"
 ARCHIVE="$CACHE/node-v$NODE_VERSION-darwin-$ARCH.tar.xz"
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-pi-runtime.XXXXXX")
 SIGN_KEYCHAIN=""
+ORIGINAL_KEYCHAINS="$WORK/original-keychains.txt"
 cleanup() {
   if [ -n "$SIGN_KEYCHAIN" ]; then
+    if [ -f "$ORIGINAL_KEYCHAINS" ]; then
+      python3 - "$ORIGINAL_KEYCHAINS" <<'PY' || true
+import shlex,subprocess,sys
+keychains=shlex.split(open(sys.argv[1],encoding="utf-8").read())
+subprocess.run(["security","list-keychains","-d","user","-s",*keychains],check=False)
+PY
+    fi
     security delete-keychain "$SIGN_KEYCHAIN" >/dev/null 2>&1 || true
   fi
   rm -rf "$WORK"
@@ -84,6 +92,12 @@ if [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
       -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
     security set-key-partition-list -S apple-tool:,apple:,codesign: -s \
       -k "$sign_keychain_password" "$SIGN_KEYCHAIN" >/dev/null
+    security list-keychains -d user >"$ORIGINAL_KEYCHAINS"
+    python3 - "$ORIGINAL_KEYCHAINS" "$SIGN_KEYCHAIN" <<'PY'
+import shlex,subprocess,sys
+keychains=shlex.split(open(sys.argv[1],encoding="utf-8").read())
+subprocess.run(["security","list-keychains","-d","user","-s",sys.argv[2],*keychains],check=True)
+PY
     rm -f "$sign_p12"
     security find-identity -v -p codesigning "$SIGN_KEYCHAIN" | grep -qF "$APPLE_SIGNING_IDENTITY" || {
       echo "APPLE_SIGNING_IDENTITY was not found in APPLE_CERTIFICATE" >&2
@@ -107,12 +121,10 @@ if [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
       entitlements="$ROOT/scripts/node-runtime-entitlements.plist"
     fi
     echo "signing runtime binary: $relative_candidate" >&2
-    python3 - "$candidate" "$APPLE_SIGNING_IDENTITY" "$SIGN_KEYCHAIN" "$entitlements" <<'PY'
+    python3 - "$candidate" "$APPLE_SIGNING_IDENTITY" "$entitlements" <<'PY'
 import subprocess,sys
-candidate,identity,keychain,entitlements=sys.argv[1:]
+candidate,identity,entitlements=sys.argv[1:]
 command=["/usr/bin/codesign","--sign",identity,"--timestamp","--options","runtime","--force"]
-if keychain:
-    command.extend(["--keychain",keychain])
 if entitlements:
     command.extend(["--entitlements",entitlements])
 command.append(candidate)
