@@ -2,28 +2,12 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-app_choice=${PET_TOWN_APP:-v1}
-case "$app_choice" in
-v1)
-  app_dir=pet-town
-  artifact=pet-town
-  binary_name=pet-town
-  has_runtime=1
-  ;;
-v2)
-  app_dir=pet-town-v2
-  artifact=pet-town-v2
-  binary_name=pet-town-v2
-  has_runtime=0
-  ;;
-*)
-  echo "PET_TOWN_APP must be v1 or v2, received: $app_choice" >&2
-  exit 2
-  ;;
-esac
+app_dir=pet-town
+artifact=pet-town
+binary_name=pet-town
 ARM="$ROOT/bin/macos-arm64/$artifact"
 X64="$ROOT/bin/macos-x64/$artifact"
-EXPECTED_SOURCE=$(PET_TOWN_APP="$app_choice" "$ROOT/scripts/package-source-fingerprint.sh")
+EXPECTED_SOURCE=$("$ROOT/scripts/package-source-fingerprint.sh")
 
 [ -L "$ARM" ] && [ "$(readlink "$ARM")" = "$artifact.bin" ]
 [ -L "$X64" ] && [ "$(readlink "$X64")" = "$artifact.bin" ]
@@ -32,30 +16,26 @@ EXPECTED_SOURCE=$(PET_TOWN_APP="$app_choice" "$ROOT/scripts/package-source-finge
 [ "$(cat "$X64.source.sha256")" = "$EXPECTED_SOURCE" ]
 file "$ARM" | grep -q 'Mach-O 64-bit executable arm64'
 file "$X64" | grep -q 'Mach-O 64-bit executable x86_64'
-if [ "$has_runtime" = 1 ]; then
-  for item in "macos-arm64:arm64" "macos-x64:x64"; do
-    package=${item%%:*}
-    arch=${item#*:}
-    archive="$ROOT/bin/$package/pet-town-pi-runtime.tar.gz"
-    [ -f "$archive" ]
-    runtime_hash=$(shasum -a 256 "$archive" | cut -d' ' -f1)
-    strings "$ROOT/bin/$package/pet-town" | grep -F "$runtime_hash" >/dev/null
-    runtime=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-runtime-check.XXXXXX")
-    trap 'rm -rf "$runtime"' EXIT INT TERM
-    tar -xzf "$archive" -C "$runtime"
-    [ -x "$runtime/node" ] && [ -x "$runtime/bin/pi" ]
-    python3 - "$runtime" "$arch" <<'PY'
+for item in "macos-arm64:arm64" "macos-x64:x64"; do
+  package=${item%%:*}
+  arch=${item#*:}
+  archive="$ROOT/bin/$package/pet-town-pi-runtime.tar.gz"
+  [ -f "$archive" ]
+  runtime_hash=$(shasum -a 256 "$archive" | cut -d' ' -f1)
+  strings "$ROOT/bin/$package/pet-town" | grep -F "$runtime_hash" >/dev/null
+  runtime=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-runtime-check.XXXXXX")
+  trap 'rm -rf "$runtime"' EXIT INT TERM
+  tar -xzf "$archive" -C "$runtime"
+  [ -x "$runtime/node" ] && [ -x "$runtime/bin/pi" ]
+  python3 - "$runtime" "$arch" <<'PY'
 import hashlib,json,pathlib,sys
 root=pathlib.Path(sys.argv[1]); data=json.loads((root/'runtime-manifest.json').read_text())
 def sha(path): return hashlib.sha256((root/path).read_bytes()).hexdigest()
 assert data['formatVersion']==1 and data['architecture']==sys.argv[2]
 assert data['nodeVersion']=='22.21.1' and data['piVersion']=='0.85.1'
-assert data['imageGenVersion']=='0.4.1'
 assert data['nodeSha256']==sha('node')
 assert data['launcherSha256']==sha('bin/pi')
 assert data['entrypointSha256']==sha('package/node_modules/@earendil-works/pi-coding-agent/dist/cli.js')
-assert data['imageWorkerSha256']==sha('package/pet-studio-image-worker.mjs')
-assert data['imageLibrarySha256']==sha('package/node_modules/@abhishek944/pi-image-gen/dist/index.js')
 assert all(sha(path)==digest for path,digest in data['files'].items())
 actual={str(path.relative_to(root)) for path in root.rglob('*') if path.is_file()}
 assert actual==set(data['files'])|{'runtime-manifest.json'}
@@ -63,15 +43,11 @@ assert not any(path.is_symlink() for path in root.rglob('*'))
 esbuild=f"package/node_modules/@earendil-works/pi-coding-agent/node_modules/@esbuild/darwin-{sys.argv[2]}/bin/esbuild"
 assert esbuild in actual
 PY
-    node --check "$runtime/package/pet-studio-image-worker.mjs"
-    (cd "$runtime/package" && node --input-type=module -e \
-      "import('@abhishek944/pi-image-gen').then((module) => { if (typeof module.generateImage !== 'function' || typeof module.runSpritePipeline !== 'function') process.exit(1) })")
-    file "$runtime/node" | grep -q "$([ "$arch" = arm64 ] && echo arm64 || echo x86_64)"
-    file "$runtime/package/node_modules/@earendil-works/pi-coding-agent/node_modules/@esbuild/darwin-$arch/bin/esbuild" | grep -q "$([ "$arch" = arm64 ] && echo arm64 || echo x86_64)"
-    rm -rf "$runtime"
-    trap - EXIT INT TERM
-  done
-fi
+  file "$runtime/node" | grep -q "$([ "$arch" = arm64 ] && echo arm64 || echo x86_64)"
+  file "$runtime/package/node_modules/@earendil-works/pi-coding-agent/node_modules/@esbuild/darwin-$arch/bin/esbuild" | grep -q "$([ "$arch" = arm64 ] && echo arm64 || echo x86_64)"
+  rm -rf "$runtime"
+  trap - EXIT INT TERM
+done
 
 if [ "${CHECK_PACKAGED_SKIP_BINARY_COMPARE:-0}" != 1 ]; then
   case "$(uname -m)" in
@@ -94,4 +70,4 @@ if [ "${CHECK_PACKAGED_SKIP_BINARY_COMPARE:-0}" != 1 ]; then
   fi
 fi
 
-echo "packaged macOS $app_choice binaries: pass"
+echo "packaged macOS binaries: pass"

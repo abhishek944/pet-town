@@ -57,7 +57,7 @@ user permissions, so review their manifest and source before installing.
 - Lets users drag a pet horizontally; it pauses while held and resumes its existing movement from the drop point.
 - Builds each pet's right-click menu from validated `flow.json` actions; every bundled pet currently exposes **Wave**.
 - Opens a native macOS Settings window when the installed app launches, from **Preferences…** in a pet menu, or from the Herdr plugin action, with direct **Show Town / Hide Town** controls, per-character controls, a **Pet Studio**, and an **Agents** tab for atomic, reversible setup of all six standalone harness integrations.
-- Lets users choose between creating a new pet and extending an existing pet. New pets can use a newly generated reference or an existing pet as their reference; animation generation uses one coherent 3-column × 2-row sheet, locally extracts six aligned frames, and keeps review and APNG approval explicit. Extensions can import or generate APNGs, optionally replace individual state animations, and add menu actions without modifying bundled assets or rebuilding.
+- Lets users create a new pet or extend an existing pet by importing transparent looping APNGs in Settings. Pet Studio validates each file locally, previews it, and lets users map animations to states, orchestrator behavior, and right-click actions without modifying bundled assets or rebuilding.
 - Adds a user-named voice assistant that uses the bundled Mossback tortoise, listens locally for “Hey, <name>,” starts GPT-Live 1 without opening another visible window, and delegates computer work to a persistent Pi agent in a dedicated Herdr pane.
 - Runs that Pi agent with GPT-5.6 Luna at medium thinking, supports spoken task cancellation, and keeps voice transcripts ephemeral.
 - Keeps the assistant independent from Pet Studio: its bundled Mossback walking and listening animations are fixed and cannot be replaced by user pet creation or extensions.
@@ -132,12 +132,11 @@ than storing large installers in the website bundle. The build also downloads a 
 Node release and installs a pinned Pi package inside that architecture's application
 bundle.
 
-The repository is a pnpm workspace orchestrated by Turborepo. The released
-v1 desktop application lives in `apps/pet-town`; the greenfield Excalibur
-v2 application lives separately in `apps/pet-town-v2`, and its headless
-contracts live in `packages/pet-town-core`. The public landing page lives in
-`apps/web`; repository scripts, plugin metadata, documentation, and checked-in
-packages remain at the root.
+The repository is a pnpm workspace orchestrated by Turborepo. The production
+Tauri desktop application lives in `apps/pet-town`, the Godot implementation
+lives in `apps/pet-town-godot`, and the public landing page lives in `apps/web`.
+Repository scripts, plugin metadata, documentation, and checked-in packages
+remain at the root.
 
 For development:
 
@@ -147,12 +146,10 @@ pnpm install --frozen-lockfile
 pnpm run tauri dev
 ```
 
-Run the v1 desktop frontend with `pnpm run dev` or the v2 frontend with
-`pnpm run dev:v2`. The selector defaults to v1; set `PET_TOWN_APP=v2` for
-`build:desktop`, `build:desktop:frontend`, `tauri`, or `./scripts/build.sh` to
-select v2. Each selected binary contains only that implementation. Start the
-landing page at `http://127.0.0.1:4173` with `pnpm run dev:web`. Root build,
-type-check, and lint commands are delegated through Turbo to the workspaces.
+Run the Tauri desktop frontend with `pnpm run dev`. Start the landing page at
+`http://127.0.0.1:4173` with `pnpm run dev:web`. Root build, type-check, and lint
+commands are delegated through Turbo to the workspaces. Godot development is
+documented in `apps/pet-town-godot/README.md`.
 
 ## Link for local development
 
@@ -204,7 +201,7 @@ Ordinary village monitoring remains local. It does not send coding-agent prompts
 
 Voice is off until the user chooses **Start assistant** in Settings, and **Stop assistant** turns it off again. On-device recognition listens locally for the configured wake phrase; after the wake phrase is heard, microphone audio and ephemeral transcripts pass through GPT-Live 1 over WebRTC without opening another visible window. Only delegated conversation context and the concise Pi result are routed between GPT-Live and the dedicated Pi agent. Ending the conversation stops microphone capture immediately and clears app-held transcripts; five minutes without user speech also ends the paid Live session. The OpenAI API key stays in Rust memory and may come from `OPENAI_API_KEY` or the macOS Keychain item with service `pet-town.openai` and account `api-key`.
 
-Pet Studio makes an OpenAI request only after the user presses a generation button; imported APNGs stay local. That request contains the Studio prompt and, when creating an animation, the character reference the user approved. Animation generation makes one provider request for a coherent 3-column × 2-row sheet, then `pi-image-gen` extracts and validates the six frames locally. API charges may apply. Rust passes the OpenAI API key to the private local Node worker only through its process environment; the key is sent only to the fixed OpenAI endpoint and is never placed in command arguments, request JSON, preferences, frontend state, or logs. Generated references, sheets, frames, APNGs, preferences, and short-lived event records remain under `~/.pet-town/` unless the user exports them. Existing-pet extensions are stored separately under `~/.pet-town/pet-packs/extensions/` as validated, versioned overlays, so bundled pet files remain immutable.
+Pet Studio does not contact an image provider. Users supply their own APNGs, which are validated and stored locally under `~/.pet-town/`. Existing-pet extensions are stored separately under `~/.pet-town/pet-packs/extensions/` as validated, versioned overlays, so bundled pet files remain immutable. The OpenAI API key is used only by the optional voice assistant and is never placed in command arguments, preferences, frontend state, or logs.
 
 ## License
 

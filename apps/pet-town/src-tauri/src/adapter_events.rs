@@ -8,7 +8,6 @@ mod relay;
 
 use crate::agents::safe_display_label;
 pub use ingestion::record as record_from_stdin;
-pub(crate) use registry::read_records;
 pub use relay::relay as relay_from_stdin;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

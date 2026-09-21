@@ -33,6 +33,12 @@ Controls edit a draft. The Settings preview reflects that draft, including walki
 
 **Reset pet** restores only the selected character in the draft and still requires Apply. **Reset Everything…** asks for confirmation and saves defaults for the app and every character.
 
+## Create characters and actions
+
+Pet Studio uses APNG files supplied by the user and does not generate artwork. In Settings, choose **Create a new pet** or **Extend an existing pet**, then import each transparent looping APNG with a short animation name and either the Walking or Stationary role. Pet Town validates the file and reads its cycle duration automatically.
+
+For a new pet, assign imported animations to all six behavior slots before saving. For an extension, optionally replace existing states. To add a right-click action, enter its action ID and menu label, choose an imported animation, and select **Add menu action**. Imported files and saved packs stay under `~/.pet-town/`.
+
 ## File location and format
 
 Preferences are stored at:

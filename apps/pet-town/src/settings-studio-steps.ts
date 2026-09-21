@@ -6,7 +6,6 @@ interface StepContext {
   mode: StudioMode | "";
   draftId: () => string;
   startDraft: () => Promise<boolean>;
-  referenceReady: () => boolean;
   approvedCount: () => number;
   status: (message: string, success?: boolean, fields?: string[]) => void;
   syncControls: () => void;
@@ -27,22 +26,13 @@ export async function advanceStudioWizard(context: StepContext): Promise<void> {
   }
   if (step === 1) {
     if (!context.draftId() && !(await context.startDraft())) return;
-    if (!context.referenceReady()) {
-      context.status("Generate and review the character reference before continuing.", false, [
-        "studio-character-prompt",
-      ]);
-      return;
-    }
     context.wizard.go(2);
     context.syncControls();
     return;
   }
   if (step === 2) {
     if (!context.approvedCount()) {
-      context.status("Create or import and approve at least one APNG before continuing.", false, [
-        "studio-animation-id",
-        "studio-animation-prompt",
-      ]);
+      context.status("Import at least one APNG before continuing.", false, ["studio-animation-id"]);
       return;
     }
     context.wizard.go(3);

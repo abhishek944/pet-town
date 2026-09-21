@@ -1,0 +1,131 @@
+[gd_scene format=3 uid="uid://y65h7dx8g0au"]
+
+[ext_resource type="Script" uid="uid://cy8hnu324w3uf" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/warm_island.tscn" id="2_0xm2m"]
+[ext_resource type="Environment" path="res://assets/cozy-island/woodland-evening.tres" id="3_evening"]
+
+[ext_resource type="NavigationMesh" path="res://navigation/town_walkable.res" id="4_nav"]
+[ext_resource type="Shape3D" path="res://navigation/town_collision.res" id="5_collision"]
+[ext_resource type="PackedScene" path="res://scenes/town_life.tscn" id="6_life"]
+
+[ext_resource type="PackedScene" path="res://scenes/town_decorations.tscn" id="7_decor"]
+
+[ext_resource type="PackedScene" path="res://scenes/island_render_sections.tscn" id="8_render"]
+
+[node name="PetTown" type="Node3D" unique_id=614714254]
+physics_interpolation_mode = 2
+script = ExtResource("1_main")
+
+[node name="GrandMoonhaven" parent="." unique_id=1031562730 instance=ExtResource("2_0xm2m")]
+visible = false
+
+[node name="WoodlandEvening" type="WorldEnvironment" parent="."]
+environment = ExtResource("3_evening")
+
+[node name="EveningSun" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.436332, -0.610865, 0)
+light_color = Color(1, 0.82, 0.66, 1)
+light_energy = 0.32
+shadow_enabled = true
+directional_shadow_max_distance = 280.0
+
+[node name="CameraFocus" type="Marker3D" parent="."]
+position = Vector3(0, 1.5, 2)
+
+[node name="OrbitCamera" type="Camera3D" parent="."]
+physics_interpolation_mode = 2
+current = true
+fov = 38.0
+near = 0.15
+far = 4000.0
+
+[node name="ViewerHelp" type="CanvasLayer" parent="."]
+
+[node name="HelpRoot" type="Control" parent="ViewerHelp"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="ViewerHelp/HelpRoot"]
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 478.0
+offset_bottom = 238.0
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="ViewerHelp/HelpRoot/Panel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="ViewerHelp/HelpRoot/Panel/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="Title" type="Label" parent="ViewerHelp/HelpRoot/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+text = "GRAND MOONHAVEN"
+autowrap_mode = 3
+
+[node name="Subtitle" type="Label" parent="ViewerHelp/HelpRoot/Panel/Margin/Content"]
+layout_mode = 2
+modulate = Color(0.9137255, 0.7882353, 0.5607843, 1)
+text = "Five neighborhoods · woodland island"
+autowrap_mode = 3
+
+[node name="Controls" type="Label" parent="ViewerHelp/HelpRoot/Panel/Margin/Content"]
+layout_mode = 2
+modulate = Color(0.7411765, 0.7843137, 0.8352941, 1)
+text = "Drag to move · Option-drag to orbit · pinch or +/− to zoom\nDouble-click to focus · R reset · F fullscreen · H hide help"
+autowrap_mode = 3
+
+[node name="WalkableTown" type="NavigationRegion3D" parent="."]
+navigation_mesh = ExtResource("4_nav")
+
+[node name="TownCollision" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TownCollision"]
+shape = ExtResource("5_collision")
+
+[node name="TownLife" parent="." instance=ExtResource("6_life")]
+
+[node name="CompanionPanel" type="PanelContainer" parent="ViewerHelp/HelpRoot"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -330.0
+offset_top = 18.0
+offset_right = -18.0
+offset_bottom = 210.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="ViewerHelp/HelpRoot/CompanionPanel"]
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Status" type="Label" parent="ViewerHelp/HelpRoot/CompanionPanel/Margin"]
+theme_override_font_sizes/font_size = 16
+text = "ISLAND COMPANIONS\n\nTab: follow next companion\nClick a character to follow\nR: whole island · Esc: release camera"
+autowrap_mode = 3
+
+[node name="TownDecorations" parent="." instance=ExtResource("7_decor")]
+
+[editable path="GrandMoonhaven"]
+[editable path="TownDecorations"]
+
+[node name="IslandRenderSections" parent="." instance=ExtResource("8_render")]

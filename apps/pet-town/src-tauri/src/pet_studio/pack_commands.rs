@@ -4,7 +4,7 @@ use super::types::{
     UserPackView,
 };
 use super::{catalog, store};
-use super::{with_draft, worker_registry, PetStudioState};
+use super::{with_draft, PetStudioState};
 use tauri::{Emitter, Manager};
 
 #[tauri::command]
@@ -22,7 +22,6 @@ pub fn save_pet_pack(
         .unwrap_or_else(|error| error.into_inner())
         .remove(&draft_id);
     if let Some(draft) = draft {
-        worker_registry::stop_for(&draft.directory);
         let _ = std::fs::remove_dir_all(draft.directory);
     }
     super::clear_orchestrator_pet_cache();
@@ -88,7 +87,6 @@ pub fn activate_pet_extension(
         (id, drafts.remove(&request.draft_id).unwrap())
     };
     let (id, draft) = draft;
-    worker_registry::stop_for(&draft.directory);
     let _ = std::fs::remove_dir_all(draft.directory);
     for candidate in draft.extension_candidates {
         if candidate.candidate_id != request.candidate_id {

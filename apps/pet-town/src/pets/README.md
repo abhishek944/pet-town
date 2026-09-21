@@ -174,7 +174,7 @@ Each clip's `asset` must be a valid APNG. It must:
 
 A `holdAsset`, when present, must be a visible transparent static 8-bit RGBA PNG. The checker composites APNG disposal and blending before comparing visible output.
 
-Use the project-local `/skill:pet-sprite-apng` workflow when creating or replacing animation artwork. It generates reviewed sprite sheets first, then assembles deterministic APNGs. For bundled sleeping assets, `--sleep-z-trail` applies the approved thick electric rising-Z treatment; the checker requires that signal in all eight frames.
+Create animation artwork outside Pet Town and supply final transparent APNG files. Pet Studio accepts the same APNG format for user-created pets and extensions. Bundled sleeping assets must still satisfy the checker’s eight-frame rising-Z visual contract.
 
 ## Useful limits
 

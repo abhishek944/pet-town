@@ -1,0 +1,186 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/companion.tscn" id="actor"]
+[ext_resource type="Script" path="res://scripts/interaction_spot.gd" id="spot"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/Knight.glb" id="Knight"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/Ranger.glb" id="Ranger"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/Rogue.glb" id="Rogue"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/Barbarian.glb" id="Barbarian"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/Mage.glb" id="Mage"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/Rogue_Hooded.glb" id="Rogue_Hooded"]
+
+[node name="TownLife" type="Node3D"]
+
+[node name="Activities" type="Node3D" parent="."]
+
+[node name="AppleOrchard" type="Marker3D" parent="Activities"]
+position = Vector3(1.938815, 1.632887, -6.705320)
+rotation = Vector3(0, 3.094369, 0)
+script = ExtResource("spot")
+prop_path = NodePath("../../../IslandRenderSections/HarvestApples/Sparse orchard apples_006")
+display_name = "Apple orchard"
+activity = "gather"
+animation = "PickUp"
+duration = 4.500000
+cooldown = 15.000000
+
+[node name="OrchardEast" type="Marker3D" parent="Activities"]
+position = Vector3(5.443389, 1.553712, -8.793802)
+rotation = Vector3(0, -1.575090, 0)
+script = ExtResource("spot")
+prop_path = NodePath("../../../IslandRenderSections/HarvestApples/Sparse orchard apples_008")
+display_name = "Orchard grove"
+activity = "gather"
+animation = "Interact"
+duration = 4.000000
+cooldown = 15.000000
+
+[node name="Bakery" type="Marker3D" parent="Activities"]
+position = Vector3(-6.008635, 2.108889, 6.592839)
+rotation = Vector3(0, -1.565995, 0)
+script = ExtResource("spot")
+display_name = "Bakery"
+activity = "eat"
+animation = "Use_Item"
+duration = 5.000000
+cooldown = 2.000000
+
+[node name="TeaMarket" type="Marker3D" parent="Activities"]
+position = Vector3(5.433190, 2.513351, 12.307596)
+rotation = Vector3(0, 3.097306, 0)
+script = ExtResource("spot")
+display_name = "Village market"
+activity = "deliver"
+animation = "Interact"
+duration = 4.000000
+cooldown = 2.000000
+
+[node name="TownBench" type="Marker3D" parent="Activities"]
+position = Vector3(0.000000, 1.700000, -0.900000)
+rotation = Vector3(0, 0.000000, 0)
+script = ExtResource("spot")
+display_name = "Town bench"
+activity = "rest"
+animation = "Idle_B"
+duration = 7.000000
+cooldown = 2.000000
+
+[node name="Campfire" type="Marker3D" parent="Activities"]
+position = Vector3(-48.697380, 4.883189, -2.789519)
+rotation = Vector3(0, 1.225860, 0)
+script = ExtResource("spot")
+display_name = "Campfire"
+activity = "rest"
+animation = "Idle_B"
+duration = 9.000000
+cooldown = 2.000000
+
+[node name="CraftMarket" type="Marker3D" parent="Activities"]
+position = Vector3(-42.297440, 2.912965, -44.381351)
+rotation = Vector3(0, -3.139652, 0)
+script = ExtResource("spot")
+display_name = "Artisan market"
+activity = "deliver"
+animation = "Interact"
+duration = 5.000000
+cooldown = 2.000000
+
+[node name="Pinewatch" type="Marker3D" parent="Activities"]
+position = Vector3(-42.937389, 4.291072, 31.996414)
+rotation = Vector3(0, 1.569576, 0)
+script = ExtResource("spot")
+display_name = "Pinewatch Commons"
+activity = "visit"
+animation = "Idle_A"
+duration = 4.000000
+cooldown = 2.000000
+
+[node name="Harborlight" type="Marker3D" parent="Activities"]
+position = Vector3(42.949787, 6.321489, 31.936396)
+rotation = Vector3(0, 0.016389, 0)
+script = ExtResource("spot")
+display_name = "Harborlight green"
+activity = "visit"
+animation = "Idle_B"
+duration = 5.000000
+cooldown = 2.000000
+
+[node name="LanternGarden" type="Marker3D" parent="Activities"]
+position = Vector3(42.969311, 2.666250, -34.972229)
+rotation = Vector3(0, 1.579959, 0)
+script = ExtResource("spot")
+display_name = "Lantern Garden"
+activity = "visit"
+animation = "Idle_A"
+duration = 5.000000
+cooldown = 2.000000
+
+[node name="Northlight" type="Marker3D" parent="Activities"]
+position = Vector3(-0.171178, 4.663907, -57.950127)
+rotation = Vector3(0, 3.099350, 0)
+script = ExtResource("spot")
+display_name = "Northlight overlook"
+activity = "visit"
+animation = "Idle_B"
+duration = 5.000000
+cooldown = 2.000000
+
+[node name="SouthWalk" type="Marker3D" parent="Activities"]
+position = Vector3(-0.004185, 2.962519, 45.003372)
+rotation = Vector3(0, 1.571919, 0)
+script = ExtResource("spot")
+display_name = "South meadow"
+activity = "visit"
+animation = "Idle_A"
+duration = 4.000000
+cooldown = 2.000000
+
+[node name="Residents" type="Node3D" parent="."]
+
+[node name="Rowan" parent="Residents" instance=ExtResource("actor")]
+position = Vector3(-3.004368, 1.996569, 1.020748)
+display_name = "Rowan"
+preferred_activity = "visit"
+energy = 55.000000
+
+[node name="Model" parent="Residents/Rowan/Visual" instance=ExtResource("Knight")]
+
+[node name="Fern" parent="Residents" instance=ExtResource("actor")]
+position = Vector3(2.000000, 1.850000, -4.000000)
+display_name = "Fern"
+preferred_activity = "gather"
+energy = 61.000000
+
+[node name="Model" parent="Residents/Fern/Visual" instance=ExtResource("Ranger")]
+
+[node name="Pip" parent="Residents" instance=ExtResource("actor")]
+position = Vector3(3.081688, 2.359186, 7.991284)
+display_name = "Pip"
+preferred_activity = "deliver"
+energy = 67.000000
+
+[node name="Model" parent="Residents/Pip/Visual" instance=ExtResource("Rogue")]
+
+[node name="Bramble" parent="Residents" instance=ExtResource("actor")]
+position = Vector3(-5.000002, 2.142852, 4.000357)
+display_name = "Bramble"
+preferred_activity = "eat"
+energy = 73.000000
+
+[node name="Model" parent="Residents/Bramble/Visual" instance=ExtResource("Barbarian")]
+
+[node name="Mica" parent="Residents" instance=ExtResource("actor")]
+position = Vector3(1.000000, 2.101770, 3.002679)
+display_name = "Mica"
+preferred_activity = "rest"
+energy = 79.000000
+
+[node name="Model" parent="Residents/Mica/Visual" instance=ExtResource("Mage")]
+
+[node name="Wren" parent="Residents" instance=ExtResource("actor")]
+position = Vector3(4.982211, 1.797448, -3.970890)
+display_name = "Wren"
+preferred_activity = "gather"
+energy = 85.000000
+
+[node name="Model" parent="Residents/Wren/Visual" instance=ExtResource("Rogue_Hooded")]

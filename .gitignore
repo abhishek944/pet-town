@@ -8,6 +8,10 @@ node_modules/
 .turbo/
 dist/
 apps/web/.downloads/
+apps/*/.godot/
+apps/pet-town-godot/assets/nature-essentials/
+apps/pet-town-godot/assets/cozy-island/
+apps/pet-town-godot/navigation/*.res
 bin/macos-*/pet-town.dmg
 *.log
 *.local

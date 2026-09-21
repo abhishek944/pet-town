@@ -6,6 +6,14 @@ use std::io::{BufReader, Cursor};
 const MAX_BYTES: usize = 20 * 1024 * 1024;
 
 pub fn validate(bytes: &[u8]) -> Result<u32, String> {
+    validate_with_policy(bytes, false)
+}
+
+pub fn validate_import(bytes: &[u8]) -> Result<u32, String> {
+    validate_with_policy(bytes, true)
+}
+
+fn validate_with_policy(bytes: &[u8], require_continuous_loop: bool) -> Result<u32, String> {
     if bytes.len() > MAX_BYTES || !bytes.starts_with(b"\x89PNG\r\n\x1a\n") {
         return Err("Choose a valid APNG no larger than 20 MB.".into());
     }
@@ -42,6 +50,11 @@ pub fn validate(bytes: &[u8]) -> Result<u32, String> {
         match &kind {
             b"acTL" if length == 8 && declared.is_none() => {
                 declared = Some(u32::from_be_bytes(data[..4].try_into().unwrap()));
+                if require_continuous_loop
+                    && u32::from_be_bytes(data[4..8].try_into().unwrap()) != 0
+                {
+                    return Err("The APNG must loop continuously.".into());
+                }
             }
             b"fcTL" if length == 26 => {
                 controls += 1;

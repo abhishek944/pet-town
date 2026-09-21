@@ -13,6 +13,9 @@ var/
 pnpm-lock.yaml
 scripts/pi-runtime-package-lock.json
 
+# Godot owns formatting for its project files and documentation.
+apps/pet-town-godot/
+
 # This template has compact markup assertions in the repository checks.
 apps/pet-town/settings.html
 

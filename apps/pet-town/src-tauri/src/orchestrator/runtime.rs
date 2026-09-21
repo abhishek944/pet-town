@@ -43,20 +43,6 @@ pub fn path_environment() -> Result<Option<String>, String> {
     )))
 }
 
-pub(crate) fn image_worker_available() -> bool {
-    if let Some(path) = std::env::var_os("PET_TOWN_PI_RUNTIME") {
-        return super::runtime_verify::validate(&PathBuf::from(path)).is_ok();
-    }
-    if cfg!(debug_assertions) {
-        let app = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
-        return app.join("scripts/pet-studio-image-worker.mjs").is_file()
-            && app
-                .join("node_modules/@abhishek944/pi-image-gen/dist/index.js")
-                .is_file();
-    }
-    archive_path().is_some()
-}
-
 fn archive_path() -> Option<PathBuf> {
     let executable = std::env::current_exe().ok()?;
     let parent = executable.parent()?;

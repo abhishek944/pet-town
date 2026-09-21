@@ -9,14 +9,14 @@ import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-app_choice = os.environ.get("PET_TOWN_APP", "v1")
-if app_choice not in {"v1", "v2"}:
-    raise SystemExit("PET_TOWN_APP must be v1 or v2")
-app = root / "apps" / ("pet-town-v2" if app_choice == "v2" else "pet-town")
+app = root / "apps" / "pet-town"
 files = []
-directories = [app / "src", app / "src-tauri", app / "public"]
-if app_choice == "v2":
-    directories.append(root / "packages" / "pet-town-core" / "src")
+directories = [
+    app / "src",
+    app / "src-tauri",
+    app / "public",
+    root / "packages" / "pet-town-agent-broker",
+]
 for directory in directories:
     for path in directory.rglob("*"):
         relative = path.relative_to(root).parts
@@ -31,7 +31,6 @@ for path in (
     app / "package.json",
     app / "tsconfig.json",
     app / "vite.config.ts",
-    app / "scripts" / "pet-studio-image-worker.mjs",
     root / "package.json",
     root / "pnpm-lock.yaml",
     root / "pnpm-workspace.yaml",
@@ -39,11 +38,8 @@ for path in (
     root / "scripts" / "build.sh",
     root / "scripts" / "check-packaged.sh",
     root / "scripts" / "check-dmg.sh",
-    root / "scripts" / "select-desktop-app.mjs",
     root / "scripts" / "prepare-pi-runtime.sh",
     root / "scripts" / "pi-runtime-package-lock.json",
-    root / "packages" / "pet-town-core" / "package.json" if app_choice == "v2" else root / ".missing",
-    root / "packages" / "pet-town-core" / "tsconfig.json" if app_choice == "v2" else root / ".missing",
 ):
     if path.is_file():
         files.append(path)

@@ -58,7 +58,7 @@
           </div>
         </section>
         <section id="panel-studio" class="panel studio-panel" data-panel="studio" role="tabpanel" aria-labelledby="tab-studio" hidden>
-          <header class="studio-heading"><div><h1 id="studio-heading-title">Pet Studio</h1><p id="studio-heading-copy">Create a local pet from reviewed animation frames.</p></div><span id="studio-api-status" class="studio-status">Checking OpenAI…</span></header>
+          <header class="studio-heading"><div><h1 id="studio-heading-title">Pet Studio</h1><p id="studio-heading-copy">Create a local pet from your APNG animations.</p></div></header>
           <section class="studio-step studio-mode-step" data-studio-step="0">
             <h2 tabindex="-1">1 · Choose what to make</h2>
             <label>Studio workflow<select id="studio-mode"><option value="">Choose…</option><option value="new">Create a new pet</option><option value="extend">Extend an existing pet</option></select></label>
@@ -66,29 +66,22 @@
           </section>
           <section id="studio-character-step" class="studio-step" data-studio-step="1" hidden>
             <h2 tabindex="-1">2 · Character</h2>
-            <div id="studio-new-fields">
-              <div class="studio-grid"><label>Name<input id="studio-name" maxlength="64" placeholder="Mochi Explorer" /></label><label>Reference choice<select id="studio-reference-kind"><option value="">Choose…</option><option value="new">Create a new reference</option><option value="existing">Use an existing pet reference</option></select></label><label id="studio-source-field" hidden>Reference pet<select id="studio-source"></select></label></div>
-            </div>
+            <div id="studio-new-fields"><label>Name<input id="studio-name" maxlength="64" placeholder="Mochi Explorer" /></label></div>
             <label id="studio-existing-field" hidden>Pet to extend<select id="studio-existing"></select></label>
-            <label id="studio-character-prompt-field">Character description<textarea id="studio-character-prompt" maxlength="30000" rows="3" placeholder="A tiny teal dragon cartographer with a leather map case…"></textarea></label>
-            <div class="studio-options"><label>Model<select id="studio-model"><option value="gpt-image-2.5-sunburst">GPT Image 2.5 Sunburst</option><option value="gpt-image-2.5-flare">GPT Image 2.5 Flare</option></select></label><label>Quality<select id="studio-quality"><option>low</option><option selected>medium</option><option>high</option><option>xhigh</option><option>max</option></select></label></div>
-            <p class="hint">Generate reference starts a new-reference draft. If you chose an existing reference, Next starts the draft.</p>
-            <div class="studio-actions"><button id="studio-cancel" class="secondary" type="button" hidden>Cancel draft</button><button id="studio-start" class="secondary" type="button" hidden>Start draft</button><button id="studio-reference-generate" class="primary" type="button" disabled>Generate reference</button></div>
-            <span id="studio-reference-loading" class="studio-reference-loading" aria-hidden="true" hidden><i aria-hidden="true"></i>Generating character reference…</span>
-            <img id="studio-reference-preview" class="studio-preview" alt="Approved character reference" hidden />
+            <p class="hint">Pet Studio keeps imported APNGs local and validates them before saving.</p>
+            <div class="studio-actions"><button id="studio-cancel" class="secondary" type="button" hidden>Cancel draft</button></div>
           </section>
           <section id="studio-animation-step" class="studio-step" data-studio-step="2" hidden>
-            <h2 tabindex="-1">3 · Animation</h2>
-            <div class="studio-grid"><label>Animation name<input id="studio-animation-id" maxlength="48" placeholder="walk" /></label><label>Kind<select id="studio-role"><option value="stationary">Stationary</option><option value="locomotion">Walking</option></select></label><label>Loop duration<input id="studio-duration" type="number" min="128" max="60000" value="900" /> ms</label></div>
-            <label>Action description<textarea id="studio-animation-prompt" maxlength="19000" rows="3" placeholder="Walks forward with a light, confident two-step gait…"></textarea></label>
-            <div class="studio-actions"><label class="studio-import-button secondary">Import APNG<input id="studio-import-animation" type="file" accept="image/png,image/apng,.png,.apng" /></label><button id="studio-generate-animation" class="primary" type="button">Generate sprite sheet</button><button id="studio-create-animation" class="secondary" type="button" disabled>Create animation</button><button id="studio-approve-animation" class="secondary" type="button" disabled>Approve animation</button><button id="studio-discard-animation" class="secondary" type="button" disabled>Discard draft animation</button></div>
-            <p class="hint">One transparent sprite sheet produces six aligned frames. Review them, then create and approve the looping APNG.</p>
-            <div class="studio-review"><figure class="studio-frames-review"><figcaption>Six individual frames</figcaption><div id="studio-frame-preview" class="studio-frame-grid" data-ready="false"></div><span id="studio-sheet-loading" class="studio-review-loading" aria-hidden="true" hidden><i></i>Generating and checking one sprite sheet…</span><span class="studio-review-empty">Generate six frames to preview them here.</span></figure><figure><figcaption>APNG loop</figcaption><img id="studio-apng-preview" alt="APNG animation preview" hidden /><span id="studio-animation-loading" class="studio-review-loading" aria-hidden="true" hidden><i></i>Creating the APNG loop…</span><span class="studio-review-empty">Create or import an APNG to preview it here.</span></figure></div>
-            <p id="studio-approved" class="hint">No approved animations yet.</p>
+            <h2 tabindex="-1">3 · Import animations</h2>
+            <div class="studio-grid"><label>Animation name<input id="studio-animation-id" maxlength="48" placeholder="walk" /></label><label>Kind<select id="studio-role"><option value="stationary">Stationary</option><option value="locomotion">Walking</option></select></label></div>
+            <div class="studio-actions"><label class="studio-import-button primary">Import APNG<input id="studio-import-animation" type="file" accept="image/png,image/apng,.png,.apng" /></label></div>
+            <p class="hint">Choose a transparent looping APNG. Its frame timing is read from the file automatically.</p>
+            <div class="studio-review"><figure><figcaption>Imported APNG preview</figcaption><img id="studio-apng-preview" alt="Imported APNG animation preview" hidden /><span class="studio-review-empty">Import an APNG to preview it here.</span></figure></div>
+            <p id="studio-approved" class="hint">No imported animations yet.</p>
           </section>
           <section id="studio-map-step" class="studio-step" data-studio-step="3" hidden>
             <h2 tabindex="-1">4 · Assign and save</h2>
-            <p id="studio-mapping-hint" class="hint">Create and approve animations, then assign them to every required behavior.</p>
+            <p id="studio-mapping-hint" class="hint">Import animations, then assign them to every required behavior.</p>
             <div id="studio-mappings" class="studio-mappings"></div>
             <section class="studio-orchestrator" aria-labelledby="studio-orchestrator-title"><div><h3 id="studio-orchestrator-title">Orchestrator animations</h3><p class="hint studio-orchestrator-note">The orchestrator walks normally. The listening APNG runs only while you are speaking.</p><button id="studio-focus-orchestrator" class="secondary" type="button">Open assignment view</button></div><div class="studio-orchestrator-slots"><label><b>Walking</b><span class="studio-orchestrator-preview"><img id="studio-orchestrator-walk-preview" alt="Walking APNG preview" hidden /></span><input id="studio-import-walking" type="file" accept="image/png,image/apng,.png,.apng" aria-label="Choose Walking APNG" /><select id="studio-orchestrator-walk" aria-label="Walking animation assignment"><option value="">Choose…</option></select><small>Default state</small></label><label><b>Listening</b><span class="studio-orchestrator-preview"><img id="studio-orchestrator-listening-preview" alt="Listening APNG preview" hidden /></span><input id="studio-import-listening" type="file" accept="image/png,image/apng,.png,.apng" aria-label="Choose Listening APNG" /><select id="studio-orchestrator-listening" aria-label="Listening animation assignment"><option value="">Choose…</option></select><small>Waiting for your voice</small></label></div><div class="studio-orchestrator-actions"><button id="studio-preview-sequence" class="secondary" type="button">Preview sequence</button><button id="studio-assign-now" class="primary" type="button">Assign to orchestrator</button></div><label class="studio-assign"><input id="studio-assign-orchestrator" type="checkbox" checked /> Assign this pet to the orchestrator when saved</label></section>
             <div class="studio-action-row"><label>Action ID<input id="studio-action-id" placeholder="wave" maxlength="48" /></label><label>Menu label<input id="studio-action-label" placeholder="Wave" maxlength="24" /></label><label>Animation<select id="studio-action-animation"></select></label><button id="studio-add-action" class="secondary" type="button">Add menu action</button></div>
@@ -136,7 +129,7 @@
         <section id="panel-about" class="panel" data-panel="about" role="tabpanel" aria-labelledby="tab-about" hidden>
           <h1>About Pet Town</h1>
           <p class="about">A local desktop village for your live coding agents.</p>
-          <p class="hint">Version <span id="app-version">—</span> · Preferences and user pets stay under <code>~/.pet-town/</code> on this Mac. Ordinary village monitoring never sends prompts, project paths, or output to OpenAI. Voice sends delegated task context to the selected Pi model; Pet Studio sends only approved generation inputs.</p>
+          <p class="hint">Version <span id="app-version">—</span> · Preferences, imported APNGs, and user pets stay under <code>~/.pet-town/</code> on this Mac. Ordinary village monitoring never sends prompts, project paths, or output to OpenAI. Voice sends delegated task context to the selected Pi model.</p>
           <a href="https://github.com/abhishek944/pet-town" target="_blank" rel="noreferrer">View project on GitHub</a>
         </section>
         <p id="message" class="message" role="status" aria-live="polite"></p>

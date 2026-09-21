@@ -13,12 +13,6 @@ fn configured_state_dir() -> Option<PathBuf> {
     (!value.is_empty()).then(|| PathBuf::from(value))
 }
 
-pub(crate) fn session_registry() -> Option<PathBuf> {
-    std::env::var_os("PET_TOWN_SESSION_REGISTRY")
-        .map(PathBuf::from)
-        .or_else(|| configured_state_dir().map(|path| path.join("sessions")))
-}
-
 pub(crate) fn reload_result() -> Option<PathBuf> {
     std::env::var_os("PET_TOWN_RELOAD_RESULT")
         .map(PathBuf::from)

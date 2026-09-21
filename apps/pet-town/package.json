@@ -18,7 +18,6 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@abhishek944/pi-image-gen": "0.4.1",
     "@tauri-apps/api": "^2"
   },
   "devDependencies": {

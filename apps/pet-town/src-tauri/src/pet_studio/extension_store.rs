@@ -72,18 +72,16 @@ pub fn stage(
 
     let mut names = HashMap::new();
     for (name, animation) in &draft.animations {
-        let Some(path) = animation.apng.as_ref() else {
-            continue;
-        };
         let internal = internal_name(draft, name);
-        let bytes = fs::read(path).map_err(|_| "Could not stage an animation.".to_string())?;
+        let bytes =
+            fs::read(&animation.apng).map_err(|_| "Could not stage an animation.".to_string())?;
         clips.insert(internal.clone(), json!({"asset":format!("assets/{internal}.png"),
             "durationMs":animation.duration_ms,"role":animation.role,"sourceFacing":"right","mirror":true}));
         assets.insert(format!("assets/{internal}.png"), bytes);
         names.insert(name.clone(), internal);
     }
     if names.is_empty() {
-        return Err("Approve at least one new APNG before saving this extension.".into());
+        return Err("Import at least one new APNG before saving this extension.".into());
     }
     for (state, animation) in &request.state_assignments {
         if !matches!(
@@ -94,7 +92,7 @@ pub fn stage(
         }
         let internal = names
             .get(animation)
-            .ok_or_else(|| format!("Animation {animation} is not approved in this draft."))?;
+            .ok_or_else(|| format!("Animation {animation} was not imported in this draft."))?;
         states.insert(state.clone(), state_flow(internal));
     }
     for action in &request.actions {
@@ -104,7 +102,7 @@ pub fn stage(
         }
         let internal = names.get(&action.animation_id).ok_or_else(|| {
             format!(
-                "Animation {} is not approved in this draft.",
+                "Animation {} was not imported in this draft.",
                 action.animation_id
             )
         })?;

@@ -1,0 +1,449 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://assets/cozy-island/grand-moonhaven.glb" id="island"]
+[ext_resource type="Material" path="res://materials/window_amber.tres" id="window_amber"]
+[ext_resource type="Material" path="res://materials/lantern_amber.tres" id="lantern_amber"]
+[ext_resource type="Material" path="res://materials/fire_gold.tres" id="fire_gold"]
+[ext_resource type="Material" path="res://materials/fire_ember.tres" id="fire_ember"]
+
+[node name="GrandMoonhaven" instance=ExtResource("island")]
+
+[node name="Cabin warm side glass_001" parent="ANIM cream fishing boat"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Cabin warm side glass_002" parent="ANIM cruising fishing boat"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="ANIM dancing fire tongue" parent="."]
+surface_material_override/0 = ExtResource("fire_gold")
+position = Vector3(-46.200001, 4.362937, -2.000000)
+
+[node name="ANIM dancing fire tongue_001" parent="."]
+surface_material_override/0 = ExtResource("fire_gold")
+position = Vector3(-46.219696, 4.362937, -2.192836)
+
+[node name="ANIM dancing fire tongue_002" parent="."]
+surface_material_override/0 = ExtResource("fire_gold")
+position = Vector3(-46.393349, 4.362937, -2.295442)
+
+[node name="ANIM dancing fire tongue_003" parent="."]
+surface_material_override/0 = ExtResource("fire_gold")
+position = Vector3(-46.641533, 4.362937, -2.259808)
+
+[node name="ANIM dancing fire tongue_004" parent="."]
+surface_material_override/0 = ExtResource("fire_gold")
+position = Vector3(-46.827316, 4.362937, -2.102606)
+
+[node name="ANIM dancing fire tongue_005" parent="."]
+surface_material_override/0 = ExtResource("fire_gold")
+position = Vector3(-46.839443, 4.362937, -1.897394)
+
+[node name="ANIM dancing fire tongue_006" parent="."]
+surface_material_override/0 = ExtResource("fire_gold")
+position = Vector3(-46.666763, 4.362937, -1.740192)
+
+[node name="ANIM dancing fire tongue_007" parent="."]
+surface_material_override/0 = ExtResource("fire_gold")
+position = Vector3(-46.408485, 4.362937, -1.704558)
+
+[node name="ANIM dancing fire tongue_008" parent="."]
+surface_material_override/0 = ExtResource("fire_gold")
+position = Vector3(-46.210823, 4.362937, -1.807164)
+
+[node name="Cabin warm side glass" parent="ANIM moored blue trawler"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="ANIM rising ember" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.500000, 4.312937, -2.350000)
+
+[node name="ANIM rising ember_001" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.082233, 4.745665, -2.230994)
+
+[node name="ANIM rising ember_002" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.189468, 5.178391, -1.954904)
+
+[node name="ANIM rising ember_003" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.686939, 5.611119, -1.709481)
+
+[node name="ANIM rising ember_004" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.949490, 6.043846, -1.661621)
+
+[node name="ANIM rising ember_005" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.647175, 6.476574, -1.843869)
+
+[node name="ANIM rising ember_006" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.159908, 6.909301, -2.132292)
+
+[node name="ANIM rising ember_007" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.100029, 4.542028, -2.330752)
+
+[node name="ANIM rising ember_008" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.542786, 4.974755, -2.304289)
+
+[node name="ANIM rising ember_009" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.931774, 5.407483, -2.070899)
+
+[node name="ANIM rising ember_010" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.778160, 5.840210, -1.789296)
+
+[node name="ANIM rising ember_011" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.274986, 6.272937, -1.650978)
+
+[node name="ANIM rising ember_012" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.054581, 6.705665, -1.750007)
+
+[node name="ANIM rising ember_013" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.393925, 4.338392, -2.019040)
+
+[node name="ANIM rising ember_014" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.866570, 4.771119, -2.275125)
+
+[node name="ANIM rising ember_015" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.878555, 5.203846, -2.344115)
+
+[node name="ANIM rising ember_016" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.414818, 5.636574, -2.179096)
+
+[node name="ANIM rising ember_017" parent="."]
+surface_material_override/0 = ExtResource("fire_ember")
+position = Vector3(-46.058128, 6.069301, -1.892286)
+
+[node name="Artisan Heights 01 | Warm flickering panes_021" parent="Artisan Heights 01 | Rose Cottage/Artisan Heights 01 | Side window assembly_008"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 01 | Warm flickering panes_020" parent="Artisan Heights 01 | Rose Cottage"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 02 | Warm flickering panes_027" parent="Artisan Heights 02 | Pottery Studio/Artisan Heights 02 | Side window assembly_010"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 02 | Warm flickering panes_026" parent="Artisan Heights 02 | Pottery Studio"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 03 | Warm flickering panes_032" parent="Artisan Heights 03 | Lighthouse Keeper/Artisan Heights 03 | Side window assembly_012"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 03 | Warm flickering panes_031" parent="Artisan Heights 03 | Lighthouse Keeper"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 04 | Warm flickering panes_001" parent="Artisan Heights 04 | Honeycomb Bakery/Artisan Heights 04 | Side window assembly"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 04 | Warm flickering panes" parent="Artisan Heights 04 | Honeycomb Bakery"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 05 | Warm flickering panes_007" parent="Artisan Heights 05 | Harbor Tea House/Artisan Heights 05 | Side window assembly_002"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 05 | Warm flickering panes_006" parent="Artisan Heights 05 | Harbor Tea House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 06 | Warm flickering panes_011" parent="Artisan Heights 06 | Fernwood Chalet/Artisan Heights 06 | Side window assembly_004"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 06 | Warm flickering panes_010" parent="Artisan Heights 06 | Fernwood Chalet"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 06 | Warm flickering panes_012" parent="Artisan Heights 06 | Fernwood Chalet"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 07 | Warm flickering panes_016" parent="Artisan Heights 07 | Fishermans House/Artisan Heights 07 | Side window assembly_006"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Artisan Heights 07 | Warm flickering panes_015" parent="Artisan Heights 07 | Fishermans House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern frosted honey glass_009" parent="BUILDING - Cedar A Frame/LANTERN - porch_002"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Soft flickering interior glass_004" parent="BUILDING - Cedar A Frame"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern frosted honey glass_010" parent="BUILDING - Fishermans Longhouse/LANTERN - porch_003"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Soft flickering interior glass_005" parent="BUILDING - Fishermans Longhouse"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Soft flickering interior glass_006" parent="BUILDING - Fishermans Longhouse"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern frosted honey glass_007" parent="BUILDING - Hearth Bakery/LANTERN - porch"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Soft flickering interior glass" parent="BUILDING - Hearth Bakery"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern frosted honey glass_011" parent="BUILDING - Octagonal Keepers Cottage/LANTERN - porch_004"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Soft flickering interior glass_007" parent="BUILDING - Octagonal Keepers Cottage"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Bay large side glass" parent="BUILDING - Tide Tea House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern frosted honey glass_008" parent="BUILDING - Tide Tea House/LANTERN - porch_001"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Soft flickering interior glass_001" parent="BUILDING - Tide Tea House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Soft flickering interior glass_002" parent="BUILDING - Tide Tea House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Soft flickering interior glass_003" parent="BUILDING - Tide Tea House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Soft flickering interior glass_008" parent="BUILDING - Tide Tea House/Tea house side facade"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Soft flickering interior glass_009" parent="BUILDING - Tide Tea House/Tea house side facade"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Soft flickering interior glass_010" parent="BUILDING - Tide Tea House/Tea house side facade_001"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Soft flickering interior glass_011" parent="BUILDING - Tide Tea House/Tea house side facade_001"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 01 | Warm flickering panes_011" parent="Harborlight Ward 01 | Fernwood Chalet/Harborlight Ward 01 | Side window assembly_004"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 01 | Warm flickering panes_010" parent="Harborlight Ward 01 | Fernwood Chalet"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 01 | Warm flickering panes_012" parent="Harborlight Ward 01 | Fernwood Chalet"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 02 | Warm flickering panes_016" parent="Harborlight Ward 02 | Fishermans House/Harborlight Ward 02 | Side window assembly_006"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 02 | Warm flickering panes_015" parent="Harborlight Ward 02 | Fishermans House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 03 | Warm flickering panes_021" parent="Harborlight Ward 03 | Rose Cottage/Harborlight Ward 03 | Side window assembly_008"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 03 | Warm flickering panes_020" parent="Harborlight Ward 03 | Rose Cottage"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 04 | Warm flickering panes_027" parent="Harborlight Ward 04 | Pottery Studio/Harborlight Ward 04 | Side window assembly_010"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 04 | Warm flickering panes_026" parent="Harborlight Ward 04 | Pottery Studio"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 05 | Warm flickering panes_032" parent="Harborlight Ward 05 | Lighthouse Keeper/Harborlight Ward 05 | Side window assembly_012"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 05 | Warm flickering panes_031" parent="Harborlight Ward 05 | Lighthouse Keeper"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 06 | Warm flickering panes_001" parent="Harborlight Ward 06 | Honeycomb Bakery/Harborlight Ward 06 | Side window assembly"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 06 | Warm flickering panes" parent="Harborlight Ward 06 | Honeycomb Bakery"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 07 | Warm flickering panes_007" parent="Harborlight Ward 07 | Harbor Tea House/Harborlight Ward 07 | Side window assembly_002"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Harborlight Ward 07 | Warm flickering panes_006" parent="Harborlight Ward 07 | Harbor Tea House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern frosted honey glass_017" parent="LANTERN - hanging Camp shelter"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_018" parent="LANTERN - hanging Camp shelter_001"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_019" parent="LANTERN - hanging Camp shelter_002"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_020" parent="LANTERN - hanging Camp shelter_003"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_021" parent="LANTERN - hanging Camp shelter_004"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_012" parent="LANTERN - hanging Harbor welcome"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_013" parent="LANTERN - hanging Harbor welcome_001"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_014" parent="LANTERN - hanging Harbor welcome_002"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_015" parent="LANTERN - hanging Harbor welcome_003"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_016" parent="LANTERN - hanging Harbor welcome_004"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass" parent="LANTERN - trail"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_001" parent="LANTERN - trail_001"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_002" parent="LANTERN - trail_002"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_003" parent="LANTERN - trail_003"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_004" parent="LANTERN - trail_004"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_005" parent="LANTERN - trail_005"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern frosted honey glass_006" parent="LANTERN - trail_006"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lantern Garden 01 | Warm flickering panes_032" parent="Lantern Garden 01 | Lighthouse Keeper/Lantern Garden 01 | Side window assembly_012"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 01 | Warm flickering panes_031" parent="Lantern Garden 01 | Lighthouse Keeper"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 02 | Warm flickering panes_001" parent="Lantern Garden 02 | Honeycomb Bakery/Lantern Garden 02 | Side window assembly"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 02 | Warm flickering panes" parent="Lantern Garden 02 | Honeycomb Bakery"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 03 | Warm flickering panes_007" parent="Lantern Garden 03 | Harbor Tea House/Lantern Garden 03 | Side window assembly_002"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 03 | Warm flickering panes_006" parent="Lantern Garden 03 | Harbor Tea House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 04 | Warm flickering panes_011" parent="Lantern Garden 04 | Fernwood Chalet/Lantern Garden 04 | Side window assembly_004"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 04 | Warm flickering panes_010" parent="Lantern Garden 04 | Fernwood Chalet"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 04 | Warm flickering panes_012" parent="Lantern Garden 04 | Fernwood Chalet"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 05 | Warm flickering panes_016" parent="Lantern Garden 05 | Fishermans House/Lantern Garden 05 | Side window assembly_006"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 05 | Warm flickering panes_015" parent="Lantern Garden 05 | Fishermans House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 06 | Warm flickering panes_021" parent="Lantern Garden 06 | Rose Cottage/Lantern Garden 06 | Side window assembly_008"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 06 | Warm flickering panes_020" parent="Lantern Garden 06 | Rose Cottage"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 07 | Warm flickering panes_027" parent="Lantern Garden 07 | Pottery Studio/Lantern Garden 07 | Side window assembly_010"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lantern Garden 07 | Warm flickering panes_026" parent="Lantern Garden 07 | Pottery Studio"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Lighthouse glowing slit" parent="Lighthouse fixed architecture"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lighthouse glowing slit_001" parent="Lighthouse fixed architecture"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lighthouse glowing slit_002" parent="Lighthouse fixed architecture"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Lighthouse lamp core" parent="Lighthouse fixed architecture"]
+surface_material_override/0 = ExtResource("lantern_amber")
+
+[node name="Pinewatch Commons 01 | Warm flickering panes_001" parent="Pinewatch Commons 01 | Honeycomb Bakery/Pinewatch Commons 01 | Side window assembly"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 01 | Warm flickering panes" parent="Pinewatch Commons 01 | Honeycomb Bakery"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 02 | Warm flickering panes_007" parent="Pinewatch Commons 02 | Harbor Tea House/Pinewatch Commons 02 | Side window assembly_002"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 02 | Warm flickering panes_006" parent="Pinewatch Commons 02 | Harbor Tea House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 03 | Warm flickering panes_011" parent="Pinewatch Commons 03 | Fernwood Chalet/Pinewatch Commons 03 | Side window assembly_004"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 03 | Warm flickering panes_010" parent="Pinewatch Commons 03 | Fernwood Chalet"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 03 | Warm flickering panes_012" parent="Pinewatch Commons 03 | Fernwood Chalet"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 04 | Warm flickering panes_016" parent="Pinewatch Commons 04 | Fishermans House/Pinewatch Commons 04 | Side window assembly_006"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 04 | Warm flickering panes_015" parent="Pinewatch Commons 04 | Fishermans House"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 05 | Warm flickering panes_021" parent="Pinewatch Commons 05 | Rose Cottage/Pinewatch Commons 05 | Side window assembly_008"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 05 | Warm flickering panes_020" parent="Pinewatch Commons 05 | Rose Cottage"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 06 | Warm flickering panes_027" parent="Pinewatch Commons 06 | Pottery Studio/Pinewatch Commons 06 | Side window assembly_010"]
+surface_material_override/0 = ExtResource("window_amber")
+
+[node name="Pinewatch Commons 06 | Warm flickering panes_026" parent="Pinewatch Commons 06 | Pottery Studio"]
+surface_material_override/0 = ExtResource("window_amber")
+
+# BEGIN STATIC RENDER SECTIONS
+
+[node name="Artisan Heights continuous outer ring road" parent="."]
+visible = false
+
+[node name="Grand Harbor connected promenade" parent="."]
+visible = false
+
+[node name="Grand Moonhaven - tenfold broad terraced island" parent="."]
+visible = false
+
+[node name="Harborlight Ward continuous outer ring road" parent="."]
+visible = false
+
+[node name="Lantern Garden continuous outer ring road" parent="."]
+visible = false
+
+[node name="Moonhaven Central continuous outer ring road" parent="."]
+visible = false
+
+[node name="North Meadow Scenic Walk" parent="."]
+visible = false
+
+[node name="Northlight connected promenade" parent="."]
+visible = false
+
+[node name="Pinewatch Commons continuous outer ring road" parent="."]
+visible = false
+
+[node name="South Meadow Scenic Walk" parent="."]
+visible = false

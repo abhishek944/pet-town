@@ -1,25 +1,14 @@
-mod animation_generation;
 mod apng;
-pub(crate) mod candidate_commands;
 pub(crate) mod catalog;
 pub(crate) mod draft_commands;
 mod extension_activation;
 mod extension_catalog;
 mod extension_store;
 mod extension_types;
-mod generated_frame_validation;
-mod generation_artifacts;
-pub(crate) mod generation_commands;
-mod generation_process;
-mod generation_protocol;
-mod generation_worker;
-mod images;
 mod manifest;
 pub(crate) mod pack_commands;
 mod store;
 mod types;
-mod worker_process;
-mod worker_registry;
 
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -38,7 +27,6 @@ impl PetStudioState {
         Self(Mutex::new(HashMap::new()), directory)
     }
     pub fn cleanup(&self) {
-        worker_registry::stop_all();
         if let Some(path) = &self.1 {
             let _ = std::fs::remove_dir_all(path);
         }
@@ -47,7 +35,6 @@ impl PetStudioState {
 
 impl Drop for PetStudioState {
     fn drop(&mut self) {
-        worker_registry::stop_all();
         if let Some(path) = &self.1 {
             let _ = std::fs::remove_dir_all(path);
         }

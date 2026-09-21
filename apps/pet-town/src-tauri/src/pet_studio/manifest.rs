@@ -32,8 +32,7 @@ pub fn build(id: &str, request: &SavePackRequest, draft: &Draft) -> Result<Value
         let item = draft
             .animations
             .get(name)
-            .filter(|item| item.apng.is_some())
-            .ok_or_else(|| format!("Animation {name} is not approved."))?;
+            .ok_or_else(|| format!("Animation {name} has not been imported."))?;
         clips
             .entry(name.clone())
             .or_insert_with(|| clip(name, &item.role, item.duration_ms));

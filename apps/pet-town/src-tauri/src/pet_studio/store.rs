@@ -136,7 +136,7 @@ pub fn save(request: &SavePackRequest, draft: &Draft) -> Result<String, String> 
         create_private_dir(&staging.join("assets"))?;
         let mut asset_hashes = BTreeMap::new();
         for name in animations.keys() {
-            let source = draft.animations[name].apng.as_ref().unwrap();
+            let source = &draft.animations[name].apng;
             let bytes =
                 fs::read(source).map_err(|_| "Could not stage an animation.".to_string())?;
             write_private(&staging.join("assets").join(format!("{name}.png")), &bytes)?;

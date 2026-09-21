@@ -2,18 +2,15 @@ use tauri::Manager;
 
 mod adapter_events;
 mod adapter_setup;
-mod adapters;
 mod agents;
 mod app_launch;
 mod app_menu;
 mod app_singleton;
-mod broker;
 mod control;
 mod focus;
 mod focus_id;
 mod herdr_command;
 mod herdr_state;
-mod labels;
 #[cfg(target_os = "macos")]
 mod macos_activation;
 #[cfg(target_os = "macos")]
@@ -114,15 +111,7 @@ pub fn run() {
             focus::focus_agent,
             pet_studio::draft_commands::create_pet_draft,
             pet_studio::draft_commands::discard_pet_draft,
-            pet_studio::draft_commands::pet_studio_status,
-            pet_studio::draft_commands::set_pet_reference,
             pet_studio::draft_commands::import_pet_animation,
-            pet_studio::candidate_commands::approve_pet_animation,
-            pet_studio::candidate_commands::discard_pet_animation_candidate,
-            pet_studio::candidate_commands::get_pet_animation_candidate,
-            pet_studio::generation_commands::assemble_pet_animation,
-            pet_studio::generation_commands::generate_pet_animation,
-            pet_studio::generation_commands::generate_pet_reference,
             pet_studio::pack_commands::activate_pet_extension,
             pet_studio::pack_commands::discard_pet_extension_candidate,
             pet_studio::pack_commands::list_pet_extensions,

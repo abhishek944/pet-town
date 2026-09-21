@@ -5,7 +5,6 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 TARGET=${1:-}
 NODE_VERSION=22.21.1
 PI_VERSION=0.85.1
-IMAGE_GEN_VERSION=0.4.1
 
 case "$TARGET" in
 macos-arm64 | aarch64-apple-darwin)
@@ -57,7 +56,7 @@ install -m 755 "$NODE_ROOT/bin/node" "$WORK/runtime/node"
 install -m 644 "$NODE_ROOT/LICENSE" "$WORK/runtime/NODE-LICENSE.txt"
 
 cat >"$WORK/runtime/package/package.json" <<JSON
-{"name":"pet-town-pi-runtime","private":true,"version":"0.0.0","dependencies":{"@abhishek944/pi-image-gen":"$IMAGE_GEN_VERSION","@earendil-works/pi-coding-agent":"$PI_VERSION"}}
+{"name":"pet-town-pi-runtime","private":true,"version":"0.0.0","dependencies":{"@earendil-works/pi-coding-agent":"$PI_VERSION"}}
 JSON
 cp "$ROOT/scripts/pi-runtime-package-lock.json" "$WORK/runtime/package/package-lock.json"
 (cd "$WORK/runtime/package" &&
@@ -69,8 +68,6 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 exec "$ROOT/node" "$ROOT/package/node_modules/@earendil-works/pi-coding-agent/dist/cli.js" "$@"
 SH
 chmod 755 "$WORK/runtime/bin/pi"
-install -m 600 "$ROOT/apps/pet-town/scripts/pet-studio-image-worker.mjs" \
-  "$WORK/runtime/package/pet-studio-image-worker.mjs"
 
 if [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
   if security find-identity -v -p codesigning 2>/dev/null | grep -qF "$APPLE_SIGNING_IDENTITY"; then
@@ -138,17 +135,15 @@ PY
   done <"$WORK/runtime-files.txt"
 fi
 
-python3 - "$WORK/runtime" "$NODE_VERSION" "$PI_VERSION" "$IMAGE_GEN_VERSION" "$ARCH" <<'PY'
+python3 - "$WORK/runtime" "$NODE_VERSION" "$PI_VERSION" "$ARCH" <<'PY'
 import hashlib,json,pathlib,sys
 root=pathlib.Path(sys.argv[1])
 def sha(path): return hashlib.sha256((root/path).read_bytes()).hexdigest()
 files={str(path.relative_to(root)):sha(path.relative_to(root)) for path in sorted(root.rglob('*')) if path.is_file() and not path.is_symlink()}
-manifest={"formatVersion":1,"architecture":sys.argv[5],"nodeVersion":sys.argv[2],
-          "piVersion":sys.argv[3],"imageGenVersion":sys.argv[4],"nodeSha256":sha("node"),
+manifest={"formatVersion":1,"architecture":sys.argv[4],"nodeVersion":sys.argv[2],
+          "piVersion":sys.argv[3],"nodeSha256":sha("node"),
           "launcherSha256":sha("bin/pi"),
           "entrypointSha256":sha("package/node_modules/@earendil-works/pi-coding-agent/dist/cli.js"),
-          "imageWorkerSha256":sha("package/pet-studio-image-worker.mjs"),
-          "imageLibrarySha256":sha("package/node_modules/@abhishek944/pi-image-gen/dist/index.js"),
           "files":files}
 (root/"runtime-manifest.json").write_text(json.dumps(manifest,separators=(',',':'))+"\n")
 PY

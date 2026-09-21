@@ -10,12 +10,9 @@ struct RuntimeManifest {
     architecture: String,
     node_version: String,
     pi_version: String,
-    image_gen_version: String,
     node_sha256: String,
     launcher_sha256: String,
     entrypoint_sha256: String,
-    image_worker_sha256: String,
-    image_library_sha256: String,
     files: BTreeMap<String, String>,
 }
 
@@ -33,7 +30,6 @@ pub fn validate(root: &Path) -> Result<(), String> {
         || manifest.architecture != expected_arch
         || manifest.node_version != "22.21.1"
         || manifest.pi_version != "0.85.1"
-        || manifest.image_gen_version != "0.4.1"
         || manifest.files.len() > 50_000
     {
         return Err("Bundled Pi runtime does not match this application.".into());
@@ -47,14 +43,6 @@ pub fn validate(root: &Path) -> Result<(), String> {
     verify(
         root.join("package/node_modules/@earendil-works/pi-coding-agent/dist/cli.js"),
         &manifest.entrypoint_sha256,
-    )?;
-    verify(
-        root.join("package/pet-studio-image-worker.mjs"),
-        &manifest.image_worker_sha256,
-    )?;
-    verify(
-        root.join("package/node_modules/@abhishek944/pi-image-gen/dist/index.js"),
-        &manifest.image_library_sha256,
     )?;
     let actual = count_files(root)?;
     if actual != manifest.files.len() + 1 {

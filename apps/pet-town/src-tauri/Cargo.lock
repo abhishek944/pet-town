@@ -2318,6 +2318,7 @@ dependencies = [
  "image",
  "libc",
  "objc2-app-kit",
+ "pet-town-agent-broker",
  "reqwest 0.12.28",
  "security-framework",
  "serde",
@@ -2328,6 +2329,18 @@ dependencies = [
  "tauri-build",
  "toml 0.8.2",
  "uuid",
+ "wait-timeout",
+]
+
+[[package]]
+name = "pet-town-agent-broker"
+version = "0.1.0"
+dependencies = [
+ "fs2",
+ "libc",
+ "objc2-app-kit",
+ "serde",
+ "serde_json",
  "wait-timeout",
 ]
 

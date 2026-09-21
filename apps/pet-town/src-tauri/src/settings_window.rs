@@ -50,9 +50,10 @@ impl SettingsSession {
         }
     }
     fn context(&self) -> SettingsContext {
+        let session = self.lock();
         SettingsContext {
-            selected_pet_id: self.lock().selected_pet_id.clone(),
-            initial_tab: self.lock().initial_tab.clone(),
+            selected_pet_id: session.selected_pet_id.clone(),
+            initial_tab: session.initial_tab.clone(),
         }
     }
     pub fn is_open(&self) -> bool {

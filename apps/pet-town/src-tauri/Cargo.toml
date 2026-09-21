@@ -20,6 +20,7 @@ tauri-build = { version = "2", features = [] }
 sha2 = "0.10"
 
 [dependencies]
+pet-town-agent-broker = { path = "../../../packages/pet-town-agent-broker" }
 # custom-protocol makes every build serve the embedded frontend through Tauri's
 # asset protocol. Without it Tauri assumes a development environment and every
 # window (including release binaries) loads from the vite dev server instead,

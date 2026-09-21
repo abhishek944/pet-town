@@ -1,7 +1,5 @@
 import { allCharacterIds, behaviorPackForCharacter, characterDisplayName } from "./character-packs";
-import { loadImageSource } from "./image-source";
 import { friendlyPetName } from "./preferences-types";
-import { previewAnimations } from "./settings-preview";
 
 export type StudioMode = "new" | "extend";
 export const EXTENSION_STATES = ["idle", "working", "blocked", "done", "unknown"] as const;
@@ -12,34 +10,15 @@ export interface StudioChoice {
   mode: StudioMode;
   name: string;
   baseId: string;
-  referenceId: string;
 }
 export interface StudioIssue {
   message: string;
   fields: string[];
 }
 
-export async function existingPetReference(id: string): Promise<string> {
-  const animations = previewAnimations(behaviorPackForCharacter(id));
-  const option = animations.find((item) => item.locomotion) ?? animations[0];
-  if (!option) throw new Error("This pet has no usable reference animation.");
-  const source = await loadImageSource(option.assetUrl);
-  const canvas = document.createElement("canvas");
-  canvas.width = 1024;
-  canvas.height = 1024;
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("Could not prepare the character reference.");
-  const scale = Math.min(900 / source.naturalWidth, 900 / source.naturalHeight);
-  const width = source.naturalWidth * scale;
-  const height = source.naturalHeight * scale;
-  context.drawImage(source, (1024 - width) / 2, 974 - height, width, height);
-  return canvas.toDataURL("image/png");
-}
-
 export class StudioWorkflow {
   constructor(onChange: () => void) {
     $("studio-mode").addEventListener("change", onChange);
-    $("studio-reference-kind").addEventListener("change", onChange);
   }
   mode(): StudioMode | "" {
     return $<HTMLSelectElement>("studio-mode").value as StudioMode | "";
@@ -52,15 +31,12 @@ export class StudioWorkflow {
     mode.value = "new";
     mode.dispatchEvent(new Event("change", { bubbles: true }));
     reset();
-    return "Create a new pet, then assign different Walking and Listening animations.";
+    return "Create a new pet, import APNGs, then assign different Walking and Listening animations.";
   }
   sync(draftId: string): void {
     const mode = this.mode();
-    const referenceKind = $<HTMLSelectElement>("studio-reference-kind").value;
     $("studio-new-fields").hidden = mode !== "new";
     $("studio-existing-field").hidden = mode !== "extend";
-    $("studio-source-field").hidden = mode !== "new" || referenceKind !== "existing";
-    $("studio-character-prompt-field").hidden = mode === "extend" || referenceKind === "existing";
     $<HTMLElement>("panel-studio").dataset.mode = mode;
     if (!draftId) this.renderMappings([]);
   }
@@ -68,23 +44,14 @@ export class StudioWorkflow {
     const options = allCharacterIds().map(
       (id) => new Option(characterDisplayName(id) ?? friendlyPetName(id), id),
     );
-    for (const id of ["studio-source", "studio-existing"] as const) {
-      const select = $<HTMLSelectElement>(id);
-      const selected = select.value;
-      select.replaceChildren(
-        new Option("Choose a pet…", ""),
-        ...options.map((option) => option.cloneNode(true) as HTMLOptionElement),
-      );
-      select.value = [...select.options].some((option) => option.value === selected)
-        ? selected
-        : "";
-    }
+    const select = $<HTMLSelectElement>("studio-existing");
+    const selected = select.value;
+    select.replaceChildren(new Option("Choose a pet…", ""), ...options);
+    select.value = [...select.options].some((option) => option.value === selected) ? selected : "";
   }
   choice(): StudioChoice | StudioIssue {
     const mode = this.mode();
     const baseId = $<HTMLSelectElement>("studio-existing").value;
-    const kind = $<HTMLSelectElement>("studio-reference-kind").value;
-    const source = $<HTMLSelectElement>("studio-source").value;
     const name =
       mode === "extend"
         ? (characterDisplayName(baseId) ?? friendlyPetName(baseId))
@@ -98,19 +65,7 @@ export class StudioWorkflow {
       return { message: "Choose the pet you want to extend.", fields: ["studio-existing"] };
     if (mode === "new" && !name)
       return { message: "Enter a name for the new pet.", fields: ["studio-name"] };
-    if (mode === "new" && !kind)
-      return {
-        message: "Choose how to create the character reference.",
-        fields: ["studio-reference-kind"],
-      };
-    if (mode === "new" && kind === "existing" && !source)
-      return { message: "Choose a reference pet.", fields: ["studio-source"] };
-    return {
-      mode,
-      name,
-      baseId,
-      referenceId: mode === "extend" ? baseId : kind === "existing" ? source : "",
-    };
+    return { mode, name, baseId };
   }
   renderMappings(animations: string[]): void {
     const root = $("studio-mappings");
@@ -127,8 +82,8 @@ export class StudioWorkflow {
       }),
     );
     $("studio-mapping-hint").textContent = extending
-      ? "Optionally replace a state with a new APNG. Unchanged states keep their existing behavior."
-      : "Create and approve animations, then assign them to every required behavior.";
+      ? "Optionally replace a state with an imported APNG. Unchanged states keep their existing behavior."
+      : "Assign imported APNGs to every required behavior.";
     $("studio-save").textContent = extending ? "Validate & save extension" : "Validate & save pet";
     this.refreshMappings(animations);
   }
@@ -164,12 +119,7 @@ export class StudioWorkflow {
     return id ? Object.keys(behaviorPackForCharacter(id).actions) : [];
   }
   lock(busy: boolean, draftId: string): void {
-    for (const id of [
-      "studio-mode",
-      "studio-reference-kind",
-      "studio-source",
-      "studio-existing",
-    ] as const) {
+    for (const id of ["studio-mode", "studio-existing"] as const) {
       $<HTMLSelectElement>(id).disabled = busy || Boolean(draftId);
     }
   }

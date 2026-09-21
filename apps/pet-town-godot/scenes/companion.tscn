@@ -1,0 +1,56 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/companion.gd" id="1"]
+[ext_resource type="AnimationLibrary" path="res://assets/kaykit/town_animations.res" id="2"]
+[sub_resource type="CapsuleShape3D" id="Body"]
+radius = 0.28
+height = 1.3
+[sub_resource type="StandardMaterial3D" id="AppleMaterial"]
+albedo_color = Color(0.78, 0.17, 0.07, 1)
+roughness = 0.7
+[sub_resource type="SphereMesh" id="Apple"]
+material = SubResource("AppleMaterial")
+radius = 0.16
+height = 0.29
+radial_segments = 12
+rings = 6
+
+[node name="Companion" type="CharacterBody3D"]
+physics_interpolation_mode = 1
+collision_layer = 2
+collision_mask = 1
+floor_snap_length = 0.5
+floor_max_angle = 0.872665
+script = ExtResource("1")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.65, 0)
+shape = SubResource("Body")
+[node name="Visual" type="Node3D" parent="."]
+scale = Vector3(0.7, 0.7, 0.7)
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Visual"]
+callback_mode_process = 0
+root_node = NodePath("../Model")
+libraries = {&"": ExtResource("2")}
+[node name="CarriedApple" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0.42, 0.95, 0.38)
+mesh = SubResource("Apple")
+visible = false
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.55
+path_height_offset = 0.2
+target_desired_distance = 0.65
+path_max_distance = 2.0
+avoidance_enabled = true
+radius = 0.4
+height = 1.4
+neighbor_distance = 3.0
+time_horizon_agents = 1.0
+max_speed = 1.85
+[node name="Caption" type="Label3D" parent="."]
+position = Vector3(0, 1.85, 0)
+billboard = 1
+font_size = 32
+outline_size = 7
+pixel_size = 0.009
+modulate = Color(1, 0.94, 0.78, 1)
+visibility_range_end = 65.0

@@ -122,16 +122,3 @@ pub(crate) fn remove_source_records(source: &str) {
         }
     }
 }
-
-pub(crate) fn read_records() -> Vec<AdapterEventRecord> {
-    with_lock(|| {
-        let mut records: Vec<_> = collect_records()
-            .into_iter()
-            .map(|(_, record)| record)
-            .filter(|record| !super::enabled::is_disabled(&record.source))
-            .collect();
-        records.sort_by(|left, right| left.session_key.cmp(&right.session_key));
-        Ok(records)
-    })
-    .unwrap_or_default()
-}

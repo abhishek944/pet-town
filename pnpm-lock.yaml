@@ -29,9 +29,6 @@ importers:
 
   apps/pet-town:
     dependencies:
-      '@abhishek944/pi-image-gen':
-        specifier: 0.4.1
-        version: 0.4.1
       '@tauri-apps/api':
         specifier: ^2
         version: 2.11.1
@@ -49,28 +46,6 @@ importers:
         specifier: ^6.0.3
         version: 6.4.3
 
-  apps/pet-town-v2:
-    dependencies:
-      '@pet-town/core':
-        specifier: workspace:*
-        version: link:../../packages/pet-town-core
-      '@tauri-apps/api':
-        specifier: ^2
-        version: 2.11.1
-      excalibur:
-        specifier: ^0.32.0
-        version: 0.32.0
-    devDependencies:
-      '@tauri-apps/cli':
-        specifier: ^2
-        version: 2.11.4
-      typescript:
-        specifier: ~5.6.2
-        version: 5.6.3
-      vite:
-        specifier: ^6.0.3
-        version: 6.4.3
-
   apps/web:
     devDependencies:
       typescript:
@@ -80,30 +55,7 @@ importers:
         specifier: ^6.0.3
         version: 6.4.3
 
-  packages/pet-town-core:
-    devDependencies:
-      typescript:
-        specifier: ~5.6.2
-        version: 5.6.3
-
 packages:
-
-  '@abhishek944/pi-image-gen@0.4.1':
-    resolution: {integrity: sha512-2lo+mouMzu/HrGqzoZXhoe1K0Pz/jJrcnqUw3pNNV4E2qkl6qGhIcy0VTMIaUMoNyIuC8hE9+btuLcH+GLhtRw==}
-    peerDependencies:
-      '@earendil-works/pi-ai': '>=0.80.10'
-      '@earendil-works/pi-coding-agent': '>=0.79.1'
-      typebox: '*'
-    peerDependenciesMeta:
-      '@earendil-works/pi-ai':
-        optional: true
-      '@earendil-works/pi-coding-agent':
-        optional: true
-      typebox:
-        optional: true
-
-  '@amaster.ai/pi-shared@0.1.15':
-    resolution: {integrity: sha512-2CFGw8yX/6X1GaamZ7WKiSG0DnMRNYTYM+Ohj92dTwSJfz6ZN9OJGwRGGsi9a0tqbHRBzXfchQCT7HQOmo5rrg==}
 
   '@cacheable/memory@2.2.0':
     resolution: {integrity: sha512-CTLKqLItRCEixEAewD3/j9DB3/o96gpTPD4eJ1v+DGOlxZRZncRQkGYqqnAGCscYd6RNeXfGeiuCphsPtqyIfQ==}
@@ -748,9 +700,6 @@ packages:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
 
-  excalibur@0.32.0:
-    resolution: {integrity: sha512-anCvsZK2Dh3BTlw/ERHr3fvfqF2vdJHw88soCs3r6EIwxbhibNRILMZw3Ae6GMTY8FkzRfkGLyk7DlEZVesUaw==}
-
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
@@ -872,9 +821,6 @@ packages:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
 
-  pako@1.0.11:
-    resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
-
   path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
     engines: {node: '>=8'}
@@ -963,9 +909,6 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  upng-js@2.1.0:
-    resolution: {integrity: sha512-d3xzZzpMP64YkjP5pr8gNyvBt7dLk/uGI67EctzDuVp4lCZyVMo0aJO6l/VDlgbInJYDY6cnClLoBp29eKWI6g==}
-
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
@@ -1023,13 +966,6 @@ packages:
     engines: {node: '>=10'}
 
 snapshots:
-
-  '@abhishek944/pi-image-gen@0.4.1':
-    dependencies:
-      '@amaster.ai/pi-shared': 0.1.15
-      upng-js: 2.1.0
-
-  '@amaster.ai/pi-shared@0.1.15': {}
 
   '@cacheable/memory@2.2.0':
     dependencies:
@@ -1555,8 +1491,6 @@ snapshots:
 
   esutils@2.0.3: {}
 
-  excalibur@0.32.0: {}
-
   fast-deep-equal@3.1.3: {}
 
   fast-json-stable-stringify@2.1.0: {}
@@ -1659,8 +1593,6 @@ snapshots:
     dependencies:
       p-limit: 3.1.0
 
-  pako@1.0.11: {}
-
   path-exists@4.0.0: {}
 
   path-key@3.1.1: {}
@@ -1761,10 +1693,6 @@ snapshots:
       - supports-color
 
   typescript@5.6.3: {}
-
-  upng-js@2.1.0:
-    dependencies:
-      pako: 1.0.11
 
   uri-js@4.4.1:
     dependencies:

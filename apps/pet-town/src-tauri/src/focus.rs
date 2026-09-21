@@ -19,6 +19,25 @@ pub(crate) enum FocusRoute {
     },
 }
 
+impl From<pet_town_agent_broker::FocusRoute> for FocusRoute {
+    fn from(route: pet_town_agent_broker::FocusRoute) -> Self {
+        match route {
+            pet_town_agent_broker::FocusRoute::Herdr {
+                pane_id,
+                socket,
+                agent_session_id,
+            } => Self::Herdr {
+                pane_id,
+                socket,
+                agent_session_id,
+            },
+            pet_town_agent_broker::FocusRoute::Application { bundle_id } => {
+                Self::Application { bundle_id }
+            }
+        }
+    }
+}
+
 #[derive(Default)]
 pub(crate) struct FocusTargets(Mutex<HashMap<String, FocusRoute>>);
 
@@ -123,9 +142,10 @@ pub(crate) fn focus_serialized_route(route: &str) -> Result<(), String> {
 }
 
 pub(crate) fn focus_current_agent(id: &str) -> Result<(), String> {
-    let target = crate::broker::collect()
+    let target = pet_town_agent_broker::collect()
         .focus_routes
         .remove(id)
+        .map(FocusRoute::from)
         .ok_or_else(|| "agent is no longer available".to_string())?;
     run_user_focus_route(&herdr_binary(), &target)
 }

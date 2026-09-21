@@ -1,18 +1,8 @@
 export type StudioBusyOperation =
-  | "prepare-draft"
-  | "import-animation"
-  | "generate-reference"
-  | "generate-sheet"
-  | "create-animation"
-  | "approve-animation"
-  | "discard-animation"
-  | "discard-draft"
-  | "save-pet"
-  | null;
+  "prepare-draft" | "import-animation" | "discard-draft" | "save-pet" | null;
 
 type ProgressTarget = {
   buttonId?: string;
-  indicatorId?: string;
   operation: Exclude<StudioBusyOperation, null>;
   busyLabel: string;
   announcement: string;
@@ -29,39 +19,6 @@ const targets: ProgressTarget[] = [
     operation: "import-animation",
     busyLabel: "Importing…",
     announcement: "Importing and validating the APNG animation.",
-  },
-  {
-    buttonId: "studio-reference-generate",
-    indicatorId: "studio-reference-loading",
-    operation: "generate-reference",
-    busyLabel: "Generating reference…",
-    announcement: "Generating the character reference.",
-  },
-  {
-    buttonId: "studio-generate-animation",
-    indicatorId: "studio-sheet-loading",
-    operation: "generate-sheet",
-    busyLabel: "Generating sprite sheet…",
-    announcement: "Generating one sprite sheet and preparing six animation frames.",
-  },
-  {
-    buttonId: "studio-create-animation",
-    indicatorId: "studio-animation-loading",
-    operation: "create-animation",
-    busyLabel: "Creating animation…",
-    announcement: "Creating the APNG animation from six frames.",
-  },
-  {
-    buttonId: "studio-approve-animation",
-    operation: "approve-animation",
-    busyLabel: "Approving…",
-    announcement: "Approving the animation.",
-  },
-  {
-    buttonId: "studio-discard-animation",
-    operation: "discard-animation",
-    busyLabel: "Discarding…",
-    announcement: "Discarding the draft animation.",
   },
   {
     buttonId: "studio-cancel",
@@ -103,6 +60,5 @@ export function setStudioBusy(value: boolean, operation: StudioBusyOperation): v
     }
     button.dataset.loading = String(loading);
     button.setAttribute("aria-busy", String(loading));
-    if (target.indicatorId) document.getElementById(target.indicatorId)!.hidden = !loading;
   }
 }

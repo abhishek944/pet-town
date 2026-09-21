@@ -372,40 +372,32 @@ grep -q 'bindSwitch("open-with-herdr"' src/settings.ts
 [ "$(grep -o 'type="checkbox"' settings.html | wc -l | tr -d ' ')" = 1 ]
 grep -q 'id="studio-assign-orchestrator" type="checkbox"' settings.html
 grep -q 'selectedPreviewAnimationId(animationOptions, remembered)' src/settings.ts
-grep -q 'id="studio-sheet-loading".*Generating and checking one sprite sheet' settings.html
-grep -q 'id="studio-animation-loading".*Creating the APNG loop' settings.html
 grep -q 'id="studio-operation-status".*aria-live="polite"' settings.html
-grep -q 'grid-template-rows: auto 240px auto' src/settings-studio.css
-grep -q 'grid-template-rows: repeat(2, minmax(0, 1fr))' src/settings-studio.css
-grep -Fq 'role: $<HTMLSelectElement>("studio-role").value' src/settings-studio.ts
-grep -q 'generatedRoles.set(asset.animationId, asset.role)' src/settings-studio.ts
-grep -Fq '!this.candidates.has(this.pendingAnimationId)' src/settings-studio.ts
-grep -q 'candidate_role = Some(request.role.clone())' src-tauri/src/pet_studio/animation_generation.rs
-grep -q 'animation kind changed after frame generation' src-tauri/src/pet_studio/generation_commands.rs
-grep -q 'SPRITE_PROMPT_VERSION' src-tauri/src/pet_studio/animation_generation.rs
-grep -q 'runSpritePipeline' scripts/pet-studio-image-worker.mjs
-grep -q 'repeat nearly the same pose' src-tauri/src/pet_studio/generated_frame_validation.rs
-grep -q 'setBusy(true, "generate-sheet")' src/settings-studio.ts
-grep -q 'setBusy(true, "create-animation")' src/settings-studio.ts
-grep -Fq 'disabled = this.busy || !nextReady' src/settings-studio.ts
-grep -Fq 'this.approved.size > 0' src/settings-studio.ts
-grep -Fq 'if (!this.draftId && !(await this.startDraft("generate-reference"))) return' src/settings-studio.ts
-grep -q 'id="studio-reference-loading".*Generating character reference' settings.html
-grep -q 'operation: "generate-reference"' src/settings-studio-progress.ts
+grep -q 'id="studio-import-animation".*accept="image/png,image/apng' settings.html
+grep -q 'Its frame timing is read from the file automatically' settings.html
+grep -Fq 'this.importApng(event, this.animationId(), $<HTMLSelectElement>("studio-role").value)' src/settings-studio.ts
 grep -q 'operation: "import-animation"' src/settings-studio-progress.ts
 grep -q 'setBusy(true, "import-animation")' src/settings-studio.ts
-grep -Fq 'dataset.ready !== "true"' src/settings-studio.ts
-grep -q 'await this.show("studio-reference-preview"' src/settings-studio.ts
-grep -q 'await renderFrameGrid("studio-frame-preview"' src/settings-studio.ts
+grep -q 'AnimationDraft {' src-tauri/src/pet_studio/draft_commands.rs
+grep -q 'pub fn validate_import' src-tauri/src/pet_studio/apng.rs
+grep -q 'The APNG must loop continuously' src-tauri/src/pet_studio/apng.rs
+grep -q 'apng::validate_import' src-tauri/src/pet_studio/draft_commands.rs
 grep -q '^inherit_openai_key() {' "$ROOT/scripts/supervisor.sh"
 grep -Fq '/bin/launchctl getenv OPENAI_API_KEY' "$ROOT/scripts/supervisor.sh"
-grep -q 'generation_worker::sprite' src-tauri/src/pet_studio/animation_generation.rs
-grep -q 'generateImage' scripts/pet-studio-image-worker.mjs
-grep -q 'runSpritePipeline' scripts/pet-studio-image-worker.mjs
-[ ! -e src-tauri/src/pet_studio/openai.rs ]
-[ ! -e src-tauri/src/pet_studio/frame_generation.rs ]
-[ ! -e src-tauri/src/pet_studio/sheet_layout.rs ]
-grep -q 'const FRAME_COUNT: usize = 6' src-tauri/src/pet_studio/animation_generation.rs
+[ ! -e scripts/pet-studio-image-worker.mjs ]
+[ ! -e src/settings-studio-status.ts ]
+[ ! -e src/settings-studio-candidate.ts ]
+[ ! -e src/settings-studio-frames.ts ]
+[ ! -e src-tauri/src/pet_studio/generation_commands.rs ]
+[ ! -e src-tauri/src/pet_studio/animation_generation.rs ]
+if grep -Eq 'studio-(reference|generate-animation|create-animation|approve-animation|discard-animation|sheet-loading|frame-preview)' settings.html; then
+  echo "Pet Studio generation controls or copy remain" >&2
+  exit 1
+fi
+if grep -Eq 'generate_pet_|assemble_pet_animation|pet_studio_status|set_pet_reference' src-tauri/src/lib.rs; then
+  echo "Pet Studio generation commands remain registered" >&2
+  exit 1
+fi
 grep -q 'data-locomotion="true"' src/settings.css
 grep -q 'calc(-50% - 24px)' src/settings.css
 grep -q 'data-reduced-movement="true"' src/settings.css
