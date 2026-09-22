@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { ASSISTANT_PET_ID, type PreferencesFile } from "./preferences-types";
 import { bundledBehaviorPackForCharacter } from "./character-packs";
+import { open } from "@tauri-apps/plugin-dialog";
 import type { OrchestratorStatus } from "./orchestrator-status";
 
 const byId = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
@@ -21,8 +22,12 @@ export class AssistantSettings {
     wakeActivated: false,
     wakeGeneration: 0,
     workspaceId: null,
+    voiceMode: "idle",
+    voiceNote: null,
     message: "Not connected",
   };
+
+
 
   constructor(
     private readonly draft: () => PreferencesFile,
@@ -42,6 +47,9 @@ export class AssistantSettings {
     byId<HTMLInputElement>("assistant-name").value = value.displayName;
     byId<HTMLSelectElement>("assistant-model").value = value.model;
     byId<HTMLSelectElement>("assistant-thinking").value = value.thinking;
+    const promptBox = byId<HTMLTextAreaElement>("assistant-system-prompt");
+    if (promptBox.value !== value.systemPrompt) promptBox.value = value.systemPrompt;
+    this.renderFolder();
     const name = value.displayName.trim() || "your assistant";
     byId<HTMLElement>("assistant-intro").textContent = `Hi, I’m ${name}.`;
     byId<HTMLElement>("assistant-wake-phrase").textContent = value.enabled
@@ -56,6 +64,18 @@ export class AssistantSettings {
         : `Disabled · ${model}`;
     this.renderToggle(value.enabled, petReady);
     this.renderStatus();
+  }
+
+  private renderFolder(): void {
+    const saved = this.currentConfiguration()?.workspaceId ?? null;
+    const label = byId<HTMLElement>("assistant-folder");
+    if (saved && saved.startsWith("/")) {
+      label.textContent = saved.split("/").pop() || saved;
+      label.title = saved;
+    } else {
+      label.textContent = "Documents";
+      label.title = "Your Documents folder";
+    }
   }
 
   private bind(): void {
@@ -73,10 +93,50 @@ export class AssistantSettings {
         .value as PreferencesFile["app"]["orchestrator"]["thinking"];
       this.changed();
     });
+    byId<HTMLTextAreaElement>("assistant-system-prompt").addEventListener("input", (event) => {
+      this.draft().app.orchestrator.systemPrompt = (
+        event.currentTarget as HTMLTextAreaElement
+      ).value;
+      this.changed();
+    });
+    byId<HTMLButtonElement>("assistant-pick-folder").addEventListener("click", () => {
+      const button = byId<HTMLButtonElement>("assistant-pick-folder");
+      button.disabled = true;
+      open({ directory: true, multiple: false, title: "Choose Pi session folder" }).then(
+        (picked) => {
+          button.disabled = false;
+          if (typeof picked === "string" && picked) {
+            this.draft().app.orchestrator.workspaceId = picked;
+            this.changed();
+            this.renderFolder();
+          }
+        },
+        () => {
+          button.disabled = false;
+        },
+      );
+    });
     byId<HTMLButtonElement>("assistant-toggle").addEventListener("click", () => {
       this.draft().app.orchestrator.enabled = !this.draft().app.orchestrator.enabled;
       this.changed();
       byId<HTMLButtonElement>("apply").click();
+    });
+    byId<HTMLButtonElement>("assistant-reconnect").addEventListener("click", () => {
+      const button = byId<HTMLButtonElement>("assistant-reconnect");
+      const hint = byId<HTMLElement>("assistant-voice-hint");
+      button.disabled = true;
+      hint.hidden = false;
+      hint.textContent = "Starting voice listener…";
+      invoke<string>("rearm_orchestrator_voice").then(
+        (message) => {
+          hint.textContent = message;
+          button.disabled = false;
+        },
+        (error) => {
+          hint.textContent = String(error ?? "Could not restart the voice listener.");
+          button.disabled = false;
+        },
+      );
     });
   }
 
@@ -112,12 +172,38 @@ export class AssistantSettings {
     ready.dataset.ready = String(
       this.status.available && this.status.petReady && this.status.herdrConnected,
     );
+    const voiceIdle =
+      configured?.enabled === true &&
+      this.status.available &&
+      this.status.herdrConnected &&
+      !this.status.liveConnected;
     live.textContent = this.status.liveConnected
-      ? "Connected"
+      ? this.status.voiceMode === "tools"
+        ? "Connected · tools"
+        : "Connected · basic"
       : this.status.available
-        ? "Key found"
+        ? configured?.enabled
+          ? "Idle — voice paused"
+          : "Key found"
         : "Key missing";
     live.dataset.ready = String(this.status.available);
+    const reconnect = byId<HTMLButtonElement>("assistant-reconnect");
+    const voiceHint = byId<HTMLElement>("assistant-voice-hint");
+    reconnect.hidden = !voiceIdle;
+    if (this.status.voiceNote) {
+      voiceHint.hidden = false;
+      voiceHint.textContent = this.status.voiceNote;
+    } else if (voiceIdle) {
+      const name = configured?.displayName.trim() || "your assistant";
+      voiceHint.hidden = false;
+      if (!voiceHint.textContent || voiceHint.textContent === "Starting voice listener…") {
+        voiceHint.textContent = `Voice paused after 5 idle minutes. Say “Hey, ${name}” or press the button to listen again.`;
+      }
+    } else {
+      reconnect.disabled = false;
+      voiceHint.hidden = true;
+      voiceHint.textContent = "";
+    }
     herdr.textContent = this.status.herdrConnected ? "Connected" : "Disconnected";
     herdr.dataset.ready = String(this.status.herdrConnected);
   }

@@ -1,13 +1,11 @@
 mod herdr;
 
 pub(crate) use crate::focus_id::{herdr_owner_key, public_agent_id};
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::sync::Mutex;
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(tag = "kind", rename_all = "camelCase")]
+#[derive(Clone, Debug)]
 pub(crate) enum FocusRoute {
     Herdr {
         pane_id: String,
@@ -107,38 +105,6 @@ fn run_user_focus_route(herdr: &OsString, target: &FocusRoute) -> Result<(), Str
     #[cfg(target_os = "macos")]
     activation?;
     focused
-}
-
-/// CLI-only focus for the v2 bridge: switch the exact pane first so a click
-/// never waits on host activation, then bring Herdr forward best-effort.
-/// The interactive v1 command keeps its existing behavior below.
-pub(crate) fn focus_serialized_route(route: &str) -> Result<(), String> {
-    let target: FocusRoute =
-        serde_json::from_str(route).map_err(|_| "focus route is invalid".to_string())?;
-    let FocusRoute::Herdr {
-        pane_id,
-        socket,
-        agent_session_id,
-    } = &target
-    else {
-        return run_focus_route(&herdr_binary(), &target);
-    };
-    let herdr = herdr_binary();
-    let verified = herdr::verify(&herdr, pane_id, socket.as_deref(), agent_session_id)?;
-    herdr::focus_verified(
-        &herdr,
-        pane_id,
-        socket.as_deref(),
-        agent_session_id,
-        &verified,
-    )?;
-    #[cfg(target_os = "macos")]
-    let _ = crate::macos_activation::activate_herdr_host_with_timeout(
-        &herdr,
-        socket.as_deref(),
-        std::time::Duration::from_millis(250),
-    );
-    Ok(())
 }
 
 pub(crate) fn focus_current_agent(id: &str) -> Result<(), String> {

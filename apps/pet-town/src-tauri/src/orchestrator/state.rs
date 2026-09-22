@@ -9,6 +9,7 @@ pub struct Runtime {
     pub agent: Option<AgentSession>,
     pub herdr_connected: bool,
     pub live_connected: bool,
+    pub connecting: bool,
     pub listening: bool,
     pub wake_activated: bool,
     pub wake_status: Option<String>,
@@ -23,6 +24,8 @@ pub struct Runtime {
     pub launching: bool,
     pub launch_signature: Option<String>,
     pub selected_workspace_id: Option<String>,
+    pub degraded_note: Option<String>,
+    pub responses_backend: bool,
 }
 
 #[derive(Default)]
@@ -49,6 +52,8 @@ impl OrchestratorState {
             pi_thinking,
             lifecycle_generation,
             current_pane,
+            degraded_note,
+            responses_backend,
         ) = {
             let runtime = self.0.lock().unwrap_or_else(|error| error.into_inner());
             (
@@ -63,6 +68,8 @@ impl OrchestratorState {
                 runtime.agent.as_ref().map(|agent| agent.thinking.clone()),
                 runtime.lifecycle_generation,
                 runtime.agent.as_ref().map(|agent| agent.pane_id.clone()),
+                runtime.degraded_note.clone(),
+                runtime.responses_backend,
             )
         };
         let pi_connected = !launching
@@ -79,11 +86,11 @@ impl OrchestratorState {
         } else if !pet_ready {
             "Assistant pet required"
         } else if live_connected && !pi_connected {
-            "Pi stopped — disconnect and reconnect voice"
+            "Assistant stopped — reconnect voice"
         } else if live_connected {
             "Voice connected"
         } else if pi_connected {
-            "Pi running"
+            "Voice idle — say the wake phrase"
         } else if herdr_connected && preferences.app.orchestrator.enabled {
             wake_status.as_deref().unwrap_or("Starting wake listener")
         } else if herdr_connected {
@@ -105,7 +112,19 @@ impl OrchestratorState {
             wake_activated,
             wake_generation: super::wake::generation(),
             workspace_id,
-            message: message.into(),
+            voice_mode: if live_connected && responses_backend {
+                "tools".to_string()
+            } else if live_connected {
+                "basic".to_string()
+            } else {
+                "idle".to_string()
+            },
+            voice_note: degraded_note.clone(),
+            message: if !live_connected {
+                degraded_note.unwrap_or_else(|| message.to_string())
+            } else {
+                message.to_string()
+            },
         }
     }
 
@@ -125,9 +144,9 @@ impl OrchestratorState {
         OrchestratorPetState {
             active: configured.enabled
                 && pet_ready
-                && runtime.agent.is_some()
-                && !runtime.launching,
-            citizen_id: runtime.agent.as_ref().map(|agent| agent.public_id.clone()),
+                && (runtime.connecting || runtime.live_connected || runtime.agent.is_some()),
+            citizen_id: Some(runtime.agent.as_ref().map(|agent| agent.public_id.clone())
+                .unwrap_or_else(|| "pet-town-assistant".into())),
             pet_id: configured.pet_id.clone(),
             display_name: configured.display_name.clone(),
             listening: runtime.listening,
@@ -150,6 +169,7 @@ impl OrchestratorState {
         let agent = {
             let mut runtime = self.0.lock().unwrap_or_else(|error| error.into_inner());
             runtime.live_connected = false;
+            runtime.connecting = false;
             runtime.listening = false;
             runtime.wake_activated = false;
             runtime.wake_status = None;

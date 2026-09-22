@@ -19,7 +19,7 @@ pub async fn ensure(app: AppHandle, workspace_id: String) -> Result<(), String> 
         return Err("Enable the assistant in Settings first.".into());
     }
     if !crate::pet_studio::orchestrator_pet_ready(preferences.pet_id.as_deref()) {
-        return Err("The bundled Mossback assistant pet is unavailable.".into());
+        return Err("The bundled Knight assistant is unavailable.".into());
     }
     let selected = workspace_id.clone();
     let available = tauri::async_runtime::spawn_blocking(super::herdr::workspaces)
@@ -141,20 +141,6 @@ pub async fn ensure(app: AppHandle, workspace_id: String) -> Result<(), String> 
         return Err("The assistant changed while Pi was starting.".into());
     }
     super::agent_launch::decrement_cleanup(&app, &state);
-    let initializing = agent.clone();
-    let name = preferences.display_name.clone();
-    let initialized = tauri::async_runtime::spawn_blocking(move || initializing.initialize(&name))
-        .await
-        .map_err(|_| "Could not initialize the Pi agent.".to_string());
-    if canceled(&state, generation) {
-        return Err("The assistant changed while Pi was starting.".into());
-    }
-    if let Err(error) = initialized.and_then(|value| value) {
-        super::launch_replace::close_new(&app, &state, agent.clone()).await;
-        super::agent_launch::take(&state, &agent.pane_id);
-        clear_launching(&state, generation);
-        return Err(error);
-    }
     clear_launching(&state, generation);
     state.emit(&app);
     Ok(())
@@ -177,7 +163,11 @@ fn clear_launching(state: &OrchestratorState, generation: u64) {
 }
 pub(crate) fn signature(value: &crate::preferences_model::OrchestratorPreferences) -> String {
     format!(
-        "{}\0{}\0{}",
-        value.display_name, value.model, value.thinking
+        "{}\0{}\0{}\0{}\0{}",
+        value.display_name,
+        value.model,
+        value.thinking,
+        value.workspace_id.as_deref().unwrap_or(""),
+        value.system_prompt
     )
 }

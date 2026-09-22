@@ -99,3 +99,19 @@ fn count_files(root: &Path) -> Result<usize, String> {
     }
     Ok(count)
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn bundled_archive_passes_runtime_validation() {
+        let archive = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("resources/pet-town-pi-runtime.tar.gz");
+        let root = std::env::temp_dir().join(format!("pet-town-runtime-test-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir(&root).unwrap();
+        let file = std::fs::File::open(archive).unwrap();
+        let result = tar::Archive::new(flate2::read::GzDecoder::new(file)).unpack(&root);
+        let validation = result.map_err(|error| error.to_string()).and_then(|_| super::validate(&root));
+        std::fs::remove_dir_all(&root).unwrap();
+        assert_eq!(validation, Ok(()));
+    }
+}

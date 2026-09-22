@@ -56,21 +56,41 @@ fn owns_lock(_path: &std::path::Path, _pid: libc::pid_t) -> bool {
     true
 }
 
-fn notify_owner(file: &mut File, path: &std::path::Path) {
+fn owner_pid(file: &mut File, path: &std::path::Path) -> Option<libc::pid_t> {
     for _ in 0..10 {
         let mut value = String::new();
         let _ = file.seek(SeekFrom::Start(0));
         let _ = file.read_to_string(&mut value);
         if let Ok(pid) = value.trim().parse::<libc::pid_t>() {
             if pid > 0 && is_pet_town_process(pid) && owns_lock(path, pid) {
-                unsafe {
-                    libc::kill(pid, libc::SIGUSR1);
-                }
-                return;
+                return Some(pid);
             }
         }
         std::thread::sleep(std::time::Duration::from_millis(10));
     }
+    None
+}
+
+fn notify_owner(file: &mut File, path: &std::path::Path) {
+    if let Some(pid) = owner_pid(file, path) {
+        unsafe {
+            libc::kill(pid, libc::SIGUSR1);
+        }
+    }
+}
+
+#[cfg(unix)]
+pub(crate) fn signal_owner(signal: libc::c_int) -> Result<(), String> {
+    let path = lock_path();
+    let mut file = OpenOptions::new()
+        .read(true)
+        .open(&path)
+        .map_err(|_| "Pet Town is not running".to_string())?;
+    let pid = owner_pid(&mut file, &path).ok_or_else(|| "Pet Town is not running".to_string())?;
+    let result = unsafe { libc::kill(pid, signal) };
+    (result == 0)
+        .then_some(())
+        .ok_or_else(|| "Pet Town could not receive the town state".to_string())
 }
 
 pub(crate) fn acquire_or_notify() -> Result<Option<AppLock>, String> {

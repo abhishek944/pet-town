@@ -1,223 +1,278 @@
 extends CharacterBody3D
-## Character behavior only: navigation and activity targets live in saved scenes.
-@export var display_name := "Companion"
+## A single live broker agent. World placement remains in the saved town scene.
+
+signal retirement_finished(agent_id: String)
+
+@export var display_name := "Agent"
+@export var agent_id := ""
+@export var live_status := "unknown"
+@export var appearance_label := "Knight"
 @export var walk_speed := 1.65
-@export_range(0.0, 100.0) var energy := 80.0
-@export var preferred_activity := "gather"
-@onready var agent: NavigationAgent3D = $NavigationAgent3D
+
+@onready var navigation_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var visual: Node3D = $Visual
 @onready var player: AnimationPlayer = $Visual/AnimationPlayer
 @onready var caption: Label3D = $Caption
-@onready var apple: MeshInstance3D = $Visual/CarriedApple
-var apples := 0
-var deliveries := 0
-var completed_activities := 0
-var failed_routes := 0
-var activity_text := "Waking up"
-var state := "starting"
-var taking_detour := false
-var detour_point := Vector3.ZERO
-var detour_attempts := 0
-var target: Marker3D
-var last_target: Marker3D
-var wait_left := 0.0
-var stuck_time := 0.0
-var progress_interval := 0.0
-var last_position := Vector3.ZERO
+
+const STATUS_ACTIVITIES := {
+	"working": ["gather", "deliver"],
+	"blocked": ["rest"],
+	"idle": ["visit", "eat", "rest"],
+	"done": ["visit"],
+	"unknown": ["rest"],
+}
+
 var ready_to_walk := false
-var rng := RandomNumberGenerator.new()
+var destination := Vector3.ZERO
+var destination_index := 0
+var pause_left := 0.0
+var path_settling_frames := 0
+var seated := false
+var retiring := false
+var retirement_tween: Tween
+var activity_text := "Connecting"
+
+func configure(id: String, label: String, status: String, appearance: String) -> void:
+	agent_id = id
+	display_name = label
+	live_status = _normalized_status(status)
+	appearance_label = appearance
+	if is_node_ready():
+		_apply_live_status()
+
+func update_live_status(status: String, label: String) -> void:
+	var was_retiring := retiring
+	if retiring:
+		_cancel_retirement()
+	var next_status := _normalized_status(status)
+	var status_changed := next_status != live_status
+	display_name = label
+	live_status = next_status
+	if is_node_ready():
+		caption.text = display_name
+		if status_changed or was_retiring:
+			_apply_live_status()
+
+func begin_retirement() -> void:
+	if retiring:
+		return
+	retiring = true
+	navigation_agent.velocity = Vector3.ZERO
+	velocity = Vector3.ZERO
+	activity_text = "Agent ended"
+	_animate("Idle_A")
+	retirement_tween = create_tween()
+	retirement_tween.tween_interval(0.35)
+	retirement_tween.tween_property(self, "scale", Vector3(0.02, 0.02, 0.02), 0.65)
+	retirement_tween.tween_callback(_finish_retirement)
 
 func _ready() -> void:
-	add_to_group("companions")
-	rng.seed = hash(str(name))
-	var skeleton := $Visual/Model.find_child("Skeleton3D", true, false) as Skeleton3D
-	if skeleton and skeleton.find_bone("hand.r") >= 0:
-		var grip := BoneAttachment3D.new()
-		grip.bone_name = "hand.r"
-		skeleton.add_child(grip)
-		apple.reparent(grip, false)
-		apple.position = Vector3(0.0, 0.1, 0.0)
-	agent.velocity_computed.connect(_move_with_avoidance)
+	add_to_group("live_agents")
+	navigation_agent.velocity_computed.connect(_move_with_avoidance)
+	caption.text = display_name
 	_animate("Idle_A")
 	reset_physics_interpolation()
 	await get_tree().physics_frame
 	await get_tree().physics_frame
-	while NavigationServer3D.map_get_iteration_id(agent.get_navigation_map()) == 0:
+	while NavigationServer3D.map_get_iteration_id(navigation_agent.get_navigation_map()) == 0:
 		await get_tree().physics_frame
 	ready_to_walk = true
-	state = "idle"
-	wait_left = rng.randf_range(0.3, 1.5)
-	last_position = global_position
+	_apply_live_status()
 
 func _physics_process(delta: float) -> void:
-	if not ready_to_walk: return
-	velocity.y = 0.0 if is_on_floor() else velocity.y - 18.0 * delta
-	apple.visible = apples > 0
 	caption.text = display_name
-	if state == "idle":
-		wait_left -= delta
-		agent.velocity = Vector3.ZERO
-		if wait_left <= 0.0: _choose_activity()
-	elif state == "acting":
-		agent.velocity = Vector3.ZERO
-		wait_left -= delta
-		if wait_left <= 0.0: _finish_activity()
-	elif state == "walking":
-		if not is_instance_valid(target):
-			_abandon_route()
-			return
-		var next := agent.get_next_path_position()
-		var destination := detour_point if taking_detour else target.global_position
-		var offset := destination - global_position
-		offset.y = 0.0
-		if offset.length() < 0.65:
-			if taking_detour:
-				taking_detour = false
-				agent.target_position = target.global_position
-				stuck_time = 0.0
-			else:
-				_begin_activity()
-			return
-		if not taking_detour and agent.is_navigation_finished() and offset.length() < 1.0:
-			_begin_activity()
-			return
-		var direction := next - global_position
-		direction.y = 0.0
-		direction = direction.normalized()
-		agent.velocity = direction * walk_speed
-		if direction.length_squared() > 0.01:
-			visual.rotation.y = lerp_angle(visual.rotation.y, atan2(direction.x, direction.z), minf(delta * 8.0, 1.0))
-		energy = maxf(0.0, energy - delta * 0.25)
-		progress_interval += delta
-		if progress_interval >= 1.0:
-			if global_position.distance_to(last_position) < 0.15:
-				stuck_time += progress_interval
-			else:
-				stuck_time = 0.0
-			last_position = global_position
-			progress_interval = 0.0
-		if stuck_time > 3.0:
-			if taking_detour or detour_attempts >= 2 or not _try_detour(): _abandon_route()
+	if retiring or not ready_to_walk:
+		return
+	if seated and live_status in ["idle", "done"]:
+		navigation_agent.velocity = Vector3.ZERO
+		velocity = Vector3.ZERO
+		return
+	if pause_left > 0.0:
+		pause_left -= delta
+		navigation_agent.velocity = Vector3.ZERO
+		if pause_left <= 0.0:
+			_choose_next_destination()
+		return
+	if path_settling_frames > 0:
+		path_settling_frames -= 1
+		navigation_agent.velocity = Vector3.ZERO
+		return
+	var offset := destination - global_position
+	offset.y = 0.0
+	var arrival_distance := 1.4 if live_status == "idle" else 0.7
+	if offset.length() < arrival_distance:
+		_arrive()
+		return
+	var next_point := navigation_agent.get_next_path_position()
+	var direction := next_point - global_position
+	direction.y = 0.0
+	if direction.length_squared() < 0.001:
+		navigation_agent.velocity = Vector3.ZERO
+		return
+	direction = direction.normalized()
+	navigation_agent.velocity = direction * walk_speed
+	visual.rotation.y = lerp_angle(visual.rotation.y, atan2(direction.x, direction.z), minf(delta * 8.0, 1.0))
 
 func _move_with_avoidance(safe_velocity: Vector3) -> void:
-	if not ready_to_walk: return
+	if not ready_to_walk or retiring or seated or pause_left > 0.0:
+		velocity = Vector3.ZERO
+		return
 	velocity.x = safe_velocity.x
 	velocity.z = safe_velocity.z
+	velocity.y = 0.0 if is_on_floor() else velocity.y - 18.0 * get_physics_process_delta_time()
 	move_and_slide()
-	# Step over shallow gravel curbs, only with floor ahead and capsule clearance.
-	var horizontal := Vector3(safe_velocity.x, 0.0, safe_velocity.z)
-	if is_on_wall() and horizontal.length() > 0.2:
-		var ahead := global_position + horizontal.normalized() * 0.4
-		var probe := PhysicsRayQueryParameters3D.create(ahead + Vector3.UP * 0.5, ahead - Vector3.UP * 0.1, 1)
-		var hit := get_world_3d().direct_space_state.intersect_ray(probe)
-		if not hit.is_empty() and hit.normal.y > 0.65:
-			var rise: float = hit.position.y - global_position.y
-			if rise > 0.015 and rise <= 0.45:
-				var raised := global_transform
-				raised.origin.y += rise + 0.03
-				if not test_move(global_transform, Vector3.UP * (rise + 0.03)) and not test_move(raised, horizontal * get_physics_process_delta_time()):
-					global_position.y += rise + 0.03
-					velocity.y = 0.0
 
-func _choose_activity() -> void:
-	var candidates: Array = []
-	for spot in get_tree().get_nodes_in_group("interaction_spots"):
-		if not spot.is_available() or spot == last_target: continue
-		if spot.activity == "deliver" and apples == 0: continue
-		if spot.activity == "gather" and apples >= 3: continue
-		var priority: float = rng.randf_range(0.0, 12.0) - global_position.distance_to(spot.global_position) * 0.12
-		if spot.activity == preferred_activity: priority += 3.0
-		if energy < 35.0 and spot.activity in ["rest", "eat"]: priority += 25.0
-		if apples > 0 and spot.activity == "deliver": priority += 18.0
-		candidates.append({"spot":spot,"priority":priority})
-	candidates.sort_custom(func(a, b): return a.priority > b.priority)
-	for candidate in candidates:
-		var spot = candidate.spot
-		var path := NavigationServer3D.map_get_path(agent.get_navigation_map(), global_position, spot.global_position, true)
-		if path.is_empty() or path[-1].distance_to(spot.global_position) > 0.7: continue
-		if not spot.claim(self): continue
-		target = spot
-		taking_detour = false
-		detour_attempts = 0
-		agent.target_position = spot.global_position
-		state = "walking"
-		activity_text = "To " + spot.display_name
-		stuck_time = 0.0
-		progress_interval = 0.0
-		last_position = global_position
-		_animate("Walking_A")
+func _apply_live_status() -> void:
+	if retiring:
 		return
-	activity_text = "Watching the town"
-	wait_left = 2.0
+	caption.text = display_name
+	activity_text = {
+		"working": "Working in town",
+		"blocked": "Waiting on a blocker",
+		"idle": "Taking a town break",
+		"done": "Work complete",
+		"unknown": "Awaiting a live update",
+	}.get(live_status, "Awaiting a live update")
+	destination_index = _stable_index(_destinations_for_status().size())
+	pause_left = 0.0
+	_set_seated(false)
+	if ready_to_walk:
+		if live_status == "done":
+			destination = global_position
+			navigation_agent.target_position = global_position
+			_arrive()
+		else:
+			_choose_next_destination()
+			if live_status == "idle":
+				global_position = destination
+				reset_physics_interpolation()
+				_arrive()
+	else:
+		_animate("Idle_A")
 
-func _begin_activity() -> void:
-	state = "acting"
-	agent.velocity = Vector3.ZERO
+func _choose_next_destination() -> void:
+	_set_seated(false)
+	var destinations := _destinations_for_status()
+	if destinations.is_empty():
+		destination = global_position
+		_animate("Idle_A")
+		pause_left = 2.0
+		return
+	destination = destinations[destination_index % destinations.size()]
+	destination_index += 1
+	var closest := NavigationServer3D.map_get_closest_point(navigation_agent.get_navigation_map(), destination)
+	if closest != Vector3.ZERO:
+		destination = closest
+	navigation_agent.target_position = destination
+	path_settling_frames = 2
+	if live_status == "blocked" or live_status == "unknown":
+		_animate("Walking_A")
+	else:
+		_animate("Walking_A")
+
+func _arrive() -> void:
+	navigation_agent.velocity = Vector3.ZERO
 	velocity.x = 0.0
 	velocity.z = 0.0
-	visual.rotation.y = target.global_rotation.y
-	wait_left = target.duration
-	activity_text = {"gather":"Gathering apples", "deliver":"Delivering apples", "eat":"Enjoying a snack", "rest":"Taking a break", "visit":"Exploring"}.get(target.activity, "Exploring")
-	_animate(target.animation)
+	match live_status:
+		"working":
+			_animate("Interact")
+			pause_left = 2.2
+		"blocked":
+			_animate("Idle_A")
+			pause_left = 3.2
+		"idle":
+			_animate("Idle_B")
+			_set_seated(true)
+			activity_text = "Resting in the town center"
+			pause_left = 8.0
+		"done":
+			_animate("Idle_B")
+			_set_seated(true)
+			activity_text = "Work complete"
+			pause_left = 0.0
+		_:
+			_animate("Idle_A")
+			pause_left = 2.5
 
-func _finish_activity() -> void:
-	if not is_instance_valid(target):
-		_abandon_route()
+func _set_seated(value: bool) -> void:
+	if seated == value:
 		return
-	target.complete(self)
-	match target.activity:
-		"gather": apples += 1
-		"deliver":
-			deliveries += apples
-			apples = 0
-		"eat": energy = minf(100.0, energy + 35.0)
-		"rest": energy = minf(100.0, energy + 45.0)
-	completed_activities += 1
-	last_target = target
-	target = null
-	taking_detour = false
-	state = "idle"
-	activity_text = "Enjoying the island"
-	wait_left = rng.randf_range(1.0, 3.0)
-	_animate("Idle_B")
+	seated = value
+	navigation_agent.avoidance_enabled = not seated
+	navigation_agent.velocity = Vector3.ZERO
+	velocity = Vector3.ZERO
+	if seated:
+		path_settling_frames = 0
+	visual.position.y = -0.28 if seated else 0.0
+	visual.rotation.x = deg_to_rad(-3.0) if seated else 0.0
+	if seated:
+		_apply_seated_pose()
 
-func _abandon_route() -> void:
-	if is_instance_valid(target): target.release(self)
-	target = null
-	taking_detour = false
-	state = "idle"
-	failed_routes += 1
-	stuck_time = 0.0
-	activity_text = "Choosing another stop"
-	wait_left = 1.0
-	agent.velocity = Vector3.ZERO
-	_animate("Idle_A")
+func _apply_seated_pose() -> void:
+	player.seek(0.2, true)
+	player.pause()
+	var skeleton := visual.find_child("Skeleton3D", true, false) as Skeleton3D
+	if not is_instance_valid(skeleton):
+		return
+	var upper_leg := Quaternion.from_euler(Vector3(deg_to_rad(-72.0), 0.0, 0.0))
+	var lower_leg := Quaternion.from_euler(Vector3(deg_to_rad(102.0), 0.0, 0.0))
+	var foot := Quaternion.from_euler(Vector3(deg_to_rad(-28.0), 0.0, 0.0))
+	for side in ["l", "r"]:
+		_set_bone_pose(skeleton, "upperleg.%s" % side, upper_leg)
+		_set_bone_pose(skeleton, "lowerleg.%s" % side, lower_leg)
+		_set_bone_pose(skeleton, "foot.%s" % side, foot)
+
+func _set_bone_pose(skeleton: Skeleton3D, bone_name: String, rotation: Quaternion) -> void:
+	var bone := skeleton.find_bone(bone_name)
+	if bone >= 0:
+		skeleton.set_bone_pose_rotation(bone, rotation)
+
+func _cancel_retirement() -> void:
+	retiring = false
+	if retirement_tween:
+		retirement_tween.kill()
+	scale = Vector3.ONE
+
+func _finish_retirement() -> void:
+	retirement_finished.emit(agent_id)
+	queue_free()
 
 func _animate(clip: String) -> void:
-	if player.current_animation != clip: player.play(clip, 0.2)
+	if player.has_animation(clip) and player.current_animation != clip:
+		player.play(clip, 0.2)
 
-func _exit_tree() -> void:
-	if is_instance_valid(target): target.release(self)
+func _stable_index(count: int) -> int:
+	if count <= 0:
+		return 0
+	var value := 0
+	for index in agent_id.length():
+		value = (value * 31 + agent_id.unicode_at(index)) % 2147483647
+	return value % count
 
-func _try_detour() -> bool:
-	# Choose a short reachable side-step when a curb or another resident blocks us.
-	# These are local steering offsets, not authored world destinations.
-	var forward := Vector3(sin(visual.rotation.y), 0.0, cos(visual.rotation.y))
-	var side := Vector3(-forward.z, 0.0, forward.x)
-	for offset in [side * 1.4, -side * 1.4, -forward * 1.4]:
-		var point := NavigationServer3D.map_get_closest_point(agent.get_navigation_map(), global_position + offset)
-		if Vector2(point.x - global_position.x, point.z - global_position.z).length() < 0.9: continue
-		var raised := global_transform
-		raised.origin.y += 0.45
-		if test_move(raised, Vector3(point.x - global_position.x, 0.0, point.z - global_position.z)): continue
-		var path := NavigationServer3D.map_get_path(agent.get_navigation_map(), global_position, point, true)
-		if path.is_empty() or path[-1].distance_to(point) > 0.3: continue
-		detour_point = point
-		taking_detour = true
-		detour_attempts += 1
-		stuck_time = 0.0
-		progress_interval = 0.0
-		last_position = global_position
-		agent.target_position = point
-		return true
-	return false
+func _destinations_for_status() -> Array[Vector3]:
+	var destinations: Array[Vector3] = []
+	var activities: Array = STATUS_ACTIVITIES.get(live_status, STATUS_ACTIVITIES.unknown)
+	for spot in get_tree().get_nodes_in_group("interaction_spots"):
+		if String(spot.activity) not in activities:
+			continue
+		if live_status == "idle" and String(spot.display_name) != "Town bench":
+			continue
+		var target: Vector3 = spot.global_position
+		if live_status == "idle":
+			var seed := _stable_seed()
+			var angle := fmod(float(seed) * 2.39996323, TAU)
+			var radius := 2.6 + float((seed / 17) % 3) * 1.35
+			target += Vector3(cos(angle), 0.0, sin(angle)) * radius
+		destinations.append(target)
+	return destinations
+
+func _stable_seed() -> int:
+	var value := 0
+	for index in agent_id.length():
+		value = (value * 31 + agent_id.unicode_at(index)) % 2147483647
+	return value
+
+func _normalized_status(value: String) -> String:
+	var normalized := value.to_lower()
+	return normalized if normalized in STATUS_ACTIVITIES else "unknown"

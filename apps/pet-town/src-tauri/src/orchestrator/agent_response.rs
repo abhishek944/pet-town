@@ -1,22 +1,15 @@
 use super::herdr;
 use std::time::Duration;
 
-pub struct Pending {
-    begin: String,
-    end: String,
-}
+pub struct Pending;
 
 pub fn submit(agent: &str, prompt: &str) -> Result<Pending, String> {
-    let token = uuid::Uuid::new_v4().simple().to_string();
-    let begin = format!("[[PV_BEGIN:{token}]]");
-    let end = format!("[[PV_END:{token}]]");
-    let bounded = format!("{prompt}\n\nReturn a concise voice handoff inside these exact boundary lines. Include verified status and the next useful step.\n{begin}\n{end}");
     herdr::command(
         &[
             "agent".into(),
             "prompt".into(),
             agent.into(),
-            bounded,
+            prompt.into(),
             "--wait".into(),
             "--until".into(),
             "working".into(),
@@ -25,10 +18,10 @@ pub fn submit(agent: &str, prompt: &str) -> Result<Pending, String> {
         ],
         Duration::from_secs(15),
     )?;
-    Ok(Pending { begin, end })
+    Ok(Pending)
 }
 
-pub fn collect(agent: &str, pending: Pending) -> Result<String, String> {
+pub fn collect(agent: &str, _pending: Pending) -> Result<String, String> {
     let wait = [
         "agent".into(),
         "wait".into(),
@@ -67,7 +60,7 @@ pub fn collect(agent: &str, pending: Pending) -> Result<String, String> {
             Err(_) => std::thread::sleep(Duration::from_secs(1)),
         }
     };
-    extract(&value, &pending.begin, &pending.end)
+    Ok(raw_tail(&value))
 }
 
 pub fn terminal_missing(error: &str) -> bool {
@@ -75,17 +68,15 @@ pub fn terminal_missing(error: &str) -> bool {
     value.contains("not found") || value.contains("unknown agent") || value.contains("unknown tab")
 }
 
-fn extract(text: &str, begin: &str, end: &str) -> Result<String, String> {
-    let finish = text
-        .rfind(end)
-        .ok_or_else(|| "Pi response did not finish cleanly.".to_string())?;
-    let start = text[..finish]
-        .rfind(begin)
-        .map(|index| index + begin.len())
-        .ok_or_else(|| "Pi response could not be isolated safely.".to_string())?;
-    let output = text[start..finish].trim();
-    if output.is_empty() {
-        return Err("Pi returned no verified handoff.".into());
+/// Keeps tool results bounded for the voice backend without rewriting them.
+fn raw_tail(text: &str) -> String {
+    const LIMIT: usize = 12_000;
+    if text.len() <= LIMIT {
+        return text.trim().to_string();
     }
-    Ok(output.to_string())
+    let mut start = text.len() - LIMIT;
+    while start < text.len() && !text.is_char_boundary(start) {
+        start += 1;
+    }
+    text[start..].trim().to_string()
 }

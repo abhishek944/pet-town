@@ -40,6 +40,8 @@
 [ext_resource type="ArrayMesh" path="res://assets/cozy-island/decor_meshes/Charred campfire log_001.res" id="38_wl8pg"]
 [ext_resource type="ArrayMesh" path="res://assets/cozy-island/decor_meshes/Charred campfire log_002.res" id="39_1tjfe"]
 
+[ext_resource type="PackedScene" path="res://scenes/reference_gardens.tscn" id="99_reference"]
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jgj75"]
 resource_name = "MH old cedar"
 cull_mode = 2
@@ -949,6 +951,7 @@ size = Vector3(0.45, 0.09, 0.09)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_aakyb"]
 size = Vector3(0.18, 3.1644924, 0.18)
+
 
 [node name="TownDecorations" type="Node3D" unique_id=1971520983]
 
@@ -4911,3 +4914,5 @@ light_color = Color(1, 0.84, 0.67, 1)
 light_energy = 0.864
 omni_range = 7.0
 omni_attenuation = 1.6
+
+[node name="ReferenceGardens" parent="." instance=ExtResource("99_reference")]

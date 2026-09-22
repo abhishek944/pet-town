@@ -3,5 +3,5 @@
   "identifier": "settings-window",
   "description": "Permissions for the local Pet Town settings window",
   "windows": ["settings"],
-  "permissions": ["core:default"]
+  "permissions": ["core:default", "dialog:allow-open"]
 }

@@ -184,6 +184,42 @@ pub fn dedicated(target: &WorkspaceTarget) -> Result<String, String> {
         .ok_or_else(|| "Herdr did not return the dedicated workspace.".into())
 }
 
+/// Resolves an arbitrary session folder to a Herdr workspace id, reusing
+/// the open space at that folder or creating one named after it.
+pub fn workspace_for_folder(path: &str) -> Result<String, String> {
+    let cwd = std::path::PathBuf::from(path);
+    if !cwd.is_absolute() || !cwd.is_dir() {
+        return Err("Choose an existing folder for Pi sessions.".into());
+    }
+    if let Some(id) = listed()?
+        .into_iter()
+        .find(|item| item.cwd == cwd)
+        .map(|item| item.id)
+    {
+        return Ok(id);
+    }
+    let name = cwd
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("project");
+    let value = command(
+        &[
+            "workspace".into(),
+            "create".into(),
+            "--cwd".into(),
+            cwd.to_string_lossy().into_owned(),
+            "--label".into(),
+            clean(name),
+            "--no-focus".into(),
+        ],
+        Duration::from_secs(10),
+    )?;
+    value["result"]["workspace"]["workspace_id"]
+        .as_str()
+        .map(str::to_string)
+        .ok_or_else(|| "Herdr did not return the created workspace.".into())
+}
+
 fn clean(value: &str) -> String {
     value
         .chars()

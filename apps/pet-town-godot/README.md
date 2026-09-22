@@ -9,8 +9,8 @@ A large Godot 4 Pet Town built from PolyForge’s purchased **Cozy Low Poly Isla
 - 32 fixed houses, with overlapping prototype houses archived in Blender.
 - A grand south harbor, north lighthouse overlook, market, windmill, campsite, gardens, boats, forest groves, and a connected terrain-fitting road network.
 - Dusk lighting, warm neighborhood lights, emissive materials, and a freely orbitable camera sized for the expanded town.
-- Six animated KayKit companions: Rowan, Fern, Pip, Bramble, Mica, and Wren.
-- Baked navigation and collision, neighbor avoidance, orchard gathering, market deliveries, snacks, rest stops, and neighborhood visits.
+- One dynamic KayKit companion for every live Pet Town broker agent, with deterministic reuse of ten 3D appearances.
+- Baked navigation and collision, neighbor avoidance, and status-driven movement among the authored town activity markers.
 - True fullscreen startup with **F** available to toggle back to a maximized window.
 
 ## Local paid-asset setup
@@ -60,7 +60,7 @@ GODOT="var/godot-runtime/Godot.app/Contents/MacOS/Godot"
 "$GODOT" --path apps/pet-town-godot
 ```
 
-The portable runtime is local and ignored by Git. If it is not present, install Godot 4 and replace `GODOT` with the path to that executable.
+The portable runtime is local and ignored by Git. If it is not present, install Godot 4 and replace `GODOT` with the path to that executable. Start the Pet Town desktop app first so Godot can launch its privacy-safe `--town-bridge` helper. When launching Godot outside the desktop menu, set `PET_TOWN_BRIDGE_BIN` to the current Pet Town executable if it is not beside Godot or on `PATH`.
 
 ## Controls
 
@@ -71,24 +71,30 @@ The portable runtime is local and ignored by Git. If it is not present, install 
 - **+ / −:** keyboard zoom fallback
 - **A / D** or **Left / Right arrows:** rotate
 - **W / S** or **Up / Down arrows:** tilt
-- **Click a companion** or **Tab:** follow/select a character; the panel shows activity, energy, apples, and deliveries
-- **Escape:** release the follow camera
+- **Click a live agent:** select and follow its town pet
+- **Right-click a live agent:** follow it and open the full-height details panel
+- **Option+A:** follow the next live agent
+- **Option+H:** open or close the controls board
+- **Escape:** close help, then details, then release the follow camera
 - **R:** reset to the whole-town overview
 - **F:** toggle true fullscreen
-- **H:** hide or show the help panel
 
 ## Current boundary
 
-The island is static, with a separate autonomous companion simulation. Six characters use the supplied KayKit rigs and animations. They choose available activity markers, navigate around baked obstacles, avoid one another, and reserve each stop while using it. Gathering removes an apple from the orchard temporarily; the character carries an apple and delivers inventory to a market. Snacks and rest restore energy. These are local game behaviors, not connected to coding agents yet.
+The island remains static. The Pet Town desktop broker is the only agent authority and sends Godot only each agent's opaque ID, normalized state, safe display label, and source. Godot dynamically creates one companion per live record, reuses the ten KayKit appearances deterministically, and maps working, blocked, idle, done, and unknown states to movement and animation. Private Herdr pane and session data never enter Godot; the details action sends the opaque ID back to Rust for current-route revalidation.
+
+The desktop menu's **Open 3D Town** action launches the local project. While Godot is active, the desktop app suppresses the v1 bottom strip without changing the user's visibility preference. Switching away or closing Godot restores the strip when that preference is enabled.
 
 ## Companion authoring
 
-- `scenes/town_life.tscn`: saved character instances and 12 interaction markers. Move these in Godot when changing the layout. There are no hard-coded world destination lists in the runtime scripts.
-- `scenes/companion.tscn`: reusable body, animation player, navigation agent, and carried apple.
-- `scripts/companion.gd`: activity selection, inventory, energy, navigation, and animation.
-- `scripts/interaction_spot.gd`: activity type, duration, reservation, cooldown, and optional harvest prop. Select a marker in Godot to edit these properties.
+- `scenes/town_life.tscn`: 12 saved interaction markers used as status-driven destinations. Move these in Godot when changing the layout. There are no hard-coded world destination lists in the runtime scripts.
+- `scenes/companion.tscn`: reusable live-agent body, animation player, navigation agent, and safe display caption.
+- `scripts/companion.gd`: normalized-status destination selection, navigation, animation, and retirement behavior.
+- `scripts/main.gd`: broker bridge, roster reconciliation, camera interactions, full-height details with a rotatable 3D avatar, and the Option+H controls board.
+- `scripts/interaction_spot.gd`: authored activity type and display metadata used for status-driven destinations.
 - `navigation/town_walkable.res` and `town_collision.res`: saved navigation and collision derived from the static island. Runtime startup does not bake or rebuild the world.
-- `assets/kaykit/License.txt`: original CC0 license from the downloaded KayKit Adventurers 2.0 FREE pack, by Kay Lousberg. The six character GLBs, original textures, and two animation GLBs are copied from the downloaded ZIP.
+- `assets/kaykit/License.txt`: original CC0 license from the KayKit Adventurers 2.0 FREE pack, covering the six Adventurer GLBs, textures, and shared animation GLBs.
+- `assets/kaykit/skeletons/License.txt`: original CC0 license from the KayKit Skeletons 1.1 FREE pack, covering the four Skeleton GLBs and textures.
 
 After editing the island mesh, regenerate navigation/collision and the shared animation library, then reposition affected markers in Godot:
 
@@ -98,13 +104,7 @@ After editing the island mesh, regenerate navigation/collision and the shared an
 
 The offline bake reads the island and does not modify its meshes or placement. It includes terrain and gravel paths, with obstruction footprints for houses, trunks, rocks, and selected props. Characters follow the baked paths with collision capsules, gravity, and clearance-checked stepping over shallow gravel curbs. The harbor piers are not currently activity destinations; houses have no enterable interiors.
 
-Run the four-minute simulated integration check:
-
-```bash
-"$GODOT" --headless --fixed-fps 60 --path apps/pet-town-godot --script res://tests/town_life_smoke.gd
-```
-
-The check verifies all six characters move, animate, and finish activities, with apple deliveries, bounded route failures, and no persistent stalls. The latest four-minute run completed 47 activities and eight deliveries with zero failed routes. It does not prove every possible route through the island is clear.
+The retired autonomous-companion smoke script remains as historical navigation evidence, but it no longer represents the live broker-driven roster and is not part of the current verification flow. Verify live lifecycle and focus behavior with the desktop broker running.
 
 
 ## Town decoration and warm lighting
@@ -113,7 +113,7 @@ The check verifies all six characters move, animate, and finish activities, with
 
 `scenes/warm_island.tscn` applies window and lamp materials without modifying the original GLB or Blender layout. It also aligns the campfire flames with the relocated woodland stone ring. The warm materials are in `materials/window_amber.tres` and `materials/lantern_amber.tres`: soft cream and pale gold with restrained brightness. Street and house light pools use warm white, avoiding the earlier saturated orange treatment.
 
-Decoration colliders are marked with `navigation_obstacle` metadata and included in the offline navigation bake. The four-minute check after furnishing completed 45 activities and eight deliveries with zero failed routes. After moving furnishings in Godot, run the navigation bake again. The lighting-only color correction does not change navigation.
+Decoration colliders are marked with `navigation_obstacle` metadata and included in the offline navigation bake. The retired autonomous simulation previously completed a four-minute furnishing check with zero failed routes; treat that only as historical navigation evidence. After moving furnishings in Godot, run the navigation bake again. The lighting-only color correction does not change navigation.
 
 
 ## Smooth follow camera
@@ -138,3 +138,16 @@ After replacing the Blender GLB, rebuild the saved rendering batches:
 ```
 
 Harvest markers reference the individually rendered apples under `IslandRenderSections/HarvestApples`.
+
+
+## Reference garden scene — 22 September 2026
+
+The current scene adds static Blender-authored cobblestones, cottage gardens, 225 woodland trees, fences, an entrance arch, four shoreline piers, a gazebo, market stalls, a fountain and a water garden. The editable source is `var/large-cozy-town/grand-moonhaven-reference-garden.blend`; its authoring collection is `REFERENCE - Gardens cobbles fences and village details`. A separate hidden `EXPORT - Optimized reference details` collection contains rendering batches.
+
+Godot instances `scenes/reference_gardens.tscn` through `town_decorations.tscn`. This scene contains the exported GLB, saved collision shapes, warm-white lighting and a fading lighthouse beam. No island assets are placed during gameplay. The existing broker and companion behavior are preserved. The bench marker was moved clear of the new fountain.
+
+The default desktop renderer is now Forward+ with Metal on macOS, 2x MSAA, ambient occlusion and restrained glow. Compatibility remains the mobile override. The final overview measured about 48 FPS at 3024x1898 on this machine; this is a single-view measurement, not a guaranteed frame rate.
+
+The updated navigation bake passed all 132 directed routes among the 12 activity markers. Run `tests/reference_routes.gd` headlessly to repeat the connectivity check. `tools/reference_scene_review.gd` captures an isolated static visual review with the broker polling loop disabled only in that review tool. Normal gameplay still runs the full controller.
+
+Actual Godot comparison image: `generated/reference-town-godot-review.png`. The image is a visual target; the recreated geometry is not a pixel-identical reconstruction of every detail in the reference.

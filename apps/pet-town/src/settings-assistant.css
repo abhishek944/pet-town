@@ -59,7 +59,8 @@
 }
 
 .assistant-card input,
-.assistant-card select {
+.assistant-card select,
+.assistant-card textarea {
   background: #34363c;
   border: 1px solid var(--border, #ffffff19);
   border-radius: 8px;
@@ -68,6 +69,13 @@
   margin-top: 7px;
   padding: 7px 10px;
   width: 100%;
+}
+
+.assistant-card textarea {
+  font: inherit;
+  height: auto;
+  min-height: 120px;
+  resize: vertical;
 }
 
 .assistant-fields {
@@ -156,7 +164,8 @@
 }
 
 :root[data-theme="light"] .assistant-card input,
-:root[data-theme="light"] .assistant-card select {
+:root[data-theme="light"] .assistant-card select,
+:root[data-theme="light"] .assistant-card textarea {
   background: #fff;
   border-color: #e8e5dd;
   color: #111;
@@ -208,7 +217,8 @@
     box-shadow: 0 1px 2px #0000000f;
   }
   :root[data-theme="system"] .assistant-card input,
-  :root[data-theme="system"] .assistant-card select {
+  :root[data-theme="system"] .assistant-card select,
+  :root[data-theme="system"] .assistant-card textarea {
     background: #fff;
     border-color: #e8e5dd;
     color: #111;

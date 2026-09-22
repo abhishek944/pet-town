@@ -53,15 +53,6 @@ camera_down={
 ]
 }
 
-[rendering]
-
-limits/opengl/max_lights_per_object=8
-limits/opengl/max_renderable_lights=256
-
-renderer/rendering_method="gl_compatibility"
-renderer/rendering_method.mobile="gl_compatibility"
-environment/defaults/default_clear_color=Color(0.012, 0.035, 0.071, 1)
-
 [navigation]
 
 3d/default_cell_size=0.3
@@ -70,3 +61,12 @@ environment/defaults/default_clear_color=Color(0.012, 0.035, 0.071, 1)
 [physics]
 
 common/physics_interpolation=true
+
+[rendering]
+rendering_device/driver.macos="metal"
+anti_aliasing/quality/msaa_3d=1
+
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="gl_compatibility"
+limits/opengl/max_renderable_lights=256
+environment/defaults/default_clear_color=Color(0.00396832, 0.01169353, 0.02033630, 1)

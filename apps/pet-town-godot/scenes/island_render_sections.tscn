@@ -3595,33 +3595,43 @@ mesh = ExtResource("693_exevr")
 mesh = ExtResource("694_ul26p")
 
 [node name="Section_0654" type="MeshInstance3D" parent="." unique_id=143706813]
+visible = false
 mesh = ExtResource("695_gwugh")
 
 [node name="Section_0655" type="MeshInstance3D" parent="." unique_id=1416261483]
+visible = false
 mesh = ExtResource("696_d6qrm")
 
 [node name="Section_0656" type="MeshInstance3D" parent="." unique_id=711081893]
+visible = false
 mesh = ExtResource("697_eo62m")
 
 [node name="Section_0657" type="MeshInstance3D" parent="." unique_id=263450037]
+visible = false
 mesh = ExtResource("698_7rbp5")
 
 [node name="Section_0658" type="MeshInstance3D" parent="." unique_id=1712342927]
+visible = false
 mesh = ExtResource("699_cl7ng")
 
 [node name="Section_0659" type="MeshInstance3D" parent="." unique_id=1458261871]
+visible = false
 mesh = ExtResource("700_cmopt")
 
 [node name="Section_0660" type="MeshInstance3D" parent="." unique_id=1637133128]
+visible = false
 mesh = ExtResource("701_lf4wv")
 
 [node name="Section_0661" type="MeshInstance3D" parent="." unique_id=888429811]
+visible = false
 mesh = ExtResource("702_4fjhn")
 
 [node name="Section_0662" type="MeshInstance3D" parent="." unique_id=739865231]
+visible = false
 mesh = ExtResource("703_r160j")
 
 [node name="Section_0663" type="MeshInstance3D" parent="." unique_id=1747939461]
+visible = false
 mesh = ExtResource("704_dlwef")
 
 [node name="Section_0664" type="MeshInstance3D" parent="." unique_id=15694813]

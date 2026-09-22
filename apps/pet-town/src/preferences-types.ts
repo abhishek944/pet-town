@@ -1,4 +1,4 @@
-export const ASSISTANT_PET_ID = "mossback-turtle-monk";
+export const ASSISTANT_PET_ID = "knight";
 
 export type SettingsAppearance = "system" | "light" | "dark";
 export type LabelVisibility = "always" | "hover" | "hidden";
@@ -20,6 +20,8 @@ export interface OrchestratorPreferences {
   thinking: "low" | "medium" | "high" | "xhigh";
   wakeEnabled: boolean;
   petId: string | null;
+  workspaceId: string | null;
+  systemPrompt: string;
 }
 
 export interface PetPreferences {

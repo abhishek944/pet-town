@@ -3,22 +3,12 @@
 
 fn main() {
     let arguments: Vec<String> = std::env::args().collect();
-    if arguments.iter().any(|argument| argument == "--snapshot") {
-        println!("{}", pet_town_lib::snapshot_json());
+    if arguments.iter().any(|argument| argument == "--town-bridge") {
+        pet_town_lib::run_town_bridge();
         return;
     }
-    if let Some(index) = arguments
-        .iter()
-        .position(|argument| argument == "--focus-route")
-    {
-        let result = arguments
-            .get(index + 1)
-            .ok_or_else(|| "--focus-route requires a route".to_string())
-            .and_then(|route| pet_town_lib::focus_route_from_cli(route));
-        if let Err(message) = result {
-            eprintln!("{message}");
-            std::process::exit(2);
-        }
+    if arguments.iter().any(|argument| argument == "--snapshot") {
+        println!("{}", pet_town_lib::snapshot_json());
         return;
     }
     if let Some(index) = arguments

@@ -11,6 +11,7 @@ private final class WakeController {
     private var tapInstalled = false
     private var generation: UInt64 = 0
     private var phrase = ""
+    private var wantsListening = false
     private var rustGeneration: UInt64 = 0
     private var callback: WakeCallback?
     private var lastTranscript = ""
@@ -22,7 +23,7 @@ private final class WakeController {
             object: engine,
             queue: .main
         ) { [weak self] _ in
-            guard let self, !self.phrase.isEmpty, !self.engine.isRunning else { return }
+            guard let self, self.wantsListening, !self.engine.isRunning else { return }
             self.report(false, "Audio input changed; restarting wake recognition.")
             self.scheduleRestart()
         }
@@ -45,10 +46,25 @@ private final class WakeController {
     func start(_ phrase: String, rustGeneration: UInt64, callback: @escaping WakeCallback) {
         stop()
         let token = generation
+        self.wantsListening = true
         self.phrase = phrase.lowercased()
         self.rustGeneration = rustGeneration
         self.callback = callback
         self.lastTranscript = ""
+        // TCC can attribute a bare `tauri dev` executable to its launcher,
+        // even when an Info.plist is embedded in the Mach-O. Never request
+        // protected access without an application bundle of our own.
+        guard Bundle.main.bundleURL.pathExtension == "app" else {
+            self.report(false, "Voice requires the Pet Town.app build. Open the bundled app to start the assistant.")
+            return
+        }
+        for key in ["NSSpeechRecognitionUsageDescription", "NSMicrophoneUsageDescription"] {
+            guard let description = Bundle.main.object(forInfoDictionaryKey: key) as? String,
+                  !description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                self.report(false, "Voice is unavailable: this app build is missing \(key). Rebuild Pet Town.app.")
+                return
+            }
+        }
         SFSpeechRecognizer.requestAuthorization { [weak self] status in
             DispatchQueue.main.async {
                 guard let self, self.generation == token else { return }
@@ -56,12 +72,22 @@ private final class WakeController {
                     self.report(false, "Speech recognition permission was not granted.")
                     return
                 }
-                self.beginRecognition(token)
+                AVCaptureDevice.requestAccess(for: .audio) { [weak self] granted in
+                    DispatchQueue.main.async {
+                        guard let self, self.generation == token else { return }
+                        guard granted else {
+                            self.report(false, "Microphone permission was not granted.")
+                            return
+                        }
+                        self.beginRecognition(token)
+                    }
+                }
             }
         }
     }
 
     func stop() {
+        wantsListening = false
         generation &+= 1
         if engine.isRunning { engine.stop() }
         if tapInstalled {
@@ -74,6 +100,7 @@ private final class WakeController {
     }
 
     private func beginRecognition(_ token: UInt64) {
+        guard wantsListening, generation == token else { return }
         guard let recognizer = recognizer(), recognizer.supportsOnDeviceRecognition else {
             report(false, "On-device wake recognition is unavailable.")
             return
@@ -118,7 +145,9 @@ private final class WakeController {
     }
 
     private func scheduleRestart() {
+        guard wantsListening else { return }
         stop()
+        wantsListening = true
         let token = generation
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             guard let self, self.generation == token else { return }

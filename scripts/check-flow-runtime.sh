@@ -312,7 +312,13 @@ function collectAssets(directory, current = directory) {
     }),
   );
 }
-const workingFlowSignatures = new Set();
+const expectedPets = [
+  "barbarian", "hooded-rogue", "knight", "mage", "ranger", "rogue",
+  "skeleton-mage", "skeleton-minion", "skeleton-rogue", "skeleton-warrior",
+];
+if (JSON.stringify(petDirectories) !== JSON.stringify(expectedPets)) {
+  throw new Error(`bundled roster does not match the ten humanoid characters: ${petDirectories.join(", ")}`);
+}
 for (const pet of petDirectories) {
   const directory = path.join(petsDirectory, pet);
   const manifest = JSON.parse(fs.readFileSync(path.join(directory, "flow.json"), "utf8"));
@@ -320,13 +326,14 @@ for (const pet of petDirectories) {
   const result = compileBehaviorPack(manifest, assets);
   if (!result.pack) throw new Error(`${pet}/flow.json: ${JSON.stringify(result.diagnostics)}`);
   if (result.pack.id !== pet) throw new Error(`${pet}/flow.json: pack id must match its folder`);
+  if (Object.keys(assets).length !== 1 || assets["walk.png"] !== "walk.png") throw new Error(`${pet}: expected only walk.png`);
   if (result.pack.states.idle.flow.type !== "hide") throw new Error(`${pet}/flow.json: idle visibility is not flow-authored`);
-  if (result.pack.actions.wave?.label !== "Wave") throw new Error(`${pet}/flow.json: Wave action is not flow-authored`);
-  const done = JSON.stringify(result.pack.states.done.flow);
-  if (!done.includes('"type":"loop"') || !done.includes('"clip":"sleep"')) throw new Error(`${pet}/flow.json: done does not loop sleep`);
-  workingFlowSignatures.add(JSON.stringify(result.pack.states.working.flow));
+  if (Object.keys(result.pack.actions).length !== 0) throw new Error(`${pet}/flow.json: non-walking actions are not allowed`);
+  for (const state of ["working", "blocked", "done", "unknown"]) {
+    const flow = JSON.stringify(result.pack.states[state].flow);
+    if (!flow.includes('"clip":"walk"')) throw new Error(`${pet}/flow.json: ${state} does not use walk`);
+  }
 }
-if (workingFlowSignatures.size !== petDirectories.length) throw new Error("working pet flows are not distinct");
-console.log("bundled pet pack checks: pass");
+console.log("bundled ten-character walk-only pack checks: pass");
 CHECK_PACKS
 python3 "$ROOT/scripts/check-apng-assets.py"

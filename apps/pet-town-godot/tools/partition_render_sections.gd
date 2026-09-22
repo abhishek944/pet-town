@@ -80,6 +80,9 @@ func build() -> void:
 			var part = MeshInstance3D.new()
 			part.name = "Section_%04d" % count
 			part.mesh = load(path)
+			if material != null and material.resource_name == "MH midnight turquoise":
+				# main.tscn owns the lightweight animated replacement ocean.
+				part.visible = false
 			result.add_child(part)
 			part.owner = result
 			count += 1

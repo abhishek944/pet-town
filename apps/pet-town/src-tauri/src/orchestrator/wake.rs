@@ -177,7 +177,7 @@ fn activate(app: AppHandle, generation: u64) -> Result<(), String> {
         return Err("OpenAI key not found.".into());
     }
     if !crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref()) {
-        return Err("The bundled Mossback assistant pet is unavailable.".into());
+        return Err("The bundled Knight assistant is unavailable.".into());
     }
     super::window::open_hidden(&app)?;
     let _publication = PUBLICATION
@@ -189,6 +189,8 @@ fn activate(app: AppHandle, generation: u64) -> Result<(), String> {
         return Err("Wake activation was canceled.".into());
     }
     runtime.wake_activated = true;
+    runtime.connecting = true;
+    runtime.wake_status = Some("Wake phrase heard — connecting voice".into());
     drop(runtime);
     state.emit(&app);
     Ok(())

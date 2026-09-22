@@ -4,12 +4,8 @@ use std::collections::HashMap;
 
 pub fn snapshot_json() -> String {
     let collected = pet_town_agent_broker::collect();
-    serde_json::to_string(&serde_json::json!({
-        "available": collected.snapshot.available,
-        "agents": collected.snapshot.agents,
-        "focusTargets": collected.focus_routes,
-    }))
-    .unwrap_or_else(|_| r#"{"available":false,"agents":[],"focusTargets":{}}"#.to_string())
+    serde_json::to_string(&collected.snapshot)
+        .unwrap_or_else(|_| r#"{"available":false,"agents":[]}"#.to_string())
 }
 
 #[tauri::command]

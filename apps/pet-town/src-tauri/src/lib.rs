@@ -29,6 +29,8 @@ mod preferences_state;
 mod sessions;
 mod settings_window;
 mod settings_window_lifecycle;
+mod town_bridge;
+mod town_process;
 mod village_visibility;
 mod window;
 
@@ -38,12 +40,12 @@ pub use agents::{AgentSnapshot, AgentView};
 pub use preferences_commands::startup_enabled_from_disk;
 pub use sessions::snapshot_json;
 
-pub fn focus_agent_from_cli(id: &str) -> Result<(), String> {
-    focus::focus_current_agent(id)
+pub fn run_town_bridge() {
+    town_bridge::run();
 }
 
-pub fn focus_route_from_cli(route: &str) -> Result<(), String> {
-    focus::focus_serialized_route(route)
+pub fn focus_agent_from_cli(id: &str) -> Result<(), String> {
+    focus::focus_current_agent(id)
 }
 
 pub fn verify_existing_herdr_agent(pane_id: String) -> Result<(), String> {
@@ -66,6 +68,7 @@ pub fn run() {
         }
     };
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(app_lock)
         .manage(window::HitRegions::default())
         .manage(village_visibility::VillageVisibility::default())
@@ -74,6 +77,7 @@ pub fn run() {
         .manage(pet_studio::PetStudioState::load())
         .manage(orchestrator::OrchestratorState::default())
         .manage(settings_window::SettingsSession::default())
+        .manage(town_process::TownProcess::default())
         .on_window_event(|window, event| {
             if window.label() == "settings"
                 && matches!(
@@ -127,6 +131,7 @@ pub fn run() {
             orchestrator::status_commands::list_orchestrator_workspaces,
             orchestrator::task_commands::set_orchestrator_listening,
             orchestrator::commands::start_orchestrator_session,
+            orchestrator::commands::rearm_orchestrator_voice,
             orchestrator::task_commands::stop_orchestrator_session,
             preferences_commands::apply_preferences,
             preferences_commands::get_preferences,
@@ -152,7 +157,10 @@ pub fn run() {
                     orchestrator::retry_exit(app.clone());
                 }
             }
-            tauri::RunEvent::Exit => app.state::<pet_studio::PetStudioState>().cleanup(),
+            tauri::RunEvent::Exit => {
+                town_process::stop(app);
+                app.state::<pet_studio::PetStudioState>().cleanup();
+            }
             tauri::RunEvent::Reopen { .. } => {
                 let _ = settings_window::open_internal(app, None, None);
             }

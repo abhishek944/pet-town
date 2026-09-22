@@ -2,9 +2,11 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { PreferencesSnapshot } from "./preferences-types";
 import type { OrchestratorStatus as Status } from "./orchestrator-status";
-import { startSpeechMeter } from "./assistant-meter"; import { iceComplete, installReleaseGuards } from "./assistant-webrtc"; import { delegationContext } from "./assistant-context"; import { appendTranscript, readTranscript, resetTranscript } from "./assistant-transcript";
+import { startSpeechMeter } from "./assistant-meter"; import { iceComplete, installReleaseGuards } from "./assistant-webrtc"; import { delegationContext, toolTaskContext } from "./assistant-context"; import { appendTranscript, readTranscript, resetTranscript } from "./assistant-transcript";
 type Workspace = { id: string; label: string; project: string };
-type LiveAnswer = { sessionId: string; sdp: string }; type LiveEvent = { type?: string; delta?: string; transcript?: string; delegation?: { id?: string; target?: string }; error?: { message?: string } };
+type LiveAnswer = { sessionId: string; sdp: string }; type LiveEvent = { type?: string; delta?: string; transcript?: string; delegation?: { id?: string; target?: string }; delegation_id?: string; event?: { type?: string; item?: { type?: string; call_id?: string; name?: string; arguments?: string } }; error?: { message?: string } };
+type PendingCall = { callId: string; name: string; args: string };
+const responseCalls = new Map<string, PendingCall[]>();
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 let connection: RTCPeerConnection | null = null, channel: RTCDataChannel | null = null;
 let microphone: MediaStream | null = null, stopMeter = () => {};
@@ -12,6 +14,8 @@ let connecting = false, listening = false, pushToTalk = false, cancellationSent 
 let closeTimer = 0, idleTimer = 0, connectionAttempt = 0;
 let activeDelegationId: string | null = null; let currentStatus: Status | null = null;
 let userUtterance = "";
+let lastUserUtterance = "";
+let lastInputAt = 0;
 let delegationQueue = Promise.resolve(); const delegations = new Set<string>();
 function setStatus(status: Status): void {
   currentStatus = status; activeDelegationId = status.activeTaskId; $("connection").textContent = status.message;
@@ -38,19 +42,33 @@ async function load(): Promise<void> {
   const workspace = $<HTMLSelectElement>("workspace");
   workspace.replaceChildren(...workspaces.map((item) => new Option(`${item.label} · ${item.project}`, item.id)));
   if (!workspaces.length) workspace.append(new Option("No Herdr workspace available", ""));
-  if (status.workspaceId && workspaces.some((item) => item.id === status.workspaceId)) workspace.value = status.workspaceId;
+  const savedWorkspace = preferences.preferences.app.orchestrator.workspaceId;
+  if (savedWorkspace && savedWorkspace.startsWith("/")) {
+    if (![...workspace.options].some((option) => option.value === savedWorkspace))
+      workspace.append(new Option(`Folder · ${savedWorkspace.split("/").pop() ?? savedWorkspace}`, savedWorkspace));
+    workspace.value = savedWorkspace;
+  } else if (savedWorkspace && workspaces.some((item) => item.id === savedWorkspace)) workspace.value = savedWorkspace;
+  else if (status.workspaceId && workspaces.some((item) => item.id === status.workspaceId)) workspace.value = status.workspaceId;
+  else {
+    workspace.prepend(new Option("Documents (default)", ""));
+    workspace.value = "";
+  }
   setStatus(status);
   if (status.available && status.herdrConnected && status.wakeActivated)
     await connect(true, status.wakeGeneration);
 }
 async function connect(fromWake = false, wakeGeneration?: number): Promise<void> {
+  if (closeTimer) {
+    clearTimeout(closeTimer); closeTimer = 0;
+    closeLocal(false);
+  }
   if (connecting || connection) return;
-  clearTimeout(closeTimer); closeTimer = 0;
   connecting = true; const attempt = ++connectionAttempt; error("");
   $<HTMLButtonElement>("connect").disabled = true; $<HTMLButtonElement>("disconnect").disabled = false;
   try {
-  const workspaceId = $<HTMLSelectElement>("workspace").value;
-  if (!workspaceId) throw new Error("Choose a running Herdr workspace first.");
+  const workspaceSelect = $<HTMLSelectElement>("workspace");
+  const workspaceId = workspaceSelect.value;
+  if (!workspaceId && workspaceSelect.options.length === 0) throw new Error("Choose a running Herdr workspace first.");
   await invoke("report_orchestrator_diagnostic", { message: "requesting microphone" });
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
@@ -90,16 +108,37 @@ function handleEvent(raw: string): void {
   let event: LiveEvent;
   try { event = JSON.parse(raw) as LiveEvent; } catch { return; }
   if (event.type === "session.input_transcript.delta" && event.delta) {
-    resetIdle(); userUtterance += event.delta; appendTranscript("user", event.delta);
+    resetIdle(); userUtterance += event.delta; lastInputAt = Date.now(); appendTranscript("user", event.delta);
   }
   if (event.type === "session.input_transcript.done") {
-    const utterance = event.transcript ?? userUtterance; userUtterance = ""; maybeCancel(utterance); }
+    const utterance = (event.transcript ?? userUtterance).trim(); userUtterance = "";
+    if (utterance) lastUserUtterance = utterance;
+    maybeCancel(utterance); }
   if (event.type === "session.output_transcript.delta" && event.delta) {
-    cancellationSent = false; appendTranscript("assistant", event.delta);
+    resetIdle(); cancellationSent = false;
+    if (Date.now() - lastInputAt > 2500) userUtterance = "";
+    appendTranscript("assistant", event.delta);
+  }
+  if (event.type === "response.event") {
+    resetIdle();
+    handleResponseEvent(event, connectionAttempt);
   }
   if (event.type === "session.delegation.created") {
-    const attempt = connectionAttempt, context = delegationContext(readTranscript());
-    delegationQueue = delegationQueue.then(() => delegate(event, attempt, context));
+    resetIdle();
+    if (event.delegation && event.delegation.target !== "client") return;
+    const attempt = connectionAttempt;
+    const task = userUtterance.trim() || lastUserUtterance;
+    userUtterance = "";
+    if (task.trim()) lastUserUtterance = task.trim();
+    const cancelTarget = activeDelegationId ?? currentStatus?.activeTaskId ?? null;
+    if (task.trim() && isCancelRequest(task) && cancelTarget && !cancellationSent) {
+      cancellationSent = true;
+      const cancelId = event.delegation?.id ?? "";
+      delegationQueue = delegationQueue.then(() => cancelDelegation(event, attempt, cancelId, cancelTarget));
+    } else {
+      const context = delegationContext(task, readTranscript());
+      delegationQueue = delegationQueue.then(() => delegate(event, attempt, context));
+    }
   }
   if (event.type === "session.closed") closeLocal();
   if (event.type === "error") error(event.error?.message ?? "GPT-Live reported an error.");
@@ -112,7 +151,7 @@ async function delegate(event: LiveEvent, attempt: number, context: string): Pro
   const ownsTask = activeDelegationId === null;
   if (ownsTask) activeDelegationId = id;
   try {
-    const output = await invoke<string | null>("delegate_orchestrator_task", { delegationId: id, context });
+    const output = await invoke<string | null>("delegate_orchestrator_task", { delegationId: id, context, full: false });
     if (attempt === connectionAttempt && output && channel?.readyState === "open") channel.send(JSON.stringify({
       type: "session.commentary.append", event_id: crypto.randomUUID(), delegation_id: id, content: output,
     }));
@@ -122,12 +161,101 @@ async function delegate(event: LiveEvent, attempt: number, context: string): Pro
       type: "session.commentary.append", event_id: crypto.randomUUID(), delegation_id: id,
       content: "The Pi agent could not complete that request. Please try again or choose another workspace.",
     }));
-  } finally { if (ownsTask && activeDelegationId === id) activeDelegationId = null; }
+  } finally { if (ownsTask && activeDelegationId === id) activeDelegationId = null; if (attempt === connectionAttempt) resetIdle(); }
+}
+function sendChannel(payload: unknown): boolean {
+  if (channel?.readyState === "open") { channel.send(JSON.stringify(payload)); return true; }
+  return false;
+}
+function handleResponseEvent(envelope: LiveEvent, attempt: number): void {
+  const outerId = envelope.delegation_id;
+  const inner = envelope.event;
+  if (!outerId || !inner) return;
+  if (inner.type === "response.output_item.done" && inner.item?.type === "function_call" && inner.item.call_id && inner.item.name) {
+    const calls = responseCalls.get(outerId) ?? [];
+    if (calls.length < 8 && !calls.some((call) => call.callId === inner.item!.call_id)) {
+      calls.push({ callId: inner.item.call_id!, name: inner.item.name!, args: inner.item.arguments ?? "{}" });
+      responseCalls.set(outerId, calls);
+    }
+    return;
+  }
+  if (inner.type === "response.completed") {
+    const calls = responseCalls.get(outerId) ?? [];
+    responseCalls.delete(outerId);
+    if (calls.length) delegationQueue = delegationQueue.then(() => runBackendCalls(outerId, attempt, calls));
+  }
+}
+async function runBackendCalls(outerId: string, attempt: number, calls: PendingCall[]): Promise<void> {
+  if (attempt !== connectionAttempt || delegations.has(outerId)) return;
+  if (delegations.size >= 512) delegations.delete(delegations.values().next().value!);
+  delegations.add(outerId); cancellationSent = false;
+  const ownsTask = activeDelegationId === null;
+  if (ownsTask) activeDelegationId = outerId;
+  try {
+    for (const call of calls) {
+      if (attempt !== connectionAttempt) return;
+      const output = await executeBackendCall(outerId, call);
+      sendChannel({
+        type: "response.item.create", event_id: crypto.randomUUID(),
+        item: { type: "function_call_output", call_id: call.callId, output },
+      });
+    }
+    if (attempt === connectionAttempt) sendChannel({ type: "response.create", event_id: crypto.randomUUID() });
+  } finally { if (ownsTask && activeDelegationId === outerId) activeDelegationId = null; if (attempt === connectionAttempt) resetIdle(); }
+}
+async function executeBackendCall(outerId: string, call: PendingCall): Promise<string> {
+  try {
+    if (call.name === "run_pi_task") {
+      let task = "";
+      try { task = String(JSON.parse(call.args || "{}").task ?? ""); } catch { task = ""; }
+      const output = await invoke<string | null>("delegate_orchestrator_task", {
+        delegationId: outerId, context: toolTaskContext(task), full: true,
+      });
+      return JSON.stringify(
+        output
+          ? { status: "completed", result: output }
+          : {
+              status: "not_completed",
+              reason:
+                "The Pi task did not finish (it may have been canceled). Tell the user plainly and ask whether to retry instead of assuming progress.",
+            },
+      );
+    }
+    if (call.name === "cancel_pi_task") {
+      await invoke("cancel_orchestrator_task", { delegationId: outerId });
+      return JSON.stringify({ status: "canceled" });
+    }
+    return JSON.stringify({ status: "error", message: `Unknown tool: ${call.name}` });
+  } catch (reason) {
+    error(reason);
+    return JSON.stringify({
+      status: "error",
+      message: String(reason),
+      recovery:
+        "Tell the user plainly what failed and suggest the next step instead of assuming the work is still running.",
+    });
+  }
+}
+async function cancelDelegation(event: LiveEvent, attempt: number, newId: string, targetId: string): Promise<void> {
+  if (attempt !== connectionAttempt || !newId || event.delegation?.target !== "client" || delegations.has(newId)) { cancellationSent = false; return; }
+  if (delegations.size >= 512) delegations.delete(delegations.values().next().value!);
+  delegations.add(newId);
+  try {
+    await invoke("cancel_orchestrator_task", { delegationId: targetId });
+  } catch (reason) { error(reason); }
+  cancellationSent = false;
+  if (attempt === connectionAttempt && channel?.readyState === "open") channel.send(JSON.stringify({
+    type: "session.commentary.append", event_id: crypto.randomUUID(), delegation_id: newId,
+    content: "The active Pi task was canceled.",
+  }));
+}
+function isCancelRequest(value: string): boolean {
+  const text = value.trim().toLowerCase();
+  return /^(please\s+)?(cancel|stop)(\s+(that|it|the\s+(current\s+)?task))?[.!?]*$/.test(text)
+    || /^(never\s*mind)[.!?]*$/.test(text);
 }
 function maybeCancel(value: string): void {
-  const text = value.trim().toLowerCase();
-  const request = /^(please\s+)?(cancel|stop)(\s+(that|it|the\s+(current\s+)?task))?[.!?]*$/.test(text)
-    || /^(never\s*mind)[.!?]*$/.test(text);
+  const request = isCancelRequest(value);
   const delegationId = activeDelegationId;
   if (cancellationSent || !request || !delegationId) return;
   cancellationSent = true;
@@ -138,8 +266,20 @@ function maybeCancel(value: string): void {
     }));
   }).catch((reason) => { cancellationSent = false; error(reason); });
 }
+function isTaskActive(): boolean {
+  return activeDelegationId !== null || currentStatus?.taskActive === true;
+}
+function onIdleTimeout(): void {
+  if (!connection) return;
+  if (isTaskActive()) {
+    clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(onIdleTimeout, 60_000);
+    return;
+  }
+  closeSession();
+}
 function resetIdle(): void {
-  clearTimeout(idleTimer); idleTimer = window.setTimeout(() => { if (connection) closeSession(); }, 300_000);
+  clearTimeout(idleTimer); idleTimer = window.setTimeout(onIdleTimeout, 300_000);
 }
 function closeSession(): void {
   connectionAttempt += 1;
@@ -161,7 +301,7 @@ function closeLocal(notifyBackend: unknown = true): void {
   connectionAttempt += 1; connecting = false; clearTimeout(closeTimer); clearTimeout(idleTimer); closeTimer = 0; idleTimer = 0; stopMeter(); stopMeter = () => {}; microphone?.getTracks().forEach((track) => track.stop());
   microphone = null;
   channel?.removeEventListener("close", closeLocal); channel?.close(); channel = null; connection?.close(); connection = null;
-  resetTranscript(); userUtterance = ""; delegations.clear(); listening = false; pushToTalk = false; cancellationSent = false; activeDelegationId = null;
+  resetTranscript(); userUtterance = ""; lastUserUtterance = ""; lastInputAt = 0; delegations.clear(); responseCalls.clear(); listening = false; pushToTalk = false; cancellationSent = false; activeDelegationId = null;
   if (notifyBackend !== false) void invoke("stop_orchestrator_session");
 }
 $("connect").addEventListener("click", () => { if (!connection) void connect(false).catch(error); });

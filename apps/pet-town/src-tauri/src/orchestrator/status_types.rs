@@ -16,6 +16,8 @@ pub struct OrchestratorStatus {
     pub wake_activated: bool,
     pub wake_generation: u64,
     pub workspace_id: Option<String>,
+    pub voice_mode: String,
+    pub voice_note: Option<String>,
     pub message: String,
 }
 

@@ -55,14 +55,14 @@ user permissions, so review their manifest and source before installing.
 - Labels each character with its Herdr pane name when present, otherwise `{space-name}-{tab}` (for example `pet-town-1`), and uses the current folder name only when Herdr naming is unavailable.
 - Focuses an exact revalidated Herdr pane when its pet is clicked, or the best already-running application known for a standalone harness without launching or resuming anything.
 - Lets users drag a pet horizontally; it pauses while held and resumes its existing movement from the drop point.
-- Builds each pet's right-click menu from validated `flow.json` actions; every bundled pet currently exposes **Wave**.
+- Builds each pet's right-click menu from validated `flow.json` actions; the bundled walk-only roster does not add character actions.
 - Opens a native macOS Settings window when the installed app launches, from **Preferences…** in a pet menu, or from the Herdr plugin action, with direct **Show Town / Hide Town** controls, per-character controls, a **Pet Studio**, and an **Agents** tab for atomic, reversible setup of all six standalone harness integrations.
 - Lets users create a new pet or extend an existing pet by importing transparent looping APNGs in Settings. Pet Studio validates each file locally, previews it, and lets users map animations to states, orchestrator behavior, and right-click actions without modifying bundled assets or rebuilding.
-- Adds a user-named voice assistant that uses the bundled Mossback tortoise, listens locally for “Hey, <name>,” starts GPT-Live 1 without opening another visible window, and delegates computer work to a persistent Pi agent in a dedicated Herdr pane.
+- Adds a user-named voice assistant that uses the bundled Knight, listens locally for “Hey, <name>,” starts GPT-Live 1 without opening another visible window, and delegates computer work to a persistent Pi agent in a dedicated Herdr pane.
 - Runs that Pi agent with GPT-5.6 Luna at medium thinking, supports spoken task cancellation, and keeps voice transcripts ephemeral.
-- Keeps the assistant independent from Pet Studio: its bundled Mossback walking and listening animations are fixed and cannot be replaced by user pet creation or extensions.
+- Keeps the assistant independent from Pet Studio: its bundled Knight walk animation is fixed and cannot be replaced by user pet creation or extensions.
 - Includes every character in random assignment by default, lets users deselect unwanted characters, and immediately replaces visible deselected pets after Apply while preserving allowed assignments.
-- Optionally hides completed sleeping pets after 1, 5, 15, 30, or 60 minutes while continuing to monitor them and restoring them immediately when their state changes.
+- Optionally hides completed pets after 1, 5, 15, 30, or 60 minutes while continuing to monitor them and restoring them immediately when their state changes.
 - Pauses the visible village while Settings edits a draft; **Apply** saves the complete versioned file at `~/.pet-town/preferences.json`, while closing discards unapplied changes and resumes current agent states.
 - Keeps the window transparent, undecorated, always on top, and visible across
   macOS workspaces. Empty pixels are click-through while citizen pixels remain
@@ -185,10 +185,10 @@ Use `pnpm run check:quality` for only formatting, linting, and type checks. Use 
 3. Confirm citizens appear centered just above the Dock, empty window space passes clicks through, and clicking a pet focuses its exact Herdr agent pane.
 4. Confirm each pet moves to a screen edge, turns only there, and continues in the direction it faces with its project name following above.
 5. Change agents between working, blocked, done, idle, and unknown; confirm idle flows hide the complete citizen while the other states restore it.
-6. Watch working pets use distinct movement and action animations. Confirm the Viking hammers, Ember practices with a sword, Mossback bows, Skiff scans, Mira checks her route map and drills with a spear, Jun repairs his bird, Brassbell sorts parcels, and Pebble blocks and flourishes its spoon.
-7. Complete an agent and confirm its pet celebrates once, then continues sleeping with animated Zs until its state changes.
+6. Confirm the Assets gallery contains exactly the six KayKit Adventurers and four KayKit Skeletons, and each character uses only its normal walk APNG.
+7. Complete an agent and confirm its character remains visible with the same walk animation until its state changes or the completed-pet delay hides it.
 8. Drag a pet horizontally, release it, and confirm it resumes movement from the drop point without focusing the agent.
-9. Right-click several pets, choose **Wave**, and confirm each waves once before resuming its exact prior behavior. Change an agent's state during Wave and confirm the new state interrupts it.
+9. Right-click several bundled characters and confirm no animation actions are offered.
 10. Right-click a pet and choose **Preferences…**. Confirm one native Settings window opens for that character, every visible pet freezes, the preview reflects walking speed and reduced movement, and hovering the preview pauses its travel when **Stop walking while hovered** is enabled. Deselect that character from the random cast, Apply, close Settings, and confirm any visible copy is replaced while allowed pets keep their assignments.
 11. Enable **Hide completed pets**, select a delay, and Apply. Confirm completed pets disappear after that delay, no longer affect crowd sizing or clicks, and return immediately if they begin working or become blocked.
 12. Confirm reduced movement or hover pauses only horizontal travel while the pet keeps animating; also confirm closing Settings discards any unapplied draft and resumes current Herdr states.

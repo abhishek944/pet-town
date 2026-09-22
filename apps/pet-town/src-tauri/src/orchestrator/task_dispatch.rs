@@ -2,6 +2,12 @@ use super::agent::AgentSession;
 use super::state::OrchestratorState;
 use tauri::{AppHandle, Manager};
 
+const DEAD_AGENT_MARKER: &str = "closed before retry";
+
+pub fn dead_agent(error: &str) -> bool {
+    error.contains(DEAD_AGENT_MARKER)
+}
+
 pub async fn run(
     app: AppHandle,
     agent: AgentSession,
@@ -49,9 +55,7 @@ pub async fn run(
                 if runtime.closing_agent_pane_id.as_deref() == Some(&agent.pane_id) {
                     runtime.closing_agent_pane_id = None;
                 }
-                return Err(format!(
-                    "{error} The uncertain Pi session was closed before retry."
-                ));
+                return Err(format!("{error} The uncertain Pi session was {DEAD_AGENT_MARKER}."));
             }
         };
         drop(dispatch);

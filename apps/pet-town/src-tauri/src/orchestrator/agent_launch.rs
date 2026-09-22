@@ -12,19 +12,6 @@ pub fn decrement_cleanup(app: &tauri::AppHandle, state: &OrchestratorState) {
     }
 }
 
-pub fn take(state: &OrchestratorState, pane: &str) -> Option<AgentSession> {
-    let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
-    if runtime
-        .agent
-        .as_ref()
-        .is_some_and(|item| item.pane_id == pane)
-    {
-        runtime.agent.take()
-    } else {
-        None
-    }
-}
-
 pub async fn start(
     workspace_id: String,
     herdr_workspace_id: String,

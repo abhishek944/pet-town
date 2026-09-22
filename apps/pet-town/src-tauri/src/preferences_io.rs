@@ -46,7 +46,7 @@ pub fn read(path: &Path, ids: &[String]) -> ReadResult {
     }
     let preferences: PreferencesFile = match serde_json::from_value(value) {
         Ok(mut preferences) => {
-            reconcile_user_pets(&mut preferences, ids);
+            reconcile_installed_pets(&mut preferences, ids);
             preferences
         }
         Err(error) => {
@@ -58,12 +58,10 @@ pub fn read(path: &Path, ids: &[String]) -> ReadResult {
         Err(error) => ReadResult::Invalid(error),
     }
 }
-fn reconcile_user_pets(preferences: &mut PreferencesFile, ids: &[String]) {
+fn reconcile_installed_pets(preferences: &mut PreferencesFile, ids: &[String]) {
     preferences.normalize_assistant();
-    preferences
-        .pets
-        .retain(|id, _| ids.contains(id) || !id.starts_with("user-"));
-    for id in ids.iter().filter(|id| id.starts_with("user-")) {
+    preferences.pets.retain(|id, _| ids.contains(id));
+    for id in ids {
         preferences.pets.entry(id.clone()).or_default();
     }
     if !preferences

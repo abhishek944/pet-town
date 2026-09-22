@@ -7,6 +7,7 @@ use tauri::{AppHandle, Manager};
 static OPEN_SETTINGS: AtomicBool = AtomicBool::new(false);
 static RELOAD_PREFERENCES: AtomicBool = AtomicBool::new(false);
 static VISIBILITY_REQUEST: AtomicI8 = AtomicI8::new(0);
+static TOWN_ACTIVE_REQUEST: AtomicI8 = AtomicI8::new(0);
 static STOP: AtomicBool = AtomicBool::new(false);
 
 #[cfg(unix)]
@@ -25,6 +26,14 @@ extern "C" fn request_show(_signal: libc::c_int) {
 #[cfg(unix)]
 extern "C" fn request_hide(_signal: libc::c_int) {
     VISIBILITY_REQUEST.store(-1, Ordering::SeqCst);
+}
+#[cfg(unix)]
+extern "C" fn request_town_active(_signal: libc::c_int) {
+    TOWN_ACTIVE_REQUEST.store(1, Ordering::SeqCst);
+}
+#[cfg(unix)]
+extern "C" fn request_town_inactive(_signal: libc::c_int) {
+    TOWN_ACTIVE_REQUEST.store(-1, Ordering::SeqCst);
 }
 #[cfg(unix)]
 extern "C" fn request_stop(_signal: libc::c_int) {
@@ -51,6 +60,14 @@ pub fn install_signal_handlers() {
             request_hide as *const () as libc::sighandler_t,
         );
         libc::signal(
+            libc::SIGURG,
+            request_town_active as *const () as libc::sighandler_t,
+        );
+        libc::signal(
+            libc::SIGWINCH,
+            request_town_inactive as *const () as libc::sighandler_t,
+        );
+        libc::signal(
             libc::SIGTERM,
             request_stop as *const () as libc::sighandler_t,
         );
@@ -71,6 +88,14 @@ pub fn start(app: AppHandle) {
                 let _ = crate::village_visibility::set(&target, visibility > 0);
             });
         }
+        let town_active = TOWN_ACTIVE_REQUEST.swap(0, Ordering::SeqCst);
+        if town_active != 0 {
+            let target = app.clone();
+            let _ = app.run_on_main_thread(move || {
+                let _ = crate::village_visibility::set_town_active(&target, town_active > 0);
+            });
+        }
+        crate::town_process::reap(&app);
         if OPEN_SETTINGS.swap(false, Ordering::SeqCst) {
             let target = app.clone();
             if app

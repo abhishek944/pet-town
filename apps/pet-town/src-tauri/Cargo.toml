@@ -16,10 +16,14 @@ name = "pet-town"
 path = "src/main.rs"
 
 [build-dependencies]
+flate2 = "1"
+tar = "0.4"
+serde_json = "1"
 tauri-build = { version = "2", features = [] }
 sha2 = "0.10"
 
 [dependencies]
+futures-util = "0.3"
 pet-town-agent-broker = { path = "../../../packages/pet-town-agent-broker" }
 # custom-protocol makes every build serve the embedded frontend through Tauri's
 # asset protocol. Without it Tauri assumes a development environment and every
@@ -41,6 +45,7 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 sha2 = "0.10"
 uuid = { version = "1", features = ["v4"] }
+tauri-plugin-dialog = "2"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

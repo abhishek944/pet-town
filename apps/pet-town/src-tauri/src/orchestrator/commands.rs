@@ -20,7 +20,7 @@ pub async fn start_orchestrator_session(
         .app
         .orchestrator;
     if !crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref()) {
-        return Err("The bundled Mossback assistant pet is unavailable.".into());
+        return Err("The bundled Knight assistant is unavailable.".into());
     }
     let state = app.state::<OrchestratorState>();
     let generation = {
@@ -31,32 +31,80 @@ pub async fn start_orchestrator_session(
             }
             runtime.wake_activated = false;
         }
+        runtime.connecting = true;
         runtime.session_generation = runtime.session_generation.wrapping_add(1);
         runtime.session_generation
     };
-    super::launcher::ensure(app.clone(), workspace_id).await?;
-    if state
-        .0
-        .lock()
-        .unwrap_or_else(|error| error.into_inner())
-        .session_generation
-        != generation
-    {
-        return Err("Voice connection was canceled.".into());
-    }
+    state.emit(&app);
     let preferences = app.state::<PreferencesStore>().snapshot().preferences;
-    let answer =
-        super::openai::create_session(sdp, &preferences.app.orchestrator.display_name).await?;
+    // An empty id means the default session folder; a leading slash marks a
+    // picked session folder rather than a workspace id.
+    let workspace_id = if workspace_id.is_empty() {
+        default_session_folder()?
+    } else {
+        workspace_id
+    };
+    let workspace_id = if workspace_id.starts_with('/') {
+        super::herdr::workspace_for_folder(&workspace_id)?
+    } else {
+        workspace_id
+    };
+    // Start Pi and negotiate voice concurrently; neither requires the other.
+    let (pi, voice) = futures_util::future::join(
+        super::launcher::ensure(app.clone(), workspace_id),
+        super::openai::create_session(sdp, &preferences.app.orchestrator.display_name),
+    ).await;
+    pi?;
+    let (result, note) = voice;
+    {
+        let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
+        runtime.responses_backend = note.is_none() && result.is_ok();
+        runtime.degraded_note = note;
+    }
+    let answer = result?;
     {
         let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
         if runtime.session_generation != generation {
             return Err("Voice connection was canceled.".into());
         }
         runtime.live_connected = true;
+        runtime.connecting = false;
         runtime.wake_activated = false;
     }
     state.emit(&app);
     Ok(answer)
+}
+
+#[tauri::command]
+pub fn rearm_orchestrator_voice(app: AppHandle) -> Result<String, String> {
+    if super::openai::api_key().is_none() {
+        return Err("Add an OpenAI API key in the environment or Pet Town Keychain entry.".into());
+    }
+    let configured = app
+        .state::<PreferencesStore>()
+        .snapshot()
+        .preferences
+        .app
+        .orchestrator;
+    if !configured.enabled {
+        return Err("The assistant is stopped. Start it first.".into());
+    }
+    if !crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref()) {
+        return Err("The bundled Knight assistant is unavailable.".into());
+    }
+    super::window::open_hidden(&app)?;
+    super::wake::start(&app, &configured.display_name)?;
+    app.state::<OrchestratorState>().emit(&app);
+    Ok(format!(
+        "Listening for \u{201c}Hey, {}\u{201d}. Say the wake phrase to start talking.",
+        configured.display_name.trim()
+    ))
+}
+
+fn default_session_folder() -> Result<String, String> {
+    let home = std::env::var("HOME")
+        .map_err(|_| "Your home folder is unavailable; choose a session folder in Settings.".to_string())?;
+    Ok(format!("{home}/Documents"))
 }
 
 pub fn preferences_changed(app: &AppHandle) {
@@ -97,6 +145,12 @@ pub fn preferences_changed(app: &AppHandle) {
         let _ = app.emit_to("orchestrator", "orchestrator-reset", ());
         state.shutdown();
     } else if configured.wake_enabled {
+        // Extract and verify the bundled runtime before a wake phrase arrives.
+        tauri::async_runtime::spawn_blocking(|| {
+            if let Err(error) = super::runtime::directory() {
+                eprintln!("[assistant runtime] {error}");
+            }
+        });
         let _ = super::wake::start(app, &configured.display_name);
     } else {
         super::wake::stop(app);

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 pub const SCHEMA_VERSION: u32 = 3;
-pub const ASSISTANT_PET_ID: &str = "mossback-turtle-monk";
+pub const ASSISTANT_PET_ID: &str = "knight";
 pub const COMPLETED_HIDE_DELAYS_MINUTES: [u16; 5] = [1, 5, 15, 30, 60];
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -33,6 +33,9 @@ pub struct OrchestratorPreferences {
     pub thinking: String,
     pub wake_enabled: bool,
     pub pet_id: Option<String>,
+    pub workspace_id: Option<String>,
+    #[serde(default)]
+    pub system_prompt: String,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -102,10 +105,10 @@ impl PreferencesFile {
     pub fn defaults(ids: &[String]) -> Self {
         let first = ids
             .iter()
-            .find(|id| id.as_str() == "cat")
+            .find(|id| id.as_str() == ASSISTANT_PET_ID)
             .or_else(|| ids.first())
             .cloned()
-            .unwrap_or_else(|| "cat".to_string());
+            .unwrap_or_else(|| ASSISTANT_PET_ID.to_string());
         Self {
             schema_version: SCHEMA_VERSION,
             app: AppPreferences {
@@ -121,6 +124,8 @@ impl PreferencesFile {
                     thinking: "medium".to_string(),
                     wake_enabled: true,
                     pet_id: Some(ASSISTANT_PET_ID.to_string()),
+                    workspace_id: None,
+                    system_prompt: String::new(),
                 },
             },
             pets: ids
@@ -158,10 +163,23 @@ impl PreferencesFile {
         if !orchestrator.wake_enabled {
             return Err("orchestrator.wakeEnabled must remain on".to_string());
         }
+        if let Some(id) = orchestrator.workspace_id.as_deref() {
+            if id.is_empty() || id.len() > 1024 {
+                return Err("orchestrator.workspaceId must be 1–1024 characters".to_string());
+            }
+        }
+        if orchestrator.system_prompt.chars().count() > 4_000
+            || orchestrator
+                .system_prompt
+                .chars()
+                .any(|character| character.is_control() && !"\n\r\t".contains(character))
+        {
+            return Err("orchestrator.systemPrompt must be at most 4000 safe characters".to_string());
+        }
         if orchestrator.pet_id.as_deref() != Some(ASSISTANT_PET_ID)
             || !ids.iter().any(|id| id == ASSISTANT_PET_ID)
         {
-            return Err("orchestrator.petId must use the bundled Mossback tortoise".to_string());
+            return Err("orchestrator.petId must use the bundled Knight".to_string());
         }
         let actual: Vec<&str> = self.pets.keys().map(String::as_str).collect();
         let expected: Vec<&str> = ids.iter().map(String::as_str).collect();

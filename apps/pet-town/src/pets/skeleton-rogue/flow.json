@@ -1,0 +1,53 @@
+{
+  "formatVersion": 1,
+  "id": "skeleton-rogue",
+  "packVersion": "1",
+  "clips": {
+    "walk": {
+      "asset": "walk.png",
+      "durationMs": 960,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "completion": "restart",
+      "flow": {
+        "type": "hide",
+        "durationMs": 1000
+      }
+    },
+    "working": {
+      "completion": "restart",
+      "flow": {
+        "type": "move",
+        "clip": "walk",
+        "durationMs": 2400,
+        "speedPxPerSecond": 30
+      }
+    },
+    "blocked": {
+      "completion": "restart",
+      "flow": {
+        "type": "play",
+        "clip": "walk"
+      }
+    },
+    "done": {
+      "completion": "restart",
+      "flow": {
+        "type": "play",
+        "clip": "walk"
+      }
+    },
+    "unknown": {
+      "completion": "restart",
+      "flow": {
+        "type": "play",
+        "clip": "walk"
+      }
+    }
+  }
+}

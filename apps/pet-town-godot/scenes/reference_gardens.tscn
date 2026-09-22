@@ -1,0 +1,3906 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://assets/cozy-island/reference-gardens.glb" id="1_garden"]
+[ext_resource type="Script" path="res://scripts/reference_water_cleanup.gd" id="2_water_cleanup"]
+
+[sub_resource type="BoxShape3D" id="Box_0"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_1"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_2"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_3"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_4"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_5"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_6"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_7"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_8"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_9"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_10"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_11"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_12"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_13"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_14"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_15"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_16"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_17"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_18"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_19"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_20"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_21"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_22"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_23"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_24"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_25"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_26"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_27"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_28"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_29"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_30"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_31"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_32"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_33"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_34"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_35"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_36"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_37"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_38"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_39"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_40"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_41"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_42"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_43"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_44"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_45"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_46"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_47"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_48"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_49"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_50"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_51"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_52"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_53"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_54"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_55"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_56"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_57"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_58"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_59"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_60"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_61"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_62"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_63"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_64"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_65"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_66"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_67"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_68"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_69"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_70"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_71"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_72"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_73"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_74"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_75"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_76"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_77"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_78"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_79"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_80"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_81"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_82"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_83"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_84"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_85"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_86"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_87"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_88"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_89"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_90"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_91"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_92"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_93"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_94"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_95"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_96"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_97"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_98"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_99"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_100"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_101"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_102"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_103"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_104"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_105"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_106"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_107"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_108"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_109"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_110"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_111"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_112"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_113"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_114"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_115"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_116"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_117"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_118"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_119"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_120"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_121"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_122"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_123"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_124"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_125"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_126"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_127"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_128"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_129"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_130"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_131"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_132"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_133"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_134"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_135"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_136"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_137"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_138"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_139"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_140"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_141"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_142"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_143"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_144"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_145"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_146"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_147"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_148"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_149"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_150"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_151"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_152"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_153"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_154"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_155"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_156"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_157"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_158"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_159"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_160"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_161"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_162"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_163"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_164"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_165"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_166"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_167"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_168"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_169"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_170"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_171"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_172"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_173"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_174"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_175"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_176"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_177"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_178"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_179"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_180"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_181"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_182"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_183"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_184"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_185"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_186"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_187"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_188"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_189"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_190"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_191"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_192"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_193"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_194"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_195"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_196"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_197"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_198"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_199"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_200"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_201"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_202"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_203"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_204"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_205"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_206"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_207"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_208"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_209"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_210"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_211"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_212"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_213"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_214"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_215"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_216"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_217"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_218"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_219"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_220"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_221"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_222"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_223"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_224"]
+size = Vector3(0.48, 2, 0.48)
+
+[sub_resource type="BoxShape3D" id="Box_225"]
+size = Vector3(3.1, 1.4, 1.8)
+
+[sub_resource type="BoxShape3D" id="Box_226"]
+size = Vector3(3.1, 1.4, 1.8)
+
+[sub_resource type="BoxShape3D" id="Box_227"]
+size = Vector3(7.2, 2, 7.2)
+
+[sub_resource type="BoxShape3D" id="Box_228"]
+size = Vector3(5.5, 1.2, 5.5)
+
+[sub_resource type="BoxShape3D" id="Box_229"]
+size = Vector3(0.2848269854497275, 1, 2.6367374237506604)
+
+[sub_resource type="BoxShape3D" id="Box_230"]
+size = Vector3(0.5529002332182792, 1, 2.607582701102893)
+
+[sub_resource type="BoxShape3D" id="Box_231"]
+size = Vector3(0.8162498441275382, 1, 2.549615068273986)
+
+[sub_resource type="BoxShape3D" id="Box_232"]
+size = Vector3(1.0717882847724431, 1, 2.463514142758545)
+
+[sub_resource type="BoxShape3D" id="Box_233"]
+size = Vector3(1.3165196005774589, 1, 2.350289379185415)
+
+[sub_resource type="BoxShape3D" id="Box_234"]
+size = Vector3(1.9580117642499775, 1, 1.862639714306901)
+
+[sub_resource type="BoxShape3D" id="Box_235"]
+size = Vector3(2.132582046647238, 1, 1.6571196896728444)
+
+[sub_resource type="BoxShape3D" id="Box_236"]
+size = Vector3(2.2839083672396217, 1, 1.4339300646500468)
+
+[sub_resource type="BoxShape3D" id="Box_237"]
+size = Vector3(2.4102165632771384, 1, 1.1956875335276727)
+
+[sub_resource type="BoxShape3D" id="Box_238"]
+size = Vector3(2.5100257866459583, 1, 0.9451852721559263)
+
+[sub_resource type="BoxShape3D" id="Box_239"]
+size = Vector3(2.5821658654584905, 1, 0.685360190512975)
+
+[sub_resource type="BoxShape3D" id="Box_240"]
+size = Vector3(2.582165865458491, 1, 0.685360190512975)
+
+[sub_resource type="BoxShape3D" id="Box_241"]
+size = Vector3(2.5100257866459468, 1, 0.9451852721559227)
+
+[sub_resource type="BoxShape3D" id="Box_242"]
+size = Vector3(2.4102165632771437, 1, 1.1956875335276762)
+
+[sub_resource type="BoxShape3D" id="Box_243"]
+size = Vector3(2.2839083672396217, 1, 1.4339300646500468)
+
+[sub_resource type="BoxShape3D" id="Box_244"]
+size = Vector3(2.132582046647245, 1, 1.6571196896728444)
+
+[sub_resource type="BoxShape3D" id="Box_245"]
+size = Vector3(1.9580117642499633, 1, 1.8626397143068956)
+
+[sub_resource type="BoxShape3D" id="Box_246"]
+size = Vector3(1.3165196005774624, 1, 2.350289379185415)
+
+[sub_resource type="BoxShape3D" id="Box_247"]
+size = Vector3(1.0717882847724396, 1, 2.463514142758546)
+
+[sub_resource type="BoxShape3D" id="Box_248"]
+size = Vector3(0.8162498441275382, 1, 2.5496150682739773)
+
+[sub_resource type="BoxShape3D" id="Box_249"]
+size = Vector3(0.5529002332182792, 1, 2.607582701102894)
+
+[sub_resource type="BoxShape3D" id="Box_250"]
+size = Vector3(0.2848269854497275, 1, 2.6367374237506613)
+
+[sub_resource type="BoxShape3D" id="Box_251"]
+size = Vector3(0.2848269854497275, 1, 2.636737423750651)
+
+[sub_resource type="BoxShape3D" id="Box_252"]
+size = Vector3(0.5529002332182792, 1, 2.607582701102904)
+
+[sub_resource type="BoxShape3D" id="Box_253"]
+size = Vector3(0.8162498441275382, 1, 2.549615068273986)
+
+[sub_resource type="BoxShape3D" id="Box_254"]
+size = Vector3(1.0717882847724431, 1, 2.463514142758546)
+
+[sub_resource type="BoxShape3D" id="Box_255"]
+size = Vector3(1.3165196005774624, 1, 2.350289379185417)
+
+[sub_resource type="BoxShape3D" id="Box_256"]
+size = Vector3(1.9580117642499828, 1, 1.8626397143069098)
+
+[sub_resource type="BoxShape3D" id="Box_257"]
+size = Vector3(2.1325820466472343, 1, 1.6571196896728408)
+
+[sub_resource type="BoxShape3D" id="Box_258"]
+size = Vector3(2.2839083672396128, 1, 1.4339300646500361)
+
+[sub_resource type="BoxShape3D" id="Box_259"]
+size = Vector3(2.4102165632771526, 1, 1.1956875335276833)
+
+[sub_resource type="BoxShape3D" id="Box_260"]
+size = Vector3(2.5100257866459414, 1, 0.9451852721559227)
+
+[sub_resource type="BoxShape3D" id="Box_261"]
+size = Vector3(2.5821658654585007, 1, 0.6853601905129786)
+
+[sub_resource type="BoxShape3D" id="Box_262"]
+size = Vector3(2.5821658654584807, 1, 0.6853601905129715)
+
+[sub_resource type="BoxShape3D" id="Box_263"]
+size = Vector3(2.5100257866459628, 1, 0.9451852721559263)
+
+[sub_resource type="BoxShape3D" id="Box_264"]
+size = Vector3(2.4102165632771526, 1, 1.1956875335276798)
+
+[sub_resource type="BoxShape3D" id="Box_265"]
+size = Vector3(2.2839083672396145, 1, 1.4339300646500397)
+
+[sub_resource type="BoxShape3D" id="Box_266"]
+size = Vector3(2.1325820466472503, 1, 1.6571196896728515)
+
+[sub_resource type="BoxShape3D" id="Box_267"]
+size = Vector3(1.958011764249965, 1, 1.8626397143068973)
+
+[sub_resource type="BoxShape3D" id="Box_268"]
+size = Vector3(1.3165196005774553, 1, 2.3502893791854063)
+
+[sub_resource type="BoxShape3D" id="Box_269"]
+size = Vector3(1.0717882847724467, 1, 2.4635141427585565)
+
+[sub_resource type="BoxShape3D" id="Box_270"]
+size = Vector3(0.8162498441275382, 1, 2.5496150682739764)
+
+[sub_resource type="BoxShape3D" id="Box_271"]
+size = Vector3(0.5529002332182756, 1, 2.607582701102883)
+
+[sub_resource type="BoxShape3D" id="Box_272"]
+size = Vector3(0.28482698544973106, 1, 2.6367374237506715)
+
+[sub_resource type="BoxShape3D" id="Box_273"]
+size = Vector3(0.2525857497987062, 1, 2.042082822418981)
+
+[sub_resource type="BoxShape3D" id="Box_274"]
+size = Vector3(0.4565545252747768, 1, 2.019899881273941)
+
+[sub_resource type="BoxShape3D" id="Box_275"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867297)
+
+[sub_resource type="BoxShape3D" id="Box_276"]
+size = Vector3(0.8513606514572963, 1, 1.9102824999249761)
+
+[sub_resource type="BoxShape3D" id="Box_277"]
+size = Vector3(1.0375692613089362, 1, 1.8241332232932534)
+
+[sub_resource type="BoxShape3D" id="Box_278"]
+size = Vector3(1.525661124972808, 1, 1.453095434798731)
+
+[sub_resource type="BoxShape3D" id="Box_279"]
+size = Vector3(1.6584863398402923, 1, 1.296721503011946)
+
+[sub_resource type="BoxShape3D" id="Box_280"]
+size = Vector3(1.773625931595363, 1, 1.1269033100598143)
+
+[sub_resource type="BoxShape3D" id="Box_281"]
+size = Vector3(1.86972999379782, 1, 0.9456318189884506)
+
+[sub_resource type="BoxShape3D" id="Box_282"]
+size = Vector3(1.945671794187143, 1, 0.7550322722925543)
+
+[sub_resource type="BoxShape3D" id="Box_283"]
+size = Vector3(2.000560984587986, 1, 0.5573392753903029)
+
+[sub_resource type="BoxShape3D" id="Box_284"]
+size = Vector3(2.0337540394285667, 1, 0.35487059791796016)
+
+[sub_resource type="BoxShape3D" id="Box_285"]
+size = Vector3(2.0448618004896146, 1, 0.15)
+
+[sub_resource type="BoxShape3D" id="Box_286"]
+size = Vector3(2.033754039428581, 1, 0.35487059791796016)
+
+[sub_resource type="BoxShape3D" id="Box_287"]
+size = Vector3(2.000560984587979, 1, 0.5573392753903065)
+
+[sub_resource type="BoxShape3D" id="Box_288"]
+size = Vector3(1.945671794187136, 1, 0.7550322722925472)
+
+[sub_resource type="BoxShape3D" id="Box_289"]
+size = Vector3(1.8697299937978271, 1, 0.9456318189884542)
+
+[sub_resource type="BoxShape3D" id="Box_290"]
+size = Vector3(1.773625931595363, 1, 1.1269033100598143)
+
+[sub_resource type="BoxShape3D" id="Box_291"]
+size = Vector3(1.6584863398402958, 1, 1.296721503011946)
+
+[sub_resource type="BoxShape3D" id="Box_292"]
+size = Vector3(1.525661124972801, 1, 1.4530954347987275)
+
+[sub_resource type="BoxShape3D" id="Box_293"]
+size = Vector3(1.3767075411939742, 1, 1.5941917640440173)
+
+[sub_resource type="BoxShape3D" id="Box_294"]
+size = Vector3(1.2133719330840491, 1, 1.7183562652930156)
+
+[sub_resource type="BoxShape3D" id="Box_295"]
+size = Vector3(1.0375692613089398, 1, 1.82413322329325)
+
+[sub_resource type="BoxShape3D" id="Box_296"]
+size = Vector3(0.8513606514572928, 1, 1.9102824999249832)
+
+[sub_resource type="BoxShape3D" id="Box_297"]
+size = Vector3(0.6569292292274739, 1, 1.975794073686719)
+
+[sub_resource type="BoxShape3D" id="Box_298"]
+size = Vector3(0.4565545252747768, 1, 2.019899881273941)
+
+[sub_resource type="BoxShape3D" id="Box_299"]
+size = Vector3(0.2525857497987062, 1, 2.042082822418981)
+
+[sub_resource type="BoxShape3D" id="Box_300"]
+size = Vector3(0.2525857497987062, 1, 2.042082822418974)
+
+[sub_resource type="BoxShape3D" id="Box_301"]
+size = Vector3(0.4565545252747768, 1, 2.0198998812739517)
+
+[sub_resource type="BoxShape3D" id="Box_302"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867297)
+
+[sub_resource type="BoxShape3D" id="Box_303"]
+size = Vector3(0.8513606514572999, 1, 1.9102824999249761)
+
+[sub_resource type="BoxShape3D" id="Box_304"]
+size = Vector3(1.0375692613089327, 1, 1.8241332232932534)
+
+[sub_resource type="BoxShape3D" id="Box_305"]
+size = Vector3(1.213371933084042, 1, 1.718356265293005)
+
+[sub_resource type="BoxShape3D" id="Box_306"]
+size = Vector3(1.3767075411939742, 1, 1.5941917640440209)
+
+[sub_resource type="BoxShape3D" id="Box_307"]
+size = Vector3(1.5256611249728151, 1, 1.4530954347987346)
+
+[sub_resource type="BoxShape3D" id="Box_308"]
+size = Vector3(1.6584863398402887, 1, 1.296721503011939)
+
+[sub_resource type="BoxShape3D" id="Box_309"]
+size = Vector3(1.773625931595356, 1, 1.1269033100598178)
+
+[sub_resource type="BoxShape3D" id="Box_310"]
+size = Vector3(1.8697299937978271, 1, 0.9456318189884542)
+
+[sub_resource type="BoxShape3D" id="Box_311"]
+size = Vector3(1.945671794187136, 1, 0.7550322722925472)
+
+[sub_resource type="BoxShape3D" id="Box_312"]
+size = Vector3(2.000560984587986, 1, 0.5573392753903065)
+
+[sub_resource type="BoxShape3D" id="Box_313"]
+size = Vector3(2.033754039428574, 1, 0.35487059791796016)
+
+[sub_resource type="BoxShape3D" id="Box_314"]
+size = Vector3(1.9456717941871502, 1, 0.7550322722925472)
+
+[sub_resource type="BoxShape3D" id="Box_315"]
+size = Vector3(1.8697299937978342, 1, 0.9456318189884542)
+
+[sub_resource type="BoxShape3D" id="Box_316"]
+size = Vector3(1.773625931595356, 1, 1.1269033100598107)
+
+[sub_resource type="BoxShape3D" id="Box_317"]
+size = Vector3(1.6584863398402958, 1, 1.2967215030119532)
+
+[sub_resource type="BoxShape3D" id="Box_318"]
+size = Vector3(1.525661124972801, 1, 1.4530954347987275)
+
+[sub_resource type="BoxShape3D" id="Box_319"]
+size = Vector3(1.3767075411939813, 1, 1.5941917640440209)
+
+[sub_resource type="BoxShape3D" id="Box_320"]
+size = Vector3(1.213371933084042, 1, 1.718356265293005)
+
+[sub_resource type="BoxShape3D" id="Box_321"]
+size = Vector3(1.0375692613089327, 1, 1.8241332232932463)
+
+[sub_resource type="BoxShape3D" id="Box_322"]
+size = Vector3(0.8513606514572999, 1, 1.9102824999249903)
+
+[sub_resource type="BoxShape3D" id="Box_323"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867154)
+
+[sub_resource type="BoxShape3D" id="Box_324"]
+size = Vector3(0.45655452527477325, 1, 2.0198998812739375)
+
+[sub_resource type="BoxShape3D" id="Box_325"]
+size = Vector3(0.25258574979870974, 1, 2.0420828224189846)
+
+[sub_resource type="BoxShape3D" id="Box_326"]
+size = Vector3(0.2525857497987062, 1, 2.0420828224189775)
+
+[sub_resource type="BoxShape3D" id="Box_327"]
+size = Vector3(0.4565545252747768, 1, 2.0198998812739446)
+
+[sub_resource type="BoxShape3D" id="Box_328"]
+size = Vector3(0.4565545252747768, 1, 2.019899881273941)
+
+[sub_resource type="BoxShape3D" id="Box_329"]
+size = Vector3(0.2525857497987062, 1, 2.0420828224189846)
+
+[sub_resource type="BoxShape3D" id="Box_330"]
+size = Vector3(0.2525857497987062, 1, 2.0420828224189704)
+
+[sub_resource type="BoxShape3D" id="Box_331"]
+size = Vector3(0.4565545252747768, 1, 2.0198998812739517)
+
+[sub_resource type="BoxShape3D" id="Box_332"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867297)
+
+[sub_resource type="BoxShape3D" id="Box_333"]
+size = Vector3(0.8513606514572963, 1, 1.9102824999249761)
+
+[sub_resource type="BoxShape3D" id="Box_334"]
+size = Vector3(1.0375692613089362, 1, 1.8241332232932534)
+
+[sub_resource type="BoxShape3D" id="Box_335"]
+size = Vector3(1.213371933084042, 1, 1.718356265293005)
+
+[sub_resource type="BoxShape3D" id="Box_336"]
+size = Vector3(1.3767075411939742, 1, 1.5941917640440209)
+
+[sub_resource type="BoxShape3D" id="Box_337"]
+size = Vector3(1.5256611249728151, 1, 1.4530954347987346)
+
+[sub_resource type="BoxShape3D" id="Box_338"]
+size = Vector3(1.6584863398402887, 1, 1.296721503011939)
+
+[sub_resource type="BoxShape3D" id="Box_339"]
+size = Vector3(2.000560984587986, 1, 0.5573392753903065)
+
+[sub_resource type="BoxShape3D" id="Box_340"]
+size = Vector3(2.033754039428574, 1, 0.35487059791796016)
+
+[sub_resource type="BoxShape3D" id="Box_341"]
+size = Vector3(2.0448618004896004, 1, 0.15)
+
+[sub_resource type="BoxShape3D" id="Box_342"]
+size = Vector3(2.033754039428588, 1, 0.35487059791795306)
+
+[sub_resource type="BoxShape3D" id="Box_343"]
+size = Vector3(2.0005609845879717, 1, 0.5573392753903136)
+
+[sub_resource type="BoxShape3D" id="Box_344"]
+size = Vector3(1.9456717941871502, 1, 0.7550322722925472)
+
+[sub_resource type="BoxShape3D" id="Box_345"]
+size = Vector3(1.8697299937978342, 1, 0.9456318189884542)
+
+[sub_resource type="BoxShape3D" id="Box_346"]
+size = Vector3(1.773625931595356, 1, 1.1269033100598107)
+
+[sub_resource type="BoxShape3D" id="Box_347"]
+size = Vector3(1.6584863398402958, 1, 1.2967215030119532)
+
+[sub_resource type="BoxShape3D" id="Box_348"]
+size = Vector3(1.525661124972801, 1, 1.4530954347987275)
+
+[sub_resource type="BoxShape3D" id="Box_349"]
+size = Vector3(1.3767075411939813, 1, 1.5941917640440209)
+
+[sub_resource type="BoxShape3D" id="Box_350"]
+size = Vector3(1.213371933084042, 1, 1.718356265293005)
+
+[sub_resource type="BoxShape3D" id="Box_351"]
+size = Vector3(1.0375692613089327, 1, 1.8241332232932463)
+
+[sub_resource type="BoxShape3D" id="Box_352"]
+size = Vector3(0.8513606514572999, 1, 1.9102824999249903)
+
+[sub_resource type="BoxShape3D" id="Box_353"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867154)
+
+[sub_resource type="BoxShape3D" id="Box_354"]
+size = Vector3(0.4565545252747768, 1, 2.0198998812739375)
+
+[sub_resource type="BoxShape3D" id="Box_355"]
+size = Vector3(0.2525857497987062, 1, 2.0420828224189846)
+
+[sub_resource type="BoxShape3D" id="Box_356"]
+size = Vector3(0.2525857497987062, 1, 2.0420828224189775)
+
+[sub_resource type="BoxShape3D" id="Box_357"]
+size = Vector3(0.4565545252747768, 1, 2.0198998812739446)
+
+[sub_resource type="BoxShape3D" id="Box_358"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867297)
+
+[sub_resource type="BoxShape3D" id="Box_359"]
+size = Vector3(0.8513606514572963, 1, 1.9102824999249761)
+
+[sub_resource type="BoxShape3D" id="Box_360"]
+size = Vector3(1.0375692613089362, 1, 1.8241332232932534)
+
+[sub_resource type="BoxShape3D" id="Box_361"]
+size = Vector3(1.2133719330840456, 1, 1.718356265293012)
+
+[sub_resource type="BoxShape3D" id="Box_362"]
+size = Vector3(1.3767075411939742, 1, 1.5941917640440137)
+
+[sub_resource type="BoxShape3D" id="Box_363"]
+size = Vector3(1.525661124972808, 1, 1.4530954347987346)
+
+[sub_resource type="BoxShape3D" id="Box_364"]
+size = Vector3(1.6584863398402923, 1, 1.296721503011946)
+
+[sub_resource type="BoxShape3D" id="Box_365"]
+size = Vector3(1.773625931595363, 1, 1.1269033100598107)
+
+[sub_resource type="BoxShape3D" id="Box_366"]
+size = Vector3(2.0337540394285667, 1, 0.35487059791796016)
+
+[sub_resource type="BoxShape3D" id="Box_367"]
+size = Vector3(2.0448618004896146, 1, 0.15)
+
+[sub_resource type="BoxShape3D" id="Box_368"]
+size = Vector3(2.033754039428581, 1, 0.35487059791796016)
+
+[sub_resource type="BoxShape3D" id="Box_369"]
+size = Vector3(2.000560984587979, 1, 0.5573392753903065)
+
+[sub_resource type="BoxShape3D" id="Box_370"]
+size = Vector3(1.945671794187136, 1, 0.7550322722925472)
+
+[sub_resource type="BoxShape3D" id="Box_371"]
+size = Vector3(1.8697299937978271, 1, 0.9456318189884542)
+
+[sub_resource type="BoxShape3D" id="Box_372"]
+size = Vector3(1.773625931595363, 1, 1.1269033100598107)
+
+[sub_resource type="BoxShape3D" id="Box_373"]
+size = Vector3(1.6584863398402958, 1, 1.296721503011946)
+
+[sub_resource type="BoxShape3D" id="Box_374"]
+size = Vector3(1.525661124972801, 1, 1.4530954347987346)
+
+[sub_resource type="BoxShape3D" id="Box_375"]
+size = Vector3(1.3767075411939742, 1, 1.5941917640440137)
+
+[sub_resource type="BoxShape3D" id="Box_376"]
+size = Vector3(1.2133719330840491, 1, 1.718356265293012)
+
+[sub_resource type="BoxShape3D" id="Box_377"]
+size = Vector3(1.0375692613089398, 1, 1.8241332232932534)
+
+[sub_resource type="BoxShape3D" id="Box_378"]
+size = Vector3(1.773625931595356, 1, 1.1269033100598107)
+
+[sub_resource type="BoxShape3D" id="Box_379"]
+size = Vector3(1.6584863398402958, 1, 1.2967215030119532)
+
+[sub_resource type="BoxShape3D" id="Box_380"]
+size = Vector3(1.0375692613089327, 1, 1.8241332232932463)
+
+[sub_resource type="BoxShape3D" id="Box_381"]
+size = Vector3(0.8513606514572999, 1, 1.9102824999249868)
+
+[sub_resource type="BoxShape3D" id="Box_382"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867226)
+
+[sub_resource type="BoxShape3D" id="Box_383"]
+size = Vector3(0.45655452527477325, 1, 2.019899881273934)
+
+[sub_resource type="BoxShape3D" id="Box_384"]
+size = Vector3(0.25258574979870974, 1, 2.0420828224189846)
+
+[sub_resource type="BoxShape3D" id="Box_385"]
+size = Vector3(0.2525857497987062, 1, 2.0420828224189775)
+
+[sub_resource type="BoxShape3D" id="Box_386"]
+size = Vector3(0.4565545252747768, 1, 2.0198998812739446)
+
+[sub_resource type="BoxShape3D" id="Box_387"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867297)
+
+[sub_resource type="BoxShape3D" id="Box_388"]
+size = Vector3(0.8513606514572999, 1, 1.9102824999249761)
+
+[sub_resource type="BoxShape3D" id="Box_389"]
+size = Vector3(1.0375692613089327, 1, 1.8241332232932534)
+
+[sub_resource type="BoxShape3D" id="Box_390"]
+size = Vector3(1.2133719330840491, 1, 1.718356265293012)
+
+[sub_resource type="BoxShape3D" id="Box_391"]
+size = Vector3(1.3767075411939742, 1, 1.5941917640440137)
+
+[sub_resource type="BoxShape3D" id="Box_392"]
+size = Vector3(1.525661124972808, 1, 1.4530954347987346)
+
+[sub_resource type="BoxShape3D" id="Box_393"]
+size = Vector3(1.6584863398402887, 1, 1.296721503011946)
+
+[sub_resource type="BoxShape3D" id="Box_394"]
+size = Vector3(1.773625931595363, 1, 1.1269033100598107)
+
+[sub_resource type="BoxShape3D" id="Box_395"]
+size = Vector3(1.86972999379782, 1, 0.9456318189884542)
+
+[sub_resource type="BoxShape3D" id="Box_396"]
+size = Vector3(1.945671794187143, 1, 0.7550322722925472)
+
+[sub_resource type="BoxShape3D" id="Box_397"]
+size = Vector3(2.000560984587986, 1, 0.5573392753903065)
+
+[sub_resource type="BoxShape3D" id="Box_398"]
+size = Vector3(2.0337540394285667, 1, 0.35487059791796016)
+
+[sub_resource type="BoxShape3D" id="Box_399"]
+size = Vector3(2.0448618004896146, 1, 0.15)
+
+[sub_resource type="BoxShape3D" id="Box_400"]
+size = Vector3(2.033754039428581, 1, 0.35487059791796016)
+
+[sub_resource type="BoxShape3D" id="Box_401"]
+size = Vector3(1.6584863398402958, 1, 1.296721503011946)
+
+[sub_resource type="BoxShape3D" id="Box_402"]
+size = Vector3(1.5256611249727974, 1, 1.4530954347987346)
+
+[sub_resource type="BoxShape3D" id="Box_403"]
+size = Vector3(1.3767075411939778, 1, 1.5941917640440137)
+
+[sub_resource type="BoxShape3D" id="Box_404"]
+size = Vector3(1.2133719330840491, 1, 1.718356265293012)
+
+[sub_resource type="BoxShape3D" id="Box_405"]
+size = Vector3(1.0375692613089398, 1, 1.8241332232932534)
+
+[sub_resource type="BoxShape3D" id="Box_406"]
+size = Vector3(0.8513606514572928, 1, 1.9102824999249832)
+
+[sub_resource type="BoxShape3D" id="Box_407"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867226)
+
+[sub_resource type="BoxShape3D" id="Box_408"]
+size = Vector3(0.4565545252747768, 1, 2.0198998812739375)
+
+[sub_resource type="BoxShape3D" id="Box_409"]
+size = Vector3(0.2525857497987062, 1, 2.0420828224189846)
+
+[sub_resource type="BoxShape3D" id="Box_410"]
+size = Vector3(0.2525857497987062, 1, 2.0420828224189704)
+
+[sub_resource type="BoxShape3D" id="Box_411"]
+size = Vector3(0.4565545252747768, 1, 2.019899881273948)
+
+[sub_resource type="BoxShape3D" id="Box_412"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867297)
+
+[sub_resource type="BoxShape3D" id="Box_413"]
+size = Vector3(0.8513606514572963, 1, 1.9102824999249797)
+
+[sub_resource type="BoxShape3D" id="Box_414"]
+size = Vector3(1.0375692613089362, 1, 1.8241332232932534)
+
+[sub_resource type="BoxShape3D" id="Box_415"]
+size = Vector3(1.6584863398402887, 1, 1.296721503011939)
+
+[sub_resource type="BoxShape3D" id="Box_416"]
+size = Vector3(1.773625931595356, 1, 1.1269033100598143)
+
+[sub_resource type="BoxShape3D" id="Box_417"]
+size = Vector3(1.8697299937978271, 1, 0.9456318189884542)
+
+[sub_resource type="BoxShape3D" id="Box_418"]
+size = Vector3(1.945671794187136, 1, 0.7550322722925508)
+
+[sub_resource type="BoxShape3D" id="Box_419"]
+size = Vector3(2.000560984587986, 1, 0.5573392753903065)
+
+[sub_resource type="BoxShape3D" id="Box_420"]
+size = Vector3(2.033754039428574, 1, 0.35487059791796016)
+
+[sub_resource type="BoxShape3D" id="Box_421"]
+size = Vector3(2.0448618004896004, 1, 0.15)
+
+[sub_resource type="BoxShape3D" id="Box_422"]
+size = Vector3(2.033754039428588, 1, 0.3548705979179566)
+
+[sub_resource type="BoxShape3D" id="Box_423"]
+size = Vector3(2.0005609845879717, 1, 0.5573392753903065)
+
+[sub_resource type="BoxShape3D" id="Box_424"]
+size = Vector3(1.9456717941871502, 1, 0.7550322722925508)
+
+[sub_resource type="BoxShape3D" id="Box_425"]
+size = Vector3(1.8697299937978342, 1, 0.9456318189884542)
+
+[sub_resource type="BoxShape3D" id="Box_426"]
+size = Vector3(1.773625931595356, 1, 1.1269033100598107)
+
+[sub_resource type="BoxShape3D" id="Box_427"]
+size = Vector3(1.6584863398402958, 1, 1.2967215030119532)
+
+[sub_resource type="BoxShape3D" id="Box_428"]
+size = Vector3(1.525661124972801, 1, 1.4530954347987275)
+
+[sub_resource type="BoxShape3D" id="Box_429"]
+size = Vector3(1.3767075411939813, 1, 1.5941917640440209)
+
+[sub_resource type="BoxShape3D" id="Box_430"]
+size = Vector3(1.213371933084042, 1, 1.718356265293005)
+
+[sub_resource type="BoxShape3D" id="Box_431"]
+size = Vector3(1.0375692613089327, 1, 1.8241332232932463)
+
+[sub_resource type="BoxShape3D" id="Box_432"]
+size = Vector3(0.8513606514572999, 1, 1.9102824999249868)
+
+[sub_resource type="BoxShape3D" id="Box_433"]
+size = Vector3(0.6569292292274739, 1, 1.9757940736867226)
+
+[sub_resource type="BoxShape3D" id="Box_434"]
+size = Vector3(0.4565545252747768, 1, 2.019899881273934)
+
+[sub_resource type="BoxShape3D" id="Box_435"]
+size = Vector3(0.2525857497987062, 1, 2.0420828224189846)
+
+[sub_resource type="BoxShape3D" id="Box_436"]
+size = Vector3(0.8, 2.8, 0.9)
+
+[sub_resource type="BoxShape3D" id="Box_437"]
+size = Vector3(0.8, 2.8, 0.9)
+
+[sub_resource type="Shader" id="BeaconShader"]
+code = "shader_type spatial; render_mode unshaded, blend_add, cull_disabled, depth_draw_never; varying float beam_fade; void vertex(){ beam_fade=clamp((VERTEX.y+14.0)/28.0,0.0,1.0); } void fragment(){ ALBEDO=vec3(0.9,0.82,0.65); ALPHA=0.024*beam_fade*beam_fade; }"
+
+[sub_resource type="ShaderMaterial" id="BeamMaterial"]
+shader = SubResource("BeaconShader")
+
+[sub_resource type="CylinderMesh" id="BeamMesh"]
+material = SubResource("BeamMaterial")
+top_radius = 0.12
+bottom_radius = 4.0
+height = 28.0
+radial_segments = 24
+cap_top = false
+cap_bottom = false
+
+[node name="ReferenceGardens" type="Node3D"]
+script = ExtResource("2_water_cleanup")
+
+[node name="BlenderAuthoredDetails" parent="." instance=ExtResource("1_garden")]
+
+[node name="GardenObstacles" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 2
+
+[node name="Obstacle_0" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-63.48368634958424, 8.058525085449219, -12.360337677575458)
+shape = SubResource("Box_0")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_1" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(11.16464700634252, 3.3018035888671875, -23.28287827175187)
+shape = SubResource("Box_1")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_2" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(72.58663570084997, 3.7733840942382812, -15.096609153221436)
+shape = SubResource("Box_2")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_3" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(36.28117378988671, 3.2487564086914062, -11.122433227545585)
+shape = SubResource("Box_3")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_4" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(13.81999550529548, 5.832954406738281, -51.40011586228478)
+shape = SubResource("Box_4")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_5" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-71.98992217518867, 7.2839508056640625, -20.732561877996346)
+shape = SubResource("Box_5")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_6" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(18.69193399844829, 5.173164367675781, 19.876307665362887)
+shape = SubResource("Box_6")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_7" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(22.49453559496392, 6.6399383544921875, 30.002740351081464)
+shape = SubResource("Box_7")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_8" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(53.64974343385012, 6.1605072021484375, 5.131879689241131)
+shape = SubResource("Box_8")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_9" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-28.088360223653268, 2.9822235107421875, -5.546691952408793)
+shape = SubResource("Box_9")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_10" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(7.554398665185317, 3.7745819091796875, -26.345440498963512)
+shape = SubResource("Box_10")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_11" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-79.28530629900108, 9.021438598632812, -13.93076561997978)
+shape = SubResource("Box_11")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_12" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(9.779787527558355, 3.7840194702148438, 46.04844843103248)
+shape = SubResource("Box_12")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_13" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(9.694691712032025, 5.008445739746094, 38.32285354786575)
+shape = SubResource("Box_13")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_14" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(62.785393711911894, 6.39593505859375, 11.66946765613769)
+shape = SubResource("Box_14")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_15" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(6.188929110583018, 4.7188873291015625, -32.70268966439279)
+shape = SubResource("Box_15")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_16" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(55.571633563681075, 5.133064270019531, -7.47820570931097)
+shape = SubResource("Box_16")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_17" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(24.54723892133741, 4.51177978515625, 10.407021403967079)
+shape = SubResource("Box_17")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_18" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(75.61975921101549, 7.001960754394531, 8.75149780139163)
+shape = SubResource("Box_18")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_19" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-12.207500173655092, 3.6429061889648438, 47.93660069120135)
+shape = SubResource("Box_19")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_20" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-8.121317254755866, 5.491485595703125, -41.963434143034476)
+shape = SubResource("Box_20")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_21" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-11.547769929438417, 4.081428527832031, 43.04327923707338)
+shape = SubResource("Box_21")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_22" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-33.58674308181527, 3.72369384765625, -7.108132774836633)
+shape = SubResource("Box_22")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_23" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-65.34851815443221, 2.4650650024414062, 37.3050351799958)
+shape = SubResource("Box_23")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_24" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-13.600172796542083, 4.63702392578125, -28.426557412121753)
+shape = SubResource("Box_24")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_25" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-82.25888762164321, 3.8926010131835938, 8.577430354221185)
+shape = SubResource("Box_25")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_26" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-66.58828271625563, 6.0328826904296875, -33.803919377118504)
+shape = SubResource("Box_26")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_27" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-22.422093092459207, 4.8273773193359375, 22.82594216649869)
+shape = SubResource("Box_27")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_28" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(65.72652968478937, 4.597991943359375, 28.79531653039812)
+shape = SubResource("Box_28")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_29" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-61.93796995848194, 3.0473098754882812, 17.67151214875902)
+shape = SubResource("Box_29")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_30" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(28.740751248656764, 2.9569549560546875, -15.365548975821369)
+shape = SubResource("Box_30")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_31" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(18.08450019476949, 4.698005676269531, -40.57099416723878)
+shape = SubResource("Box_31")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_32" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-37.41517038671169, 3.8422927856445312, -3.2094386434019526)
+shape = SubResource("Box_32")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_33" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(72.6517320953651, 5.8070220947265625, 11.81181017633439)
+shape = SubResource("Box_33")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_34" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-20.83317321333289, 4.818046569824219, 42.33396335702865)
+shape = SubResource("Box_34")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_35" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-12.374061160780599, 6.895195007324219, 37.94210139407136)
+shape = SubResource("Box_35")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_36" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-63.969184995297056, 4.895500183105469, 1.0337069216787)
+shape = SubResource("Box_36")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_37" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(73.192211477804, 7.616302490234375, 4.949388989050576)
+shape = SubResource("Box_37")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_38" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(19.530314452830197, 7.205108642578125, -49.31535923265835)
+shape = SubResource("Box_38")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_39" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(67.86542534657013, 2.2732315063476562, -29.157398061948783)
+shape = SubResource("Box_39")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_40" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-63.313591173486735, 3.7527618408203125, 7.29378976065923)
+shape = SubResource("Box_40")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_41" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(52.799413847898165, 6.5960845947265625, 12.805454466371138)
+shape = SubResource("Box_41")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_42" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(25.467064891211493, 2.7995758056640625, 57.93302343597995)
+shape = SubResource("Box_42")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_43" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-21.033710496573143, 6.9996185302734375, 36.632608749605026)
+shape = SubResource("Box_43")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_44" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-76.81254928311479, 7.558631896972656, 4.479774332817378)
+shape = SubResource("Box_44")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_45" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(11.1394804706961, 5.291557312011719, -39.83937407800671)
+shape = SubResource("Box_45")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_46" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-9.746481262347345, 5.50067138671875, -44.790672899118476)
+shape = SubResource("Box_46")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_47" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-41.278627488566045, 5.971244812011719, -11.677264393702004)
+shape = SubResource("Box_47")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_48" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(66.2545944301379, 2.6363601684570312, -26.163411546674723)
+shape = SubResource("Box_48")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_49" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(79.87755086400463, 10.794692993164062, 5.351814033573319)
+shape = SubResource("Box_49")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_50" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-18.29048180010176, 5.182334899902344, -29.8178706423911)
+shape = SubResource("Box_50")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_51" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(63.870597382083304, 4.1009063720703125, -16.38620400595687)
+shape = SubResource("Box_51")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_52" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-8.35316244952105, 3.5597763061523438, -25.562464217513423)
+shape = SubResource("Box_52")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_53" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(16.99809558237014, 3.449249267578125, -25.3622287758931)
+shape = SubResource("Box_53")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_54" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-44.0308465692237, 4.253875732421875, -0.5812328664815212)
+shape = SubResource("Box_54")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_55" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-19.569726448838367, 4.650260925292969, -44.71467796719823)
+shape = SubResource("Box_55")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_56" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-72.28920480141666, 6.7632293701171875, -26.763286914428818)
+shape = SubResource("Box_56")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_57" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(62.704787656391545, 2.7780227661132812, -26.681730699717804)
+shape = SubResource("Box_57")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_58" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-10.288463779734329, 4.685211181640625, 29.526893146943426)
+shape = SubResource("Box_58")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_59" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(71.51650323145947, 4.34210205078125, 24.18255464504614)
+shape = SubResource("Box_59")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_60" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(78.02017840615497, 4.518463134765625, -11.453571337682448)
+shape = SubResource("Box_60")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_61" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(64.11118240962139, 6.056312561035156, 0.8749738864104799)
+shape = SubResource("Box_61")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_62" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(18.96676547158131, 4.1336517333984375, -33.07060670613946)
+shape = SubResource("Box_62")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_63" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-28.987394544370233, 3.0882339477539062, 4.330220384527188)
+shape = SubResource("Box_63")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_64" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-81.1707660843986, 8.876602172851562, 4.338119762394491)
+shape = SubResource("Box_64")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_65" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(71.35074493113808, 2.700439453125, -23.524468652436653)
+shape = SubResource("Box_65")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_66" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(41.97605772489564, 4.258628845214844, -4.369768389812997)
+shape = SubResource("Box_66")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_67" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-74.99782132414886, 2.6654434204101562, 11.752581115545318)
+shape = SubResource("Box_67")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_68" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(68.44303932837238, 2.982421875, -22.316811802389083)
+shape = SubResource("Box_68")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_69" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-49.87027579803391, 6.2370147705078125, -5.206095258726776)
+shape = SubResource("Box_69")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_70" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-69.76124447916243, 2.6040802001953125, 18.327148370678245)
+shape = SubResource("Box_70")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_71" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-64.59112957466287, 2.6814956665039062, 33.928566487543065)
+shape = SubResource("Box_71")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_72" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-32.75019123809892, 3.5455551147460938, 8.103001800915365)
+shape = SubResource("Box_72")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_73" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-36.55814145420835, 2.8679733276367188, 55.2885513446723)
+shape = SubResource("Box_73")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_74" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-7.2836643879617355, 3.1604766845703125, 51.38426125095947)
+shape = SubResource("Box_74")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_75" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(37.414501264209065, 5.53948974609375, 10.281294285035727)
+shape = SubResource("Box_75")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_76" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-68.07909847767635, 2.5212936401367188, 28.382404330858968)
+shape = SubResource("Box_76")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_77" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-44.31478883183492, 6.515800476074219, -12.601541759552049)
+shape = SubResource("Box_77")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_78" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(7.3109378959312465, 3.9319076538085938, 43.239036543487195)
+shape = SubResource("Box_78")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_79" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-67.42762656420004, 3.4143218994140625, 8.573359134457021)
+shape = SubResource("Box_79")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_80" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-65.83482133424776, 6.1466064453125, -3.8963485525394574)
+shape = SubResource("Box_80")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_81" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(27.663489006009996, 3.0597000122070312, -5.884821806014401)
+shape = SubResource("Box_81")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_82" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(49.97833105847474, 5.515960693359375, 0.8632568937350342)
+shape = SubResource("Box_82")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_83" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(66.38513007046086, 3.7047042846679688, 34.18105288867229)
+shape = SubResource("Box_83")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_84" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(75.19111480130988, 4.932014465332031, 16.5880714461997)
+shape = SubResource("Box_84")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_85" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.154172476459905, 3.4311065673828125, -14.125169938910659)
+shape = SubResource("Box_85")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_86" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(60.51114891826191, 6.418525695800781, 6.564995191572741)
+shape = SubResource("Box_86")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_87" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(55.405425180613236, 4.403556823730469, -13.99825431492988)
+shape = SubResource("Box_87")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_88" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.41063963424157, 2.944427490234375, 56.06801540825368)
+shape = SubResource("Box_88")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_89" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(48.24501319543609, 5.913215637207031, 6.394162207303843)
+shape = SubResource("Box_89")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_90" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(20.923719637115028, 3.7802276611328125, -29.07263361803149)
+shape = SubResource("Box_90")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_91" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-13.960732032147192, 2.4861297607421875, 58.638745855601734)
+shape = SubResource("Box_91")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_92" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(69.05250871946106, 4.401573181152344, 26.411587521444496)
+shape = SubResource("Box_92")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_93" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(16.90513543866612, 5.0732421875, -44.59208026124746)
+shape = SubResource("Box_93")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_94" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-51.25231336887296, 3.6471023559570312, 11.417336642922137)
+shape = SubResource("Box_94")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_95" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-76.67991947072309, 2.1919631958007812, 16.898506756932377)
+shape = SubResource("Box_95")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_96" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(69.20636378768114, 5.228706359863281, -5.642471183639714)
+shape = SubResource("Box_96")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_97" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(67.31717385431716, 6.203651428222656, 2.992678540886679)
+shape = SubResource("Box_97")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_98" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-55.188253018011096, 7.0392913818359375, -7.559248940382801)
+shape = SubResource("Box_98")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_99" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-27.525736014692512, 3.3893051147460938, 9.099909572495456)
+shape = SubResource("Box_99")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_100" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-72.50477156441927, 2.522003173828125, 16.65739687549084)
+shape = SubResource("Box_100")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_101" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-35.02114073128826, 3.5406341552734375, -0.3523823323320556)
+shape = SubResource("Box_101")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_102" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-49.6550209628976, 7.112724304199219, -11.31880179779779)
+shape = SubResource("Box_102")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_103" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(55.505688974357895, 3.8133163452148438, -19.362207260352648)
+shape = SubResource("Box_103")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_104" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(49.50279458154637, 6.271476745605469, 9.299302291718128)
+shape = SubResource("Box_104")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_105" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(48.785898623901204, 4.97149658203125, -3.366933329342629)
+shape = SubResource("Box_105")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_106" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-32.16159593167758, 3.0734329223632812, 54.88156642663211)
+shape = SubResource("Box_106")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_107" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(73.61858319258926, 4.740325927734375, -9.708405373385418)
+shape = SubResource("Box_107")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_108" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-25.320807457725827, 2.929901123046875, 4.241308555403165)
+shape = SubResource("Box_108")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_109" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-45.00624362426786, 3.8047103881835938, 8.120090970874521)
+shape = SubResource("Box_109")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_110" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.082135479337403, 4.1260986328125, -48.55961665140855)
+shape = SubResource("Box_110")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_111" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(7.910769009241008, 5.737709045410156, -42.94099828481602)
+shape = SubResource("Box_111")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_112" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(23.301421246630824, 9.280464172363281, -50.44256489162157)
+shape = SubResource("Box_112")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_113" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-33.83435984821824, 2.8656005859375, -55.752809444699466)
+shape = SubResource("Box_113")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_114" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-7.822505744576262, 4.18145751953125, 26.557181326531534)
+shape = SubResource("Box_114")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_115" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-12.890534664876085, 4.413612365722656, 25.683187708347305)
+shape = SubResource("Box_115")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_116" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(32.58487382125416, 3.7324295043945312, 53.78150335681796)
+shape = SubResource("Box_116")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_117" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-57.08141517446575, 3.3379440307617188, 16.3669991577857)
+shape = SubResource("Box_117")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_118" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(65.28725363775587, 2.0156478881835938, -34.1611998969657)
+shape = SubResource("Box_118")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_119" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(65.96777244589867, 5.271636962890625, 23.391571653049546)
+shape = SubResource("Box_119")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_120" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(22.428983704945963, 6.070098876953125, 24.130463415345154)
+shape = SubResource("Box_120")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_121" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(67.25753522128164, 3.5809326171875, -18.279845850019797)
+shape = SubResource("Box_121")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_122" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-22.812731472736033, 4.548423767089844, -46.34092412078928)
+shape = SubResource("Box_122")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_123" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(50.071632227365825, 3.9478073120117188, -15.821918515516657)
+shape = SubResource("Box_123")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_124" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(21.386376858089733, 3.21429443359375, -22.99685937003514)
+shape = SubResource("Box_124")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_125" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-18.35364760138293, 2.814666748046875, 56.631259620000364)
+shape = SubResource("Box_125")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_126" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-60.447959364859116, 8.77142333984375, -17.53709714483483)
+shape = SubResource("Box_126")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_127" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(7.103522167913553, 4.695777893066406, 33.22599367680881)
+shape = SubResource("Box_127")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_128" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(61.93463245254324, 6.211090087890625, 16.875747402769726)
+shape = SubResource("Box_128")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_129" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-30.061614110683102, 3.9412841796875, -16.458761591630534)
+shape = SubResource("Box_129")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_130" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-19.294461719052464, 7.743598937988281, -33.468497762891076)
+shape = SubResource("Box_130")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_131" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(16.64453396602339, 4.493743896484375, -36.0497989534023)
+shape = SubResource("Box_131")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_132" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(16.694712869162984, 3.8148422241210938, -29.34575554357731)
+shape = SubResource("Box_132")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_133" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-60.56230961708049, 6.943145751953125, -6.751118720489558)
+shape = SubResource("Box_133")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_134" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-48.49601094913424, 3.9074554443359375, 5.207483703074544)
+shape = SubResource("Box_134")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_135" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-17.588517170821916, 9.332908630371094, -36.16423905483306)
+shape = SubResource("Box_135")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_136" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-57.68606514596671, 8.258346557617188, -13.573461680341936)
+shape = SubResource("Box_136")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_137" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-67.79189030897982, 7.788200378417969, -10.7683907176244)
+shape = SubResource("Box_137")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_138" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-15.751735499620153, 4.2454986572265625, 21.169962997582402)
+shape = SubResource("Box_138")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_139" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(42.95883673618772, 3.73590087890625, -10.842308957963766)
+shape = SubResource("Box_139")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_140" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(71.11399286391847, 2.353485107421875, -26.7486137958431)
+shape = SubResource("Box_140")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_141" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(41.76003370211723, 6.059394836425781, 11.874178903834938)
+shape = SubResource("Box_141")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_142" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-7.505765521511606, 5.357170104980469, -35.672245988777675)
+shape = SubResource("Box_142")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_143" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(50.86565255807301, 4.833244323730469, -6.726528920665601)
+shape = SubResource("Box_143")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_144" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(28.82144148565726, 5.7172393798828125, 15.69070164830957)
+shape = SubResource("Box_144")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_145" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-58.6791540988945, 6.287696838378906, -4.239564599199149)
+shape = SubResource("Box_145")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_146" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-47.02600703422546, 4.207649230957031, 1.2985673992028097)
+shape = SubResource("Box_146")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_147" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(40.302970271693525, 4.867622375488281, 2.277937097853467)
+shape = SubResource("Box_147")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_148" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(69.0576664343221, 5.655693054199219, 17.154157460696176)
+shape = SubResource("Box_148")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_149" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(57.74268063475594, 6.420372009277344, 18.17697261775202)
+shape = SubResource("Box_149")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_150" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(13.08376512622587, 4.0018768310546875, -29.66281894875688)
+shape = SubResource("Box_150")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_151" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(63.398782460777966, 6.327354431152344, 4.809157031703556)
+shape = SubResource("Box_151")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_152" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-65.3087515402714, 8.219932556152344, -23.395161248314466)
+shape = SubResource("Box_152")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_153" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-71.23754905966373, 8.046981811523438, -1.0213946053614151)
+shape = SubResource("Box_153")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_154" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-10.675417033372696, 6.017646789550781, 33.88832865732199)
+shape = SubResource("Box_154")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_155" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-64.5002848021362, 4.6493072509765625, -39.50374389612938)
+shape = SubResource("Box_155")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_156" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(33.86241505585595, 4.6621246337890625, 5.6177465923206995)
+shape = SubResource("Box_156")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_157" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(20.863838091407416, 4.5158233642578125, 46.907969449148055)
+shape = SubResource("Box_157")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_158" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(38.66390056955245, 5.128593444824219, 6.092266542714718)
+shape = SubResource("Box_158")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_159" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(9.580361891616562, 2.3737564086914062, 58.563012644813035)
+shape = SubResource("Box_159")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_160" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-75.0226386925413, 6.610076904296875, -23.957620674208442)
+shape = SubResource("Box_160")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_161" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-30.096366377137713, 3.6600799560546875, 11.097352879098217)
+shape = SubResource("Box_161")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_162" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-64.44347938515818, 7.323966979980469, -28.779237044899915)
+shape = SubResource("Box_162")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_163" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-66.94233393245369, 7.244773864746094, -7.6421623593455195)
+shape = SubResource("Box_163")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_164" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(30.789224308412926, 2.944854736328125, 57.49124270496529)
+shape = SubResource("Box_164")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_165" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-11.264623002888698, 6.07745361328125, -39.75060164670627)
+shape = SubResource("Box_165")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_166" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(18.051381234114743, 8.073844909667969, -58.62596635596543)
+shape = SubResource("Box_166")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_167" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(19.336722499674337, 2.6774749755859375, 57.88244606151529)
+shape = SubResource("Box_167")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_168" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(13.289164326463577, 5.402679443359375, -44.910601943409404)
+shape = SubResource("Box_168")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_169" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-66.30553574066113, 2.7252426147460938, 21.186288417472646)
+shape = SubResource("Box_169")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_170" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-19.951024976076397, 4.50103759765625, 21.113819586545056)
+shape = SubResource("Box_170")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_171" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(71.38334552422202, 6.344047546386719, -0.6781796806272524)
+shape = SubResource("Box_171")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_172" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-76.47398085838854, 4.227806091308594, 7.77144580639856)
+shape = SubResource("Box_172")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_173" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(36.33517607771921, 3.4593429565429688, -7.938207956415397)
+shape = SubResource("Box_173")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_174" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(77.93751444196423, 8.193870544433594, -5.379941738294875)
+shape = SubResource("Box_174")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_175" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(52.132335059741024, 4.616096496582031, -11.074070172025884)
+shape = SubResource("Box_175")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_176" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(79.86937344725345, 10.929855346679688, -2.385379066791252)
+shape = SubResource("Box_176")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_177" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(33.95275915005709, 3.133270263671875, -15.424434151690278)
+shape = SubResource("Box_177")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_178" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-17.813447258963322, 4.122322082519531, 45.7453217079868)
+shape = SubResource("Box_178")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_179" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(43.92702196680746, 3.673095703125, -14.26094168471738)
+shape = SubResource("Box_179")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_180" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(27.97582979413761, 4.728057861328125, 9.859807766034763)
+shape = SubResource("Box_180")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_181" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-69.60711484005151, 2.4521331787109375, 25.29621150807626)
+shape = SubResource("Box_181")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_182" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(71.93545874452772, 1.9865875244140625, -30.421501020096528)
+shape = SubResource("Box_182")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_183" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-63.50186813977806, 2.9026031494140625, 25.131947552153136)
+shape = SubResource("Box_183")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_184" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-10.05433094467432, 5.72601318359375, -31.800998263218688)
+shape = SubResource("Box_184")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_185" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(21.619502066590343, 6.311576843261719, 39.43859733875037)
+shape = SubResource("Box_185")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_186" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(24.575986191628772, 4.008331298828125, 7.014757453606073)
+shape = SubResource("Box_186")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_187" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(15.58407250448822, 2.4857330322265625, 58.54841853566131)
+shape = SubResource("Box_187")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_188" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(45.788238953773714, 4.3860321044921875, -6.424608150211057)
+shape = SubResource("Box_188")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_189" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-62.01371526405665, 5.7606964111328125, -2.3574898180952886)
+shape = SubResource("Box_189")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_190" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-17.340342652639947, 9.229248046875, 36.18616270114699)
+shape = SubResource("Box_190")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_191" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-40.27156487936762, 3.9002761840820312, 11.089213328010437)
+shape = SubResource("Box_191")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_192" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-53.84739335197712, 7.4434356689453125, -10.311512570821947)
+shape = SubResource("Box_192")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_193" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-55.6926393580832, 3.6960906982421875, 8.780587725236202)
+shape = SubResource("Box_193")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_194" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(16.21951954582312, 3.77630615234375, 50.0113842605687)
+shape = SubResource("Box_194")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_195" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-39.01256032690732, 4.932624816894531, -7.145970623069118)
+shape = SubResource("Box_195")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_196" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(67.87257034984304, 6.127311706542969, 11.910375802553816)
+shape = SubResource("Box_196")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_197" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-67.45893290373486, 4.455818176269531, 3.0953751150740345)
+shape = SubResource("Box_197")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_198" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-55.35895999754693, 4.582855224609375, 2.0309434723542665)
+shape = SubResource("Box_198")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_199" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.810592975195163, 2.8147659301757812, -1.9198699786089506)
+shape = SubResource("Box_199")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_200" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-29.033724620631943, 4.388580322265625, 17.365936946367817)
+shape = SubResource("Box_200")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_201" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-25.21672128774906, 4.59051513671875, 44.334184821657956)
+shape = SubResource("Box_201")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_202" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-23.16602033747487, 5.1621246337890625, 39.04735391730159)
+shape = SubResource("Box_202")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_203" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(30.709276170581347, 6.240150451660156, 18.193720027667993)
+shape = SubResource("Box_203")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_204" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-17.62059152653461, 6.889678955078125, 39.9700128427107)
+shape = SubResource("Box_204")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_205" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(39.238074945144476, 3.6354293823242188, 53.64928053088448)
+shape = SubResource("Box_205")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_206" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(7.532404886615993, 4.508125305175781, 26.245191091182868)
+shape = SubResource("Box_206")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_207" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-9.614577222509936, 7.602546691894531, -50.28415754095694)
+shape = SubResource("Box_207")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_208" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-58.80149796529729, 7.692863464355469, -10.05496470893415)
+shape = SubResource("Box_208")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_209" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(45.42959186624043, 6.126243591308594, 10.36758898034762)
+shape = SubResource("Box_209")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_210" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(37.139682048742884, 3.7793426513671875, -4.829332476155088)
+shape = SubResource("Box_210")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_211" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(75.14765477977133, 3.8499984741210938, 23.90130511471184)
+shape = SubResource("Box_211")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_212" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(14.393214938301668, 3.1522979736328125, -21.744829645827238)
+shape = SubResource("Box_212")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_213" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-68.46268840621617, 7.704963684082031, -14.593860944528032)
+shape = SubResource("Box_213")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_214" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-23.423805257454774, 3.7033309936523438, -23.390246332862816)
+shape = SubResource("Box_214")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_215" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(77.81980955923277, 10.716949462890625, 1.1646168477996426)
+shape = SubResource("Box_215")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_216" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-69.59263840994896, 2.2753372192382812, 32.23708260866334)
+shape = SubResource("Box_216")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_217" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(38.8864510772019, 4.203880310058594, -2.1678429758308155)
+shape = SubResource("Box_217")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_218" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-74.42983235526005, 2.0266876220703125, 27.102285857299442)
+shape = SubResource("Box_218")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_219" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-16.099432381255582, 6.476814270019531, 29.668088382350017)
+shape = SubResource("Box_219")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_220" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(32.1189552825483, 3.0804901123046875, -10.474828849287206)
+shape = SubResource("Box_220")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_221" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-51.2519988621696, 4.114036560058594, 3.6265001118555915)
+shape = SubResource("Box_221")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_222" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-52.83727361836418, 8.106185913085938, -16.123578014257888)
+shape = SubResource("Box_222")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_223" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(32.405884249611674, 8.188652038574219, -54.755835595605205)
+shape = SubResource("Box_223")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_224" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-21.293445528779124, 4.090812683105469, 47.21108162382588)
+shape = SubResource("Box_224")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_225" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-8, 1.945086669921875, -5.5)
+shape = SubResource("Box_225")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_226" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(8, 2.07408447265625, -5.5)
+shape = SubResource("Box_226")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_227" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(16, 8.545005798339844, 36)
+shape = SubResource("Box_227")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_228" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(0, 1.9755874633789063, 0)
+shape = SubResource("Box_228")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_229" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(22.932586507275136, 2.5296249389648438, -1.2433687118753303)
+shape = SubResource("Box_229")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_230" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(22.663722897941135, 2.3766098022460938, -3.715528774302107)
+shape = SubResource("Box_230")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_231" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(22.129147859268222, 2.271595001220703, -6.144127658990547)
+shape = SubResource("Box_231")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_232" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(21.33512879481823, 2.2067909240722656, -8.500692264506812)
+shape = SubResource("Box_232")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_233" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(20.290974852143282, 2.173816680908203, -10.757594025478792)
+shape = SubResource("Box_233")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_234" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(15.793890432107023, 2.285297393798828, -16.673407410782186)
+shape = SubResource("Box_234")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_235" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(13.898593526658415, 2.382251739501953, -18.283287112772058)
+shape = SubResource("Box_235")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_236" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(11.840348319714984, 2.486164093017578, -19.678811989933507)
+shape = SubResource("Box_236")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_237" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(9.643285854456604, 2.58203125, -20.843620789022367)
+shape = SubResource("Box_237")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_238" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(7.333164679495056, 2.684619903564453, -21.764057191864165)
+shape = SubResource("Box_238")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_239" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(4.937068853442832, 2.7883338928222656, -22.429329923198615)
+shape = SubResource("Box_239")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_240" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-4.937068853442835, 2.7210044860839844, -22.429329923198615)
+shape = SubResource("Box_240")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_241" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-7.333164679495053, 2.61492919921875, -21.76405719186417)
+shape = SubResource("Box_241")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_242" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-9.643285854456598, 2.496837615966797, -20.843620789022367)
+shape = SubResource("Box_242")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_243" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-11.84034831971498, 2.3747634887695312, -19.678811989933507)
+shape = SubResource("Box_243")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_244" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-13.898593526658415, 2.2667808532714844, -18.283287112772058)
+shape = SubResource("Box_244")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_245" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-15.79389043210702, 2.1919937133789062, -16.67340741078219)
+shape = SubResource("Box_245")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_246" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-20.290974852143286, 2.0803756713867188, -10.757594025478788)
+shape = SubResource("Box_246")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_247" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-21.335128794818235, 2.0625534057617188, -8.500692264506808)
+shape = SubResource("Box_247")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_248" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-22.129147859268222, 2.0550765991210938, -6.144127658990547)
+shape = SubResource("Box_248")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_249" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-22.663722897941135, 2.0667457580566406, -3.7155287743021113)
+shape = SubResource("Box_249")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_250" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-22.932586507275136, 2.1117591857910156, -1.2433687118753334)
+shape = SubResource("Box_250")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_251" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-22.932586507275136, 2.1920623779296875, 1.243368711875323)
+shape = SubResource("Box_251")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_252" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-22.663722897941135, 2.3103713989257812, 3.7155287743021006)
+shape = SubResource("Box_252")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_253" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-22.129147859268222, 2.4657630920410156, 6.144127658990546)
+shape = SubResource("Box_253")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_254" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-21.33512879481823, 2.646495819091797, 8.500692264506812)
+shape = SubResource("Box_254")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_255" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-20.29097485214328, 2.8335342407226562, 10.757594025478793)
+shape = SubResource("Box_255")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_256" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-15.793890432107023, 3.2930259704589844, 16.673407410782186)
+shape = SubResource("Box_256")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_257" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-13.898593526658415, 3.371173858642578, 18.28328711277206)
+shape = SubResource("Box_257")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_258" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-11.840348319714991, 3.406421661376953, 19.6788119899335)
+shape = SubResource("Box_258")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_259" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-9.643285854456607, 3.4076461791992188, 20.84362078902236)
+shape = SubResource("Box_259")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_260" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-7.333164679495061, 3.3894309997558594, 21.76405719186416)
+shape = SubResource("Box_260")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_261" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-4.93706885344284, 3.370433807373047, 22.429329923198615)
+shape = SubResource("Box_261")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_262" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(4.937068853442821, 3.587322235107422, 22.429329923198615)
+shape = SubResource("Box_262")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_263" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(7.333164679495043, 3.7186203002929688, 21.76405719186417)
+shape = SubResource("Box_263")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_264" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(9.6432858544566, 3.837848663330078, 20.843620789022367)
+shape = SubResource("Box_264")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_265" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(11.840348319714984, 3.930553436279297, 19.678811989933507)
+shape = SubResource("Box_265")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_266" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(13.898593526658416, 3.9881134033203125, 18.283287112772058)
+shape = SubResource("Box_266")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_267" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(15.793890432107025, 4.004947662353516, 16.673407410782186)
+shape = SubResource("Box_267")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_268" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(20.29097485214328, 3.699687957763672, 10.757594025478797)
+shape = SubResource("Box_268")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_269" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(21.33512879481823, 3.466419219970703, 8.500692264506815)
+shape = SubResource("Box_269")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_270" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(22.129147859268222, 3.211627960205078, 6.1441276589905485)
+shape = SubResource("Box_270")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_271" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(22.66372289794113, 2.958953857421875, 3.7155287743021193)
+shape = SubResource("Box_271")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_272" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(22.932586507275133, 2.7274131774902344, 1.2433687118753416)
+shape = SubResource("Box_272")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_273" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-25.551292874899353, 4.887493133544922, 31.053958588790508)
+shape = SubResource("Box_273")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_274" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-25.755863012436095, 4.866737365722656, 29.172967236944046)
+shape = SubResource("Box_274")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_275" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.16260488968722, 4.81231689453125, 27.325120259463713)
+shape = SubResource("Box_275")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_276" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.766749830029603, 4.719287872314453, 25.53208197265786)
+shape = SubResource("Box_276")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_277" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-27.56121478641272, 4.614837646484375, 23.814874111048745)
+shape = SubResource("Box_277")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_278" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-30.982909453831613, 4.1507415771484375, 19.313711752665725)
+shape = SubResource("Box_278")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_279" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-32.424983186238165, 3.987110137939453, 18.088803283760388)
+shape = SubResource("Box_279")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_280" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-33.991039321955995, 3.851726531982422, 17.026990877224506)
+shape = SubResource("Box_280")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_281" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-35.66271728465259, 3.7353515625, 16.140723312700374)
+shape = SubResource("Box_281")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_282" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-37.420418178645065, 3.638427734375, 15.440391267059873)
+shape = SubResource("Box_282")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_283" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-39.24353456803263, 3.556377410888672, 14.934205493218444)
+shape = SubResource("Box_283")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_284" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-41.110692080040906, 3.5012435913085938, 14.628100556564313)
+shape = SubResource("Box_284")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_285" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-43.0, 3.460407257080078, 14.525665257605333)
+shape = SubResource("Box_285")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_286" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-44.889307919959094, 3.3956298828125, 14.628100556564313)
+shape = SubResource("Box_286")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_287" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-46.75646543196737, 3.3215599060058594, 14.934205493218446)
+shape = SubResource("Box_287")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_288" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-48.579581821354935, 3.257781982421875, 15.440391267059873)
+shape = SubResource("Box_288")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_289" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-50.33728271534741, 3.1936988830566406, 16.140723312700374)
+shape = SubResource("Box_289")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_290" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-52.008960678044005, 3.1259002685546875, 17.026990877224506)
+shape = SubResource("Box_290")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_291" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-53.575016813761835, 3.056201934814453, 18.088803283760388)
+shape = SubResource("Box_291")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_292" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-55.01709054616839, 2.981243133544922, 19.313711752665725)
+shape = SubResource("Box_292")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_293" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-56.318274879251774, 2.910053253173828, 20.687355352087096)
+shape = SubResource("Box_293")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_294" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-57.46331461639079, 2.847606658935547, 22.193629366755616)
+shape = SubResource("Box_294")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_295" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-58.43878521358728, 2.794910430908203, 23.814874111048745)
+shape = SubResource("Box_295")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_296" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-59.2332501699704, 2.75079345703125, 25.532081972657863)
+shape = SubResource("Box_296")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_297" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-59.837395110312784, 2.7193679809570312, 27.325120259463716)
+shape = SubResource("Box_297")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_298" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-60.244136987563905, 2.7003936767578125, 29.172967236944046)
+shape = SubResource("Box_298")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_299" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-60.44870712510065, 2.6848068237304688, 31.053958588790508)
+shape = SubResource("Box_299")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_300" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-60.44870712510065, 2.671092987060547, 32.946041411209485)
+shape = SubResource("Box_300")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_301" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-60.244136987563905, 2.6332550048828125, 34.827032763055946)
+shape = SubResource("Box_301")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_302" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-59.837395110312784, 2.583953857421875, 36.674879740536284)
+shape = SubResource("Box_302")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_303" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-59.23325016997039, 2.5478515625, 38.46791802734214)
+shape = SubResource("Box_303")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_304" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-58.43878521358728, 2.5074996948242188, 40.185125888951255)
+shape = SubResource("Box_304")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_305" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-57.46331461639079, 2.4863624572753906, 41.806370633244384)
+shape = SubResource("Box_305")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_306" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-56.31827487925178, 2.4769973754882812, 43.3126446479129)
+shape = SubResource("Box_306")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_307" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-55.01709054616839, 2.4730987548828125, 44.686288247334275)
+shape = SubResource("Box_307")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_308" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-53.575016813761835, 2.488361358642578, 45.911196716239616)
+shape = SubResource("Box_308")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_309" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-52.00896067804401, 2.5161514282226562, 46.973009122775494)
+shape = SubResource("Box_309")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_310" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-50.33728271534742, 2.567394256591797, 47.85927668729963)
+shape = SubResource("Box_310")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_311" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-48.579581821354935, 2.632892608642578, 48.55960873294013)
+shape = SubResource("Box_311")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_312" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-46.75646543196738, 2.71466064453125, 49.06579450678156)
+shape = SubResource("Box_312")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_313" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-44.889307919959094, 2.8227767944335938, 49.37189944343569)
+shape = SubResource("Box_313")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_314" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-37.42041817864508, 3.416492462158203, 48.55960873294013)
+shape = SubResource("Box_314")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_315" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-35.66271728465259, 3.5807647705078125, 47.85927668729963)
+shape = SubResource("Box_315")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_316" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-33.99103932195599, 3.7509498596191406, 46.973009122775494)
+shape = SubResource("Box_316")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_317" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-32.424983186238165, 3.9303970336914062, 45.911196716239616)
+shape = SubResource("Box_317")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_318" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-30.982909453831613, 4.115440368652344, 44.686288247334275)
+shape = SubResource("Box_318")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_319" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-29.681725120748222, 4.290252685546875, 43.3126446479129)
+shape = SubResource("Box_319")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_320" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-28.53668538360921, 4.4423675537109375, 41.806370633244384)
+shape = SubResource("Box_320")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_321" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-27.561214786412723, 4.5531158447265625, 40.18512588895126)
+shape = SubResource("Box_321")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_322" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.766749830029607, 4.639911651611328, 38.46791802734214)
+shape = SubResource("Box_322")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_323" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.16260488968722, 4.770782470703125, 36.674879740536284)
+shape = SubResource("Box_323")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_324" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-25.755863012436095, 4.8682403564453125, 34.82703276305596)
+shape = SubResource("Box_324")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_325" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-25.551292874899353, 4.88983154296875, 32.9460414112095)
+shape = SubResource("Box_325")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_326" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(60.44870712510065, 4.323383331298828, 33.05395858879051)
+shape = SubResource("Box_326")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_327" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(60.244136987563905, 4.564937591552734, 31.17296723694405)
+shape = SubResource("Box_327")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_328" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(25.755863012436095, 6.268360137939453, 31.172967236944046)
+shape = SubResource("Box_328")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_329" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(25.551292874899353, 6.294868469238281, 33.05395858879051)
+shape = SubResource("Box_329")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_330" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(25.551292874899353, 6.2038116455078125, 34.946041411209485)
+shape = SubResource("Box_330")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_331" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(25.755863012436095, 5.9457244873046875, 36.827032763055946)
+shape = SubResource("Box_331")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_332" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(26.16260488968722, 5.680271148681641, 38.674879740536284)
+shape = SubResource("Box_332")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_333" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(26.766749830029603, 5.435932159423828, 40.46791802734214)
+shape = SubResource("Box_333")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_334" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(27.56121478641272, 5.218589782714844, 42.185125888951255)
+shape = SubResource("Box_334")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_335" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(28.53668538360921, 5.0112457275390625, 43.806370633244384)
+shape = SubResource("Box_335")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_336" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(29.68172512074822, 4.817592620849609, 45.3126446479129)
+shape = SubResource("Box_336")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_337" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(30.982909453831613, 4.631427764892578, 46.686288247334275)
+shape = SubResource("Box_337")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_338" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(32.424983186238165, 4.448505401611328, 47.911196716239616)
+shape = SubResource("Box_338")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_339" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(39.24353456803262, 3.7121849060058594, 51.06579450678156)
+shape = SubResource("Box_339")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_340" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(41.110692080040906, 3.5595130920410156, 51.37189944343569)
+shape = SubResource("Box_340")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_341" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(42.999999999999986, 3.4246177673339844, 51.47433474239467)
+shape = SubResource("Box_341")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_342" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(44.88930791995908, 3.336841583251953, 51.371899443435694)
+shape = SubResource("Box_342")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_343" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(46.756465431967364, 3.269939422607422, 51.06579450678156)
+shape = SubResource("Box_343")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_344" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(48.57958182135492, 3.211822509765625, 50.55960873294013)
+shape = SubResource("Box_344")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_345" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(50.33728271534741, 3.193370819091797, 49.85927668729963)
+shape = SubResource("Box_345")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_346" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(52.00896067804401, 3.186084747314453, 48.973009122775494)
+shape = SubResource("Box_346")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_347" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(53.575016813761835, 3.1853294372558594, 47.911196716239616)
+shape = SubResource("Box_347")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_348" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(55.01709054616839, 3.2175559997558594, 46.686288247334275)
+shape = SubResource("Box_348")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_349" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(56.318274879251774, 3.2617759704589844, 45.3126446479129)
+shape = SubResource("Box_349")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_350" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(57.46331461639079, 3.3321876525878906, 43.806370633244384)
+shape = SubResource("Box_350")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_351" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(58.43878521358728, 3.422443389892578, 42.18512588895126)
+shape = SubResource("Box_351")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_352" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(59.23325016997039, 3.531951904296875, 40.46791802734214)
+shape = SubResource("Box_352")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_353" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(59.837395110312784, 3.6797027587890625, 38.674879740536284)
+shape = SubResource("Box_353")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_354" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(60.244136987563905, 3.859325408935547, 36.82703276305596)
+shape = SubResource("Box_354")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_355" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(60.44870712510065, 4.079597473144531, 34.9460414112095)
+shape = SubResource("Box_355")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_356" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-25.551292874899353, 3.860004425048828, -35.94604141120949)
+shape = SubResource("Box_356")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_357" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-25.755863012436095, 3.748027801513672, -37.82703276305595)
+shape = SubResource("Box_357")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_358" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.16260488968722, 3.6953468322753906, -39.674879740536284)
+shape = SubResource("Box_358")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_359" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.766749830029603, 3.6626358032226562, -41.46791802734214)
+shape = SubResource("Box_359")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_360" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-27.56121478641272, 3.5678939819335938, -43.185125888951255)
+shape = SubResource("Box_360")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_361" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-28.53668538360921, 3.4263458251953125, -44.806370633244384)
+shape = SubResource("Box_361")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_362" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-29.681725120748222, 3.2510948181152344, -46.312644647912904)
+shape = SubResource("Box_362")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_363" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-30.982909453831613, 3.0549964904785156, -47.686288247334275)
+shape = SubResource("Box_363")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_364" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-32.424983186238165, 2.852447509765625, -48.911196716239616)
+shape = SubResource("Box_364")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_365" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-33.991039321955995, 2.6415443420410156, -49.973009122775494)
+shape = SubResource("Box_365")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_366" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-41.110692080040906, 1.8961601257324219, -52.37189944343569)
+shape = SubResource("Box_366")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_367" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-43.0, 1.7932853698730469, -52.47433474239467)
+shape = SubResource("Box_367")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_368" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-44.889307919959094, 1.7247238159179688, -52.37189944343569)
+shape = SubResource("Box_368")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_369" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-46.75646543196737, 1.6934356689453125, -52.06579450678156)
+shape = SubResource("Box_369")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_370" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-48.579581821354935, 1.70574951171875, -51.55960873294013)
+shape = SubResource("Box_370")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_371" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-50.33728271534741, 1.7614898681640625, -50.85927668729963)
+shape = SubResource("Box_371")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_372" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-52.008960678044005, 1.8707389831542969, -49.973009122775494)
+shape = SubResource("Box_372")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_373" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-53.575016813761835, 2.0316925048828125, -48.911196716239616)
+shape = SubResource("Box_373")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_374" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-55.01709054616839, 2.254596710205078, -47.686288247334275)
+shape = SubResource("Box_374")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_375" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-56.318274879251774, 2.5305023193359375, -46.312644647912904)
+shape = SubResource("Box_375")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_376" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-57.46331461639079, 2.872386932373047, -44.806370633244384)
+shape = SubResource("Box_376")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_377" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-58.43878521358728, 3.273303985595703, -43.185125888951255)
+shape = SubResource("Box_377")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_378" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-33.99103932195599, 4.204856872558594, -20.026990877224506)
+shape = SubResource("Box_378")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_379" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-32.424983186238165, 3.9470787048339844, -21.088803283760388)
+shape = SubResource("Box_379")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_380" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-27.561214786412723, 3.5595245361328125, -26.81487411104874)
+shape = SubResource("Box_380")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_381" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.766749830029607, 3.5578155517578125, -28.532081972657856)
+shape = SubResource("Box_381")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_382" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-26.16260488968722, 3.5663833618164062, -30.325120259463713)
+shape = SubResource("Box_382")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_383" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-25.755863012436095, 3.6110992431640625, -32.17296723694404)
+shape = SubResource("Box_383")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_384" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-25.551292874899353, 3.7849998474121094, -34.0539585887905)
+shape = SubResource("Box_384")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_385" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(60.44870712510065, 1.5932693481445312, -35.94604141120949)
+shape = SubResource("Box_385")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_386" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(60.244136987563905, 1.4972991943359375, -37.82703276305595)
+shape = SubResource("Box_386")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_387" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(59.837395110312784, 1.4166946411132812, -39.674879740536284)
+shape = SubResource("Box_387")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_388" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(59.23325016997039, 1.3552894592285156, -41.46791802734214)
+shape = SubResource("Box_388")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_389" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(58.43878521358728, 1.3066978454589844, -43.185125888951255)
+shape = SubResource("Box_389")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_390" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(57.46331461639079, 1.2696685791015625, -44.806370633244384)
+shape = SubResource("Box_390")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_391" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(56.318274879251774, 1.2446403503417969, -46.312644647912904)
+shape = SubResource("Box_391")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_392" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(55.01709054616838, 1.2288894653320312, -47.686288247334275)
+shape = SubResource("Box_392")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_393" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(53.575016813761835, 1.2272911071777344, -48.911196716239616)
+shape = SubResource("Box_393")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_394" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(52.008960678044005, 1.2407875061035156, -49.973009122775494)
+shape = SubResource("Box_394")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_395" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(50.33728271534741, 1.2682380676269531, -50.85927668729963)
+shape = SubResource("Box_395")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_396" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(48.579581821354935, 1.3184623718261719, -51.55960873294013)
+shape = SubResource("Box_396")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_397" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(46.75646543196737, 1.3833045959472656, -52.06579450678156)
+shape = SubResource("Box_397")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_398" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(44.889307919959094, 1.4764137268066406, -52.37189944343569)
+shape = SubResource("Box_398")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_399" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(43.0, 1.6031723022460938, -52.47433474239467)
+shape = SubResource("Box_399")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_400" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(41.110692080040906, 1.8720130920410156, -52.37189944343569)
+shape = SubResource("Box_400")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_401" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(32.424983186238165, 5.303070068359375, -48.911196716239616)
+shape = SubResource("Box_401")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_402" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(30.982909453831617, 5.315055847167969, -47.686288247334275)
+shape = SubResource("Box_402")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_403" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(29.681725120748226, 5.0654296875, -46.312644647912904)
+shape = SubResource("Box_403")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_404" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(28.536685383609214, 4.58544921875, -44.806370633244384)
+shape = SubResource("Box_404")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_405" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(27.56121478641272, 4.023525238037109, -43.185125888951255)
+shape = SubResource("Box_405")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_406" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(26.766749830029603, 3.6895599365234375, -41.46791802734214)
+shape = SubResource("Box_406")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_407" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(26.16260488968722, 3.5900497436523438, -39.674879740536284)
+shape = SubResource("Box_407")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_408" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(25.755863012436095, 3.5780906677246094, -37.82703276305595)
+shape = SubResource("Box_408")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_409" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(25.551292874899353, 3.570697784423828, -35.94604141120949)
+shape = SubResource("Box_409")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_410" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(25.551292874899353, 3.5280303955078125, -34.053958588790515)
+shape = SubResource("Box_410")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_411" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(25.755863012436095, 3.430858612060547, -32.172967236944054)
+shape = SubResource("Box_411")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_412" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(26.16260488968722, 3.2862205505371094, -30.325120259463716)
+shape = SubResource("Box_412")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_413" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(26.766749830029603, 3.1400604248046875, -28.532081972657863)
+shape = SubResource("Box_413")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_414" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(27.56121478641272, 3.0079116821289062, -26.814874111048745)
+shape = SubResource("Box_414")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_415" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(32.424983186238165, 2.7026100158691406, -21.088803283760388)
+shape = SubResource("Box_415")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_416" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(33.99103932195599, 2.6925926208496094, -20.026990877224513)
+shape = SubResource("Box_416")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_417" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(35.66271728465258, 2.70709228515625, -19.140723312700377)
+shape = SubResource("Box_417")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_418" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(37.420418178645065, 2.7525367736816406, -18.440391267059873)
+shape = SubResource("Box_418")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_419" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(39.24353456803262, 2.8242340087890625, -17.934205493218446)
+shape = SubResource("Box_419")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_420" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(41.110692080040906, 2.9047470092773438, -17.628100556564313)
+shape = SubResource("Box_420")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_421" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(42.999999999999986, 2.9943580627441406, -17.525665257605333)
+shape = SubResource("Box_421")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_422" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(44.88930791995908, 3.06524658203125, -17.628100556564313)
+shape = SubResource("Box_422")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_423" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(46.756465431967364, 3.107280731201172, -17.934205493218442)
+shape = SubResource("Box_423")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_424" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(48.57958182135492, 3.1316871643066406, -18.440391267059873)
+shape = SubResource("Box_424")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_425" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(50.33728271534741, 3.1270523071289062, -19.140723312700374)
+shape = SubResource("Box_425")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_426" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(52.00896067804401, 3.106578826904297, -20.026990877224506)
+shape = SubResource("Box_426")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_427" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(53.575016813761835, 3.0819091796875, -21.088803283760388)
+shape = SubResource("Box_427")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_428" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(55.01709054616839, 3.0207061767578125, -22.31371175266573)
+shape = SubResource("Box_428")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_429" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(56.318274879251774, 2.8869781494140625, -23.687355352087103)
+shape = SubResource("Box_429")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_430" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(57.46331461639079, 2.7091026306152344, -25.193629366755616)
+shape = SubResource("Box_430")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_431" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(58.43878521358728, 2.5019149780273438, -26.81487411104874)
+shape = SubResource("Box_431")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_432" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(59.23325016997039, 2.2718162536621094, -28.532081972657856)
+shape = SubResource("Box_432")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_433" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(59.837395110312784, 2.0584259033203125, -30.325120259463713)
+shape = SubResource("Box_433")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_434" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(60.244136987563905, 1.8661727905273438, -32.17296723694404)
+shape = SubResource("Box_434")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_435" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(60.44870712510065, 1.7075080871582031, -34.0539585887905)
+shape = SubResource("Box_435")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_436" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(-3.5, 2.8354248046875, 58)
+shape = SubResource("Box_436")
+metadata/navigation_obstacle = true
+
+[node name="Obstacle_437" type="CollisionShape3D" parent="GardenObstacles"]
+position = Vector3(3.5, 2.8137802124023437, 58)
+shape = SubResource("Box_437")
+metadata/navigation_obstacle = true
+
+[node name="GardenWarmLight_0" type="OmniLight3D" parent="."]
+position = Vector3(-3.5, 5.9354248046875, 58)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_1" type="OmniLight3D" parent="."]
+position = Vector3(3.5, 5.913780212402344, 58)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_2" type="OmniLight3D" parent="."]
+position = Vector3(62, 7.548545837402344, -7)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_3" type="OmniLight3D" parent="."]
+position = Vector3(16, 9.545005798339844, 34)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_4" type="OmniLight3D" parent="."]
+position = Vector3(-8, 3.545086669921875, -5.5)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_5" type="OmniLight3D" parent="."]
+position = Vector3(8, 3.67408447265625, -5.5)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_6" type="OmniLight3D" parent="."]
+position = Vector3(21.341617201010724, 4.1999664306640625, -8.839987287633575)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_7" type="OmniLight3D" parent="."]
+position = Vector3(8.839987287633576, 4.625862121582031, -21.341617201010724)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_8" type="OmniLight3D" parent="."]
+position = Vector3(-8.839987287633573, 4.551872253417969, -21.341617201010724)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_9" type="OmniLight3D" parent="."]
+position = Vector3(-21.341617201010724, 4.070014953613281, -8.839987287633576)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_10" type="OmniLight3D" parent="."]
+position = Vector3(-21.341617201010727, 4.676506042480469, 8.839987287633573)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_11" type="OmniLight3D" parent="."]
+position = Vector3(-8.839987287633587, 5.410713195800781, 21.34161720101072)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_12" type="OmniLight3D" parent="."]
+position = Vector3(8.83998728763358, 5.8097381591796875, 21.341617201010724)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_13" type="OmniLight3D" parent="."]
+position = Vector3(21.34161720101072, 5.5126953125, 8.839987287633589)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_14" type="OmniLight3D" parent="."]
+position = Vector3(-26.739720227801353, 6.705162048339844, 25.26477159037442)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_15" type="OmniLight3D" parent="."]
+position = Vector3(-36.264771590374416, 5.6863861083984375, 15.739720227801353)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_16" type="OmniLight3D" parent="."]
+position = Vector3(-49.73522840962558, 5.217308044433594, 15.739720227801353)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_17" type="OmniLight3D" parent="."]
+position = Vector3(-59.26027977219864, 4.745094299316406, 25.264771590374416)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_18" type="OmniLight3D" parent="."]
+position = Vector3(-59.26027977219865, 4.5394287109375, 38.73522840962558)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_19" type="OmniLight3D" parent="."]
+position = Vector3(-49.73522840962559, 4.577873229980469, 48.26027977219864)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_20" type="OmniLight3D" parent="."]
+position = Vector3(-36.264771590374416, 5.50555419921875, 48.26027977219864)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_21" type="OmniLight3D" parent="."]
+position = Vector3(-26.739720227801357, 6.620750427246094, 38.73522840962559)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_22" type="OmniLight3D" parent="."]
+position = Vector3(59.26027977219864, 7.0942840576171875, 27.26477159037442)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_23" type="OmniLight3D" parent="."]
+position = Vector3(49.735228409625584, 8.272407531738281, 17.739720227801353)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_24" type="OmniLight3D" parent="."]
+position = Vector3(36.26477159037442, 8.020698547363281, 17.739720227801353)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_25" type="OmniLight3D" parent="."]
+position = Vector3(26.739720227801353, 8.284393310546875, 27.264771590374416)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_26" type="OmniLight3D" parent="."]
+position = Vector3(26.73972022780135, 7.39630126953125, 40.73522840962558)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_27" type="OmniLight3D" parent="."]
+position = Vector3(36.26477159037441, 5.978889465332031, 50.26027977219864)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_28" type="OmniLight3D" parent="."]
+position = Vector3(49.735228409625584, 5.16729736328125, 50.26027977219864)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_29" type="OmniLight3D" parent="."]
+position = Vector3(59.26027977219864, 5.48638916015625, 40.73522840962559)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_30" type="OmniLight3D" parent="."]
+position = Vector3(-26.739720227801353, 5.681251525878906, -41.73522840962558)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_31" type="OmniLight3D" parent="."]
+position = Vector3(-36.264771590374416, 4.3384857177734375, -51.26027977219864)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_32" type="OmniLight3D" parent="."]
+position = Vector3(-49.73522840962558, 3.7156982421875, -51.26027977219864)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_33" type="OmniLight3D" parent="."]
+position = Vector3(-59.26027977219864, 5.6579742431640625, -41.735228409625584)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_34" type="OmniLight3D" parent="."]
+position = Vector3(-59.26027977219865, 9.452552795410156, -28.264771590374423)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_35" type="OmniLight3D" parent="."]
+position = Vector3(-49.73522840962559, 9.349502563476562, -18.739720227801357)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_36" type="OmniLight3D" parent="."]
+position = Vector3(-36.264771590374416, 6.8038787841796875, -18.739720227801353)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_37" type="OmniLight3D" parent="."]
+position = Vector3(-26.739720227801357, 5.557304382324219, -28.26477159037441)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_38" type="OmniLight3D" parent="."]
+position = Vector3(59.26027977219864, 3.3416748046875, -41.73522840962558)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_39" type="OmniLight3D" parent="."]
+position = Vector3(49.735228409625584, 3.27264404296875, -51.26027977219864)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_40" type="OmniLight3D" parent="."]
+position = Vector3(36.26477159037442, 5.873748779296875, -51.26027977219864)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_41" type="OmniLight3D" parent="."]
+position = Vector3(26.739720227801353, 5.6300811767578125, -41.735228409625584)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_42" type="OmniLight3D" parent="."]
+position = Vector3(26.73972022780135, 5.126487731933594, -28.264771590374423)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_43" type="OmniLight3D" parent="."]
+position = Vector3(36.26477159037441, 4.712684631347656, -18.739720227801357)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_44" type="OmniLight3D" parent="."]
+position = Vector3(49.735228409625584, 5.143775939941406, -18.739720227801353)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="GardenWarmLight_45" type="OmniLight3D" parent="."]
+position = Vector3(59.26027977219864, 4.2983856201171875, -28.26477159037441)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.1
+omni_range = 6.5
+omni_attenuation = 1.7
+shadow_enabled = false
+
+[node name="LighthouseBeaconBeam" type="MeshInstance3D" parent="."]
+position = Vector3(81, 6.8, -45)
+rotation = Vector3(0, 0, 1.5707963)
+mesh = SubResource("BeamMesh")
+cast_shadow = 0

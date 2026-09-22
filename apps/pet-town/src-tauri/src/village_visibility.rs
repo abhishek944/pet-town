@@ -5,6 +5,7 @@ use tauri::{AppHandle, Emitter, Manager};
 pub(crate) struct VillageVisibility {
     requested: AtomicBool,
     ready: AtomicBool,
+    town_active: AtomicBool,
 }
 
 impl Default for VillageVisibility {
@@ -12,6 +13,7 @@ impl Default for VillageVisibility {
         Self {
             requested: AtomicBool::new(true),
             ready: AtomicBool::new(false),
+            town_active: AtomicBool::new(false),
         }
     }
 }
@@ -37,7 +39,7 @@ pub(crate) fn set(app: &AppHandle, visible: bool) -> Result<bool, String> {
     let state = app.state::<VillageVisibility>();
     state.requested.store(visible, Ordering::SeqCst);
     if state.ready.load(Ordering::SeqCst) {
-        apply(app, visible)?;
+        apply(app, visible && !state.town_active.load(Ordering::SeqCst))?;
     }
     let _ = app.emit(
         "village-visibility-changed",
@@ -46,11 +48,22 @@ pub(crate) fn set(app: &AppHandle, visible: bool) -> Result<bool, String> {
     Ok(visible)
 }
 
+pub(crate) fn set_town_active(app: &AppHandle, active: bool) -> Result<(), String> {
+    let state = app.state::<VillageVisibility>();
+    state.town_active.store(active, Ordering::SeqCst);
+    if state.ready.load(Ordering::SeqCst) {
+        let visible = state.requested.load(Ordering::SeqCst) && !active;
+        apply(app, visible)?;
+    }
+    Ok(())
+}
+
 #[tauri::command]
 pub(crate) fn renderer_ready(app: AppHandle) -> Result<bool, String> {
     let state = app.state::<VillageVisibility>();
     state.ready.store(true, Ordering::SeqCst);
-    let visible = state.requested.load(Ordering::SeqCst);
+    let visible =
+        state.requested.load(Ordering::SeqCst) && !state.town_active.load(Ordering::SeqCst);
     apply(&app, visible)?;
     Ok(visible)
 }

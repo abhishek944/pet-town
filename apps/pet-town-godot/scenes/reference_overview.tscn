@@ -1,0 +1,64 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://cy8hnu324w3uf" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/warm_island.tscn" id="2_0xm2m"]
+[ext_resource type="Environment" path="res://assets/cozy-island/woodland-evening.tres" id="3_evening"]
+[ext_resource type="NavigationMesh" path="res://navigation/town_walkable.res" id="4_nav"]
+[ext_resource type="Shape3D" path="res://navigation/town_collision.res" id="5_collision"]
+[ext_resource type="PackedScene" path="res://scenes/town_life.tscn" id="6_life"]
+[ext_resource type="PackedScene" path="res://scenes/town_decorations.tscn" id="7_decor"]
+[ext_resource type="PackedScene" path="res://scenes/island_render_sections.tscn" id="8_render"]
+
+[node name="PetTown" type="Node3D" unique_id=614714254]
+physics_interpolation_mode = 2
+
+
+[node name="GrandMoonhaven" parent="." unique_id=1031562730 instance=ExtResource("2_0xm2m")]
+visible = false
+
+[node name="WoodlandEvening" type="WorldEnvironment" parent="."]
+environment = ExtResource("3_evening")
+
+[node name="EveningSun" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.436332, -0.610865, 0)
+light_color = Color(1, 0.89, 0.76, 1)
+light_energy = 0.25
+light_angular_distance = 4.0
+shadow_enabled = true
+directional_shadow_max_distance = 280.0
+
+[node name="CameraFocus" type="Marker3D" parent="."]
+position = Vector3(0, 1.5, 2)
+
+[node name="OrbitCamera" type="Camera3D" parent="."]
+physics_interpolation_mode = 2
+current = true
+fov = 38.0
+near = 0.15
+far = 4000.0
+
+position = Vector3(0, 141.31, 154.93)
+rotation = Vector3(-0.750492, 0, 0)
+
+[node name="WalkableTown" type="NavigationRegion3D" parent="."]
+navigation_mesh = ExtResource("4_nav")
+
+[node name="TownCollision" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TownCollision"]
+shape = ExtResource("5_collision")
+
+[node name="TownLife" parent="." instance=ExtResource("6_life")]
+
+[node name="TownDecorations" parent="." instance=ExtResource("7_decor")]
+
+[node name="IslandRenderSections" parent="." instance=ExtResource("8_render")]
+
+[node name="LiveAgents" type="Node3D" parent="."]
+
+[node name="TownUI" type="CanvasLayer" parent="."]
+
+[editable path="GrandMoonhaven"]
+[editable path="TownDecorations"]
