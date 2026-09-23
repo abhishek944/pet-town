@@ -1,36 +1,4 @@
-extends CharacterBody3D
-## A single live broker agent. World placement remains in the saved town scene.
-
-signal retirement_finished(agent_id: String)
-
-@export var display_name := "Agent"
-@export var agent_id := ""
-@export var live_status := "unknown"
-@export var appearance_label := "Knight"
-@export var walk_speed := 1.65
-
-@onready var navigation_agent: NavigationAgent3D = $NavigationAgent3D
-@onready var visual: Node3D = $Visual
-@onready var player: AnimationPlayer = $Visual/AnimationPlayer
-@onready var caption: Label3D = $Caption
-
-const STATUS_ACTIVITIES := {
-	"working": ["gather", "deliver"],
-	"blocked": ["rest"],
-	"idle": ["visit", "eat", "rest"],
-	"done": ["visit"],
-	"unknown": ["rest"],
-}
-
-var ready_to_walk := false
-var destination := Vector3.ZERO
-var destination_index := 0
-var pause_left := 0.0
-var path_settling_frames := 0
-var seated := false
-var retiring := false
-var retirement_tween: Tween
-var activity_text := "Connecting"
+extends "res://scripts/companion_state.gd"
 
 func configure(id: String, label: String, status: String, appearance: String) -> void:
 	agent_id = id
@@ -56,6 +24,8 @@ func update_live_status(status: String, label: String) -> void:
 func begin_retirement() -> void:
 	if retiring:
 		return
+	manually_controlled = false
+	manual_direction = Vector3.ZERO
 	retiring = true
 	navigation_agent.velocity = Vector3.ZERO
 	velocity = Vector3.ZERO
@@ -65,6 +35,30 @@ func begin_retirement() -> void:
 	retirement_tween.tween_interval(0.35)
 	retirement_tween.tween_property(self, "scale", Vector3(0.02, 0.02, 0.02), 0.65)
 	retirement_tween.tween_callback(_finish_retirement)
+
+func set_manual_control(enabled: bool) -> void:
+	if retiring or manually_controlled == enabled:
+		return
+	manually_controlled = enabled
+	manual_direction = Vector3.ZERO
+	navigation_agent.velocity = Vector3.ZERO
+	velocity = Vector3.ZERO
+	if enabled:
+		_set_seated(false)
+		pause_left = 0.0
+		path_settling_frames = 0
+		navigation_agent.avoidance_enabled = false
+		navigation_agent.target_position = global_position
+		activity_text = "Exploring town"
+		_animate("Idle_A")
+	else:
+		navigation_agent.avoidance_enabled = true
+		if live_status == "idle":
+			# Idle status ordinarily teleports to a bench; never teleport on release.
+			activity_text = "Taking a town break"
+			_choose_next_destination()
+		else:
+			_apply_live_status()
 
 func _ready() -> void:
 	add_to_group("live_agents")
@@ -82,6 +76,9 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	caption.text = display_name
 	if retiring or not ready_to_walk:
+		return
+	if manually_controlled:
+		_walk_manually(delta)
 		return
 	if seated and live_status in ["idle", "done"]:
 		navigation_agent.velocity = Vector3.ZERO
@@ -113,87 +110,30 @@ func _physics_process(delta: float) -> void:
 	navigation_agent.velocity = direction * walk_speed
 	visual.rotation.y = lerp_angle(visual.rotation.y, atan2(direction.x, direction.z), minf(delta * 8.0, 1.0))
 
+func _walk_manually(delta: float) -> void:
+	var direction := manual_direction
+	var horizontal := direction * walk_speed
+	if direction.length_squared() > 0.001:
+		var candidate := global_position + horizontal * delta
+		var closest := NavigationServer3D.map_get_closest_point(navigation_agent.get_navigation_map(), candidate)
+		if candidate.distance_to(closest) > 0.65:
+			horizontal = Vector3.ZERO
+		else:
+			visual.rotation.y = lerp_angle(visual.rotation.y, atan2(direction.x, direction.z), minf(delta * 8.0, 1.0))
+	velocity.x = horizontal.x
+	velocity.z = horizontal.z
+	velocity.y = 0.0 if is_on_floor() else velocity.y - 18.0 * delta
+	move_and_slide()
+	_animate("Walking_A" if horizontal.length_squared() > 0.001 else "Idle_A")
+
 func _move_with_avoidance(safe_velocity: Vector3) -> void:
-	if not ready_to_walk or retiring or seated or pause_left > 0.0:
+	if manually_controlled or not ready_to_walk or retiring or seated or pause_left > 0.0:
 		velocity = Vector3.ZERO
 		return
 	velocity.x = safe_velocity.x
 	velocity.z = safe_velocity.z
 	velocity.y = 0.0 if is_on_floor() else velocity.y - 18.0 * get_physics_process_delta_time()
 	move_and_slide()
-
-func _apply_live_status() -> void:
-	if retiring:
-		return
-	caption.text = display_name
-	activity_text = {
-		"working": "Working in town",
-		"blocked": "Waiting on a blocker",
-		"idle": "Taking a town break",
-		"done": "Work complete",
-		"unknown": "Awaiting a live update",
-	}.get(live_status, "Awaiting a live update")
-	destination_index = _stable_index(_destinations_for_status().size())
-	pause_left = 0.0
-	_set_seated(false)
-	if ready_to_walk:
-		if live_status == "done":
-			destination = global_position
-			navigation_agent.target_position = global_position
-			_arrive()
-		else:
-			_choose_next_destination()
-			if live_status == "idle":
-				global_position = destination
-				reset_physics_interpolation()
-				_arrive()
-	else:
-		_animate("Idle_A")
-
-func _choose_next_destination() -> void:
-	_set_seated(false)
-	var destinations := _destinations_for_status()
-	if destinations.is_empty():
-		destination = global_position
-		_animate("Idle_A")
-		pause_left = 2.0
-		return
-	destination = destinations[destination_index % destinations.size()]
-	destination_index += 1
-	var closest := NavigationServer3D.map_get_closest_point(navigation_agent.get_navigation_map(), destination)
-	if closest != Vector3.ZERO:
-		destination = closest
-	navigation_agent.target_position = destination
-	path_settling_frames = 2
-	if live_status == "blocked" or live_status == "unknown":
-		_animate("Walking_A")
-	else:
-		_animate("Walking_A")
-
-func _arrive() -> void:
-	navigation_agent.velocity = Vector3.ZERO
-	velocity.x = 0.0
-	velocity.z = 0.0
-	match live_status:
-		"working":
-			_animate("Interact")
-			pause_left = 2.2
-		"blocked":
-			_animate("Idle_A")
-			pause_left = 3.2
-		"idle":
-			_animate("Idle_B")
-			_set_seated(true)
-			activity_text = "Resting in the town center"
-			pause_left = 8.0
-		"done":
-			_animate("Idle_B")
-			_set_seated(true)
-			activity_text = "Work complete"
-			pause_left = 0.0
-		_:
-			_animate("Idle_A")
-			pause_left = 2.5
 
 func _set_seated(value: bool) -> void:
 	if seated == value:
@@ -241,38 +181,3 @@ func _finish_retirement() -> void:
 func _animate(clip: String) -> void:
 	if player.has_animation(clip) and player.current_animation != clip:
 		player.play(clip, 0.2)
-
-func _stable_index(count: int) -> int:
-	if count <= 0:
-		return 0
-	var value := 0
-	for index in agent_id.length():
-		value = (value * 31 + agent_id.unicode_at(index)) % 2147483647
-	return value % count
-
-func _destinations_for_status() -> Array[Vector3]:
-	var destinations: Array[Vector3] = []
-	var activities: Array = STATUS_ACTIVITIES.get(live_status, STATUS_ACTIVITIES.unknown)
-	for spot in get_tree().get_nodes_in_group("interaction_spots"):
-		if String(spot.activity) not in activities:
-			continue
-		if live_status == "idle" and String(spot.display_name) != "Town bench":
-			continue
-		var target: Vector3 = spot.global_position
-		if live_status == "idle":
-			var seed := _stable_seed()
-			var angle := fmod(float(seed) * 2.39996323, TAU)
-			var radius := 2.6 + float((seed / 17) % 3) * 1.35
-			target += Vector3(cos(angle), 0.0, sin(angle)) * radius
-		destinations.append(target)
-	return destinations
-
-func _stable_seed() -> int:
-	var value := 0
-	for index in agent_id.length():
-		value = (value * 31 + agent_id.unicode_at(index)) % 2147483647
-	return value
-
-func _normalized_status(value: String) -> String:
-	var normalized := value.to_lower()
-	return normalized if normalized in STATUS_ACTIVITIES else "unknown"

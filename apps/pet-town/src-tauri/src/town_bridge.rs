@@ -103,6 +103,7 @@ fn parse_command(line: &str) -> Option<Command> {
 
 fn write_snapshot(output: &mut impl Write) -> io::Result<()> {
     let collected = pet_town_agent_broker::collect();
+    let mayor = read_mayor_state();
     write_message(
         output,
         &json!({
@@ -110,8 +111,25 @@ fn write_snapshot(output: &mut impl Write) -> io::Result<()> {
             "type": "snapshot",
             "available": collected.snapshot.available,
             "agents": collected.snapshot.agents,
+            "mayor": mayor,
         }),
     )
+}
+
+fn read_mayor_state() -> Option<Value> {
+    let path = crate::preferences_io::preferences_path()
+        .ok()?
+        .with_file_name("mayor-state.json");
+    let value: Value = serde_json::from_slice(&std::fs::read(path).ok()?).ok()?;
+    let pid = value.get("ownerPid")?.as_i64()?;
+    if pid <= 0 || pid > i64::from(i32::MAX) {
+        return None;
+    }
+    #[cfg(unix)]
+    if unsafe { libc::kill(pid as i32, 0) } != 0 {
+        return None;
+    }
+    Some(value)
 }
 
 fn write_message(output: &mut impl Write, value: &Value) -> io::Result<()> {

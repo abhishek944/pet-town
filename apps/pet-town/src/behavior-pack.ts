@@ -1,7 +1,8 @@
 import { containsLoop, entryCycleMinimumMs, holdOutcomes } from "./flow-analysis";
 import { diagnostic, rejectUnknownFields, validateNode, type ValidationContext } from "./flow-node-validation";
-import { compilePackActions } from "./pack-action-validation";
-import { HERDR_STATES, LIMITS, type CompiledBehaviorPack, type HerdrState, type PackCompilation, type StateFlowManifest } from "./flow-types";
+import { HERDR_STATES, PET_STATES, LIMITS, type CompiledBehaviorPack, type HerdrState, type PackCompilation, type StateAssignment, type StateFlowManifest } from "./flow-types";
+import { assignmentFlow, legacyAssignment } from "./state-assignment";
+import { compileOrchestratorAnimations } from "./orchestrator-animation-validation";
 import { IDENTIFIER_PATTERN, deepFreeze, fnv1a, hasOwn, isFiniteBetween, isIntegerBetween, isRecord, normalizeAssetPath, stableStringify } from "./flow-utils";
 
 const COMPILED_PACKS = new WeakSet<object>();
@@ -74,17 +75,39 @@ export function compileBehaviorPack(
   }
 
   const compiledStates = {} as Record<HerdrState, StateFlowManifest>;
+  const stateAssignments = {} as Record<HerdrState, StateAssignment>;
   if (!isRecord(input.states)) {
     diagnostic(context, "E_STATES", "/states", "Pack must define all Herdr states");
   } else {
     for (const key of Object.keys(input.states)) {
-      if (!(HERDR_STATES as readonly string[]).includes(key)) diagnostic(context, "E_STATE_UNKNOWN", `/states/${key}`, "Only canonical Herdr states may select behavior");
+      if (!(PET_STATES as readonly string[]).includes(key)) diagnostic(context, "E_STATE_UNKNOWN", `/states/${key}`, "Unknown pet state");
     }
-    for (const state of HERDR_STATES) {
-      const stateValue = input.states[state];
+    for (const state of PET_STATES) {
+      const stateValue: unknown = input.states[state];
       const statePath = `/states/${state}`;
+      if (state === "listening" && stateValue === undefined) continue;
       if (!isRecord(stateValue)) {
         diagnostic(context, "E_STATE_MISSING", statePath, "Required Herdr state is missing");
+        continue;
+      }
+      if ("action" in stateValue) {
+        rejectUnknownFields(context, stateValue, ["animation", "action", "visible"], statePath);
+        const action = stateValue.action;
+        const visible = stateValue.visible === undefined ? true : stateValue.visible;
+        const animation = stateValue.animation === undefined ? null : stateValue.animation;
+        if (action !== "idle" && action !== "walking") diagnostic(context, "E_STATE_ACTION", `${statePath}/action`, "Action must be idle or walking");
+        if (typeof visible !== "boolean") diagnostic(context, "E_STATE_VISIBLE", `${statePath}/visible`, "Visible must be boolean");
+        if (visible && (typeof animation !== "string" || !hasOwn(context.clips, animation))) {
+          diagnostic(context, "E_STATE_ANIMATION", `${statePath}/animation`, "Visible state needs an imported animation");
+        }
+        if (visible && action === "walking" && typeof animation === "string" && context.clips[animation] && !context.clips[animation].mirror) {
+          diagnostic(context, "E_FACING_UNSAFE", `${statePath}/animation`, "Walking animation must be safe to mirror");
+        }
+        if ((action === "idle" || action === "walking") && typeof visible === "boolean" && (!visible || (typeof animation === "string" && hasOwn(context.clips, animation)))) {
+          const assignment: StateAssignment = { animation: visible ? animation as string : null, action, visible };
+          stateAssignments[state] = assignment;
+          compiledStates[state] = assignmentFlow(assignment);
+        }
         continue;
       }
       rejectUnknownFields(context, stateValue, ["completion", "flow"], statePath);
@@ -105,9 +128,15 @@ export function compileBehaviorPack(
         ) diagnostic(context, "E_STATE_CYCLE_DURATION", statePath, "Restarting state cycle is outside the supported duration range");
       }
       if ((stateValue.completion === "restart" || stateValue.completion === "hold") && result.node) {
-        compiledStates[state] = { completion: stateValue.completion, flow: result.node };
+        stateAssignments[state] = legacyAssignment(result.node, state);
+        compiledStates[state] = assignmentFlow(stateAssignments[state]);
       }
     }
+  }
+
+  if (!compiledStates.listening && compiledStates.blocked) {
+    compiledStates.listening = compiledStates.blocked;
+    stateAssignments.listening = stateAssignments.blocked;
   }
 
   for (const state of HERDR_STATES) {
@@ -127,30 +156,9 @@ export function compileBehaviorPack(
     }
   }
 
-  const compiledActions = compilePackActions(input.actions, context);
-  let orchestratorAnimations: { walking: string; listening: string } | null = null;
-  if (input.orchestratorAnimations !== undefined && input.orchestratorAnimations !== null) {
-    const value = input.orchestratorAnimations;
-    if (!isRecord(value)) {
-      diagnostic(context, "E_ORCHESTRATOR", "/orchestratorAnimations", "Orchestrator animations must be an object");
-    } else {
-      rejectUnknownFields(context, value, ["walking", "listening"], "/orchestratorAnimations");
-      const walking = typeof value.walking === "string" ? value.walking : "";
-      const listening = typeof value.listening === "string" ? value.listening : "";
-      if (!hasOwn(context.clips, walking) || context.clips[walking]?.role !== "locomotion") {
-        diagnostic(context, "E_ORCHESTRATOR_WALK", "/orchestratorAnimations/walking", "Walking must reference a locomotion clip");
-      }
-      if (!hasOwn(context.clips, listening)) {
-        diagnostic(context, "E_ORCHESTRATOR_LISTEN", "/orchestratorAnimations/listening", "Listening must reference a clip");
-      }
-      if (walking && walking === listening) {
-        diagnostic(context, "E_ORCHESTRATOR_DISTINCT", "/orchestratorAnimations", "Walking and Listening must use different clips");
-      }
-      if (hasOwn(context.clips, walking) && hasOwn(context.clips, listening)) {
-        orchestratorAnimations = { walking, listening };
-      }
-    }
-  }
+  const orchestratorAnimations = compileOrchestratorAnimations(
+    input.orchestratorAnimations, input.states, context, stateAssignments, compiledStates,
+  );
 
   if (context.diagnostics.length > 0 || HERDR_STATES.some((state) => !hasOwn(compiledStates, state))) {
     return { pack: null, diagnostics: context.diagnostics };
@@ -163,7 +171,7 @@ export function compileBehaviorPack(
     fingerprint,
     clips: context.clips,
     states: compiledStates,
-    actions: compiledActions,
+    stateAssignments,
     orchestratorAnimations,
   });
   COMPILED_PACKS.add(pack);

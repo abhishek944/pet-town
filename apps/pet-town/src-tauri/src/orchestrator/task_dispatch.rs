@@ -55,7 +55,9 @@ pub async fn run(
                 if runtime.closing_agent_pane_id.as_deref() == Some(&agent.pane_id) {
                     runtime.closing_agent_pane_id = None;
                 }
-                return Err(format!("{error} The uncertain Pi session was {DEAD_AGENT_MARKER}."));
+                return Err(format!(
+                    "{error} The uncertain Pi session was {DEAD_AGENT_MARKER}."
+                ));
             }
         };
         drop(dispatch);

@@ -2,31 +2,23 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { PreferencesSnapshot } from "./preferences-types";
 import type { OrchestratorStatus as Status } from "./orchestrator-status";
-import { startSpeechMeter } from "./assistant-meter"; import { iceComplete, installReleaseGuards } from "./assistant-webrtc"; import { delegationContext, toolTaskContext } from "./assistant-context"; import { appendTranscript, readTranscript, resetTranscript } from "./assistant-transcript";
+import { startSpeechMeter } from "./assistant-meter"; import { iceComplete, installReleaseGuards } from "./assistant-webrtc"; import { AssistantTasks, type LiveEvent } from "./assistant-tasks";
+import { isMayorWake, renderVoiceStatus } from "./assistant-status"; import { appendTranscript, resetTranscript } from "./assistant-transcript";
 type Workspace = { id: string; label: string; project: string };
-type LiveAnswer = { sessionId: string; sdp: string }; type LiveEvent = { type?: string; delta?: string; transcript?: string; delegation?: { id?: string; target?: string }; delegation_id?: string; event?: { type?: string; item?: { type?: string; call_id?: string; name?: string; arguments?: string } }; error?: { message?: string } };
-type PendingCall = { callId: string; name: string; args: string };
-const responseCalls = new Map<string, PendingCall[]>();
-const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
+type LiveAnswer = { sessionId: string; sdp: string }; const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 let connection: RTCPeerConnection | null = null, channel: RTCDataChannel | null = null;
 let microphone: MediaStream | null = null, stopMeter = () => {};
-let connecting = false, listening = false, pushToTalk = false, cancellationSent = false;
+let connecting = false, listening = false, pushToTalk = false;
 let closeTimer = 0, idleTimer = 0, connectionAttempt = 0;
-let activeDelegationId: string | null = null; let currentStatus: Status | null = null;
+let currentStatus: Status | null = null;
+const tasks = new AssistantTasks({ attempt: () => connectionAttempt, channel: () => channel, status: () => currentStatus, error, resetIdle });
 let userUtterance = "";
 let lastUserUtterance = "";
 let lastInputAt = 0;
-let delegationQueue = Promise.resolve(); const delegations = new Set<string>();
+let mayorName = "Mayor";
 function setStatus(status: Status): void {
-  currentStatus = status; activeDelegationId = status.activeTaskId; $("connection").textContent = status.message;
-  $("connection").dataset.live = String(status.liveConnected);
-  $("voice-state").textContent = status.liveConnected ? (status.listening ? "Listening" : "Walking") : status.message;
-  const talk = $<HTMLButtonElement>("connect");
-  talk.disabled = connecting || !status.available || !status.petReady || !status.herdrConnected;
-  talk.textContent = status.liveConnected ? (pushToTalk ? "Hold to talk" : "Listening") : "Connect voice";
-  $<HTMLButtonElement>("disconnect").disabled = !status.liveConnected && !connecting;
-  $<HTMLButtonElement>("cancel").disabled = !status.taskActive;
-  $<HTMLSelectElement>("workspace").disabled = status.liveConnected;
+  currentStatus = status; tasks.activeDelegationId = status.activeTaskId;
+  renderVoiceStatus(status, connecting, pushToTalk);
 }
 function error(value: unknown): void {
   const message = String(value);
@@ -39,6 +31,7 @@ async function load(): Promise<void> {
     invoke<Status>("get_orchestrator_status"),
   ]);
   $("assistant-title").textContent = preferences.preferences.app.orchestrator.displayName;
+  mayorName = preferences.preferences.app.orchestrator.displayName;
   const workspace = $<HTMLSelectElement>("workspace");
   workspace.replaceChildren(...workspaces.map((item) => new Option(`${item.label} · ${item.project}`, item.id)));
   if (!workspaces.length) workspace.append(new Option("No Herdr workspace available", ""));
@@ -112,166 +105,31 @@ function handleEvent(raw: string): void {
   }
   if (event.type === "session.input_transcript.done") {
     const utterance = (event.transcript ?? userUtterance).trim(); userUtterance = "";
+    if (isMayorWake(utterance, mayorName)) void invoke("focus_mayor");
     if (utterance) lastUserUtterance = utterance;
-    maybeCancel(utterance); }
+    tasks.maybeCancel(utterance); }
   if (event.type === "session.output_transcript.delta" && event.delta) {
-    resetIdle(); cancellationSent = false;
+    resetIdle(); tasks.cancellationSent = false;
     if (Date.now() - lastInputAt > 2500) userUtterance = "";
     appendTranscript("assistant", event.delta);
   }
   if (event.type === "response.event") {
     resetIdle();
-    handleResponseEvent(event, connectionAttempt);
+    tasks.handleResponseEvent(event, connectionAttempt);
   }
   if (event.type === "session.delegation.created") {
     resetIdle();
-    if (event.delegation && event.delegation.target !== "client") return;
-    const attempt = connectionAttempt;
     const task = userUtterance.trim() || lastUserUtterance;
     userUtterance = "";
     if (task.trim()) lastUserUtterance = task.trim();
-    const cancelTarget = activeDelegationId ?? currentStatus?.activeTaskId ?? null;
-    if (task.trim() && isCancelRequest(task) && cancelTarget && !cancellationSent) {
-      cancellationSent = true;
-      const cancelId = event.delegation?.id ?? "";
-      delegationQueue = delegationQueue.then(() => cancelDelegation(event, attempt, cancelId, cancelTarget));
-    } else {
-      const context = delegationContext(task, readTranscript());
-      delegationQueue = delegationQueue.then(() => delegate(event, attempt, context));
-    }
+    tasks.handleDelegation(event, task);
   }
   if (event.type === "session.closed") closeLocal();
   if (event.type === "error") error(event.error?.message ?? "GPT-Live reported an error.");
 }
-async function delegate(event: LiveEvent, attempt: number, context: string): Promise<void> {
-  const id = event.delegation?.id;
-  if (attempt !== connectionAttempt || !id || event.delegation?.target !== "client" || delegations.has(id)) return;
-  if (delegations.size >= 512) delegations.delete(delegations.values().next().value!);
-  delegations.add(id); cancellationSent = false;
-  const ownsTask = activeDelegationId === null;
-  if (ownsTask) activeDelegationId = id;
-  try {
-    const output = await invoke<string | null>("delegate_orchestrator_task", { delegationId: id, context, full: false });
-    if (attempt === connectionAttempt && output && channel?.readyState === "open") channel.send(JSON.stringify({
-      type: "session.commentary.append", event_id: crypto.randomUUID(), delegation_id: id, content: output,
-    }));
-  } catch (reason) {
-    if (attempt !== connectionAttempt) return; error(reason);
-    if (channel?.readyState === "open") channel.send(JSON.stringify({
-      type: "session.commentary.append", event_id: crypto.randomUUID(), delegation_id: id,
-      content: "The Pi agent could not complete that request. Please try again or choose another workspace.",
-    }));
-  } finally { if (ownsTask && activeDelegationId === id) activeDelegationId = null; if (attempt === connectionAttempt) resetIdle(); }
-}
-function sendChannel(payload: unknown): boolean {
-  if (channel?.readyState === "open") { channel.send(JSON.stringify(payload)); return true; }
-  return false;
-}
-function handleResponseEvent(envelope: LiveEvent, attempt: number): void {
-  const outerId = envelope.delegation_id;
-  const inner = envelope.event;
-  if (!outerId || !inner) return;
-  if (inner.type === "response.output_item.done" && inner.item?.type === "function_call" && inner.item.call_id && inner.item.name) {
-    const calls = responseCalls.get(outerId) ?? [];
-    if (calls.length < 8 && !calls.some((call) => call.callId === inner.item!.call_id)) {
-      calls.push({ callId: inner.item.call_id!, name: inner.item.name!, args: inner.item.arguments ?? "{}" });
-      responseCalls.set(outerId, calls);
-    }
-    return;
-  }
-  if (inner.type === "response.completed") {
-    const calls = responseCalls.get(outerId) ?? [];
-    responseCalls.delete(outerId);
-    if (calls.length) delegationQueue = delegationQueue.then(() => runBackendCalls(outerId, attempt, calls));
-  }
-}
-async function runBackendCalls(outerId: string, attempt: number, calls: PendingCall[]): Promise<void> {
-  if (attempt !== connectionAttempt || delegations.has(outerId)) return;
-  if (delegations.size >= 512) delegations.delete(delegations.values().next().value!);
-  delegations.add(outerId); cancellationSent = false;
-  const ownsTask = activeDelegationId === null;
-  if (ownsTask) activeDelegationId = outerId;
-  try {
-    for (const call of calls) {
-      if (attempt !== connectionAttempt) return;
-      const output = await executeBackendCall(outerId, call);
-      sendChannel({
-        type: "response.item.create", event_id: crypto.randomUUID(),
-        item: { type: "function_call_output", call_id: call.callId, output },
-      });
-    }
-    if (attempt === connectionAttempt) sendChannel({ type: "response.create", event_id: crypto.randomUUID() });
-  } finally { if (ownsTask && activeDelegationId === outerId) activeDelegationId = null; if (attempt === connectionAttempt) resetIdle(); }
-}
-async function executeBackendCall(outerId: string, call: PendingCall): Promise<string> {
-  try {
-    if (call.name === "run_pi_task") {
-      let task = "";
-      try { task = String(JSON.parse(call.args || "{}").task ?? ""); } catch { task = ""; }
-      const output = await invoke<string | null>("delegate_orchestrator_task", {
-        delegationId: outerId, context: toolTaskContext(task), full: true,
-      });
-      return JSON.stringify(
-        output
-          ? { status: "completed", result: output }
-          : {
-              status: "not_completed",
-              reason:
-                "The Pi task did not finish (it may have been canceled). Tell the user plainly and ask whether to retry instead of assuming progress.",
-            },
-      );
-    }
-    if (call.name === "cancel_pi_task") {
-      await invoke("cancel_orchestrator_task", { delegationId: outerId });
-      return JSON.stringify({ status: "canceled" });
-    }
-    return JSON.stringify({ status: "error", message: `Unknown tool: ${call.name}` });
-  } catch (reason) {
-    error(reason);
-    return JSON.stringify({
-      status: "error",
-      message: String(reason),
-      recovery:
-        "Tell the user plainly what failed and suggest the next step instead of assuming the work is still running.",
-    });
-  }
-}
-async function cancelDelegation(event: LiveEvent, attempt: number, newId: string, targetId: string): Promise<void> {
-  if (attempt !== connectionAttempt || !newId || event.delegation?.target !== "client" || delegations.has(newId)) { cancellationSent = false; return; }
-  if (delegations.size >= 512) delegations.delete(delegations.values().next().value!);
-  delegations.add(newId);
-  try {
-    await invoke("cancel_orchestrator_task", { delegationId: targetId });
-  } catch (reason) { error(reason); }
-  cancellationSent = false;
-  if (attempt === connectionAttempt && channel?.readyState === "open") channel.send(JSON.stringify({
-    type: "session.commentary.append", event_id: crypto.randomUUID(), delegation_id: newId,
-    content: "The active Pi task was canceled.",
-  }));
-}
-function isCancelRequest(value: string): boolean {
-  const text = value.trim().toLowerCase();
-  return /^(please\s+)?(cancel|stop)(\s+(that|it|the\s+(current\s+)?task))?[.!?]*$/.test(text)
-    || /^(never\s*mind)[.!?]*$/.test(text);
-}
-function maybeCancel(value: string): void {
-  const request = isCancelRequest(value);
-  const delegationId = activeDelegationId;
-  if (cancellationSent || !request || !delegationId) return;
-  cancellationSent = true;
-  void invoke("cancel_orchestrator_task", { delegationId }).then(() => {
-    if (channel?.readyState === "open") channel.send(JSON.stringify({
-      type: "session.commentary.append", event_id: crypto.randomUUID(), delegation_id: delegationId,
-      content: "The active Pi task was canceled.",
-    }));
-  }).catch((reason) => { cancellationSent = false; error(reason); });
-}
-function isTaskActive(): boolean {
-  return activeDelegationId !== null || currentStatus?.taskActive === true;
-}
 function onIdleTimeout(): void {
   if (!connection) return;
-  if (isTaskActive()) {
+  if (tasks.activeDelegationId !== null || currentStatus?.taskActive === true) {
     clearTimeout(idleTimer);
     idleTimer = window.setTimeout(onIdleTimeout, 60_000);
     return;
@@ -301,7 +159,7 @@ function closeLocal(notifyBackend: unknown = true): void {
   connectionAttempt += 1; connecting = false; clearTimeout(closeTimer); clearTimeout(idleTimer); closeTimer = 0; idleTimer = 0; stopMeter(); stopMeter = () => {}; microphone?.getTracks().forEach((track) => track.stop());
   microphone = null;
   channel?.removeEventListener("close", closeLocal); channel?.close(); channel = null; connection?.close(); connection = null;
-  resetTranscript(); userUtterance = ""; lastUserUtterance = ""; lastInputAt = 0; delegations.clear(); responseCalls.clear(); listening = false; pushToTalk = false; cancellationSent = false; activeDelegationId = null;
+  resetTranscript(); userUtterance = ""; lastUserUtterance = ""; lastInputAt = 0; tasks.clear(); listening = false; pushToTalk = false;
   if (notifyBackend !== false) void invoke("stop_orchestrator_session");
 }
 $("connect").addEventListener("click", () => { if (!connection) void connect(false).catch(error); });
@@ -323,7 +181,7 @@ $("connect").addEventListener("keydown", (event) => {
 installReleaseGuards($("connect"), releaseTalk);
 $("retry").addEventListener("click", () => void load().catch(error));
 $("disconnect").addEventListener("click", closeSession);
-$("cancel").addEventListener("click", () => { const delegationId = activeDelegationId; if (!delegationId || cancellationSent) return; cancellationSent = true; void invoke("cancel_orchestrator_task", { delegationId }).catch((reason) => { cancellationSent = false; error(reason); }); });
+$("cancel").addEventListener("click", () => tasks.cancelActive());
 void listen("orchestrator-status-refresh", () => {
   void invoke<Status>("get_orchestrator_status")
     .then((status) => {

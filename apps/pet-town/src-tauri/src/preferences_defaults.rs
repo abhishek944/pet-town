@@ -6,6 +6,7 @@ use crate::preferences_model::{
 impl Default for PetPreferences {
     fn default() -> Self {
         Self {
+            custom_name: String::new(),
             included_in_random_cast: true,
             appearance: AppearancePreferences {
                 scale_percent: 100,

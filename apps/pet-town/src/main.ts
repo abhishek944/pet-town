@@ -64,8 +64,6 @@ systemReducedMotion.addEventListener("change", (event) => {
   renderer.setSystemReducedMotion(event.matches);
 });
 installPetInteractions(village, {
-  actionsFor: (id) => renderer.actionsFor(id),
-  startAction: (id, actionId) => renderer.startAction(id, actionId),
   openPreferences: (id) => {
     const petId = citizens.get(id)?.sprite;
     if (petId) void invoke("open_preferences", { petId });

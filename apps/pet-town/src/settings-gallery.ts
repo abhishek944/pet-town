@@ -49,13 +49,16 @@ export class SettingsGallery {
     const includedCount = ids.filter((id) => draft.pets[id].includedInRandomCast).length;
     this.count.textContent = `${includedCount} of ${ids.length} included`;
     for (const [id, card] of this.cards) {
+      const name =
+        draft.pets[id].customName?.trim() || characterDisplayName(id) || friendlyPetName(id);
+      card.querySelector<HTMLElement>(".name")!.textContent = name;
       const excluded = !draft.pets[id].includedInRandomCast;
       const origin = isSystemPet(id) ? "system pet" : "custom pet";
       card.classList.toggle("excluded", excluded);
       card.querySelector<HTMLElement>(".veil")!.hidden = !excluded;
       card.setAttribute(
         "aria-label",
-        `${characterDisplayName(id) ?? friendlyPetName(id)}, ${origin}, ${excluded ? "excluded from" : "included in"} random cast`,
+        `${name}, ${origin}, ${excluded ? "excluded from" : "included in"} random cast`,
       );
     }
     if (this.visible) this.loadPortraits();

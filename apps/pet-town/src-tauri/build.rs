@@ -80,20 +80,43 @@ fn runtime_hash() -> String {
         let mut manifest = None;
         for entry in archive.entries().expect("invalid Pi archive") {
             let mut entry = entry.expect("invalid Pi archive entry");
-            if entry.path().expect("invalid archive path").as_ref() == Path::new("runtime-manifest.json") {
+            if entry.path().expect("invalid archive path").as_ref()
+                == Path::new("runtime-manifest.json")
+            {
                 use std::io::Read;
                 let mut bytes = Vec::new();
-                entry.read_to_end(&mut bytes).expect("could not read Pi manifest");
-                manifest = Some(serde_json::from_slice::<serde_json::Value>(&bytes).expect("invalid Pi manifest"));
+                entry
+                    .read_to_end(&mut bytes)
+                    .expect("could not read Pi manifest");
+                manifest = Some(
+                    serde_json::from_slice::<serde_json::Value>(&bytes)
+                        .expect("invalid Pi manifest"),
+                );
                 break;
             }
         }
         let manifest = manifest.expect("Pi runtime manifest is missing");
-        let arch = if std::env::var("CARGO_CFG_TARGET_ARCH").as_deref() == Ok("aarch64") { "arm64" } else { "x64" };
+        let arch = if std::env::var("CARGO_CFG_TARGET_ARCH").as_deref() == Ok("aarch64") {
+            "arm64"
+        } else {
+            "x64"
+        };
         assert_eq!(manifest["architecture"].as_str(), Some(arch), "Wrong Pi runtime architecture: run scripts/prepare-pi-runtime.sh for the target and copy the archive into src-tauri/resources");
-        let keys = ["formatVersion", "architecture", "nodeVersion", "piVersion", "nodeSha256", "launcherSha256", "entrypointSha256", "files"];
+        let keys = [
+            "formatVersion",
+            "architecture",
+            "nodeVersion",
+            "piVersion",
+            "nodeSha256",
+            "launcherSha256",
+            "entrypointSha256",
+            "files",
+        ];
         let object = manifest.as_object().expect("Pi manifest must be an object");
-        assert!(object.len() == keys.len() && keys.iter().all(|key| object.contains_key(*key)), "Outdated Pi runtime manifest: regenerate with scripts/prepare-pi-runtime.sh");
+        assert!(
+            object.len() == keys.len() && keys.iter().all(|key| object.contains_key(*key)),
+            "Outdated Pi runtime manifest: regenerate with scripts/prepare-pi-runtime.sh"
+        );
         assert_eq!(manifest["formatVersion"], 1);
         assert_eq!(manifest["nodeVersion"], "22.21.1");
         assert_eq!(manifest["piVersion"], "0.85.1");

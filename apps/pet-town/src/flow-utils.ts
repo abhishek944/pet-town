@@ -1,4 +1,4 @@
-import { HERDR_STATES, type HerdrState } from "./flow-types";
+import { PET_STATES, type HerdrState } from "./flow-types";
 
 export const IDENTIFIER_PATTERN = /^[a-z][a-z0-9-]{0,63}$/;
 const OWN = Object.prototype.hasOwnProperty;
@@ -64,7 +64,7 @@ export function fnv1a(value: string): number {
 }
 
 export function normalizeHerdrState(status: string): HerdrState {
-  return (HERDR_STATES as readonly string[]).includes(status) ? (status as HerdrState) : "unknown";
+  return (PET_STATES as readonly string[]).includes(status) ? (status as HerdrState) : "unknown";
 }
 
 export interface TrackPosition {

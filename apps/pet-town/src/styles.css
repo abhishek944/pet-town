@@ -48,7 +48,8 @@ body {
 .pet-stack {
   position: absolute;
   z-index: 2;
-  bottom: 7px;
+  /* Offset the image box by its transparent bottom padding so visible feet share a baseline. */
+  bottom: calc(7px - var(--foot-offset-y, 0px));
   left: 50%;
   display: flex;
   flex-direction: column;

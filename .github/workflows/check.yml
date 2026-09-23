@@ -39,7 +39,7 @@ jobs:
       - run: pnpm run check:focus
       - run: pnpm run check:interactions
       - run: pnpm run check:preferences
-      - run: pnpm run build
+      - run: pnpm exec turbo run build internal:build-frontend
       - name: Check locked Rust build at the declared MSRV
         run: cargo +1.88.0 check --locked --manifest-path apps/pet-town/src-tauri/Cargo.toml --target ${{ matrix.target }}
       - name: Verify packaged source fingerprints

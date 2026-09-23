@@ -26,7 +26,7 @@ export function applyOrchestratorCitizen(
     id,
     label: view.displayName,
     source: "orchestrator",
-    status: view.listening ? "blocked" : "working",
+    status: view.listening ? "listening" : "working",
     sprite: view.petId,
     missedPolls: 0,
     retiring: false,
@@ -54,13 +54,21 @@ export function orchestratorPack(base: CompiledBehaviorPack): CompiledBehaviorPa
   return Object.freeze({
     ...base,
     fingerprint: `${base.fingerprint}:orchestrator`,
-    actions: Object.freeze({}),
+    stateAssignments: Object.freeze({
+      ...base.stateAssignments,
+      idle: { animation: mapping.walking, action: "walking" as const, visible: true },
+      working: { animation: mapping.walking, action: "walking" as const, visible: true },
+      done: { animation: mapping.walking, action: "walking" as const, visible: true },
+      unknown: { animation: mapping.walking, action: "walking" as const, visible: true },
+      listening: { animation: mapping.listening, action: "idle" as const, visible: true },
+    }),
     states: Object.freeze({
       idle: walking,
       working: walking,
-      blocked: listening,
+      blocked: base.states.blocked,
       done: walking,
       unknown: walking,
+      listening,
     }),
   });
 }

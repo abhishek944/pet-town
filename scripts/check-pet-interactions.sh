@@ -59,8 +59,6 @@ citizen.dataset.agentId = "agent-1";
 const pet = new FakeElement("pet", citizen);
 const calls = [];
 const dispose = installPetInteractions(root, {
-  actionsFor: () => [{ id: "wave", label: "Wave" }],
-  startAction: (id, action) => { calls.push(["action", id, action]); return true; },
   openPreferences: (id) => calls.push(["preferences", id]),
   beginDrag: (id, x) => { calls.push(["begin", id, x]); return true; },
   moveDrag: (id, x) => calls.push(["move", id, x]),
@@ -107,16 +105,8 @@ fire("contextmenu", { target: pet, clientX: 480, clientY: 145, preventDefault() 
 assert(contextPrevented, "pet context menu did not replace the system menu");
 const menu = root.children.find((child) => child.className === "pet-menu");
 assert(menu && menu.style.left === "416px" && menu.style.top === "116px", "menu was not clamped to the window");
-const waveButton = menu.children[0];
-assert(waveButton.tag === "button" && waveButton.children.length === 2, "menu action lost its icon or label");
-assert(waveButton.children[0].tag === "svg" && waveButton.children[0].children.length > 0, "menu action has no icon paths");
-assert(waveButton.children[1].tag === "span" && waveButton.children[1].textContent === "Wave", "menu action label is wrong");
-menu.children[0].listeners.get("click")();
-assert(calls.some(([name, id, action]) => name === "action" && id === "agent-1" && action === "wave"), "menu action was not invoked");
-assert(!root.children.includes(menu), "menu did not close after action");
-fire("contextmenu", { target: pet, clientX: 200, clientY: 80, preventDefault() {} });
-const preferencesMenu = root.children.find((child) => child.className === "pet-menu");
-const preferencesButton = preferencesMenu.children[2];
+const preferencesButton = menu.children[0];
+assert(menu.children.length === 1, "retired animation actions remain in the menu");
 assert(preferencesButton.children.length === 2, "preferences option lost its icon or label");
 assert(preferencesButton.children[0].tag === "svg" && preferencesButton.children[0].children.length > 0, "preferences option has no icon paths");
 assert(preferencesButton.children[1].textContent === "Preferences…", "preferences label is wrong");

@@ -1,26 +1,27 @@
 import { getVersion } from "@tauri-apps/api/app"; import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window"; import { listen } from "@tauri-apps/api/event";
-import { behaviorPackForCharacter, characterDisplayName } from "./character-packs";
+import { characterDisplayName } from "./character-packs";
+import { configurePetPreview } from "./settings-state-map";
 import { loadPetPacks } from "./settings-pack-loader";
 import { clonePreferences, friendlyPetName, motionFactor, preferencesEqual, type LabelVisibility, type MotionLevel, type PreferencesFile, type PreferencesSnapshot, type SettingsAppearance, type SettingsContext } from "./preferences-types";
-import { previewAnimations, selectedPreviewAnimationId, type PreviewAnimationOption } from "./settings-preview";
+import { selectedPreviewAnimationId, type PreviewAnimationOption } from "./settings-preview";
 import { mergeAppliedDraft, settingsMessage, shouldShowApplyError } from "./settings-apply"; import { mergeLocalPreferenceEdits } from "./settings-three-way";
 import { renderChoiceControls, setSettingsReadOnly } from "./settings-choice-controls";
 import { SettingsStartupBuffer } from "./settings-startup"; import { SettingsNavigation } from "./settings-navigation";
 import { AdapterSettings } from "./settings-adapters"; import { AssistantSettings } from "./settings-assistant"; import { PetStudio } from "./settings-studio";
 import { VillageVisibilitySettings } from "./settings-village";
-const byId = <T extends HTMLElement>(id: string): T => {
-  const element = document.getElementById(id);
-  if (!element) throw new Error(`Missing settings control: ${id}`);
-  return element as T;
-}; const petSelect = byId<HTMLSelectElement>("pet-select");
-const animationSelect = byId<HTMLSelectElement>("animation-select");
+import { bindRange as bindInputRange, bindSwitch as bindInputSwitch } from "./settings-range";
+import { byId, setSwitch } from "./settings-dom";
+const petSelect = byId<HTMLSelectElement>("pet-select");
 const previewPet = byId<HTMLImageElement>("preview-pet"); const preview = byId<HTMLElement>("preview");
 const resetPet = byId<HTMLButtonElement>("reset-pet"); const resetAll = byId<HTMLButtonElement>("reset-all");
 const apply = byId<HTMLButtonElement>("apply"); const dirty = byId<HTMLElement>("dirty");
 const message = byId<HTMLElement>("message");
 let snapshot: PreferencesSnapshot; let draft: PreferencesFile;
 let selectedPetId = ""; let animationOptions: PreviewAnimationOption[] = [];
+let studio: PetStudio | undefined;
+let selectedAnimationId = "";
+let previewAction: "idle" | "walking" | null = null;
 let draftMessage = ""; let applyGeneration = 0; let applying = false;
 const adapterSettings = new AdapterSettings((next) => {
   draftMessage = next;
@@ -32,30 +33,32 @@ const selectedAnimationByPet = new Map<string, string>(); const navigation = new
 const villageVisibility = new VillageVisibilitySettings((error) => { draftMessage = error; render(); });
 function pet() { return draft.pets[selectedPetId]; }
 function isDirty(): boolean { return !preferencesEqual(draft, snapshot.preferences); }
-function setSwitch(id: string, checked: boolean): void {
-  byId<HTMLButtonElement>(id).setAttribute("aria-checked", String(checked));
-}
-function bindSwitch(id: string, update: (checked: boolean) => void): void {
-  byId<HTMLButtonElement>(id).addEventListener("click", (event) => {
-    const current = (event.currentTarget as HTMLButtonElement).getAttribute("aria-checked") === "true";
-    update(!current);
-    render();
-  });
-}
-function selectPreviewAnimations(preferred?: string): void {
-  animationOptions = previewAnimations(behaviorPackForCharacter(selectedPetId));
-  animationSelect.replaceChildren(...animationOptions.map((item) => new Option(item.label, item.id)));
-  const remembered = preferred ?? selectedAnimationByPet.get(selectedPetId);
-  const selected = selectedPreviewAnimationId(animationOptions, remembered);
-  animationSelect.value = selected;
-  animationSelect.disabled = animationOptions.length === 0;
-  selectedAnimationByPet.set(selectedPetId, selected);
+const bindSwitch = (id: string, update: (checked: boolean) => void) => bindInputSwitch(id, update, render);
+function selectPreviewAnimations(): void {
+  previewAction = null;
+  animationOptions = configurePetPreview(
+    selectedPetId,
+    (clip, action) => {
+      const option = animationOptions.find((item) => item.id === `clip:${clip}`);
+      if (!option) return;
+      selectedAnimationId = option.id;
+      previewAction = action;
+      selectedAnimationByPet.set(selectedPetId, option.id);
+      render();
+    },
+    (petId, state, file) => {
+      navigation.show("studio");
+      studio?.importApngForState(petId, state, file);
+    },
+  );
+  selectedAnimationId = selectedPreviewAnimationId(animationOptions, selectedAnimationByPet.get(selectedPetId));
+  selectedAnimationByPet.set(selectedPetId, selectedAnimationId);
 }
 function render(): void {
   const item = pet();
   if (!item) return;
   navigation.gallery.update(snapshot.petIds, draft);
-  const animation = animationOptions.find((option) => option.id === animationSelect.value);
+  const animation = animationOptions.find((option) => option.id === selectedAnimationId);
   if (animation && previewPet.dataset.previewAsset !== animation.assetUrl) {
     previewPet.dataset.previewAsset = animation.assetUrl;
     previewPet.src = animation.assetUrl;
@@ -65,10 +68,13 @@ function render(): void {
   preview.style.setProperty("--preview-size", `${Math.min(190, Math.round(148 * clipScale * item.appearance.scalePercent / 100))}px`);
   preview.style.setProperty("--preview-opacity", String(item.appearance.opacityPercent / 100));
   preview.style.setProperty("--preview-walk-duration", `${(4 / motionFactor(item.motion.level)).toFixed(2)}s`);
-  preview.dataset.reducedMovement = String(item.motion.reduced);
   preview.dataset.pauseOnHover = String(item.motion.pauseOnHover);
-  preview.dataset.locomotion = String(animation?.locomotion ?? false);
+  preview.dataset.locomotion = String(previewAction ? previewAction === "walking" : animation?.locomotion ?? false);
   byId<HTMLInputElement>("pet-size").value = String(item.appearance.scalePercent);
+  const customName = byId<HTMLInputElement>("pet-custom-name");
+  if (customName.value !== item.customName) customName.value = item.customName;
+  const selectedOption = petSelect.selectedOptions[0];
+  if (selectedOption) selectedOption.textContent = item.customName.trim() || characterDisplayName(selectedPetId) || friendlyPetName(selectedPetId);
   byId<HTMLOutputElement>("pet-size-value").value = `${item.appearance.scalePercent}%`;
   byId<HTMLInputElement>("pet-opacity").value = String(item.appearance.opacityPercent);
   byId<HTMLOutputElement>("pet-opacity-value").value = `${item.appearance.opacityPercent}%`;
@@ -76,7 +82,6 @@ function render(): void {
   byId<HTMLInputElement>("label-size").value = String(item.labels.textScalePercent);
   byId<HTMLOutputElement>("label-size-value").value = `${item.labels.textScalePercent}%`;
   byId<HTMLSelectElement>("motion-level").value = item.motion.level;
-  setSwitch("reduced-motion", item.motion.reduced);
   setSwitch("pause-hover", item.motion.pauseOnHover);
   renderChoiceControls(draft, snapshot, item);
   setSettingsReadOnly(snapshot.readOnly);
@@ -90,28 +95,22 @@ function render(): void {
   resetAll.disabled = applying || snapshot.readOnly;
   dirty.hidden = !changed; message.textContent = settingsMessage(draftMessage, snapshot.warning);
 }
-function bindRange(id: string, update: (value: number) => void): void {
-  byId<HTMLInputElement>(id).addEventListener("input", (event) => {
-    update(Number((event.currentTarget as HTMLInputElement).value));
-    render();
-  });
-}
+const bindRange = (id: string, update: (value: number) => void) => bindInputRange(id, update, render);
 function bindControls(): void {
   petSelect.addEventListener("change", () => {
     selectedPetId = petSelect.value;
     selectPreviewAnimations();
     render();
   });
-  animationSelect.addEventListener("change", () => {
-    selectedAnimationByPet.set(selectedPetId, animationSelect.value);
+  bindRange("pet-size", (value) => { pet().appearance.scalePercent = value; });
+  byId<HTMLInputElement>("pet-custom-name").addEventListener("input", (event) => {
+    pet().customName = (event.currentTarget as HTMLInputElement).value;
     render();
   });
-  bindRange("pet-size", (value) => { pet().appearance.scalePercent = value; });
   bindRange("pet-opacity", (value) => { pet().appearance.opacityPercent = value; });
   bindRange("label-size", (value) => { pet().labels.textScalePercent = value; });
   byId<HTMLSelectElement>("label-visibility").addEventListener("change", (event) => { pet().labels.visibility = (event.currentTarget as HTMLSelectElement).value as LabelVisibility; render(); });
   byId<HTMLSelectElement>("motion-level").addEventListener("change", (event) => { pet().motion.level = (event.currentTarget as HTMLSelectElement).value as MotionLevel; render(); });
-  bindSwitch("reduced-motion", (checked) => { pet().motion.reduced = checked; });
   bindSwitch("pause-hover", (checked) => { pet().motion.pauseOnHover = checked; });
   bindSwitch("include-random-cast", (checked) => { pet().includedInRandomCast = checked; });
   bindSwitch("hide-completed-pets", (checked) => { draft.app.hideCompletedPets = checked; });
@@ -156,7 +155,7 @@ function installSnapshot(next: PreferencesSnapshot, selection?: string | null, p
   draft = pending ? mergeLocalPreferenceEdits(previous, pending, next.preferences) : clonePreferences(next.preferences);
   const preferred = selection ?? (selectedPetId || next.preferences.app.lastSelectedPetId);
   selectedPetId = next.petIds.includes(preferred) ? preferred : next.petIds[0];
-  petSelect.replaceChildren(...next.petIds.map((id) => new Option(characterDisplayName(id) ?? friendlyPetName(id), id)));
+  petSelect.replaceChildren(...next.petIds.map((id) => new Option(draft.pets[id]?.customName?.trim() || characterDisplayName(id) || friendlyPetName(id), id)));
   petSelect.value = selectedPetId;
   selectPreviewAnimations();
   render();
@@ -169,15 +168,15 @@ function installSelection(next: string | null, fromGallery = false, focus = true
   selectPreviewAnimations(); render(); navigation.show("pet", focus);
 }
 async function start(): Promise<void> {
-  const extensionWarning = await loadPetPacks(); bindControls(); const studio = new PetStudio();
-  if (extensionWarning) studio.showExtensionWarning(extensionWarning);
+  const extensionWarning = await loadPetPacks(); bindControls(); const studioInstance = new PetStudio(); studio = studioInstance;
+  if (extensionWarning) studioInstance.showExtensionWarning(extensionWarning);
   const startup = new SettingsStartupBuffer<PreferencesSnapshot, string | null>();
   await Promise.all([
     listen<SettingsContext>("settings-selection", (event) =>
       startup.receiveSelection(event.payload.selectedPetId, (id) => installSelection(id))),
     listen<PreferencesSnapshot>("preferences-reloaded", (event) => startup.receiveSnapshot(event.payload, installSnapshot)),
     listen<PreferencesSnapshot>("pet-studio-preferences", async (event) => {
-      const warning = await loadPetPacks(); studio.refreshSources(); if (warning) studio.showExtensionWarning(warning);
+      const warning = await loadPetPacks(); studioInstance.refreshSources(); if (warning) studioInstance.showExtensionWarning(warning);
       startup.receiveSnapshot(event.payload, (next) => installSnapshot(next, undefined, true));
     }),
   ]);

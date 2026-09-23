@@ -20,41 +20,28 @@
   },
   "states": {
     "idle": {
-      "completion": "restart",
-      "flow": {
-        "type": "hide",
-        "durationMs": 1000
-      }
+      "action": "idle",
+      "visible": false
     },
     "working": {
-      "completion": "restart",
-      "flow": {
-        "type": "move",
-        "clip": "walk",
-        "durationMs": 2400,
-        "speedPxPerSecond": 30
-      }
+      "animation": "walk",
+      "action": "walking"
     },
     "blocked": {
-      "completion": "restart",
-      "flow": {
-        "type": "play",
-        "clip": "walk"
-      }
+      "animation": "walk",
+      "action": "idle"
     },
     "done": {
-      "completion": "restart",
-      "flow": {
-        "type": "play",
-        "clip": "walk"
-      }
+      "animation": "walk",
+      "action": "idle"
     },
     "unknown": {
-      "completion": "restart",
-      "flow": {
-        "type": "play",
-        "clip": "walk"
-      }
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "listen",
+      "action": "idle"
     }
   },
   "orchestratorAnimations": {

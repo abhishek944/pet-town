@@ -1,11 +1,8 @@
 import { allCharacterIds, behaviorPackForCharacter, characterDisplayName } from "./character-packs";
 import { friendlyPetName } from "./preferences-types";
+import { PET_STATES, type HerdrState, type PetAction } from "./flow-types";
 
 export type StudioMode = "new" | "extend";
-export const EXTENSION_STATES = ["idle", "working", "blocked", "done", "unknown"] as const;
-const NEW_SLOTS = ["walk", "work", "blocked", "celebrate", "sleep", "unknown"] as const;
-const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-
 export interface StudioChoice {
   mode: StudioMode;
   name: string;
@@ -15,6 +12,21 @@ export interface StudioIssue {
   message: string;
   fields: string[];
 }
+export interface StateSelection {
+  animation: string | null;
+  action: PetAction;
+  visible: boolean;
+}
+const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+const label = (state: HerdrState): string =>
+  ({
+    idle: "Idle",
+    working: "Running",
+    blocked: "Blocked",
+    done: "Completed",
+    unknown: "Unknown",
+    listening: "Listening (mayor)",
+  })[state];
 
 export class StudioWorkflow {
   constructor(onChange: () => void) {
@@ -25,13 +37,13 @@ export class StudioWorkflow {
   }
   startAssistantPet(draftId: string, busy: boolean, reset: () => void): string {
     if (busy) return "Wait for the current Studio action to finish.";
-    if (draftId) return "Finish or discard the current draft before creating an assistant pet.";
+    if (draftId) return "Finish or discard the current draft before creating a mayor pet.";
     if (location.hash === "#studio-orchestrator") location.hash = "studio";
     const mode = $<HTMLSelectElement>("studio-mode");
     mode.value = "new";
     mode.dispatchEvent(new Event("change", { bubbles: true }));
     reset();
-    return "Create a new pet, import APNGs, then assign different Walking and Listening animations.";
+    return "Create a new pet, import an APNG, and assign an APNG and action to each state.";
   }
   sync(draftId: string): void {
     const mode = this.mode();
@@ -57,66 +69,98 @@ export class StudioWorkflow {
         ? (characterDisplayName(baseId) ?? friendlyPetName(baseId))
         : $<HTMLInputElement>("studio-name").value.trim();
     if (!mode)
-      return {
-        message: "Choose whether to create a new pet or extend an existing pet.",
-        fields: ["studio-mode"],
-      };
+      return { message: "Choose whether to create or extend a pet.", fields: ["studio-mode"] };
     if (mode === "extend" && !baseId)
-      return { message: "Choose the pet you want to extend.", fields: ["studio-existing"] };
+      return { message: "Choose a pet to extend.", fields: ["studio-existing"] };
     if (mode === "new" && !name)
       return { message: "Enter a name for the new pet.", fields: ["studio-name"] };
     return { mode, name, baseId };
   }
   renderMappings(animations: string[]): void {
     const root = $("studio-mappings");
-    const extending = this.mode() === "extend";
-    const names = extending ? EXTENSION_STATES : NEW_SLOTS;
     root.replaceChildren(
-      ...names.map((slot) => {
-        const label = document.createElement("label");
-        label.textContent = friendlyPetName(slot);
-        const select = document.createElement("select");
-        select.id = extending ? `studio-extend-${slot}` : `studio-map-${slot}`;
-        label.append(select);
-        return label;
+      ...PET_STATES.map((state) => {
+        const row = document.createElement("div");
+        row.className = "studio-state-row";
+        const title = document.createElement("strong");
+        title.textContent = label(state);
+        const clipLabel = document.createElement("label");
+        clipLabel.textContent = "APNG";
+        const clip = document.createElement("select");
+        clip.id = `studio-state-${state}-animation`;
+        clip.addEventListener("change", () => {
+          clip.dataset.touched = "true";
+        });
+        clipLabel.append(clip);
+        const actionLabel = document.createElement("label");
+        actionLabel.textContent = "Action";
+        const action = document.createElement("select");
+        action.id = `studio-state-${state}-action`;
+        action.replaceChildren(new Option("Idle", "idle"), new Option("Walking", "walking"));
+        actionLabel.append(action);
+        row.append(title, clipLabel, actionLabel);
+        return row;
       }),
     );
-    $("studio-mapping-hint").textContent = extending
-      ? "Optionally replace a state with an imported APNG. Unchanged states keep their existing behavior."
-      : "Assign imported APNGs to every required behavior.";
-    $("studio-save").textContent = extending ? "Validate & save extension" : "Validate & save pet";
+    $("studio-mapping-hint").textContent =
+      "Choose an APNG and an action for each visible state. Hidden states need no APNG. The same APNG can serve several states.";
+    $("studio-save").textContent =
+      this.mode() === "extend" ? "Validate & save extension" : "Validate & save pet";
     this.refreshMappings(animations);
   }
   refreshMappings(animations: string[]): void {
     const extending = this.mode() === "extend";
-    for (const name of extending ? EXTENSION_STATES : NEW_SLOTS) {
-      const select = $<HTMLSelectElement>(
-        extending ? `studio-extend-${name}` : `studio-map-${name}`,
+    const id = $<HTMLSelectElement>("studio-existing").value;
+    const pack = extending && id ? behaviorPackForCharacter(id) : null;
+    for (const state of PET_STATES) {
+      const select = $<HTMLSelectElement>(`studio-state-${state}-animation`);
+      const action = $<HTMLSelectElement>(`studio-state-${state}-action`);
+      if (!select || !action) continue;
+      const previous = select.value;
+      const existing = pack
+        ? Object.keys(pack.clips).map(
+            (clip) => new Option(`${friendlyPetName(clip)} (existing)`, `existing:${clip}`),
+          )
+        : [];
+      const imported = animations.map(
+        (clip) => new Option(friendlyPetName(clip), `imported:${clip}`),
       );
-      const value = select.value;
-      const empty = extending ? "Keep existing behavior" : "Choose…";
-      select.replaceChildren(
-        new Option(empty, ""),
-        ...animations.map((id) => new Option(friendlyPetName(id), id)),
-      );
-      select.value = animations.includes(value)
-        ? value
-        : !extending && animations.includes(name)
-          ? name
-          : "";
+      select.replaceChildren(new Option("Hidden", ""), ...existing, ...imported);
+      const defaultAssignment = pack?.stateAssignments[state];
+      const initial =
+        defaultAssignment?.visible && defaultAssignment.animation
+          ? `existing:${defaultAssignment.animation}`
+          : ["idle", "unknown"].includes(state)
+            ? ""
+            : animations.length
+              ? `imported:${animations[0]}`
+              : "";
+      select.value =
+        select.dataset.touched && [...select.options].some((option) => option.value === previous)
+          ? previous
+          : initial;
+      if (!action.dataset.initialized) {
+        action.value = defaultAssignment?.action ?? (state === "working" ? "walking" : "idle");
+        action.dataset.initialized = "true";
+      }
     }
   }
-  stateAssignments(): Record<string, string> {
-    return Object.fromEntries(
-      EXTENSION_STATES.map((state) => [
-        state,
-        $<HTMLSelectElement>(`studio-extend-${state}`).value,
-      ]).filter(([, animation]) => animation),
-    );
+  assignImportedAnimation(state: HerdrState, animationId: string): boolean {
+    const select = $<HTMLSelectElement>(`studio-state-${state}-animation`);
+    const value = `imported:${animationId}`;
+    if (![...select.options].some((option) => option.value === value)) return false;
+    select.value = value;
+    select.dataset.touched = "true";
+    return select.value === value;
   }
-  existingActionIds(): string[] {
-    const id = $<HTMLSelectElement>("studio-existing").value;
-    return id ? Object.keys(behaviorPackForCharacter(id).actions) : [];
+  stateAssignments(): Record<HerdrState, StateSelection> {
+    return Object.fromEntries(
+      PET_STATES.map((state) => {
+        const value = $<HTMLSelectElement>(`studio-state-${state}-animation`).value;
+        const action = $<HTMLSelectElement>(`studio-state-${state}-action`).value as PetAction;
+        return [state, { animation: value || null, action, visible: Boolean(value) }];
+      }),
+    ) as Record<HerdrState, StateSelection>;
   }
   lock(busy: boolean, draftId: string): void {
     for (const id of ["studio-mode", "studio-existing"] as const) {

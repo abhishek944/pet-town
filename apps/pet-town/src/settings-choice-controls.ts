@@ -13,12 +13,12 @@ function setSwitch(id: string, checked: boolean): void {
 export function setSettingsReadOnly(readOnly: boolean): void {
   const ids = [
     "pet-select",
+    "pet-custom-name",
     "pet-size",
     "pet-opacity",
     "label-visibility",
     "label-size",
     "motion-level",
-    "reduced-motion",
     "pause-hover",
     "open-with-herdr",
     "settings-appearance",

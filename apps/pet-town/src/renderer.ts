@@ -146,14 +146,6 @@ export class VillageRenderer {
     for (const element of this.elements.values()) { if (paused) freezePetFrame(element); else unfreezePetFrame(element); }
     this.publishHitRegions();
   }
-  actionsFor(id: string): Array<{ id: string; label: string }> {
-    const actions = this.motions.get(id)?.behavior.pack.actions ?? {};
-    return Object.entries(actions).map(([actionId, action]) => ({ id: actionId, label: action.label })); }
-  startAction(id: string, actionId: string): boolean {
-    const motion = this.motions.get(id);
-    if (this.paused || !motion || motion.dragging) return false;
-    const started = motion.behavior.startAction(actionId);
-    if (started) motion.pendingElapsedMs = 0; return started; }
   beginDrag(id: string, clientX: number): boolean {
     const motion = this.motions.get(id);
     if (this.paused || !motion) return false;

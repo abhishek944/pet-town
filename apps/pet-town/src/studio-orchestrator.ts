@@ -27,7 +27,7 @@ export class StudioOrchestrator {
     this.approved.clear();
     select("studio-orchestrator-walk").replaceChildren(new Option("Choose…", ""));
     select("studio-orchestrator-listening").replaceChildren(new Option("Choose…", ""));
-    (document.getElementById("studio-assign-orchestrator") as HTMLInputElement).checked = true;
+    (document.getElementById("studio-assign-orchestrator") as HTMLInputElement).checked = false;
     this.previews();
   }
 

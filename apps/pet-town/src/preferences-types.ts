@@ -25,10 +25,11 @@ export interface OrchestratorPreferences {
 }
 
 export interface PetPreferences {
+  customName: string;
   includedInRandomCast: boolean;
   appearance: { scalePercent: number; opacityPercent: number };
   labels: { visibility: LabelVisibility; textScalePercent: number };
-  motion: { level: MotionLevel; reduced: boolean; pauseOnHover: boolean };
+  motion: { level: MotionLevel; pauseOnHover: boolean };
 }
 
 export interface PreferencesFile {

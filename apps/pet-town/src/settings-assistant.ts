@@ -1,7 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { ASSISTANT_PET_ID, type PreferencesFile } from "./preferences-types";
-import { bundledBehaviorPackForCharacter } from "./character-packs";
+import type { PreferencesFile } from "./preferences-types";
+import {
+  modelLabel,
+  renderAssistantStatus,
+  renderAssistantToggle,
+  renderPet,
+} from "./settings-assistant-view";
 import { open } from "@tauri-apps/plugin-dialog";
 import type { OrchestratorStatus } from "./orchestrator-status";
 
@@ -27,8 +32,6 @@ export class AssistantSettings {
     message: "Not connected",
   };
 
-
-
   constructor(
     private readonly draft: () => PreferencesFile,
     private readonly changed: () => void,
@@ -50,19 +53,19 @@ export class AssistantSettings {
     const promptBox = byId<HTMLTextAreaElement>("assistant-system-prompt");
     if (promptBox.value !== value.systemPrompt) promptBox.value = value.systemPrompt;
     this.renderFolder();
-    const name = value.displayName.trim() || "your assistant";
+    const name = value.displayName.trim() || "Mayor";
     byId<HTMLElement>("assistant-intro").textContent = `Hi, I’m ${name}.`;
     byId<HTMLElement>("assistant-wake-phrase").textContent = value.enabled
-      ? `Say “Hey, ${name}” to start talking.`
-      : `Start the assistant, then say “Hey, ${name}” to start talking.`;
+      ? `Say “Hey Mayor” or “Hey ${name}” to call your mayor.`
+      : `Start the mayor, then say “Hey Mayor” or “Hey ${name}”.`;
     const petReady = renderPet() && this.status.petReady;
-    const model = `${this.modelLabel(value.model)} · ${value.thinking}`;
+    const model = `${modelLabel(value.model)} · ${value.thinking}`;
     byId<HTMLElement>("assistant-pi-status").textContent = this.status.piConnected
       ? `Running · ${model}`
       : value.enabled
         ? `Starts after wake phrase · ${model}`
         : `Disabled · ${model}`;
-    this.renderToggle(value.enabled, petReady);
+    renderAssistantToggle(value.enabled, petReady);
     this.renderStatus();
   }
 
@@ -150,70 +153,7 @@ export class AssistantSettings {
   }
 
   private renderStatus(): void {
-    const ready = byId<HTMLElement>("assistant-ready");
-    const live = byId<HTMLElement>("assistant-live-status");
-    const herdr = byId<HTMLElement>("assistant-herdr-status");
-    const pi = byId<HTMLElement>("assistant-pi-status");
-    const configured = this.currentConfiguration();
-    const petReady = renderPet() && this.status.petReady;
-    if (configured) this.renderToggle(configured.enabled, petReady);
-    const configuredModel = configured
-      ? `${this.modelLabel(configured.model)} · ${configured.thinking}`
-      : "Waiting for settings";
-    const runningModel = this.status.piModel
-      ? `${this.modelLabel(this.status.piModel)} · ${this.status.piThinking ?? "unknown"}`
-      : configuredModel;
-    pi.textContent = this.status.piConnected
-      ? `Running · ${runningModel}`
-      : configured?.enabled
-        ? `Starts after wake phrase · ${configuredModel}`
-        : `Disabled · ${configuredModel}`;
-    ready.textContent = this.status.message;
-    ready.dataset.ready = String(
-      this.status.available && this.status.petReady && this.status.herdrConnected,
-    );
-    const voiceIdle =
-      configured?.enabled === true &&
-      this.status.available &&
-      this.status.herdrConnected &&
-      !this.status.liveConnected;
-    live.textContent = this.status.liveConnected
-      ? this.status.voiceMode === "tools"
-        ? "Connected · tools"
-        : "Connected · basic"
-      : this.status.available
-        ? configured?.enabled
-          ? "Idle — voice paused"
-          : "Key found"
-        : "Key missing";
-    live.dataset.ready = String(this.status.available);
-    const reconnect = byId<HTMLButtonElement>("assistant-reconnect");
-    const voiceHint = byId<HTMLElement>("assistant-voice-hint");
-    reconnect.hidden = !voiceIdle;
-    if (this.status.voiceNote) {
-      voiceHint.hidden = false;
-      voiceHint.textContent = this.status.voiceNote;
-    } else if (voiceIdle) {
-      const name = configured?.displayName.trim() || "your assistant";
-      voiceHint.hidden = false;
-      if (!voiceHint.textContent || voiceHint.textContent === "Starting voice listener…") {
-        voiceHint.textContent = `Voice paused after 5 idle minutes. Say “Hey, ${name}” or press the button to listen again.`;
-      }
-    } else {
-      reconnect.disabled = false;
-      voiceHint.hidden = true;
-      voiceHint.textContent = "";
-    }
-    herdr.textContent = this.status.herdrConnected ? "Connected" : "Disconnected";
-    herdr.dataset.ready = String(this.status.herdrConnected);
-  }
-
-  private renderToggle(enabled: boolean, petReady: boolean): void {
-    const toggle = byId<HTMLButtonElement>("assistant-toggle");
-    toggle.textContent = enabled ? "Stop assistant" : "Start assistant";
-    toggle.classList.toggle("primary", !enabled);
-    toggle.classList.toggle("secondary", enabled);
-    toggle.disabled = !enabled && !petReady;
+    renderAssistantStatus(this.status, this.currentConfiguration());
   }
 
   private currentConfiguration(): PreferencesFile["app"]["orchestrator"] | null {
@@ -222,33 +162,5 @@ export class AssistantSettings {
     } catch {
       return null;
     }
-  }
-
-  private modelLabel(model: string): string {
-    return model
-      .replace("gpt-", "GPT-")
-      .replace("luna", "Luna")
-      .replace("sol", "Sol")
-      .replace("terra", "Terra");
-  }
-}
-
-function renderPet(): boolean {
-  const image = byId<HTMLImageElement>("assistant-pet-preview");
-  const placeholder = byId("assistant-pet-placeholder");
-  try {
-    const pack = bundledBehaviorPackForCharacter(ASSISTANT_PET_ID);
-    const clip = pack?.orchestratorAnimations?.walking;
-    const source = clip ? pack?.clips[clip]?.assetUrl : null;
-    if (!source) throw new Error("No assigned preview");
-    image.src = source;
-    image.hidden = false;
-    placeholder.hidden = true;
-    return true;
-  } catch {
-    image.removeAttribute("src");
-    image.hidden = true;
-    placeholder.hidden = false;
-    return false;
   }
 }

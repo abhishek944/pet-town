@@ -28,7 +28,7 @@ impl AgentSession {
             "--workspace".into(),
             herdr_workspace_id.into(),
             "--label".into(),
-            format!("{} orchestrator", preferences.display_name.trim()),
+            format!("{} mayor", preferences.display_name.trim()),
             "--no-focus".into(),
             "--env".into(),
             "OPENAI_API_KEY=".into(),

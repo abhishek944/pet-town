@@ -8,14 +8,13 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "pnpm run typecheck && vite build",
+    "internal:dev-frontend": "vite",
+    "internal:build-frontend": "pnpm run typecheck && vite build",
     "typecheck": "tsc --noEmit",
     "lint": "pnpm run lint:eslint",
     "lint:eslint": "eslint src vite.config.ts --config ../../eslint.config.js",
     "lint:rust": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-features --lib --bins -- -D warnings",
-    "check:rust": "cargo check --manifest-path src-tauri/Cargo.toml",
-    "tauri": "tauri"
+    "check:rust": "cargo check --manifest-path src-tauri/Cargo.toml"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

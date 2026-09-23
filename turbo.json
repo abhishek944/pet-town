@@ -1,8 +1,25 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "build": {
+    "@pet-town/leaderboard#build": {
       "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/pet-town/src/pets/**",
+        "$TURBO_ROOT$/bin/macos-*/**"
+      ],
+      "outputs": []
+    },
+    "@pet-town/web#build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/pet-town/src/pets/**",
+        "$TURBO_ROOT$/bin/macos-*/**"
+      ],
+      "outputs": ["dist/**"]
+    },
+    "@pet-town/desktop#internal:build-frontend": {
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/apps/pet-town/src/pets/**",
@@ -19,13 +36,13 @@
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/eslint.config.js"],
       "outputs": []
     },
-    "lint:rust": {
-      "dependsOn": ["build", "^lint:rust"],
+    "@pet-town/desktop#lint:rust": {
+      "dependsOn": ["internal:build-frontend", "^lint:rust"],
       "cache": false,
       "outputs": []
     },
-    "check:rust": {
-      "dependsOn": ["build", "^check:rust"],
+    "@pet-town/desktop#check:rust": {
+      "dependsOn": ["internal:build-frontend", "^check:rust"],
       "cache": false,
       "outputs": []
     },

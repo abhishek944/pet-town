@@ -4,9 +4,9 @@
   "version": "0.1.8",
   "identifier": "dev.pet.town",
   "build": {
-    "beforeDevCommand": "pnpm run dev",
+    "beforeDevCommand": "pnpm run internal:dev-frontend",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm run build",
+    "beforeBuildCommand": "pnpm run internal:build-frontend",
     "frontendDist": "../dist"
   },
   "app": {

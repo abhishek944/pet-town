@@ -1,14 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import { compilePetExtension, type PetExtensionPayload } from "./character-packs";
+import type { HerdrState } from "./flow-types";
+import type { StateSelection } from "./settings-studio-workflow";
 
-export type MenuAction = { id: string; label: string; animationId: string };
 type Candidate = { candidateId: string; extension: PetExtensionPayload };
 export type ExtensionSaveResult = { id: string; reloadWarning: string | null };
 type SaveInput = {
   draftId: string;
   baseId: string;
-  stateAssignments: Record<string, string>;
-  actions: MenuAction[];
+  stateAssignments: Record<HerdrState, StateSelection>;
 };
 
 export async function saveExtension(input: SaveInput): Promise<ExtensionSaveResult> {

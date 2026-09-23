@@ -123,9 +123,6 @@
 .studio-panel[data-mode="extend"] .studio-orchestrator {
   display: none;
 }
-.studio-panel[data-mode="extend"] .studio-action-row {
-  margin-top: 8px;
-}
 .studio-review {
   width: min(360px, 100%);
   margin-top: 9px;
@@ -175,8 +172,8 @@
 }
 .studio-mappings {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 7px;
+  grid-template-columns: 1fr;
+  gap: 0;
 }
 .studio-mappings label {
   display: block;
@@ -245,25 +242,6 @@
   width: auto;
   margin: 0 6px 0 0;
 }
-.studio-action-row {
-  display: grid;
-  grid-template-columns: 0.8fr 0.8fr 1fr auto;
-  gap: 6px;
-  margin-top: 10px;
-  align-items: end;
-}
-.studio-action-row input,
-.studio-action-row select {
-  margin: 0;
-}
-.studio-action-chip {
-  margin: 4px 3px 0;
-  padding: 3px 7px;
-  border: 1px solid #ffffff24;
-  border-radius: 999px;
-  background: transparent;
-  color: inherit;
-}
 .studio-save {
   display: block;
   margin: 10px 0 0 auto;
@@ -295,9 +273,7 @@ body.studio-orchestrator-route.studio-has-draft .studio-step:not(#studio-map-ste
 }
 body.studio-orchestrator-route #studio-map-step > h2,
 body.studio-orchestrator-route #studio-map-step > p,
-body.studio-orchestrator-route #studio-mappings,
-body.studio-orchestrator-route .studio-action-row,
-body.studio-orchestrator-route #studio-actions-list {
+body.studio-orchestrator-route #studio-mappings {
   display: none;
 }
 body.studio-orchestrator-route .studio-orchestrator {
@@ -526,4 +502,16 @@ body.studio-orchestrator-route .studio-orchestrator-preview img {
   :root[data-theme="system"] .studio-orchestrator-slots small {
     color: #50535a;
   }
+}
+.studio-state-row {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr 0.8fr;
+  gap: 8px;
+  align-items: end;
+  padding: 7px 0;
+  border-bottom: 1px solid #ffffff12;
+}
+.studio-state-row strong {
+  align-self: center;
+  font-size: 10px;
 }

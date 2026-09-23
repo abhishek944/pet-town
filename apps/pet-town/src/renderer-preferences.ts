@@ -2,10 +2,11 @@ import { motionFactor, type PetPreferences, type PreferencesFile } from "./prefe
 import type { CitizenState } from "./village";
 
 const FALLBACK: PetPreferences = {
+  customName: "",
   includedInRandomCast: true,
   appearance: { scalePercent: 100, opacityPercent: 100 },
   labels: { visibility: "always", textScalePercent: 100 },
-  motion: { level: "standard", reduced: false, pauseOnHover: false },
+  motion: { level: "standard", pauseOnHover: false },
 };
 
 export function preferencesFor(
@@ -66,6 +67,6 @@ export function travelDistanceFor(
 ): number {
   const motion = preferencesFor(element, preferences).motion;
   const petHovered = element.querySelector(".pet:hover") !== null;
-  if (systemReducedMotion || motion.reduced || (motion.pauseOnHover && petHovered)) return 0;
+  if (systemReducedMotion || (motion.pauseOnHover && petHovered)) return 0;
   return distancePx * motionFactor(motion.level);
 }

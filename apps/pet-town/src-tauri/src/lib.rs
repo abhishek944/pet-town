@@ -26,6 +26,7 @@ mod preferences_model;
 mod preferences_permissions;
 mod preferences_registration;
 mod preferences_state;
+mod preferences_validation;
 mod sessions;
 mod settings_window;
 mod settings_window_lifecycle;
@@ -88,7 +89,7 @@ pub fn run() {
                 settings_window::close(window.app_handle());
             }
             if window.label() == "orchestrator" && matches!(event, tauri::WindowEvent::Destroyed) {
-                orchestrator::task_commands::stop_orchestrator_session(window.app_handle().clone());
+                orchestrator::task_cancel::stop_orchestrator_session(window.app_handle().clone());
             }
         })
         .setup(|app| {
@@ -122,17 +123,18 @@ pub fn run() {
             pet_studio::pack_commands::list_user_pet_packs,
             pet_studio::pack_commands::save_pet_extension,
             pet_studio::pack_commands::save_pet_pack,
-            orchestrator::task_commands::cancel_orchestrator_task,
+            orchestrator::task_cancel::cancel_orchestrator_task,
             orchestrator::task_commands::delegate_orchestrator_task,
             orchestrator::status_commands::get_orchestrator_status,
             orchestrator::status_commands::get_orchestrator_pet_state,
+            orchestrator::status_commands::focus_mayor,
             orchestrator::status_commands::report_orchestrator_diagnostic,
             orchestrator::status_commands::report_orchestrator_error,
             orchestrator::status_commands::list_orchestrator_workspaces,
-            orchestrator::task_commands::set_orchestrator_listening,
+            orchestrator::task_cancel::set_orchestrator_listening,
             orchestrator::commands::start_orchestrator_session,
             orchestrator::commands::rearm_orchestrator_voice,
-            orchestrator::task_commands::stop_orchestrator_session,
+            orchestrator::task_cancel::stop_orchestrator_session,
             preferences_commands::apply_preferences,
             preferences_commands::get_preferences,
             preferences_commands::reload_preferences,

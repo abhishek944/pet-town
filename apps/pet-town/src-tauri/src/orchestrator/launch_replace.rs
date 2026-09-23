@@ -30,7 +30,7 @@ pub async fn close_stale(state: &OrchestratorState, generation: u64) -> Result<(
     let (stale, active) = {
         let runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
         if runtime.lifecycle_generation != generation {
-            return Err("The assistant changed while Pi was starting.".into());
+            return Err("The mayor changed while Pi was starting.".into());
         }
         (
             runtime.agent.clone(),
@@ -53,7 +53,7 @@ pub async fn close_stale(state: &OrchestratorState, generation: u64) -> Result<(
     }
     let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
     if runtime.lifecycle_generation != generation {
-        return Err("The assistant changed while Pi was starting.".into());
+        return Err("The mayor changed while Pi was starting.".into());
     }
     if runtime
         .agent

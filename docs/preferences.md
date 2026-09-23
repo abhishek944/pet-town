@@ -12,13 +12,12 @@ Only one Settings window opens. Opening it freezes every visible pet while Herdr
 
 The **Pets** section opens an **All pets** gallery showing every bundled or Pet Studio character, not just characters currently assigned to agents. Excluded characters stay visible with an **Excluded** overlay and can still be opened. Click any card to adjust that character; **All pets**, above the preview, returns to the gallery without saving or discarding edits. The gallery count and overlays reflect the current draft.
 
-Opening Preferences from a desktop pet goes directly to that character's settings. General Settings entry and the **Pets** toolbar button open the gallery. The detail view keeps two compact selectors: one chooses a character type such as `cat` or `viking`, and the other previews every unique APNG clip or action available to that character. Previewing an animation does not change the character's behavior or save another preference. If the same character appears more than once, every copy shares these settings:
+Opening Preferences from a desktop pet goes directly to that character's settings. General Settings entry and the **Pets** toolbar button open the gallery. The detail view has a character selector and a **2D agent states** list. Each row shows the state's APNG playing, its clip name, and its action. 3D settings live in the town itself, not here. Select a visible state to preview its assigned APNG and movement action. Previewing a state does not change the character's behavior or save another preference. Use **+ Add** or **Replace** on a row to choose an APNG for that state in Pet Studio. If the same character appears more than once, every copy shares these settings:
 
 - whether the character is included in random assignment;
 - pet size and opacity;
 - label visibility and text size;
 - Gentle, Standard, or Playful walking speed;
-- reduced movement;
 - stop walking while hovered.
 
 Every bundled or newly created character is included by default. Users can deselect characters they do not want, but at least one character must remain included. Applying a draft immediately replaces any visible deselected character while preserving assignments that are still allowed. Random assignment uses each included character once before repeating characters when there are more agents than included pets.
@@ -29,15 +28,15 @@ The macOS **Reduce motion** accessibility setting also keeps preview and desktop
 
 **App** contains a direct **Show Town / Hide Town** control, theme selection, **Start Pet Town when Herdr starts**, and an optional completed-pet timeout. Hiding the town keeps Pet Town running so it can be shown again from Settings, the menu bar, or the tray menu. **Hide completed pets** can remove sleeping completed pets after 1, 5, 15, 30, or 60 minutes. The timer begins when completion is first observed. Hidden pets remain monitored and return immediately when their status changes. Hiding is off by default, with 5 minutes selected for users who enable it. **About** shows the current version, local file location, and privacy information.
 
-Controls edit a draft. The Settings preview reflects that draft, including walking speed and reduced movement. Enable **Stop walking while hovered**, then hover the preview pet to see it pause its travel while its sprite keeps animating. The frozen desktop village changes only after **Apply** succeeds. Apply validates and saves the complete draft and keeps Settings open. Closing silently discards later unapplied changes.
+Controls edit a draft. The Settings preview reflects that draft, including walking speed. Enable **Stop walking while hovered**, then hover the preview pet to see it pause its travel while its sprite keeps animating. The frozen desktop village changes only after **Apply** succeeds. Apply validates and saves the complete draft and keeps Settings open. Closing silently discards later unapplied changes.
 
 **Reset pet** restores only the selected character in the draft and still requires Apply. **Reset Everything…** asks for confirmation and saves defaults for the app and every character.
 
 ## Create characters and actions
 
-Pet Studio uses APNG files supplied by the user and does not generate artwork. In Settings, choose **Create a new pet** or **Extend an existing pet**, then import each transparent looping APNG with a short animation name and either the Walking or Stationary role. Pet Town validates the file and reads its cycle duration automatically.
+Pet Studio uses APNG files supplied by the user and does not generate artwork. In Settings, choose **Create a new pet** or **Extend an existing pet**, then import transparent looping APNGs with short animation names. Pet Town validates each file and reads its cycle duration automatically.
 
-For a new pet, assign imported animations to all six behavior slots before saving. For an extension, optionally replace existing states. To add a right-click action, enter its action ID and menu label, choose an imported animation, and select **Add menu action**. Imported files and saved packs stay under `~/.pet-town/`.
+For each state, select an APNG and either **Idle** or **Walking**. Hidden states need no APNG, and a new pet can reuse one APNG across visible states. The Pets settings page shows the saved mapping for each pet; selecting a visible state previews its APNG. Use **+ Add** or **Replace** on a state row to choose and import an APNG for that state; the existing Idle/Walking action is preserved. Pet Studio also lets extensions reuse an already-imported APNG from the mapping selector. Imported files and saved packs stay under `~/.pet-town/`.
 
 ## File location and format
 

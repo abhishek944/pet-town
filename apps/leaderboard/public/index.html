@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pet Town · Leaderboard</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta
+      name="description"
+      content="A friendly look at how the Pet Town community uses its AI assistants."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/main.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/"
+        ><span class="brand-mark">✦</span> Pet Town
+        <span class="brand-divider">/</span> Leaderboard</a
+      >
+      <div id="account" class="account"></div>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="live-dot"></span> COMMUNITY ACTIVITY</span>
+          <h1>Every little prompt<br /><em>adds up.</em></h1>
+          <p>
+            See how Pet Town’s assistants are being used. Pick a measure, find your place, and
+            celebrate the work behind the numbers.
+          </p>
+          <div class="hero-note">
+            Participation is optional. Your assistant shares only provider, model, thinking level,
+            token counts and estimated cost.
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="sun"></div>
+          <div class="hill hill-back"></div>
+          <div class="hill hill-front"></div>
+          <div class="tower">
+            <div class="roof"></div>
+            <div class="tower-body"><span>★</span></div>
+          </div>
+          <div class="spark spark-one">✦</div>
+          <div class="spark spark-two">✧</div>
+        </div>
+      </section>
+      <section class="board" aria-labelledby="board-title">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">THE VILLAGE BOARD</span>
+            <h2 id="board-title">Leaderboard</h2>
+          </div>
+          <p id="period-note">Rolling 7 days</p>
+        </div>
+        <div class="filters">
+          <div class="filter-group" role="group" aria-label="Ranking metric">
+            <button data-metric="total" class="selected">Total tokens</button
+            ><button data-metric="input">Input</button><button data-metric="output">Output</button
+            ><button data-metric="cache">Cache hits</button
+            ><button data-metric="cost">Est. cost</button>
+          </div>
+          <label class="period-label"
+            >Period
+            <select id="period">
+              <option value="week">7 days</option>
+              <option value="month">30 days</option>
+              <option value="all">All time</option>
+            </select></label
+          >
+        </div>
+        <p id="metric-description" class="metric-description">
+          Input, output, cache read and cache write tokens combined.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Village member</th>
+                <th scope="col">Messages</th>
+                <th scope="col" id="score-heading">Total tokens</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-rows">
+              <tr>
+                <td colspan="4" class="empty">Loading the village board…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="board-footer">
+          Reported by participating devices. Counts are self reported and may be incomplete.
+          Estimated cost is based on Pi’s model rates, not an invoice.
+        </p>
+      </section>
+      <section class="join" aria-labelledby="join-title">
+        <div>
+          <span class="eyebrow">JOIN THE BOARD</span>
+          <h2 id="join-title">Bring your assistant along.</h2>
+          <p>
+            Connect your Pet Town desktop app to share usage totals under your GitHub name. Your
+            prompts, responses and files stay on your device.
+          </p>
+        </div>
+        <div id="join-action">
+          <a class="primary-button" href="/auth/github">Join with GitHub <span>↗</span></a>
+        </div>
+      </section>
+      <section id="setup" class="setup" hidden>
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">YOUR CONNECTION</span>
+            <h2>Connect this device</h2>
+          </div>
+        </div>
+        <p>
+          Generate a private token, then save it in <code>~/.pet-town/leaderboard.json</code>.
+          Restart the mayor if it is already running.
+        </p>
+        <button id="generate-token" class="secondary-button">Generate connection token</button>
+        <div id="token-result" class="token-result" hidden>
+          <p>Copy this file content now. The token is shown only once.</p>
+          <pre id="config-json"></pre>
+          <button id="copy-config" class="secondary-button">Copy configuration</button>
+        </div>
+        <div class="account-actions">
+          <button id="revoke-tokens" class="text-button">Revoke all connection tokens</button>
+          <button id="delete-account" class="text-button danger">Delete my leaderboard data</button>
+        </div>
+      </section>
+    </main>
+    <footer>Made for a more curious Pet Town <span>✦</span></footer>
+  </body>
+</html>

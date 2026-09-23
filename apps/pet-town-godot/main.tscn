@@ -9,10 +9,16 @@
 [ext_resource type="PackedScene" path="res://scenes/town_decorations.tscn" id="7_decor"]
 [ext_resource type="PackedScene" path="res://scenes/island_render_sections.tscn" id="8_render"]
 [ext_resource type="Material" path="res://materials/endless_water.tres" id="10_water"]
+[ext_resource type="Script" path="res://scripts/main_tree_interaction.gd" id="11_trees"]
+[ext_resource type="PackedScene" path="res://scenes/build_land.tscn" id="12_build_land"]
+[ext_resource type="Shape3D" path="res://navigation/build_land_collision.res" id="13_build_collision"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_water"]
 material = ExtResource("10_water")
 size = Vector2(12000, 12000)
+
+[sub_resource type="BoxShape3D" id="BoxShape_ocean_placement"]
+size = Vector3(12000, 0.1, 12000)
 
 [node name="PetTown" type="Node3D" unique_id=614714254]
 physics_interpolation_mode = 2
@@ -58,12 +64,33 @@ shape = ExtResource("5_collision")
 
 [node name="IslandRenderSections" parent="." instance=ExtResource("8_render")]
 
+[node name="BuildLand" parent="." instance=ExtResource("12_build_land")]
+visible = false
+
+[node name="BuildLandCollision" type="StaticBody3D" parent="."]
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BuildLandCollision"]
+shape = ExtResource("13_build_collision")
+
 [node name="OceanSurface" type="MeshInstance3D" parent="."]
 position = Vector3(0, -0.535, 0)
 mesh = SubResource("PlaneMesh_water")
 cast_shadow = 0
 
+[node name="OceanPlacement" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.61, 0)
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="OceanPlacement"]
+shape = SubResource("BoxShape_ocean_placement")
+
 [node name="LiveAgents" type="Node3D" parent="."]
+
+[node name="UserTrees" type="Node3D" parent="."]
+script = ExtResource("11_trees")
 
 [node name="TownUI" type="CanvasLayer" parent="."]
 

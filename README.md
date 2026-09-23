@@ -38,26 +38,20 @@ user permissions, so review their manifest and source before installing.
 ## What it does
 
 - Polls every registered Herdr session once per second through safe Rust commands (no shell), with a two-second timeout and a 1 MiB output limit.
-- Assigns agents from an approved cast of twenty companions, with distinct packs reused only after every character has appeared.
-- Runs state-authored sprite flows across the full screen while each name follows its character.
+- Assigns agents from an approved cast of ten KayKit pets, with distinct packs reused only after every character has appeared.
+- Runs each state's chosen APNG with either an idle or walking action while each name follows its pet.
 - Turns characters only at screen edges and always faces them in their movement direction.
-- Selects a validated declarative behavior flow solely from agent state:
-  - `working` → continuously move through distinct walk and action animations
-  - `blocked` → waiting flow
-  - `idle` → hidden through the pack's ordinary `hide` flow action
-  - `unknown` → each pet's cautious fallback flow
-  - `done` → celebrates once, then loops a clearly visible sleeping animation with floating Zs
+- Selects an APNG and action solely from agent state: Running walks; Blocked and Completed stay in place; Idle and Unknown are hidden. The voice assistant also has a separate Listening state.
 - Keeps each pet's `flow.json` and APNG assets together in one self-contained folder; see [the behavior pack format](docs/behavior-packs.md).
-- Gives the Viking a working cycle that alternates walking and hammering, plus a seated thinking animation when blocked.
 - Uses no floating status symbols; the sprite animation communicates the current state.
 - Waits for three missed polls before a departed citizen fades away.
 - Shrinks citizens automatically for large crowds.
 - Labels each character with its Herdr pane name when present, otherwise `{space-name}-{tab}` (for example `pet-town-1`), and uses the current folder name only when Herdr naming is unavailable.
 - Focuses an exact revalidated Herdr pane when its pet is clicked, or the best already-running application known for a standalone harness without launching or resuming anything.
 - Lets users drag a pet horizontally; it pauses while held and resumes its existing movement from the drop point.
-- Builds each pet's right-click menu from validated `flow.json` actions; the bundled walk-only roster does not add character actions.
+- Keeps **Preferences…** in each pet's right-click menu; menu animation actions are retired.
 - Opens a native macOS Settings window when the installed app launches, from **Preferences…** in a pet menu, or from the Herdr plugin action, with direct **Show Town / Hide Town** controls, per-character controls, a **Pet Studio**, and an **Agents** tab for atomic, reversible setup of all six standalone harness integrations.
-- Lets users create a new pet or extend an existing pet by importing transparent looping APNGs in Settings. Pet Studio validates each file locally, previews it, and lets users map animations to states, orchestrator behavior, and right-click actions without modifying bundled assets or rebuilding.
+- Lets users create or extend a pet by importing transparent looping APNGs in Settings and choosing an APNG and idle or walking action for each state. The Pets page shows those assignments.
 - Adds a user-named voice assistant that uses the bundled Knight, listens locally for “Hey, <name>,” starts GPT-Live 1 without opening another visible window, and delegates computer work to a persistent Pi agent in a dedicated Herdr pane.
 - Runs that Pi agent with GPT-5.6 Luna at medium thinking, supports spoken task cancellation, and keeps voice transcripts ephemeral.
 - Keeps the assistant independent from Pet Studio: its bundled Knight walk animation is fixed and cannot be replaced by user pet creation or extensions.
@@ -116,11 +110,16 @@ The window uses Tauri's macOS private API for transparency. That is suitable for
 direct distribution but not for Apple's Mac App Store. Linux and Windows can be
 added later; always-on-top behavior on Linux depends on the desktop compositor.
 
-## Build
+## Develop and build both towns
+
+From the repository root, with Godot 4 and the local 3D island assets installed:
 
 ```bash
-./scripts/build.sh
+pnpm run dev    # refresh frontend/Godot state, preserve Rust cache, launch the app
+pnpm run build  # refresh frontend/Godot state, preserve Rust cache, build app + DMG
 ```
+
+These are the only supported desktop run/build commands. They validate the local Godot install and required island assets, then stop Pet Town and Godot processes from this checkout, clear generated frontend/Vite/Turbo/Godot import state, and reimport the 3D project. They preserve Cargo's `apps/pet-town/src-tauri/target` directory so Rust builds can reuse compiled artifacts and rebuild only changed crates. Save work in those windows before running either command; other Godot projects are left alone. Dependencies, user preferences, purchased island sources, saved rendering meshes, baked navigation/collision, and the Rust build cache are preserved. **dev** launches Tauri with live watchers; **build** produces the complete native desktop app and DMG. The **Open 3D Town** menu opens the freshly imported Godot project. Godot is imported but not exported as a separate installer (this project has no Godot export preset). CI uses Turbo's workspace tasks internally; there is no separate frontend-only desktop build command.
 
 The release executable is written to
 `apps/pet-town/src-tauri/target/<rust-target>/release/pet-town` and copied
@@ -138,17 +137,7 @@ lives in `apps/pet-town-godot`, and the public landing page lives in `apps/web`.
 Repository scripts, plugin metadata, documentation, and checked-in packages
 remain at the root.
 
-For development:
-
-```bash
-corepack prepare pnpm@10.28.2 --activate
-pnpm install --frozen-lockfile
-pnpm run tauri dev
-```
-
-Run the Tauri desktop frontend with `pnpm run dev`. Start the landing page at
-`http://127.0.0.1:4173` with `pnpm run dev:web`. Root build, type-check, and lint
-commands are delegated through Turbo to the workspaces. Godot development is
+For first-time development, use Corepack to select pnpm 10.28.2, then run `pnpm run dev`. That command installs dependencies and starts the Tauri desktop app after the clean Godot import. Changes made while development is running use the normal dev watchers; rerunning the command refreshes generated frontend/Godot state while retaining Cargo's incremental build cache. Start the landing page at `http://127.0.0.1:4173` with `pnpm run dev:web`. Type-check and lint commands still use Turbo. Godot development is
 documented in `apps/pet-town-godot/README.md`.
 
 ## Link for local development
@@ -184,12 +173,12 @@ Use `pnpm run check:quality` for only formatting, linting, and type checks. Use 
 2. Invoke `pet-town.village-on` while at least two Herdr agents exist.
 3. Confirm citizens appear centered just above the Dock, empty window space passes clicks through, and clicking a pet focuses its exact Herdr agent pane.
 4. Confirm each pet moves to a screen edge, turns only there, and continues in the direction it faces with its project name following above.
-5. Change agents between working, blocked, done, idle, and unknown; confirm idle flows hide the complete citizen while the other states restore it.
+5. Change agents between working, blocked, done, idle, and unknown; confirm Idle and Unknown hide the complete pet, Running walks, and Blocked and Completed stay in place.
 6. Confirm the Assets gallery contains exactly the six KayKit Adventurers and four KayKit Skeletons, and each character uses only its normal walk APNG.
 7. Complete an agent and confirm its character remains visible with the same walk animation until its state changes or the completed-pet delay hides it.
 8. Drag a pet horizontally, release it, and confirm it resumes movement from the drop point without focusing the agent.
 9. Right-click several bundled characters and confirm no animation actions are offered.
-10. Right-click a pet and choose **Preferences…**. Confirm one native Settings window opens for that character, every visible pet freezes, the preview reflects walking speed and reduced movement, and hovering the preview pauses its travel when **Stop walking while hovered** is enabled. Deselect that character from the random cast, Apply, close Settings, and confirm any visible copy is replaced while allowed pets keep their assignments.
+10. Right-click a pet and choose **Preferences…**. Confirm one native Settings window opens for that character, every visible pet freezes, and the Pets page lists each state with its APNG and action. Select a state to preview it, including whether it walks or stays in place. Deselect that character from the random cast, Apply, close Settings, and confirm any visible copy is replaced while allowed pets keep their assignments.
 11. Enable **Hide completed pets**, select a delay, and Apply. Confirm completed pets disappear after that delay, no longer affect crowd sizing or clicks, and return immediately if they begin working or become blocked.
 12. Confirm reduced movement or hover pauses only horizontal travel while the pet keeps animating; also confirm closing Settings discards any unapplied draft and resumes current Herdr states.
 13. Edit `~/.pet-town/preferences.json`, invoke `pet-town.reload-preferences`, and confirm valid changes load while invalid JSON is preserved and rejected.

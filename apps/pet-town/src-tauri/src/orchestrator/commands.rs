@@ -20,7 +20,7 @@ pub async fn start_orchestrator_session(
         .app
         .orchestrator;
     if !crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref()) {
-        return Err("The bundled Knight assistant is unavailable.".into());
+        return Err("The bundled Knight mayor is unavailable.".into());
     }
     let state = app.state::<OrchestratorState>();
     let generation = {
@@ -53,7 +53,8 @@ pub async fn start_orchestrator_session(
     let (pi, voice) = futures_util::future::join(
         super::launcher::ensure(app.clone(), workspace_id),
         super::openai::create_session(sdp, &preferences.app.orchestrator.display_name),
-    ).await;
+    )
+    .await;
     pi?;
     let (result, note) = voice;
     {
@@ -87,10 +88,10 @@ pub fn rearm_orchestrator_voice(app: AppHandle) -> Result<String, String> {
         .app
         .orchestrator;
     if !configured.enabled {
-        return Err("The assistant is stopped. Start it first.".into());
+        return Err("The mayor is stopped. Start it first.".into());
     }
     if !crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref()) {
-        return Err("The bundled Knight assistant is unavailable.".into());
+        return Err("The bundled Knight mayor is unavailable.".into());
     }
     super::window::open_hidden(&app)?;
     super::wake::start(&app, &configured.display_name)?;
@@ -102,8 +103,9 @@ pub fn rearm_orchestrator_voice(app: AppHandle) -> Result<String, String> {
 }
 
 fn default_session_folder() -> Result<String, String> {
-    let home = std::env::var("HOME")
-        .map_err(|_| "Your home folder is unavailable; choose a session folder in Settings.".to_string())?;
+    let home = std::env::var("HOME").map_err(|_| {
+        "Your home folder is unavailable; choose a session folder in Settings.".to_string()
+    })?;
     Ok(format!("{home}/Documents"))
 }
 

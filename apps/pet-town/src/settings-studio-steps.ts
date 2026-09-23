@@ -31,7 +31,7 @@ export async function advanceStudioWizard(context: StepContext): Promise<void> {
     return;
   }
   if (step === 2) {
-    if (!context.approvedCount()) {
+    if (context.mode === "new" && !context.approvedCount()) {
       context.status("Import at least one APNG before continuing.", false, ["studio-animation-id"]);
       return;
     }

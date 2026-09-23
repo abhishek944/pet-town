@@ -1,15 +1,21 @@
 use super::store::{create_private_dir, flow_id, pack_id, root, secure_dir, write_private};
-use super::types::{Draft, PetExtensionCandidateView, SaveExtensionRequest, StoredPetExtension};
+use super::types::{
+    Draft, PetExtensionCandidateView, SaveExtensionRequest, StateSelection, StoredPetExtension,
+};
 use base64::Engine;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
 
-fn state_flow(animation: &str) -> Value {
-    json!({"completion":"restart","flow":{"type":"sequence","steps":[
-        {"type":"play","clip":animation},{"type":"wait","durationMs":300}
-    ]}})
+fn state_value(selection: &StateSelection, animation: Option<String>) -> Result<Value, String> {
+    if !matches!(selection.action.as_str(), "idle" | "walking") {
+        return Err("State action must be Idle or Walking.".into());
+    }
+    if selection.visible && animation.is_none() {
+        return Err("A visible state needs an APNG.".into());
+    }
+    Ok(json!({"animation":animation,"action":selection.action,"visible":selection.visible}))
 }
 
 fn decode_asset(value: &str) -> Result<Vec<u8>, String> {
@@ -54,10 +60,7 @@ pub fn stage(
         .as_ref()
         .map(|value| value.states.clone())
         .unwrap_or_default();
-    let mut actions = previous
-        .as_ref()
-        .map(|value| value.actions.clone())
-        .unwrap_or_default();
+    let actions = serde_json::Map::new();
     let mut assets = previous
         .as_ref()
         .map(|value| {
@@ -80,39 +83,34 @@ pub fn stage(
         assets.insert(format!("assets/{internal}.png"), bytes);
         names.insert(name.clone(), internal);
     }
-    if names.is_empty() {
-        return Err("Import at least one new APNG before saving this extension.".into());
-    }
-    for (state, animation) in &request.state_assignments {
+    for (state, selection) in &request.state_assignments {
         if !matches!(
             state.as_str(),
-            "idle" | "working" | "blocked" | "done" | "unknown"
+            "idle" | "working" | "blocked" | "done" | "unknown" | "listening"
         ) {
             return Err("Choose a valid pet state to replace.".into());
         }
-        let internal = names
-            .get(animation)
-            .ok_or_else(|| format!("Animation {animation} was not imported in this draft."))?;
-        states.insert(state.clone(), state_flow(internal));
-    }
-    for action in &request.actions {
-        let action_id = flow_id(&action.id, "Action")?;
-        if action.label.trim().is_empty() || action.label.len() > 24 {
-            return Err("Action labels must contain 1–24 characters.".into());
-        }
-        let internal = names.get(&action.animation_id).ok_or_else(|| {
-            format!(
-                "Animation {} was not imported in this draft.",
-                action.animation_id
-            )
-        })?;
-        actions.insert(
-            action_id,
-            json!({"label":action.label.trim(),"flow":{"type":"play","clip":internal}}),
-        );
-    }
-    if actions.len() > 8 {
-        return Err("A pet can have at most eight menu actions.".into());
+        let animation = if selection.visible {
+            let value = selection
+                .animation
+                .as_deref()
+                .ok_or("A visible state needs an APNG.")?;
+            if let Some(imported) = value.strip_prefix("imported:") {
+                Some(
+                    names
+                        .get(imported)
+                        .ok_or("The imported APNG is unavailable.")?
+                        .clone(),
+                )
+            } else if let Some(existing) = value.strip_prefix("existing:") {
+                Some(flow_id(existing, "Animation")?)
+            } else {
+                return Err("Choose an imported or existing APNG.".into());
+            }
+        } else {
+            None
+        };
+        states.insert(state.clone(), state_value(selection, animation)?);
     }
 
     let extension_version = uuid::Uuid::new_v4().to_string();

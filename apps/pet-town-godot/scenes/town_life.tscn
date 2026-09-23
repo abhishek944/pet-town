@@ -10,7 +10,7 @@
 position = Vector3(1.938815, 1.632887, -6.705320)
 rotation = Vector3(0, 3.094369, 0)
 script = ExtResource("spot")
-prop_path = NodePath("../../../IslandRenderSections/HarvestApples/Sparse orchard apples_006")
+prop_path = NodePath("../../../IslandRenderSections/EditableTrees/OrchardTree_000/AuthoredModel/Sparse orchard apples_006")
 display_name = "Apple orchard"
 activity = "gather"
 animation = "PickUp"
@@ -21,7 +21,7 @@ cooldown = 15.000000
 position = Vector3(5.443389, 1.553712, -8.793802)
 rotation = Vector3(0, -1.575090, 0)
 script = ExtResource("spot")
-prop_path = NodePath("../../../IslandRenderSections/HarvestApples/Sparse orchard apples_008")
+prop_path = NodePath("../../../IslandRenderSections/EditableTrees/OrchardTree_001/AuthoredModel/Sparse orchard apples_008")
 display_name = "Orchard grove"
 activity = "gather"
 animation = "Interact"

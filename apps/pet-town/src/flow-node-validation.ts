@@ -72,8 +72,7 @@ export function validateNode(
     rejectUnknownFields(context, value, ["type", "clip", "durationMs", "speedPxPerSecond"], path);
     const clip = typeof value.clip === "string" ? context.clips[value.clip] : undefined;
     if (!clip) diagnostic(context, "E_REF_MISSING", `${path}/clip`, "Move references an unknown clip");
-    else if (clip.role !== "locomotion") diagnostic(context, "E_MOVE_CLIP_ROLE", `${path}/clip`, "Move requires a locomotion clip");
-    else if (!clip.mirror) diagnostic(context, "E_FACING_UNSAFE", `${path}/clip`, "A locomotion clip must be safe to mirror at boundaries");
+    else if (!clip.mirror) diagnostic(context, "E_FACING_UNSAFE", `${path}/clip`, "A walking animation must be safe to mirror at boundaries");
     if (!isIntegerBetween(value.durationMs, LIMITS.durationMinMs, LIMITS.durationMaxMs)) {
       diagnostic(context, "E_DURATION", `${path}/durationMs`, "Move duration is outside the supported range");
     }
@@ -82,7 +81,6 @@ export function validateNode(
     }
     if (
       !clip ||
-      clip.role !== "locomotion" ||
       !clip.mirror ||
       !isIntegerBetween(value.durationMs, LIMITS.durationMinMs, LIMITS.durationMaxMs) ||
       !isFiniteBetween(value.speedPxPerSecond, 1, LIMITS.moveSpeedMax)

@@ -2,7 +2,7 @@ use super::agent::AgentSession;
 use super::status_types::{OrchestratorPetState, OrchestratorStatus};
 use crate::preferences::PreferencesStore;
 use std::sync::Mutex;
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Manager};
 
 #[derive(Default)]
 pub struct Runtime {
@@ -12,6 +12,7 @@ pub struct Runtime {
     pub connecting: bool,
     pub listening: bool,
     pub wake_activated: bool,
+    pub mayor_focus_serial: u64,
     pub wake_status: Option<String>,
     pub active_task_id: Option<String>,
     pub canceling_task_id: Option<String>,
@@ -84,9 +85,9 @@ impl OrchestratorState {
         let message = if !available {
             "OpenAI key not found"
         } else if !pet_ready {
-            "Assistant pet required"
+            "Mayor pet required"
         } else if live_connected && !pi_connected {
-            "Assistant stopped — reconnect voice"
+            "Mayor stopped — reconnect voice"
         } else if live_connected {
             "Voice connected"
         } else if pi_connected {
@@ -137,25 +138,11 @@ impl OrchestratorState {
     }
 
     pub fn pet_state(&self, app: &AppHandle) -> OrchestratorPetState {
-        let preferences = app.state::<PreferencesStore>().snapshot().preferences;
-        let configured = &preferences.app.orchestrator;
-        let pet_ready = crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref());
-        let runtime = self.0.lock().unwrap_or_else(|error| error.into_inner());
-        OrchestratorPetState {
-            active: configured.enabled
-                && pet_ready
-                && (runtime.connecting || runtime.live_connected || runtime.agent.is_some()),
-            citizen_id: Some(runtime.agent.as_ref().map(|agent| agent.public_id.clone())
-                .unwrap_or_else(|| "pet-town-assistant".into())),
-            pet_id: configured.pet_id.clone(),
-            display_name: configured.display_name.clone(),
-            listening: runtime.listening,
-        }
+        super::state_publication::pet_state(self, app)
     }
 
     pub fn emit(&self, app: &AppHandle) {
-        let _ = app.emit("orchestrator-status-refresh", ());
-        let _ = app.emit_to("main", "orchestrator-pet-state", self.pet_state(app));
+        super::state_publication::publish(self, app);
     }
 
     pub fn mark_exiting(&self) {

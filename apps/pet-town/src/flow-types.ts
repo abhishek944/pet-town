@@ -1,6 +1,13 @@
 export const HERDR_STATES = ["idle", "working", "blocked", "done", "unknown"] as const;
+export const PET_STATES = [...HERDR_STATES, "listening"] as const;
 
-export type HerdrState = (typeof HERDR_STATES)[number];
+export type HerdrState = (typeof PET_STATES)[number];
+export type PetAction = "idle" | "walking";
+export interface StateAssignment {
+  animation: string | null;
+  action: PetAction;
+  visible: boolean;
+}
 export type ClipRole = "stationary" | "locomotion";
 export type SourceFacing = "left" | "right";
 
@@ -71,25 +78,14 @@ export interface StateFlowManifest {
   flow: FlowNode;
 }
 
-export const ACTIONS_MAX = 8;
-
-export interface PackActionManifest {
-  label: string;
-  flow: FlowNode;
-}
-
-export interface CompiledAction {
-  label: string;
-  flow: FlowNode;
-}
-
 export interface BehaviorPackManifest {
   formatVersion: 1;
   id: string;
   packVersion: string;
   clips: Record<string, ClipManifest>;
-  states: Record<HerdrState, StateFlowManifest>;
-  actions?: Record<string, PackActionManifest>;
+  states: Record<(typeof HERDR_STATES)[number], StateFlowManifest | StateAssignment> &
+    Partial<Record<"listening", StateFlowManifest | StateAssignment>>;
+  actions?: Record<string, unknown>;
   orchestratorAnimations?: OrchestratorAnimations | null;
 }
 
@@ -124,7 +120,7 @@ export interface CompiledBehaviorPack {
   readonly fingerprint: string;
   readonly clips: Readonly<Record<string, CompiledClip>>;
   readonly states: Readonly<Record<HerdrState, StateFlowManifest>>;
-  readonly actions: Readonly<Record<string, CompiledAction>>;
+  readonly stateAssignments: Readonly<Record<HerdrState, StateAssignment>>;
   readonly orchestratorAnimations: Readonly<OrchestratorAnimations> | null;
 }
 

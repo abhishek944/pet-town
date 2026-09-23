@@ -40,8 +40,8 @@ fn begin(app: &AppHandle, name: &str, testing: bool, automatic: bool) -> Result<
     if !supported() {
         return Err("On-device wake recognition is unavailable.".into());
     }
-    let phrase = CString::new(format!("hey {}", name.trim().to_lowercase()))
-        .map_err(|_| "The assistant name cannot be used as a wake phrase.".to_string())?;
+    let phrase = CString::new(format!("hey mayor\nhey {}", name.trim().to_lowercase()))
+        .map_err(|_| "The mayor name cannot be used as a wake phrase.".to_string())?;
     let _ = APP.set(app.clone());
     let _publication = PUBLICATION
         .lock()
@@ -177,7 +177,7 @@ fn activate(app: AppHandle, generation: u64) -> Result<(), String> {
         return Err("OpenAI key not found.".into());
     }
     if !crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref()) {
-        return Err("The bundled Knight assistant is unavailable.".into());
+        return Err("The bundled Knight mayor is unavailable.".into());
     }
     super::window::open_hidden(&app)?;
     let _publication = PUBLICATION
@@ -192,6 +192,6 @@ fn activate(app: AppHandle, generation: u64) -> Result<(), String> {
     runtime.connecting = true;
     runtime.wake_status = Some("Wake phrase heard — connecting voice".into());
     drop(runtime);
-    state.emit(&app);
+    state.focus_mayor(&app);
     Ok(())
 }

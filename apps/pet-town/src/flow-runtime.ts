@@ -12,7 +12,6 @@ export {
   type HideNode,
   type LoopNode,
   type MoveNode,
-  type PackActionManifest,
   type PackCompilation,
   type PackDiagnostic,
   type PlayNode,

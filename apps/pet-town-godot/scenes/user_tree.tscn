@@ -1,0 +1,81 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/user_tree.gd" id="1_tree"]
+
+[sub_resource type="StandardMaterial3D" id="Material_trunk"]
+albedo_color = Color(0.27, 0.12, 0.055, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Material_leaves"]
+albedo_color = Color(0.16, 0.38, 0.16, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Material_marker"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.93, 0.72, 0.24, 0.42)
+
+[sub_resource type="CylinderMesh" id="Cylinder_trunk"]
+material = SubResource("Material_trunk")
+top_radius = 0.36
+bottom_radius = 0.52
+height = 3.2
+radial_segments = 7
+
+[sub_resource type="SphereMesh" id="Sphere_crown_large"]
+material = SubResource("Material_leaves")
+radius = 1.85
+height = 3.7
+radial_segments = 9
+rings = 5
+
+[sub_resource type="SphereMesh" id="Sphere_crown_small"]
+material = SubResource("Material_leaves")
+radius = 1.45
+height = 2.9
+radial_segments = 9
+rings = 5
+
+[sub_resource type="CylinderMesh" id="Cylinder_marker"]
+material = SubResource("Material_marker")
+top_radius = 1.55
+bottom_radius = 1.55
+height = 0.055
+radial_segments = 32
+
+[sub_resource type="CapsuleShape3D" id="Capsule_pick"]
+radius = 1.75
+height = 6.1
+
+[node name="UserTree" type="Node3D"]
+script = ExtResource("1_tree")
+
+[node name="Trunk" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.6, 0)
+mesh = SubResource("Cylinder_trunk")
+
+[node name="CrownLarge" type="MeshInstance3D" parent="."]
+position = Vector3(-0.28, 3.9, 0.05)
+scale = Vector3(1.0, 0.88, 0.94)
+mesh = SubResource("Sphere_crown_large")
+
+[node name="CrownSmall" type="MeshInstance3D" parent="."]
+position = Vector3(0.72, 4.8, -0.18)
+scale = Vector3(0.86, 0.94, 0.82)
+mesh = SubResource("Sphere_crown_small")
+
+[node name="SelectionMarker" type="MeshInstance3D" parent="."]
+visible = false
+position = Vector3(0, 0.04, 0)
+mesh = SubResource("Cylinder_marker")
+cast_shadow = 0
+
+[node name="PickArea" type="Area3D" parent="."]
+position = Vector3(0, 2.8, 0)
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PickArea"]
+shape = SubResource("Capsule_pick")

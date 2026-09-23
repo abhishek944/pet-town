@@ -33,7 +33,7 @@ if [ -n "$rust_target" ]; then
 
   release_dir="$ROOT/apps/$app_dir/src-tauri/target/$rust_target/release"
   rm -rf "$release_dir/bundle/macos" "$release_dir/bundle/dmg"
-  pnpm --filter "$workspace" tauri build --target "$rust_target"
+  pnpm --filter "$workspace" exec tauri build --target "$rust_target"
 
   binary="$release_dir/$binary_name"
   package_dir="$ROOT/bin/$package"
@@ -87,7 +87,7 @@ PY
   "$ROOT/scripts/check-dmg.sh" "$package"
   echo "packaged installer: $package_dir/$output_name.dmg"
 else
-  pnpm --filter "$workspace" tauri build --no-bundle
+  pnpm --filter "$workspace" exec tauri build --no-bundle
   binary="$ROOT/apps/$app_dir/src-tauri/target/release/$binary_name"
 fi
 

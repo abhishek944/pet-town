@@ -41,6 +41,8 @@ pub struct OrchestratorPreferences {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PetPreferences {
+    #[serde(default)]
+    pub custom_name: String,
     pub included_in_random_cast: bool,
     pub appearance: AppearancePreferences,
     pub labels: LabelPreferences,
@@ -65,6 +67,9 @@ pub struct LabelPreferences {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MotionPreferences {
     pub level: MotionLevel,
+    // Legacy per-pet "reduce movement" toggle, removed from Settings and never
+    // written to new files. Kept readable so older preference files still load.
+    #[serde(default, skip_serializing)]
     pub reduced: bool,
     pub pause_on_hover: bool,
 }
@@ -119,7 +124,7 @@ impl PreferencesFile {
                 completed_hide_delay_minutes: 5,
                 orchestrator: OrchestratorPreferences {
                     enabled: false,
-                    display_name: "Mochi".to_string(),
+                    display_name: "Mayor".to_string(),
                     model: "gpt-5.6-luna".to_string(),
                     thinking: "medium".to_string(),
                     wake_enabled: true,
@@ -139,67 +144,29 @@ impl PreferencesFile {
         self.app.orchestrator.wake_enabled = true;
         self.app.orchestrator.pet_id = Some(ASSISTANT_PET_ID.to_string());
     }
+}
 
-    pub fn validate(&self, ids: &[String]) -> Result<(), String> {
-        if self.schema_version != SCHEMA_VERSION {
-            return Err("unsupported preference schema version".to_string());
-        }
-        if !self.pets.contains_key(&self.app.last_selected_pet_id) {
-            return Err("lastSelectedPetId is not an installed pet".to_string());
-        }
-        if !COMPLETED_HIDE_DELAYS_MINUTES.contains(&self.app.completed_hide_delay_minutes) {
-            return Err("completedHideDelayMinutes is not a supported delay".to_string());
-        }
-        let orchestrator = &self.app.orchestrator;
-        let name = orchestrator.display_name.trim();
-        if name.is_empty() || name.chars().count() > 32 || name.chars().any(char::is_control) {
-            return Err("orchestrator.displayName must contain 1–32 safe characters".to_string());
-        }
-        if !["gpt-5.6-luna", "gpt-5.6-sol", "gpt-5.6-terra"].contains(&orchestrator.model.as_str())
-            || !["low", "medium", "high", "xhigh"].contains(&orchestrator.thinking.as_str())
-        {
-            return Err("orchestrator model or thinking level is unsupported".to_string());
-        }
-        if !orchestrator.wake_enabled {
-            return Err("orchestrator.wakeEnabled must remain on".to_string());
-        }
-        if let Some(id) = orchestrator.workspace_id.as_deref() {
-            if id.is_empty() || id.len() > 1024 {
-                return Err("orchestrator.workspaceId must be 1–1024 characters".to_string());
-            }
-        }
-        if orchestrator.system_prompt.chars().count() > 4_000
-            || orchestrator
-                .system_prompt
-                .chars()
-                .any(|character| character.is_control() && !"\n\r\t".contains(character))
-        {
-            return Err("orchestrator.systemPrompt must be at most 4000 safe characters".to_string());
-        }
-        if orchestrator.pet_id.as_deref() != Some(ASSISTANT_PET_ID)
-            || !ids.iter().any(|id| id == ASSISTANT_PET_ID)
-        {
-            return Err("orchestrator.petId must use the bundled Knight".to_string());
-        }
-        let actual: Vec<&str> = self.pets.keys().map(String::as_str).collect();
-        let expected: Vec<&str> = ids.iter().map(String::as_str).collect();
-        if actual != expected {
-            return Err("pets must contain every installed pet ID exactly once".to_string());
-        }
-        if !self.pets.values().any(|pet| pet.included_in_random_cast) {
-            return Err("at least one pet must be included in the random cast".to_string());
-        }
-        for (id, pet) in &self.pets {
-            if !(75..=175).contains(&pet.appearance.scale_percent) {
-                return Err(format!("{id}.appearance.scalePercent must be 75–175"));
-            }
-            if !(30..=100).contains(&pet.appearance.opacity_percent) {
-                return Err(format!("{id}.appearance.opacityPercent must be 30–100"));
-            }
-            if !(75..=160).contains(&pet.labels.text_scale_percent) {
-                return Err(format!("{id}.labels.textScalePercent must be 75–160"));
-            }
-        }
-        Ok(())
+#[cfg(test)]
+mod mayor_name_tests {
+    use super::PreferencesFile;
+
+    #[test]
+    fn pet_names_survive_save_and_older_preferences_still_load() {
+        let ids = vec!["knight".to_string()];
+        let mut preferences = PreferencesFile::defaults(&ids);
+        preferences.pets.get_mut("knight").unwrap().custom_name = "Pip".into();
+        let value = serde_json::to_value(&preferences).unwrap();
+        let restored: PreferencesFile = serde_json::from_value(value.clone()).unwrap();
+        assert_eq!(restored.pets["knight"].custom_name, "Pip");
+        assert!(restored.validate(&ids).is_ok());
+
+        let mut older = value;
+        older["pets"]["knight"]
+            .as_object_mut()
+            .unwrap()
+            .remove("customName");
+        let restored: PreferencesFile = serde_json::from_value(older).unwrap();
+        assert!(restored.pets["knight"].custom_name.is_empty());
+        assert!(restored.validate(&ids).is_ok());
     }
 }

@@ -1,6 +1,6 @@
 import { CHARACTER_IDS, type CharacterId } from "./character-packs";
 
-export type AgentStatus = "working" | "blocked" | "idle" | "done" | "unknown";
+export type AgentStatus = "working" | "blocked" | "idle" | "done" | "unknown" | "listening";
 
 export interface AgentView {
   id: string;

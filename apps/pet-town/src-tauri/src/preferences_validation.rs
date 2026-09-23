@@ -1,0 +1,76 @@
+use crate::preferences_model::{
+    PreferencesFile, ASSISTANT_PET_ID, COMPLETED_HIDE_DELAYS_MINUTES, SCHEMA_VERSION,
+};
+
+impl PreferencesFile {
+    pub fn validate(&self, ids: &[String]) -> Result<(), String> {
+        if self.schema_version != SCHEMA_VERSION {
+            return Err("unsupported preference schema version".to_string());
+        }
+        if !self.pets.contains_key(&self.app.last_selected_pet_id) {
+            return Err("lastSelectedPetId is not an installed pet".to_string());
+        }
+        if !COMPLETED_HIDE_DELAYS_MINUTES.contains(&self.app.completed_hide_delay_minutes) {
+            return Err("completedHideDelayMinutes is not a supported delay".to_string());
+        }
+        let orchestrator = &self.app.orchestrator;
+        let name = orchestrator.display_name.trim();
+        if name.is_empty() || name.chars().count() > 32 || name.chars().any(char::is_control) {
+            return Err("orchestrator.displayName must contain 1–32 safe characters".to_string());
+        }
+        if !["gpt-5.6-luna", "gpt-5.6-sol", "gpt-5.6-terra"].contains(&orchestrator.model.as_str())
+            || !["low", "medium", "high", "xhigh"].contains(&orchestrator.thinking.as_str())
+        {
+            return Err("orchestrator model or thinking level is unsupported".to_string());
+        }
+        if !orchestrator.wake_enabled {
+            return Err("orchestrator.wakeEnabled must remain on".to_string());
+        }
+        if let Some(id) = orchestrator.workspace_id.as_deref() {
+            if id.is_empty() || id.len() > 1024 {
+                return Err("orchestrator.workspaceId must be 1–1024 characters".to_string());
+            }
+        }
+        if orchestrator.system_prompt.chars().count() > 4_000
+            || orchestrator
+                .system_prompt
+                .chars()
+                .any(|character| character.is_control() && !"\n\r\t".contains(character))
+        {
+            return Err(
+                "orchestrator.systemPrompt must be at most 4000 safe characters".to_string(),
+            );
+        }
+        if orchestrator.pet_id.as_deref() != Some(ASSISTANT_PET_ID)
+            || !ids.iter().any(|id| id == ASSISTANT_PET_ID)
+        {
+            return Err("orchestrator.petId must use the bundled Knight".to_string());
+        }
+        let actual: Vec<&str> = self.pets.keys().map(String::as_str).collect();
+        let expected: Vec<&str> = ids.iter().map(String::as_str).collect();
+        if actual != expected {
+            return Err("pets must contain every installed pet ID exactly once".to_string());
+        }
+        if !self.pets.values().any(|pet| pet.included_in_random_cast) {
+            return Err("at least one pet must be included in the random cast".to_string());
+        }
+        for (id, pet) in &self.pets {
+            let custom_name = &pet.custom_name;
+            if custom_name.chars().count() > 32 || custom_name.chars().any(char::is_control) {
+                return Err(format!(
+                    "{id}.customName must contain at most 32 safe characters"
+                ));
+            }
+            if !(75..=175).contains(&pet.appearance.scale_percent) {
+                return Err(format!("{id}.appearance.scalePercent must be 75–175"));
+            }
+            if !(30..=100).contains(&pet.appearance.opacity_percent) {
+                return Err(format!("{id}.appearance.opacityPercent must be 30–100"));
+            }
+            if !(75..=160).contains(&pet.labels.text_scale_percent) {
+                return Err(format!("{id}.labels.textScalePercent must be 75–160"));
+            }
+        }
+        Ok(())
+    }
+}

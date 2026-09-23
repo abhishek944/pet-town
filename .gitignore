@@ -6,12 +6,14 @@ var/
 node_modules/
 .pnpm-store/
 .turbo/
+.wrangler/
 dist/
 apps/web/.downloads/
 apps/*/.godot/
 apps/pet-town-godot/assets/nature-essentials/
 apps/pet-town-godot/assets/cozy-island/
 apps/pet-town-godot/navigation/*.res
+!apps/pet-town-godot/navigation/build_land_collision.res
 bin/macos-*/pet-town.dmg
 *.log
 *.local

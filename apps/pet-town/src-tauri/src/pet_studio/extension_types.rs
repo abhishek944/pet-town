@@ -1,4 +1,4 @@
-use super::types::MenuActionInput;
+use super::types::StateSelection;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -7,8 +7,7 @@ use std::collections::HashMap;
 pub struct SaveExtensionRequest {
     pub draft_id: String,
     pub base_id: String,
-    pub state_assignments: HashMap<String, String>,
-    pub actions: Vec<MenuActionInput>,
+    pub state_assignments: HashMap<String, StateSelection>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]

@@ -73,6 +73,9 @@ fn godot_runtime() -> Option<PathBuf> {
     if let Some(path) = executable_env("PET_TOWN_GODOT_BIN") {
         return Some(path);
     }
+    if let Some(path) = branded_godot_runtime() {
+        return Some(path);
+    }
     let mut candidates = vec![
         PathBuf::from("/Applications/Godot.app/Contents/MacOS/Godot"),
         repository_root().join("var/godot-runtime/Godot.app/Contents/MacOS/Godot"),
@@ -85,6 +88,27 @@ fn godot_runtime() -> Option<PathBuf> {
         .find(|candidate| candidate.is_file())
         .or_else(|| executable_on_path("godot"))
         .or_else(|| executable_on_path("Godot"))
+}
+
+#[cfg(target_os = "macos")]
+fn branded_godot_runtime() -> Option<PathBuf> {
+    let root = repository_root();
+    let script = root.join("scripts/prepare-pet-town-godot-app.sh");
+    let source = root.join("var/godot-runtime/Godot.app");
+    if !script.is_file() || !source.is_dir() {
+        return None;
+    }
+    let output = Command::new("sh").arg(script).arg(source).output().ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let path = PathBuf::from(String::from_utf8(output.stdout).ok()?.trim());
+    path.is_file().then_some(path)
+}
+
+#[cfg(not(target_os = "macos"))]
+fn branded_godot_runtime() -> Option<PathBuf> {
+    None
 }
 
 fn project_path() -> Option<PathBuf> {

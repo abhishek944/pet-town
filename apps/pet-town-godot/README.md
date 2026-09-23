@@ -10,6 +10,9 @@ A large Godot 4 Pet Town built from PolyForge’s purchased **Cozy Low Poly Isla
 - A grand south harbor, north lighthouse overlook, market, windmill, campsite, gardens, boats, forest groves, and a connected terrain-fitting road network.
 - Dusk lighting, warm neighborhood lights, emissive materials, and a freely orbitable camera sized for the expanded town.
 - One dynamic KayKit companion for every live Pet Town broker agent, with deterministic reuse of ten 3D appearances.
+- Local town customization: users can add trees and edit saved trees, flower patches, houses, benches, lanterns, and other authored objects in the game. Changes persist across restarts.
+- **Chill** opens the complete authored island with live pets and all current agent controls. **Build** opens the same authored terrain without town objects or visible pets. The mode buttons and object catalog are at the top right; each mode keeps its own saved layout.
+- A Knight mayor called by “Hey Mayor” or “Hey” plus the mayor’s chosen name. The wake phrase creates the mayor if needed and moves the camera to them; ordinary conversation leaves the camera alone. A speaking wave appears at the bottom while the user talks.
 - Baked navigation and collision, neighbor avoidance, and status-driven movement among the authored town activity markers.
 - True fullscreen startup with **F** available to toggle back to a maximized window.
 
@@ -29,7 +32,7 @@ unzip -p "$HOME/Downloads/Cozy Low Poly Island .zip" \
   > var/large-cozy-town/source/cozy-island.blend
 ```
 
-`main.tscn` contains a fixed `GrandMoonhaven` instance of `scenes/warm_island.tscn`, which inherits the original `assets/cozy-island/grand-moonhaven.glb`. Houses, trees, terrain, and roads are authored geometry; the game does not generate or place them at runtime. The previous construction script and sample pet code have been removed from the active project and archived locally in `var/large-cozy-town/retired-procedural-code-20260921-145248.tar.gz`. The island stays static. Scripts now control the camera and the separate companion behavior layer; they do not generate or place island assets.
+`main.tscn` contains a fixed `GrandMoonhaven` instance of `scenes/warm_island.tscn`, which inherits the original `assets/cozy-island/grand-moonhaven.glb`. Houses, terrain, and roads remain authored geometry. The 328 island trees are saved in four equal groups of 82 round, pine, fir, and orchard trees. Island props, reference garden trees and flower patches, and Godot decorations remain individually selectable or grouped by flower patch. In-game edits are local layout overrides and do not modify the Blender source assets. The previous construction script and sample pet code have been removed from the active project and archived locally in `var/large-cozy-town/retired-procedural-code-20260921-145248.tar.gz`.
 
 ## Static island authoring
 
@@ -57,12 +60,21 @@ The current saved scene was verified with Godot 4.7.2. From the repository root,
 ```bash
 GODOT="var/godot-runtime/Godot.app/Contents/MacOS/Godot"
 "$GODOT" --headless --editor --path apps/pet-town-godot --quit
-"$GODOT" --path apps/pet-town-godot
+sh scripts/prepare-pet-town-godot-app.sh
+"var/godot-runtime/Pet Town 3D.app/Contents/MacOS/Godot" --path apps/pet-town-godot
 ```
 
-The portable runtime is local and ignored by Git. If it is not present, install Godot 4 and replace `GODOT` with the path to that executable. Start the Pet Town desktop app first so Godot can launch its privacy-safe `--town-bridge` helper. When launching Godot outside the desktop menu, set `PET_TOWN_BRIDGE_BIN` to the current Pet Town executable if it is not beside Godot or on `PATH`.
+The portable runtime and branded macOS app are local and ignored by Git. The desktop launcher prepares the branded app automatically. If the portable runtime is not present, install Godot 4 and replace `GODOT` with the path to that executable. Start the Pet Town desktop app first so Godot can launch its privacy-safe `--town-bridge` helper. When launching Godot outside the desktop menu, set `PET_TOWN_BRIDGE_BIN` to the current Pet Town executable if it is not beside Godot or on `PATH`.
 
 ## Controls
+
+### Island modes and object catalog
+
+Choose **Chill** to keep the complete town and place any catalog object for free. Choose **Build** to start with empty land. The catalog currently offers 27 complete styles across trees, gardens, furniture, lights, homes, shops, waterfront objects, and landmarks. Buildings and garden objects place on land; boats place on the water. Build shows a price beside each object and charges only when placement is confirmed. Canceling placement costs nothing. Purchased objects can be moved, turned, resized, and removed; removing one does not refund its price.
+
+For this first version, the Build wallet is a local editable file at `~/.pet-town/build-wallet.json`. The game creates it with zero usage totals. Edit its `usage` fields to enter accumulated `input_tokens`, `output_tokens`, `cache_hit_tokens`, and `estimated_cost_usd`; this version does not automatically import live Pi usage. Credits earned are `input_tokens + 2 × output_tokens + floor(cache_hit_tokens ÷ 4) + floor(estimated_cost_usd × 1000)`. Purchases increase `spent` while the original usage totals remain visible. The cost value is an estimate, not an API invoice. Build placement saves separately to `user://build_layout.json`; Chill keeps its existing `user://town_layout.json`.
+
+Build mode hides the live agent controls and the existing roads, gardens, buildings, and decorations. The terrain is the original authored Blender landform. Moving large purchased objects currently changes their visual layout; pet collision and navigation still use the authored Chill layout when that mode is active.
 
 - **Normal mouse or trackpad drag:** move across the town
 - **Option-drag** (or right/middle drag): orbit and tilt the camera
@@ -70,18 +82,25 @@ The portable runtime is local and ignored by Git. If it is not present, install 
 - **Double-click a location:** focus it at neighborhood zoom
 - **+ / −:** keyboard zoom fallback
 - **A / D** or **Left / Right arrows:** rotate
-- **W / S** or **Up / Down arrows:** tilt
+- **W / S** or **Up / Down arrows:** tilt (when not driving an agent)
 - **Click a live agent:** select and follow its town pet
+- **C while following:** take or release control of that pet; **WASD / arrows** walk relative to the camera instead of rotating/tilting it. Walking stays on the baked paths. This does not control the underlying coding agent.
 - **Right-click a live agent:** follow it and open the full-height details panel
+- **T:** start placing a custom tree without opening the editing panel; click a town surface to place it
+- **Double-click an object:** open its editing panel for move, rotation, size, or deletion. Trees show a gold canopy ring when selected.
+- **Move:** click Move, point at a town surface, and click to place. **Right-click** or **Escape** cancels placement; **Close** or **Escape** closes editing.
 - **Option+A:** follow the next live agent
 - **Option+H:** open or close the controls board
-- **Escape:** close help, then details, then release the follow camera
+- **Option+S:** open or close in-town 3D settings. The centered settings window has separate entries for each 3D pet; the pictured lighting, sounds, movement, and camera controls are deferred. Apply is disabled until there are editable settings. Tree editing stays in the main game and continues to save automatically.
+- **Escape:** close settings if open, then help, then details, then release walking control, then release the follow camera
 - **R:** reset to the whole-town overview
 - **F:** toggle true fullscreen
 
 ## Current boundary
 
-The island remains static. The Pet Town desktop broker is the only agent authority and sends Godot only each agent's opaque ID, normalized state, safe display label, and source. Godot dynamically creates one companion per live record, reuses the ten KayKit appearances deterministically, and maps working, blocked, idle, done, and unknown states to movement and animation. Private Herdr pane and session data never enter Godot; the details action sends the opaque ID back to Rust for current-route revalidation.
+Authored trees and props are rendered as separate objects, and added trees live under `UserTrees`. Double-click a visible object to edit it. Positions, rotation, scale, and deletions are saved locally in `user://town_layout.json` and restored at startup. Overlap is intentionally allowed. Terrain and paths remain fixed. The baked collision/navigation resources reflect the original authored layout, so move large buildings and path obstacles in Blender/Godot and rebake navigation before relying on pet routing around their new positions.
+
+The Pet Town desktop broker is the only agent authority and sends Godot only each agent's opaque ID, normalized state, safe display label, and source. A separate local mayor state supplies the chosen mayor name, speaking state, and wake focus event. Godot dynamically creates one companion per visible live record (idle and unknown stay hidden, matching the 2D town), reuses the ten KayKit appearances deterministically, and maps working, blocked, and done states to movement and animation. Private Herdr pane and session data never enter Godot; the details action sends the opaque ID back to Rust for current-route revalidation.
 
 The desktop menu's **Open 3D Town** action launches the local project. While Godot is active, the desktop app suppresses the v1 bottom strip without changing the user's visibility preference. Switching away or closing Godot restores the strip when that preference is enabled.
 
@@ -129,7 +148,7 @@ Regression check (run without `--fixed-fps`, since it needs render frames betwee
 This deliberately uses 10 physics ticks per second and checks smooth constant-speed tracking, switching companions, resetting to the overview, and releasing follow by panning. It also reports the old raw-position approach for comparison.
 
 
-The island also has a static rendering-only batch in `scenes/island_render_sections.tscn`. It combines 7,703 original meshes into 1,427 material-and-area batches, preserving all 574,569 source triangles. Forty orchard apple meshes remain individually visible and interactive. Original Blender-authored nodes remain in the scene but are hidden for rendering; navigation and collision still use the originals. Batch resources stay in the ignored local `assets/cozy-island/render_sections/` folder. The per-object light limit returns to eight instead of evaluating 64 lights across the entire terrain.
+The island also has a static rendering scene in `scenes/island_render_sections.tscn`. Terrain and road surfaces remain batched by material and area; all 328 island trees are saved under `IslandRenderSections/EditableTrees`, and 1,160 authored object roots under `IslandRenderSections/EditableObjects`. The five original orchard wrappers carry their harvest apples. The hidden source scene continues to supply navigation and collision. Batch resources stay in the ignored local `assets/cozy-island/render_sections/` folder.
 
 After replacing the Blender GLB, rebuild the saved rendering batches:
 
@@ -137,14 +156,20 @@ After replacing the Blender GLB, rebuild the saved rendering batches:
 "$GODOT" --headless --path apps/pet-town-godot --script res://tools/partition_render_sections.gd
 ```
 
-Harvest markers reference the individually rendered apples under `IslandRenderSections/HarvestApples`.
+The apple-gather markers reference fruit nodes carried by `IslandRenderSections/EditableTrees/OrchardTree_000` and `OrchardTree_001`.
 
 
 ## Reference garden scene — 22 September 2026
 
-The current scene adds static Blender-authored cobblestones, cottage gardens, 225 woodland trees, fences, an entrance arch, four shoreline piers, a gazebo, market stalls, a fountain and a water garden. The editable source is `var/large-cozy-town/grand-moonhaven-reference-garden.blend`; its authoring collection is `REFERENCE - Gardens cobbles fences and village details`. A separate hidden `EXPORT - Optimized reference details` collection contains rendering batches.
+The scene adds static Blender-authored cobblestones, cottage gardens, 225 woodland trees, fences, an entrance arch, four shoreline piers, a gazebo, market stalls, a fountain and a water garden. The editable source is `var/large-cozy-town/grand-moonhaven-reference-garden.blend`; its authoring collection is `REFERENCE - Gardens cobbles fences and village details`. The export preserves the named garden detail meshes and separates the 225 tree roots. To rebuild the locally ignored runtime GLB, run from the repository root:
 
-Godot instances `scenes/reference_gardens.tscn` through `town_decorations.tscn`. This scene contains the exported GLB, saved collision shapes, warm-white lighting and a fading lighthouse beam. No island assets are placed during gameplay. The existing broker and companion behavior are preserved. The bench marker was moved clear of the new fountain.
+```bash
+blender -b var/large-cozy-town/grand-moonhaven-reference-garden.blend \
+  --python apps/pet-town-godot/tools/export_editable_reference_gardens.py -- \
+  --output apps/pet-town-godot/assets/cozy-island/reference-gardens-editable.glb
+```
+
+The Blender tool checks the expected tree geometry and verifies every static source mesh appears in the GLB. It also adds `Calm open ocean`, a static 240×240 water plane stored outside the optimized export collection, so creating the export scene does not silently drop it. Godot instances `scenes/reference_gardens.tscn` through `town_decorations.tscn`; saved collision shapes, warm-white lighting, and a fading lighthouse beam are unchanged. The existing broker and companion behavior are preserved.
 
 The default desktop renderer is now Forward+ with Metal on macOS, 2x MSAA, ambient occlusion and restrained glow. Compatibility remains the mobile override. The final overview measured about 48 FPS at 3024x1898 on this machine; this is a single-view measurement, not a guaranteed frame rate.
 

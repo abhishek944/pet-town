@@ -41,10 +41,10 @@ pub struct AnimationUpload {
 
 #[derive(Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct MenuActionInput {
-    pub id: String,
-    pub label: String,
-    pub animation_id: String,
+pub struct StateSelection {
+    pub animation: Option<String>,
+    pub action: String,
+    pub visible: bool,
 }
 
 #[derive(Deserialize)]
@@ -52,16 +52,10 @@ pub struct MenuActionInput {
 pub struct SavePackRequest {
     pub draft_id: String,
     pub display_name: String,
-    pub walk: String,
-    pub work: String,
-    pub blocked: String,
-    pub celebrate: String,
-    pub sleep: String,
-    pub unknown: String,
+    pub state_assignments: HashMap<String, StateSelection>,
     pub assign_to_orchestrator: bool,
     pub orchestrator_walk: String,
     pub orchestrator_listening: String,
-    pub actions: Vec<MenuActionInput>,
 }
 
 #[derive(Serialize)]

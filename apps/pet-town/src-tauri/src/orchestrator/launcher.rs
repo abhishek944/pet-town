@@ -16,10 +16,10 @@ pub async fn ensure(app: AppHandle, workspace_id: String) -> Result<(), String> 
         .app
         .orchestrator;
     if !preferences.enabled {
-        return Err("Enable the assistant in Settings first.".into());
+        return Err("Enable the mayor in Settings first.".into());
     }
     if !crate::pet_studio::orchestrator_pet_ready(preferences.pet_id.as_deref()) {
-        return Err("The bundled Knight assistant is unavailable.".into());
+        return Err("The bundled Knight mayor is unavailable.".into());
     }
     let selected = workspace_id.clone();
     let available = tauri::async_runtime::spawn_blocking(super::herdr::workspaces)
@@ -39,12 +39,12 @@ pub async fn ensure(app: AppHandle, workspace_id: String) -> Result<(), String> 
         || !current.enabled
         || !crate::pet_studio::orchestrator_pet_ready(current.pet_id.as_deref())
     {
-        return Err("The assistant changed while Pi was starting.".into());
+        return Err("The mayor changed while Pi was starting.".into());
     }
     let (existing, generation) = {
         let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
         if runtime.lifecycle_generation != admission {
-            return Err("The assistant changed while Pi was starting.".into());
+            return Err("The mayor changed while Pi was starting.".into());
         }
         runtime.herdr_connected = true;
         if runtime.exiting {
@@ -73,7 +73,7 @@ pub async fn ensure(app: AppHandle, workspace_id: String) -> Result<(), String> 
             .await
             .map_err(|_| "Could not check the Pi agent.".to_string())?;
         if canceled(&state, generation) {
-            return Err("The assistant changed while Pi was starting.".into());
+            return Err("The mayor changed while Pi was starting.".into());
         }
         match alive {
             Ok(true) => {
@@ -112,7 +112,7 @@ pub async fn ensure(app: AppHandle, workspace_id: String) -> Result<(), String> 
     {
         let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
         if runtime.lifecycle_generation != generation {
-            return Err("The assistant changed while Pi was starting.".into());
+            return Err("The mayor changed while Pi was starting.".into());
         }
         runtime.cleanup_count += 1;
     }
@@ -138,7 +138,7 @@ pub async fn ensure(app: AppHandle, workspace_id: String) -> Result<(), String> 
     if invalidated {
         super::launch_replace::close_new(&app, &state, agent).await;
         super::agent_launch::decrement_cleanup(&app, &state);
-        return Err("The assistant changed while Pi was starting.".into());
+        return Err("The mayor changed while Pi was starting.".into());
     }
     super::agent_launch::decrement_cleanup(&app, &state);
     clear_launching(&state, generation);

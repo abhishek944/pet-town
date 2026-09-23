@@ -47,6 +47,11 @@ pub fn get_orchestrator_pet_state(app: AppHandle) -> OrchestratorPetState {
 }
 
 #[tauri::command]
+pub fn focus_mayor(app: AppHandle) {
+    app.state::<OrchestratorState>().focus_mayor(&app);
+}
+
+#[tauri::command]
 pub fn report_orchestrator_diagnostic(message: String) {
     eprintln!("[assistant trace] {message}");
 }

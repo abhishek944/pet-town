@@ -10,7 +10,7 @@ private final class WakeController {
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var tapInstalled = false
     private var generation: UInt64 = 0
-    private var phrase = ""
+    private var phrases: [String] = []
     private var wantsListening = false
     private var rustGeneration: UInt64 = 0
     private var callback: WakeCallback?
@@ -47,7 +47,7 @@ private final class WakeController {
         stop()
         let token = generation
         self.wantsListening = true
-        self.phrase = phrase.lowercased()
+        self.phrases = Array(Set(phrase.lowercased().split(separator: "\n").map(String.init)))
         self.rustGeneration = rustGeneration
         self.callback = callback
         self.lastTranscript = ""
@@ -55,7 +55,7 @@ private final class WakeController {
         // even when an Info.plist is embedded in the Mach-O. Never request
         // protected access without an application bundle of our own.
         guard Bundle.main.bundleURL.pathExtension == "app" else {
-            self.report(false, "Voice requires the Pet Town.app build. Open the bundled app to start the assistant.")
+            self.report(false, "Voice requires the Pet Town.app build. Open the bundled app to start the mayor.")
             return
         }
         for key in ["NSSpeechRecognitionUsageDescription", "NSMicrophoneUsageDescription"] {
@@ -99,6 +99,13 @@ private final class WakeController {
         request = nil
     }
 
+    private func normalized(_ value: String) -> String {
+        value.lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+    }
+
     private func beginRecognition(_ token: UInt64) {
         guard wantsListening, generation == token else { return }
         guard let recognizer = recognizer(), recognizer.supportsOnDeviceRecognition else {
@@ -108,7 +115,7 @@ private final class WakeController {
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.requiresOnDeviceRecognition = true
         request.shouldReportPartialResults = true
-        request.contextualStrings = [phrase, phrase.replacingOccurrences(of: "hey ", with: "")]
+        request.contextualStrings = phrases + phrases.map { $0.replacingOccurrences(of: "hey ", with: "") }
         request.taskHint = .confirmation
         self.request = request
         let input = engine.inputNode
@@ -119,14 +126,15 @@ private final class WakeController {
         task = recognizer.recognitionTask(with: request) { [weak self] result, error in
             guard let self, self.generation == token else { return }
             if let text = result?.bestTranscription.formattedString.lowercased() {
-                if text.contains(phrase) {
+                let heard = " \(normalized(text)) "
+                if phrases.contains(where: { heard.contains(" \(self.normalized($0)) ") }) {
                     report(true, "Wake phrase heard.")
                     stop()
                     return
                 }
                 if !text.isEmpty && text != lastTranscript {
                     lastTranscript = text
-                    report(false, "Heard ‘\(text)’; waiting for ‘\(phrase)’.")
+                    report(false, "Heard ‘\(text)’; waiting for the mayor wake phrase.")
                 }
             }
             if error != nil || result?.isFinal == true {

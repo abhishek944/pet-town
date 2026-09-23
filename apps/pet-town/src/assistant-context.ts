@@ -13,7 +13,9 @@ export function toolTaskContext(task: string): string {
 }
 
 export function delegationContext(task: string, recentTranscript: string): string {
-  const cleanTask = task.trim().slice(0, 2_000) || "(no fresh speech captured since the last request; use recent conversation)";
+  const cleanTask =
+    task.trim().slice(0, 2_000) ||
+    "(no fresh speech captured since the last request; use recent conversation)";
   const recent = tail(recentTranscript, 2_000);
   return `Voice request (primary intent — act on this):\n${cleanTask}\n\nRecent conversation (reference resolution only, may contain recognition errors):\n${recent}\n\nHandle the request. Return verified status and what comes next.`;
 }

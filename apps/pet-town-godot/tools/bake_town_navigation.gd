@@ -11,6 +11,21 @@ func bake() -> void:
 	var collision_faces = PackedVector3Array()
 	var surface_count = 0
 	var obstacle_count = 0
+	var life: Node3D = load("res://scenes/town_life.tscn").instantiate()
+	root.add_child(life)
+	var approach_centers: Array[Vector2] = []
+	for stop_name in ["Campfire", "CraftMarket"]:
+		var stop := life.get_node("Activities/" + stop_name) as Marker3D
+		approach_centers.append(Vector2(stop.global_position.x, stop.global_position.z))
+	life.queue_free()
+	var road_bounds: Array[AABB] = []
+	for node in island.find_children("*", "MeshInstance3D", true, false):
+		var mesh_node := node as MeshInstance3D
+		for surface in mesh_node.mesh.get_surface_count():
+			var material := mesh_node.get_active_material(surface)
+			if material and ("warm gravel" in material.resource_name or "muted cobblestone" in material.resource_name):
+				road_bounds.append(mesh_node.global_transform * mesh_node.get_aabb())
+				break
 	for node in island.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node = node as MeshInstance3D
 		var label = str(node.name).to_lower()
@@ -21,9 +36,17 @@ func bake() -> void:
 			if mat and ("warm gravel" in mat.resource_name or "muted cobblestone" in mat.resource_name):
 				road = true
 		var obstacle = matches(label, ["foundation", "plaster", "faceted trunk", "tree trunk", "orchard trunk", "village bench", "bread display table", "coastal rock", "shore boulder", "campfire ring stone", "campfire log seat", "canvas camping tent", "raised bed", "garden bed", "table top", "tabletop", "crate", "lighthouse tower", "windmill tower"])
-		if ground or road or "earthen clearing" in label:
+		if road or "earthen clearing" in label:
 			source.add_mesh(mesh_node.mesh, mesh_node.global_transform)
 			surface_count += 1
+		elif ground:
+			# The campfire and craft market sit just beyond the continuous paved
+			# network. Keep short ground approaches without making the whole island
+			# a walkable shortcut across its gardens and forests.
+			var approach := _ground_approaches(mesh_node, road_bounds, approach_centers)
+			if approach != null:
+				source.add_mesh(approach, Transform3D.IDENTITY)
+				surface_count += 1
 		if ground or road or obstacle:
 			var faces = mesh_node.mesh.get_faces()
 			for v in faces: collision_faces.append(mesh_node.global_transform * v)
@@ -65,6 +88,35 @@ func bake() -> void:
 	bake_animations()
 	island.queue_free()
 	quit()
+
+func _ground_approaches(mesh_node: MeshInstance3D, road_bounds: Array[AABB], centers: Array[Vector2]) -> ArrayMesh:
+	var vertices := PackedVector3Array()
+	var faces := mesh_node.mesh.get_faces()
+	for index in range(0, faces.size(), 3):
+		var a: Vector3 = mesh_node.global_transform * faces[index]
+		var b: Vector3 = mesh_node.global_transform * faces[index + 1]
+		var c: Vector3 = mesh_node.global_transform * faces[index + 2]
+		var middle := (a + b + c) / 3.0
+		var included := false
+		for center in centers:
+			if Vector2(middle.x, middle.z).distance_to(center) < 16.0:
+				vertices.append_array(PackedVector3Array([a, b, c]))
+				included = true
+				break
+		if included:
+			continue
+		for road in road_bounds:
+			if middle.x >= road.position.x - 3.0 and middle.x <= road.end.x + 3.0 and middle.z >= road.position.z - 3.0 and middle.z <= road.end.z + 3.0:
+				vertices.append_array(PackedVector3Array([a, b, c]))
+				break
+	if vertices.is_empty():
+		return null
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
 
 func matches(label: String, words: Array) -> bool:
 	for word in words:
