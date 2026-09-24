@@ -86,12 +86,12 @@ func _build_help_board() -> void:
 	help_board.add_child(groups)
 	var explore_controls := [
 		["Drag", "Move across town"], ["Option + Drag", "Orbit camera"],
-		["Pinch", "Zoom"], ["T", "Place a custom tree"],
-		["Double-click a custom tree", "Open tree editing"], ["R", "Town overview"],
+		["Pinch", "Zoom"], ["/objects", "Browse and place objects"],
+		["Double-click an object", "Open object editing"], ["R", "Town overview"],
 	]
 	_help_group(groups, "EXPLORE THE TOWN", explore_controls)
 	_help_group(groups, "LIVE AGENTS", [["Click", "Follow pet"], ["Right-click", "Open details"], ["Option + A", "Next agent"], ["C, then WASD / arrows", "Drive the selected pet"], ["Esc", "Close or release"]])
-	_help_group(groups, "VIEW", [["F", "Fullscreen"], ["Option + H", "Toggle help"], ["+ / −", "Zoom fallback"]])
+	_help_group(groups, "TOWN COMMANDS", [["/chill", "Explore the complete island"], ["/build", "Build on open land"], ["/settings", "Open town studio"], ["F", "Fullscreen"]])
 	var footer := Label.new()
 	footer.text = "Press Option+H or Escape to close"
 	footer.add_theme_font_size_override("font_size", 13)
@@ -134,8 +134,8 @@ func _layout_ui() -> void:
 	if not is_instance_valid(ui_root):
 		return
 	var size := get_viewport().get_visible_rect().size
-	notice.position = Vector2((size.x - 360.0) * 0.5, (size.y - 86.0) * 0.5)
-	notice.size = Vector2(360.0, 86.0)
+	notice.position = Vector2(16.0, size.y - 88.0)
+	notice.size = Vector2(290.0, 72.0)
 	speaking_wave.position = Vector2((size.x - 122.0) * 0.5, size.y - 82.0)
 	speaking_wave.size = Vector2(122.0, 54.0)
 	var panel_width := minf(DETAILS_WIDTH, size.x * 0.9)

@@ -65,11 +65,9 @@ func fit_pick_area_to_visuals() -> void:
 		pick_area.position.z = bounds.position.z + bounds.size.z * 0.5
 		selection_marker.position = Vector3(bounds.position.x + bounds.size.x * 0.5, bounds.position.y + 0.08, bounds.position.z + bounds.size.z * 0.5)
 		selection_marker.scale = Vector3(maxf(bounds.size.x, 2.4) / 3.1, 1.0, maxf(bounds.size.z, 2.4) / 3.1)
-		var radius := maxf(bounds.size.x, bounds.size.z) * 0.52
-		if tree_id.begins_with("flower:"):
-			radius = minf(radius, 3.5)
+		var radius := clampf(maxf(bounds.size.x, bounds.size.z) * 0.52, 1.2, 3.5)
 		selection_crown_ring.scale = Vector3(radius, 1.0, radius)
-		selection_crown_ring.position = Vector3(bounds.position.x + bounds.size.x * 0.5, bounds.end.y + 0.18, bounds.position.z + bounds.size.z * 0.5)
+		selection_crown_ring.position = Vector3(bounds.position.x + bounds.size.x * 0.5, bounds.position.y + 0.12, bounds.position.z + bounds.size.z * 0.5)
 
 func set_selected(selected: bool) -> void:
 	selection_marker.visible = false

@@ -4,12 +4,12 @@ func _launch_bridge() -> void:
 	var bridge_path := _bridge_path()
 	if bridge_path.is_empty():
 		bridge_retry_at = Time.get_ticks_msec() + 3000
-		_set_notice("Live-agent connection unavailable\nRetrying…")
+		_set_notice("")
 		return
 	var pipe := OS.execute_with_pipe(bridge_path, ["--town-bridge"])
 	if pipe.is_empty() or not pipe.has("pid"):
 		bridge_retry_at = Time.get_ticks_msec() + 3000
-		_set_notice("Live-agent connection unavailable\nRetrying…")
+		_set_notice("")
 		return
 	bridge_pid = int(pipe.pid)
 	bridge_stdin = pipe.get("stdio") as FileAccess
@@ -17,10 +17,10 @@ func _launch_bridge() -> void:
 	if bridge_pid <= 0 or bridge_stdin == null or bridge_stdout == null:
 		bridge_pid = -1
 		bridge_retry_at = Time.get_ticks_msec() + 3000
-		_set_notice("Live-agent connection unavailable\nRetrying…")
+		_set_notice("")
 		return
 	_send_bridge({"v": 1, "type": "activeChanged", "active": true})
-	_set_notice("Connecting to live agents…")
+	_set_notice("")
 
 func _bridge_path() -> String:
 	var configured := OS.get_environment("PET_TOWN_BRIDGE_BIN")
@@ -48,7 +48,7 @@ func _poll_bridge() -> void:
 		bridge_retry_at = Time.get_ticks_msec() + 3000
 		received_snapshot = false
 		_reconcile_agents([])
-		_set_notice("Live-agent connection unavailable\nRetrying…")
+		_set_notice("")
 		return
 	while bridge_stdout.get_position() < bridge_stdout.get_length():
 		var line := bridge_stdout.get_line().strip_edges()
@@ -73,7 +73,7 @@ func _handle_bridge_line(line: String) -> void:
 		agents.append({"id": MAYOR_ID, "label": mayor_name if not mayor_name.is_empty() else "Mayor", "status": "working", "source": "mayor"})
 	if not bool(snapshot.get("available", false)):
 		_reconcile_agents(agents)
-		_set_notice("Live agents are unavailable\nRetrying…")
+		_set_notice("")
 		_focus_mayor_from_snapshot(mayor)
 		return
 	for candidate in snapshot.get("agents", []):
@@ -82,7 +82,7 @@ func _handle_bridge_line(line: String) -> void:
 				continue
 			agents.append(candidate)
 	_reconcile_agents(agents)
-	_set_notice("No live agents right now" if agents.is_empty() else "")
+	_set_notice("")
 	_focus_mayor_from_snapshot(mayor)
 
 func _focus_mayor_from_snapshot(mayor: Dictionary) -> void:

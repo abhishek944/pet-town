@@ -56,6 +56,10 @@ func _layout_catalog() -> void:
 	catalog_panel.size = Vector2(minf(344.0, viewport.x - 16.0), maxf(220.0, viewport.y - 104.0))
 
 func _toggle_catalog() -> void:
+	var town := get_parent()
+	if town != null and town.has_method("_open_settings_section"):
+		town.call("_open_settings_section", 3)
+		return
 	if catalog_panel.visible:
 		catalog_panel.visible = false
 		return

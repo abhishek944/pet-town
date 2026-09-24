@@ -1,4 +1,4 @@
-extends "res://scripts/town_mode.gd"
+extends "res://scripts/town_commands.gd"
 
 const TOWN_SETTINGS_SCRIPT := preload("res://scripts/town_settings.gd")
 
@@ -14,6 +14,7 @@ func _ready() -> void:
 	_build_ui()
 	tree_customization.call("initialize", ui_root)
 	_initialize_town_mode()
+	_build_commands()
 	_build_settings()
 	_layout_ui()
 	_update_camera()
@@ -26,7 +27,7 @@ func _exit_tree() -> void:
 func _build_settings() -> void:
 	settings_window = TOWN_SETTINGS_SCRIPT.new() as Control
 	ui_root.add_child(settings_window)
-	settings_window.call("set_pet_names", MODEL_NAMES)
+	settings_window.call("configure", self, tree_customization, MODEL_NAMES, MODEL_SCENES)
 	settings_window.connect("dismissed", _on_settings_dismissed)
 
 func _on_settings_dismissed() -> void:
@@ -41,6 +42,10 @@ func _set_background_focus_enabled(enabled: bool) -> void:
 func _settings_are_open() -> bool:
 	return is_instance_valid(settings_window) and settings_window.visible
 
+func _open_settings_section(index: int) -> void:
+	settings_window.call("open_settings", index)
+	_set_background_focus_enabled(false)
+
 func _input(event: InputEvent) -> void:
 	# Placement needs the first chance at world clicks; the open editor panel can
 	# otherwise consume them before _unhandled_input sees the move action.
@@ -53,14 +58,20 @@ func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
 	var key := event as InputEventKey
+	if command_panel.visible:
+		if key.keycode == KEY_ESCAPE:
+			_close_command_palette()
+			get_viewport().set_input_as_handled()
+		return
+	if key.keycode == KEY_SLASH and not _settings_are_open() and not key.alt_pressed and not key.ctrl_pressed and not key.meta_pressed:
+		_open_command_palette()
+		get_viewport().set_input_as_handled()
+		return
 	if key.alt_pressed and (key.keycode == KEY_S or key.physical_keycode == KEY_S):
-		if town_mode == "build":
-			return
 		if _settings_are_open():
 			settings_window.call("close_settings")
 		else:
-			settings_window.call("open_settings")
-			_set_background_focus_enabled(false)
+			_open_settings_section(0)
 		get_viewport().set_input_as_handled()
 	elif key.keycode == KEY_ESCAPE and _settings_are_open():
 		settings_window.call("close_settings")
@@ -104,7 +115,7 @@ func _process(delta: float) -> void:
 	_update_speaking_wave()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _settings_are_open():
+	if _settings_are_open() or command_panel.visible:
 		return
 	if bool(tree_customization.call("_handle_tree_customization_input", event)):
 		return
