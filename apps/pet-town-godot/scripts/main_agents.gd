@@ -49,10 +49,14 @@ func _open_details() -> void:
 		return
 	details_panel.visible = true
 	_refresh_details(true)
+	if has_method("_refresh_command_hint"):
+		call("_refresh_command_hint")
 
 func _close_details() -> void:
 	details_panel.visible = false
 	avatar_dragging = false
+	if has_method("_refresh_command_hint"):
+		call("_refresh_command_hint")
 
 func _refresh_details(force_avatar := false) -> void:
 	if not _details_are_open():

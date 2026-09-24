@@ -53,7 +53,7 @@ func _build_help_board() -> void:
 	help_scrim.visible = false
 	ui_root.add_child(help_scrim)
 	help_board = Panel.new()
-	help_board.add_theme_stylebox_override("panel", _style(Color("0b0f0de8"), 22, Color("ffffff38"), 1))
+	help_board.add_theme_stylebox_override("panel", _style(Color("14231ff8"), 20, Color("d6aa6166"), 1))
 	help_board.mouse_filter = Control.MOUSE_FILTER_STOP
 	help_board.visible = false
 	ui_root.add_child(help_board)
@@ -61,7 +61,7 @@ func _build_help_board() -> void:
 	help_close.text = "×"
 	help_close.tooltip_text = "Close town controls"
 	help_close.add_theme_font_size_override("font_size", 24)
-	help_close.add_theme_stylebox_override("normal", _style(Color("ffffff12"), 10))
+	help_close.add_theme_stylebox_override("normal", _style(Color("315947"), 10, Color("d6aa6166"), 1))
 	help_close.pressed.connect(func() -> void: _toggle_help(false))
 	help_board.add_child(help_close)
 	var header := VBoxContainer.new()
@@ -77,13 +77,16 @@ func _build_help_board() -> void:
 	title.add_theme_color_override("font_color", Color("f8f5ed"))
 	header.add_child(title)
 	var subtitle := Label.new()
-	subtitle.text = "Everything you need, only when you ask for it."
+	subtitle.text = "Explore the island at your own pace."
 	subtitle.add_theme_font_size_override("font_size", 16)
 	subtitle.add_theme_color_override("font_color", Color("b8c0b7"))
 	header.add_child(subtitle)
+	var scroller := ScrollContainer.new()
+	scroller.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	help_board.add_child(scroller)
 	var groups := HBoxContainer.new()
 	groups.add_theme_constant_override("separation", 14)
-	help_board.add_child(groups)
+	scroller.add_child(groups)
 	var explore_controls := [
 		["Drag", "Move across town"], ["Option + Drag", "Orbit camera"],
 		["Pinch", "Zoom"], ["/objects", "Browse and place objects"],
@@ -101,7 +104,7 @@ func _build_help_board() -> void:
 func _help_group(parent: HBoxContainer, title: String, rows: Array) -> void:
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.add_theme_stylebox_override("panel", _style(Color("ffffff07"), 12, Color("ffffff2b"), 1))
+	panel.add_theme_stylebox_override("panel", _style(Color("26392f"), 12, Color("94ae9266"), 1))
 	parent.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
@@ -116,7 +119,7 @@ func _help_group(parent: HBoxContainer, title: String, rows: Array) -> void:
 		key.text = row[0]
 		key.add_theme_font_size_override("font_size", 13)
 		key.add_theme_color_override("font_color", Color("f8f5ed"))
-		key.add_theme_stylebox_override("normal", _style(Color("ffffff12"), 6, Color("ffffff44"), 1))
+		key.add_theme_stylebox_override("normal", _style(Color("315947"), 6, Color("94ae9266"), 1))
 		box.add_child(key)
 		var description := Label.new()
 		description.text = row[1]
@@ -127,6 +130,8 @@ func _help_group(parent: HBoxContainer, title: String, rows: Array) -> void:
 func _toggle_help(show: bool) -> void:
 	help_scrim.visible = show
 	help_board.visible = show
+	if has_method("_refresh_command_hint"):
+		call("_refresh_command_hint")
 	if show:
 		help_close.grab_focus()
 
@@ -155,17 +160,18 @@ func _layout_ui() -> void:
 	content.size = Vector2(panel_width - 40.0, maxf(180.0, size.y - content.position.y - 94.0))
 	details_action.position = Vector2(20.0, size.y - 72.0)
 	details_action.size = Vector2(panel_width - 40.0, 54.0)
-	var board_margin := clampf(size.x * 0.03, 22.0, 42.0)
-	help_board.position = Vector2(board_margin, board_margin)
-	help_board.size = Vector2(size.x - board_margin * 2.0, size.y - board_margin * 2.0)
+	help_board.size = Vector2(minf(1040.0, size.x - 32.0), minf(680.0, size.y - 32.0))
+	help_board.position = (size - help_board.size) * 0.5
 	help_close.position = Vector2(help_board.size.x - 68.0, 15.0)
 	help_close.size = Vector2(44.0, 44.0)
 	var header := help_board.get_child(1) as VBoxContainer
 	header.position = Vector2(42.0, 38.0)
 	header.size = Vector2(help_board.size.x - 120.0, 90.0)
-	var groups := help_board.get_child(2) as HBoxContainer
-	groups.position = Vector2(42.0, 172.0)
-	groups.size = Vector2(help_board.size.x - 84.0, minf(400.0, help_board.size.y - 260.0))
+	var scroller := help_board.get_child(2) as ScrollContainer
+	scroller.position = Vector2(42.0, 172.0)
+	scroller.size = Vector2(help_board.size.x - 84.0, help_board.size.y - 235.0)
+	var groups := scroller.get_child(0) as HBoxContainer
+	groups.custom_minimum_size.x = scroller.size.x
 	var footer := help_board.get_child(3) as Label
 	footer.position = Vector2(42.0, help_board.size.y - 50.0)
 	footer.size = Vector2(360.0, 26.0)

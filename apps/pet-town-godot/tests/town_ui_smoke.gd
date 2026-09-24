@@ -17,20 +17,28 @@ func run() -> void:
 			var ring: MeshInstance3D = child.selection_crown_ring
 			if ring != null and ring.scale.x > 3.5:
 				errors.append("selection ring is too large")
-	settings.call("open_settings", 1)
+	town.call("_open_settings_section", 1)
+	if (town.get("command_hint") as Control).visible:
+		errors.append("command hint overlaps studio")
 	await process_frame
 	var pet_previews := settings.find_children("*", "SubViewportContainer", true, false).size()
 	if pet_previews < 8:
 		errors.append("missing 3D companion previews: %d" % pet_previews)
-	settings.call("open_settings", 3)
+	town.call("_open_settings_section", 3)
 	await process_frame
 	var object_previews := settings.find_children("*", "SubViewportContainer", true, false).size()
 	if object_previews < 20:
 		errors.append("missing 3D object previews: %d" % object_previews)
 	settings.call("close_settings")
+	town.call("_toggle_help", true)
+	if (town.get("command_hint") as Control).visible:
+		errors.append("command hint overlaps help")
+	town.call("_toggle_help", false)
 	town.call("_open_command_palette")
 	if not (town.get("command_panel") as Control).visible:
 		errors.append("command palette did not open")
+	if (town.get("command_hint") as Control).visible:
+		errors.append("command hint overlaps palette")
 	town.call("_run_town_command", "/settings")
 	if not settings.visible:
 		errors.append("/settings did not open town studio")

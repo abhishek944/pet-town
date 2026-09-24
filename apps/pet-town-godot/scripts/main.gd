@@ -32,6 +32,7 @@ func _build_settings() -> void:
 
 func _on_settings_dismissed() -> void:
 	_set_background_focus_enabled(true)
+	_refresh_command_hint()
 
 func _set_background_focus_enabled(enabled: bool) -> void:
 	var behavior := Control.FOCUS_BEHAVIOR_INHERITED if enabled else Control.FOCUS_BEHAVIOR_DISABLED
@@ -45,6 +46,7 @@ func _settings_are_open() -> bool:
 func _open_settings_section(index: int) -> void:
 	settings_window.call("open_settings", index)
 	_set_background_focus_enabled(false)
+	_refresh_command_hint()
 
 func _input(event: InputEvent) -> void:
 	# Placement needs the first chance at world clicks; the open editor panel can

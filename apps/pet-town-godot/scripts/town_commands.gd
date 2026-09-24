@@ -54,6 +54,7 @@ func _layout_commands() -> void:
 func _refresh_command_hint() -> void:
 	if is_instance_valid(command_hint):
 		command_hint.text = "  %s ISLAND   ·   / commands  " % town_mode.to_upper()
+		command_hint.visible = not command_panel.visible and not call("_details_are_open") and not call("_help_is_open") and not call("_settings_are_open")
 
 func _open_command_palette() -> void:
 	command_panel.visible = true
@@ -61,10 +62,12 @@ func _open_command_palette() -> void:
 	command_input.caret_column = 1
 	command_feedback.text = ""
 	command_input.grab_focus()
+	_refresh_command_hint()
 
 func _close_command_palette() -> void:
 	command_panel.visible = false
 	command_input.release_focus()
+	_refresh_command_hint()
 
 func _run_town_command(raw: String) -> void:
 	var command := raw.strip_edges().trim_prefix("/").to_lower()

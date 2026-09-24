@@ -48,13 +48,13 @@ func _update_speaking_wave() -> void:
 
 func _build_details_panel() -> void:
 	details_panel = Panel.new()
-	details_panel.add_theme_stylebox_override("panel", _style(Color("090c0a"), 0))
+	details_panel.add_theme_stylebox_override("panel", _style(Color("14231ff8"), 16, Color("d6aa6166"), 1))
 	details_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	details_panel.visible = false
 	ui_root.add_child(details_panel)
 	_setup_avatar_viewer()
 	var eyebrow := Label.new()
-	eyebrow.text = "LIVE AGENT"
+	eyebrow.text = "PET TOWN  /  COMPANION"
 	eyebrow.position = Vector2(20.0, 19.0)
 	eyebrow.size = Vector2(180.0, 28.0)
 	eyebrow.add_theme_font_size_override("font_size", 12)
@@ -64,14 +64,14 @@ func _build_details_panel() -> void:
 	details_close.text = "×"
 	details_close.tooltip_text = "Close agent details"
 	details_close.add_theme_font_size_override("font_size", 24)
-	details_close.add_theme_stylebox_override("normal", _style(Color("00000075"), 10))
+	details_close.add_theme_stylebox_override("normal", _style(Color("315947"), 10, Color("d6aa6166"), 1))
 	details_close.pressed.connect(_close_details)
 	details_panel.add_child(details_close)
 	avatar_reset = Button.new()
 	avatar_reset.text = "Reset view"
 	avatar_reset.tooltip_text = "Reset the live 3D avatar view"
 	avatar_reset.add_theme_font_size_override("font_size", 13)
-	avatar_reset.add_theme_stylebox_override("normal", _style(Color("00000075"), 10, Color("ffffff28"), 1))
+	avatar_reset.add_theme_stylebox_override("normal", _style(Color("315947"), 10, Color("d6aa6166"), 1))
 	avatar_reset.pressed.connect(Callable(self, "_reset_avatar_view"))
 	details_panel.add_child(avatar_reset)
 	var content := VBoxContainer.new()
@@ -100,7 +100,7 @@ func _build_details_panel() -> void:
 	details_action.text = "Open in Herdr"
 	details_action.tooltip_text = "Open the current live agent in Herdr"
 	details_action.add_theme_font_size_override("font_size", 16)
-	details_action.add_theme_stylebox_override("normal", _style(Color("80531fd9"), 12, Color("d9a64c"), 1))
+	details_action.add_theme_stylebox_override("normal", _style(Color("bd842e"), 12, Color("ffe1a5"), 1))
 	details_action.add_theme_stylebox_override("disabled", _style(Color("30342f"), 12, Color("ffffff24"), 1))
 	details_action.pressed.connect(_open_in_herdr)
 	details_panel.add_child(details_action)
@@ -109,7 +109,7 @@ func _detail_card(grid: GridContainer, title: String) -> Label:
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(0, 64)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override("panel", _style(Color("ffffff08"), 10, Color("ffffff26"), 1))
+	card.add_theme_stylebox_override("panel", _style(Color("26392f"), 10, Color("94ae9266"), 1))
 	grid.add_child(card)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
@@ -130,7 +130,7 @@ func _detail_card(grid: GridContainer, title: String) -> Label:
 func _setup_avatar_viewer() -> void:
 	avatar_frame = Panel.new()
 	avatar_frame.clip_contents = true
-	avatar_frame.add_theme_stylebox_override("panel", _style(Color("111a14"), 14, Color("ffffff30"), 1))
+	avatar_frame.add_theme_stylebox_override("panel", _style(Color("26392f"), 14, Color("94ae9266"), 1))
 	details_panel.add_child(avatar_frame)
 	avatar_container = SubViewportContainer.new()
 	avatar_container.stretch = true
