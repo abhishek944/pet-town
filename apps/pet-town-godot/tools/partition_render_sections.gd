@@ -49,6 +49,8 @@ func build() -> void:
 	_assign_replacements(by_variant["round"], 48, "apple", replacements, 68)
 	_assign_replacements(by_variant["pine"], 29, "apple", replacements)
 	_assign_replacements(by_variant["apple"], by_variant["apple"].size(), "apple", replacements)
+	var expanded_round_count := 0
+	var new_grove_count := 0
 	for index in tree_roots.size():
 		var source: Node3D = tree_roots[index]
 		var tree_id := "island:%s" % String(source.name)
@@ -57,6 +59,17 @@ func build() -> void:
 		var replacement := String(replacements.get(source.get_instance_id(), ""))
 		var visual_source: Node3D = apple_donor if replacement == "apple" else donors.get(replacement, source)
 		var wrapper := _make_tree_wrapper(source, tree_id, "IslandTree_%03d" % index, visual_source)
+		var visible_variant := replacement if not replacement.is_empty() else _tree_variant(source)
+		var hide_dense_tree := false
+		if String(source.name).begins_with("Expanded grove ") and visible_variant == "round":
+			hide_dense_tree = expanded_round_count % 10 != 0
+			expanded_round_count += 1
+		elif String(source.name).begins_with("TREE - new grove"):
+			hide_dense_tree = new_grove_count % 6 != 0
+			new_grove_count += 1
+		if hide_dense_tree:
+			wrapper.visible = false
+			(wrapper.get_node("PickArea") as Area3D).collision_layer = 0
 		editable_trees.add_child(wrapper)
 		_set_owner_recursive(wrapper, result)
 		for mesh_node in _tree_mesh_instances(source):

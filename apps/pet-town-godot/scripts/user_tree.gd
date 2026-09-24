@@ -15,20 +15,24 @@ var selection_crown_ring: MeshInstance3D
 func _ready() -> void:
 	authored_base_scale = scale
 	add_to_group("editable_trees")
-	selection_crown_ring = MeshInstance3D.new()
-	selection_crown_ring.name = "SelectionCrownRing"
+	selection_crown_ring = get_node_or_null("SelectionCrownRing") as MeshInstance3D
+	if selection_crown_ring == null:
+		selection_crown_ring = MeshInstance3D.new()
+		selection_crown_ring.name = "SelectionCrownRing"
+		add_child(selection_crown_ring)
 	selection_crown_ring.visible = false
 	selection_crown_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring_material := StandardMaterial3D.new()
 	ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	ring_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	ring_material.albedo_color = Color(1.0, 0.77, 0.22, 0.92)
+	ring_material.no_depth_test = true
+	ring_material.render_priority = 1
+	ring_material.albedo_color = Color(1.0, 0.78, 0.24, 1.0)
 	var ring := TorusMesh.new()
 	ring.inner_radius = 0.94
 	ring.outer_radius = 1.0
 	ring.material = ring_material
 	selection_crown_ring.mesh = ring
-	add_child(selection_crown_ring)
 	fit_pick_area_to_visuals()
 
 func fit_pick_area_to_visuals() -> void:
@@ -65,9 +69,9 @@ func fit_pick_area_to_visuals() -> void:
 		pick_area.position.z = bounds.position.z + bounds.size.z * 0.5
 		selection_marker.position = Vector3(bounds.position.x + bounds.size.x * 0.5, bounds.position.y + 0.08, bounds.position.z + bounds.size.z * 0.5)
 		selection_marker.scale = Vector3(maxf(bounds.size.x, 2.4) / 3.1, 1.0, maxf(bounds.size.z, 2.4) / 3.1)
-		var radius := clampf(maxf(bounds.size.x, bounds.size.z) * 0.52, 1.2, 3.5)
+		var radius := clampf(maxf(bounds.size.x, bounds.size.z) * 0.52, 1.2, 2.0)
 		selection_crown_ring.scale = Vector3(radius, 1.0, radius)
-		selection_crown_ring.position = Vector3(bounds.position.x + bounds.size.x * 0.5, bounds.position.y + 0.12, bounds.position.z + bounds.size.z * 0.5)
+		selection_crown_ring.position = Vector3(bounds.position.x + bounds.size.x * 0.5, bounds.end.y + 0.18, bounds.position.z + bounds.size.z * 0.5)
 
 func set_selected(selected: bool) -> void:
 	selection_marker.visible = false
@@ -82,5 +86,5 @@ func set_placement_preview(preview: bool) -> void:
 	selection_crown_ring.visible = preview
 	pick_area.collision_layer = 0 if preview else 4
 	for child in find_children("*", "MeshInstance3D", true, false):
-		if child != selection_marker:
+		if child != selection_marker and child != selection_crown_ring:
 			(child as MeshInstance3D).transparency = 0.38 if preview else 0.0

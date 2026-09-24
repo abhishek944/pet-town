@@ -8,6 +8,33 @@ func run() -> void:
 	root.add_child(town)
 	town.call("_set_town_mode", "chill", false)
 	var arguments := OS.get_cmdline_user_args()
+	if not arguments.is_empty() and arguments[0] in ["selected", "moving", "move-check"]:
+		var editor := town.get_node("UserTrees")
+		var object := town.get_node("IslandRenderSections/EditableObjects/IslandObject_0803") as UserTree
+		editor.set("tree_editor_open", true)
+		editor.call("_select_user_tree", object)
+		if arguments[0] == "moving":
+			editor.call("_start_moving_selected_tree")
+		var marker := object.selection_crown_ring
+		town.set("camera_at_overview", false)
+		town.set("camera_target", marker.global_position)
+		town.set("camera_distance", 22.0)
+		town.call("_update_camera")
+		if arguments[0] == "move-check":
+			var start := object.global_position
+			editor.call("_start_moving_selected_tree")
+			editor.call("_update_tree_placement_preview", Vector2(900, 650))
+			assert(editor.get("placement_has_surface"), "Move preview did not find land")
+			assert(object.global_position.distance_to(start) > 0.1, "Move preview did not reposition object")
+			assert(marker.visible, "Move marker is hidden")
+			editor.call("_cancel_tree_placement")
+			assert(object.global_position.is_equal_approx(start), "Cancel did not restore object")
+			print("TOWN UI VISUAL move-check passed")
+			quit()
+			return
+		town.set_process(false)
+		print("TOWN UI VISUAL ", arguments[0], " marker=", marker.global_position, " visible=", marker.visible)
+		return
 	if not arguments.is_empty() and arguments[0] == "command":
 		town.call("_open_command_palette")
 		print("TOWN UI VISUAL command")
