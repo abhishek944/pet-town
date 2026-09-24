@@ -15,6 +15,12 @@ var selection_crown_ring: MeshInstance3D
 func _ready() -> void:
 	authored_base_scale = scale
 	add_to_group("editable_trees")
+	if is_authored:
+		for model_name in ["Trunk", "CrownLarge", "CrownSmall"]:
+			var default_model := get_node_or_null(model_name)
+			if default_model != null:
+				remove_child(default_model)
+				default_model.free()
 	selection_crown_ring = get_node_or_null("SelectionCrownRing") as MeshInstance3D
 	if selection_crown_ring == null:
 		selection_crown_ring = MeshInstance3D.new()

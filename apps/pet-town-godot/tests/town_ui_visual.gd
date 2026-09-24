@@ -11,6 +11,7 @@ func run() -> void:
 	if not arguments.is_empty() and arguments[0] in ["selected", "moving", "move-check"]:
 		var editor := town.get_node("UserTrees")
 		var object := town.get_node("IslandRenderSections/EditableObjects/IslandObject_0803") as UserTree
+		assert(object.get_node_or_null("CrownLarge") == null, "Authored objects still contain the default green crown")
 		editor.set("tree_editor_open", true)
 		editor.call("_select_user_tree", object)
 		if arguments[0] == "moving":
