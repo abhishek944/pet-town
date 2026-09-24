@@ -91,7 +91,7 @@ pub(crate) fn create_village_window(
     app: &mut tauri::App,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(target_os = "macos")]
-    app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+    app.set_activation_policy(tauri::ActivationPolicy::Regular);
 
     tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
         .title("Pet Town")
@@ -104,7 +104,7 @@ pub(crate) fn create_village_window(
         .focusable(false)
         .focused(false)
         .accept_first_mouse(true)
-        .skip_taskbar(true)
+        .skip_taskbar(false)
         .shadow(false)
         .visible(false)
         .visible_on_all_workspaces(true)
