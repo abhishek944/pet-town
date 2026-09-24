@@ -68,6 +68,14 @@ if [ "$mode" = dev ]; then
   pnpm install --frozen-lockfile
   # Tauri's compile-time context needs frontendDist even when dev uses Vite.
   pnpm --filter @pet-town/desktop run internal:build-frontend
+  # Cargo normally launches target/debug/pet-town, which macOS labels "pet-town".
+  # Run a debug-named copy so its Dock entry is distinct from the installed app.
+  if [ "$(uname -s)" = Darwin ]; then
+    case "$(uname -m)" in
+    arm64) export CARGO_TARGET_AARCH64_APPLE_DARWIN_RUNNER="$ROOT/scripts/run-pet-town-debug.sh" ;;
+    x86_64) export CARGO_TARGET_X86_64_APPLE_DARWIN_RUNNER="$ROOT/scripts/run-pet-town-debug.sh" ;;
+    esac
+  fi
   exec pnpm --filter @pet-town/desktop exec tauri dev
 fi
 exec "$ROOT/scripts/build.sh"
