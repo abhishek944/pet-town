@@ -19,6 +19,7 @@
   },
   "scripts": {
     "dev": "sh scripts/fresh-towns.sh dev",
+    "dev:workshop": "sh scripts/run-pet-town-workshop.sh",
     "dev:web": "turbo run dev --filter=@pet-town/web",
     "preview:web": "pnpm --filter @pet-town/web preview",
     "build": "sh scripts/fresh-towns.sh build",

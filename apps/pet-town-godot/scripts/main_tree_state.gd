@@ -9,6 +9,10 @@ const MIN_TREE_SCALE := 0.5
 const MAX_TREE_SCALE := 2.0
 const TREE_ROTATION_STEP := 15.0
 
+func _town_layout_path() -> String:
+	var test_dir := OS.get_environment("PET_TOWN_TEST_DATA_DIR")
+	return test_dir.path_join("town_layout.json") if not test_dir.is_empty() else TREE_LAYOUT_PATH
+
 @onready var camera: Camera3D = $"../OrbitCamera"
 @onready var host: Node = get_parent()
 
@@ -16,6 +20,7 @@ var ui_root: Control
 var tree_panel: PanelContainer
 var tree_status: Label
 var tree_selection_label: Label
+var tree_preview_holder: PanelContainer
 var tree_scale_label: Label
 var tree_scale_slider: HSlider
 var tree_move_button: Button
@@ -25,12 +30,14 @@ var tree_delete_button: Button
 var tree_done_button: Button
 
 var selected_user_tree: UserTree
+var paver_registry: Node3D
 var placement_tree: UserTree
 var placement_active := false
 var tree_editor_open := false
 var placement_started_from_editor := false
 var moving_existing_tree := false
 var move_start_transform := Transform3D.IDENTITY
+var move_undo_before: Dictionary = {}
 var placement_has_surface := false
 var next_tree_id := 1
 var authored_trees: Dictionary = {}
@@ -44,3 +51,9 @@ var catalog_list: VBoxContainer
 var catalog_balance: Label
 var catalog_button: Button
 var next_build_id := 1
+var undo_history: Array[Dictionary] = []
+var scale_drag_before: Dictionary = {}
+
+func register_paver_proxy(item: UserTree) -> void:
+	authored_trees[item.tree_id] = item
+	authored_originals[item.tree_id] = item.global_transform

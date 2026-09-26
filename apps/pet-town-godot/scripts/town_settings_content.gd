@@ -19,7 +19,7 @@ var footer_status: Label
 var pet_names: Array[String] = []
 var pet_scenes: Array[PackedScene] = []
 var selected_section := 0
-var selected_pet := 0
+var selected_pet := -1
 var return_focus: Control
 
 func configure(town: Node, object_editor: Node, names: Array, scenes: Array) -> void:

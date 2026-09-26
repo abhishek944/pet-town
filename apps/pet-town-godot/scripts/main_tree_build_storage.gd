@@ -2,6 +2,10 @@ extends "res://scripts/main_tree_reference_objects.gd"
 
 const BUILD_LAYOUT_PATH := "user://build_layout.json"
 
+func _build_layout_path() -> String:
+	var test_dir := OS.get_environment("PET_TOWN_TEST_DATA_DIR")
+	return test_dir.path_join("build_layout.json") if not test_dir.is_empty() else BUILD_LAYOUT_PATH
+
 func _catalog_item(item_id: String) -> Dictionary:
 	for item in catalog_items:
 		if item["id"] == item_id:
@@ -43,16 +47,16 @@ func _save_build_layout() -> void:
 		var record: Dictionary = call("_tree_record", tree, "build")
 		record["catalog_item_id"] = tree.catalog_item_id
 		records.append(record)
-	var file := FileAccess.open(BUILD_LAYOUT_PATH, FileAccess.WRITE)
+	var file := FileAccess.open(_build_layout_path(), FileAccess.WRITE)
 	if file == null:
 		tree_status.text = "Could not save the Build island."
 		return
 	file.store_string(JSON.stringify({"version": 1, "objects": records}, "  "))
 
 func _load_build_layout() -> void:
-	if not FileAccess.file_exists(BUILD_LAYOUT_PATH):
+	if not FileAccess.file_exists(_build_layout_path()):
 		return
-	var file := FileAccess.open(BUILD_LAYOUT_PATH, FileAccess.READ)
+	var file := FileAccess.open(_build_layout_path(), FileAccess.READ)
 	if file == null:
 		return
 	var parsed = JSON.parse_string(file.get_as_text())

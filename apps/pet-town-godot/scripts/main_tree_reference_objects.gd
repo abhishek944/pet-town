@@ -1,4 +1,6 @@
 extends "res://scripts/main_tree_state.gd"
+const SHADOW_BUDGET := preload("res://scripts/town_shadow_budget.gd")
+const PAVERS_SCRIPT := preload("res://scripts/town_pavers.gd")
 
 func _wrap_reference_trees() -> void:
 	var details := host.get_node_or_null("TownDecorations/ReferenceGardens/BlenderAuthoredDetails")
@@ -10,6 +12,9 @@ func _wrap_reference_trees() -> void:
 		if source == null:
 			continue
 		var label := String(source.name)
+		if label.begins_with("FlowerPatch_"):
+			_wrap_scene_object(source, "flower:%s" % label)
+			continue
 		if _is_flower_source(label):
 			var key := _reference_tile_key(label)
 			if not flower_groups.has(key):
@@ -20,7 +25,8 @@ func _wrap_reference_trees() -> void:
 			continue
 		if _is_fixed_reference_surface(label):
 			continue
-		_wrap_scene_object(source, "reference:%s" % String(source.name))
+		var surface := "meadow" in label.to_lower() or " water " in label.to_lower()
+		_wrap_scene_object(source, "%s:%s" % ["surface" if surface else "reference", label])
 	for key in flower_groups:
 		var has_petals := false
 		for source in flower_groups[key]:
@@ -33,6 +39,9 @@ func _wrap_reference_trees() -> void:
 		else:
 			for source in flower_groups[key]:
 				_wrap_scene_object(source, "reference:%s" % String(source.name))
+	paver_registry = PAVERS_SCRIPT.new() as Node3D
+	details.add_child(paver_registry)
+	paver_registry.call("configure", details, self)
 	var decorations := host.get_node_or_null("TownDecorations")
 	if decorations != null:
 		for candidate in decorations.get_children():
@@ -40,9 +49,9 @@ func _wrap_reference_trees() -> void:
 			if source == null or source.name == "ReferenceGardens":
 				continue
 			if source.name in ["ExistingLanternLight", "CottageWindowSpill"]:
-				for item in source.get_children():
-					if item is Node3D:
-						_wrap_scene_object(item as Node3D, "decoration:%s/%s" % [source.name, item.name])
+				_attach_architecture_lights(source)
+			elif source is Light3D:
+				_attach_effect_light(source)
 			else:
 				_wrap_scene_object(source, "decoration:%s" % source.name)
 	var gardens := host.get_node_or_null("TownDecorations/ReferenceGardens")
@@ -50,11 +59,53 @@ func _wrap_reference_trees() -> void:
 		for candidate in gardens.get_children():
 			var source := candidate as Node3D
 			if source != null and String(source.name).begins_with("GardenWarmLight_"):
-				_wrap_scene_object(source, "light:%s" % source.name)
+				_attach_effect_light(source)
+
+func _attach_architecture_lights(group: Node3D) -> void:
+	var buildings: Array[UserTree] = []
+	for node in host.get_tree().get_nodes_in_group("editable_trees"):
+		var item := node as UserTree
+		if item == null or not item.tree_id.begins_with("object:"):
+			continue
+		if "house" in item.tree_id.to_lower() or "cottage" in item.tree_id.to_lower() or "building" in item.tree_id.to_lower() or "bakery" in item.tree_id.to_lower() or "studio" in item.tree_id.to_lower():
+			buildings.append(item)
+	for child in group.get_children():
+		var light := child as Node3D
+		if light == null:
+			continue
+		var nearest: UserTree
+		var best := INF
+		for building in buildings:
+			var distance := building.global_position.distance_squared_to(light.global_position)
+			if String(light.name) in building.tree_id:
+				distance *= 0.01
+			if distance < best:
+				best = distance
+				nearest = building
+		if nearest != null and best < 144.0:
+			light.reparent(nearest, true)
+
+func _attach_effect_light(light: Node3D) -> void:
+	var nearest: UserTree
+	var best := INF
+	for node in host.get_tree().get_nodes_in_group("editable_trees"):
+		var item := node as UserTree
+		if item == null or not item.visible or item.get_node_or_null("AuthoredModel") == null:
+			continue
+		if item.find_children("*", "MeshInstance3D", true, false).is_empty():
+			continue
+		var distance := item.global_position.distance_squared_to(light.global_position)
+		if "campfire" in String(light.name).to_lower() and "fire" in item.tree_id.to_lower():
+			distance *= 0.01
+		if distance < best:
+			best = distance
+			nearest = item
+	if nearest != null and best < 9.0:
+		light.reparent(nearest, true)
 
 func _is_fixed_reference_surface(label: String) -> bool:
 	var value := label.to_lower()
-	for part in ["ocean", "meadow", "road", "path", "water", "grass terrain", "coastal ground", "paving", "ground plane", "paver", "deep sea", "sea glint"]:
+	for part in ["ocean", "deep sea", "sea glint", "paver"]:
 		if part in value:
 			return true
 	return false
@@ -132,6 +183,8 @@ func _wrap_scene_object(source: Node3D, object_id: String) -> void:
 	parent.add_child(tree)
 	parent.move_child(tree, source_index)
 	source.reparent(model)
+	if object_id.begins_with("decoration:"):
+		SHADOW_BUDGET.disable_tiny_casters(model)
 	tree.fit_pick_area_to_visuals()
 
 func _remove_procedural_tree_model(tree: UserTree) -> void:

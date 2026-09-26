@@ -21,10 +21,10 @@ config/macos_native_icon="res://assets/branding/pet-town-icon.icns"
 boot_splash/bg_color=Color(0.043, 0.082, 0.18, 1)
 boot_splash/image="res://assets/branding/welcome-to-pet-town.png"
 boot_splash/stretch_mode=4
-boot_splash/minimum_display_time=1000
+boot_splash/minimum_display_time=0
 boot_splash/use_filter=true
-run/main_scene="res://main.tscn"
-config/features=PackedStringArray("4.7", "GL Compatibility")
+run/main_scene="res://scenes/town_loading.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
 
 [display]
 
@@ -72,9 +72,10 @@ common/physics_interpolation=true
 
 [rendering]
 rendering_device/driver.macos="metal"
-anti_aliasing/quality/msaa_3d=1
+anti_aliasing/quality/msaa_3d=0
+scaling_3d/scale=0.8
 
-renderer/rendering_method="forward_plus"
+renderer/rendering_method="mobile"
 renderer/rendering_method.mobile="gl_compatibility"
 limits/opengl/max_renderable_lights=256
 environment/defaults/default_clear_color=Color(0.00396832, 0.01169353, 0.02033630, 1)

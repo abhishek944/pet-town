@@ -4,6 +4,10 @@ func _initialize() -> void:
 	call_deferred("run")
 
 func run() -> void:
+	var previous_test_dir := OS.get_environment("PET_TOWN_TEST_DATA_DIR")
+	var test_dir := OS.get_cache_dir().path_join("pet-town-build-smoke-%d" % OS.get_process_id())
+	DirAccess.make_dir_recursive_absolute(test_dir)
+	OS.set_environment("PET_TOWN_TEST_DATA_DIR", test_dir)
 	var town := load("res://main.tscn").instantiate() as Node3D
 	root.add_child(town)
 	town.set_process(false)
@@ -12,17 +16,25 @@ func run() -> void:
 	var errors := []
 	if items.size() < 12:
 		errors.append("too few catalog objects: %d" % items.size())
+	var garden_stone: Dictionary = editor.call("_catalog_item", "garden-detail-stone")
+	if garden_stone.is_empty() or not String(garden_stone.get("source_id", "")).begins_with("reference:Garden detail stone"):
+		errors.append("Garden detail stone is missing from the placeable object catalog")
 	for item in items:
 		var sample := editor.call("_make_catalog_tree", String(item["id"]), "build-9999") as UserTree
-		if sample == null or sample.find_children("*", "MeshInstance3D", true, false).size() <= 2:
-			var source := editor.get("authored_trees").get(item["source_id"]) as UserTree
-			var source_count := source.find_children("*", "MeshInstance3D", true, false).size() if source != null else -1
-			var sample_count := sample.find_children("*", "MeshInstance3D", true, false).size() if sample != null else -1
-			errors.append("missing visual for %s source=%d sample=%d path=%s model_children=%d" % [item["id"], source_count, sample_count, source.get_path() if source != null else "none", source.get_node("AuthoredModel").get_child_count() if source != null else -1])
+		var source := editor.get("authored_trees").get(item["source_id"]) as UserTree
+		var source_triangles := _triangles(source.get_node_or_null("AuthoredModel") if source != null else null)
+		var sample_triangles := _triangles(sample)
+		if source_triangles == 0 or sample_triangles != source_triangles:
+			errors.append("visual mismatch for %s source=%d sample=%d" % [item["id"], source_triangles, sample_triangles])
 		if sample != null:
 			sample.free()
 	if not town.get_node("IslandRenderSections").visible or town.get_node("BuildLand").visible:
 		errors.append("Chill did not open with the authored town")
+	var shared_ocean := town.get_node_or_null("CalmOpenOcean") as MeshInstance3D
+	if shared_ocean == null or not shared_ocean.visible:
+		errors.append("authored Chill water is missing")
+	var sun := town.get_node("EveningSun") as DirectionalLight3D
+	var sun_energy := sun.light_energy
 	editor.call("_start_catalog_item", "garden-bench")
 	await physics_frame
 	for point in [Vector2(612, 368), Vector2(612, 500), Vector2(400, 420)]:
@@ -38,6 +50,8 @@ func run() -> void:
 	town.call("_set_town_mode", "build", false)
 	if not town.get_node("BuildLand").visible or town.get_node("IslandRenderSections").visible or town.get_node("TownDecorations").visible or town.get_node("LiveAgents").visible:
 		errors.append("Build did not show bare land")
+	if not shared_ocean.visible or not shared_ocean.is_visible_in_tree() or not is_equal_approx(sun.light_energy, sun_energy) or not sun.is_visible_in_tree():
+		errors.append("Build did not keep Chill water and sunlight")
 	var wallet = editor.get("build_wallet")
 	wallet.usage["input_tokens"] = 25000
 	wallet.usage["output_tokens"] = 10000
@@ -105,4 +119,24 @@ func run() -> void:
 		errors.append("free Chill object was not restored")
 	print("BUILD MODE items=", items.size(), " balance=", wallet.balance(), " errors=", errors)
 	reopened.free()
+	OS.set_environment("PET_TOWN_TEST_DATA_DIR", previous_test_dir)
+	for name in ["build-wallet.json", "town-mode.json", "town_layout.json", "build_layout.json"]:
+		if FileAccess.file_exists(test_dir.path_join(name)):
+			DirAccess.remove_absolute(test_dir.path_join(name))
+	DirAccess.remove_absolute(test_dir)
 	quit(0 if errors.is_empty() else 1)
+
+func _triangles(node: Node) -> int:
+	if node == null:
+		return 0
+	var total := 0
+	for candidate in node.find_children("*", "MeshInstance3D", true, false):
+		var mesh := (candidate as MeshInstance3D).mesh
+		if mesh == null:
+			continue
+		for surface in mesh.get_surface_count():
+			var arrays := mesh.surface_get_arrays(surface)
+			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			total += (indices.size() if not indices.is_empty() else vertices.size()) / 3
+	return total

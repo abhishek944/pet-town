@@ -18,6 +18,7 @@ from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from reference_tree_geometry import TREE_BATCH_PREFIXES, batch_objects, find_tree_roots
+from reference_detail_patches import split_detail_patches
 
 EXPECTED_POLYGONS = {"wood": 2031, "fir": 2700, "tips": 1350, "leaf": 7900}
 EXPECTED_REFERENCE_SOURCE_OBJECTS = 1737
@@ -98,7 +99,7 @@ def link_mesh(mesh, name, collection, parent=None):
     return obj
 
 
-def validate_export(output_path, static_objects, roots):
+def validate_export(output_path, static_objects, roots, detail_roots):
     with open(output_path, "rb") as glb_file:
         data = glb_file.read()
     assert data[:4] == b"glTF", "Export is not a GLB file"
@@ -122,6 +123,8 @@ def validate_export(output_path, static_objects, roots):
     expected_tree_names = {tree["object"].name for tree in roots}
     missing_trees = sorted(expected_tree_names - exported_names)
     assert not missing_trees, "Editable tree roots missing from GLB: %s" % missing_trees
+    missing_details = sorted({obj.name for obj in detail_roots} - exported_names)
+    assert not missing_details, "Editable flower patches missing from GLB: %s" % missing_details
     print("STATIC INVENTORY VERIFIED", len(expected_static_names), "source meshes; supplemental", list(SUPPLEMENTAL_STATIC_OBJECTS), "editable roots", len(expected_tree_names))
 
 
@@ -152,13 +155,14 @@ def build_export(roots, output_path):
                 mesh = make_fragment(source, residual, None, source.name + " Static")
                 link_mesh(mesh, source.name + " Static", staging)
     assert dict(moved_counts) == EXPECTED_POLYGONS, "Unexpected extracted tree geometry: %s" % dict(moved_counts)
+    detail_sources, detail_roots = split_detail_patches(source_objects, staging, make_fragment, link_mesh)
     output_scene = bpy.data.scenes.new("Pet Town Editable Reference Export")
     output_collection = bpy.data.collections.new("Pet Town Export Objects")
     output_scene.collection.children.link(output_collection)
     # Keep the optimized tree materials because their edited geometry differs
     # from the older source collection. Other materials retain authored names.
     split_sources = {obj for obj in source_objects if obj.data.materials and obj.data.materials[0].name in TREE_MATERIALS.values()}
-    static_objects = [obj for obj in source_objects if obj not in split_sources]
+    static_objects = [obj for obj in source_objects if obj not in split_sources and obj not in detail_sources]
     for object_name in SUPPLEMENTAL_STATIC_OBJECTS:
         supplemental = bpy.data.objects.get(object_name)
         assert supplemental is not None and supplemental.type == "MESH", "Missing supplemental static mesh: " + object_name
@@ -178,7 +182,7 @@ def build_export(roots, output_path):
         export_lights=False, export_materials="EXPORT", export_extras=True,
     )
     assert "FINISHED" in result and os.path.isfile(output_path), "Blender GLB export failed"
-    validate_export(output_path, static_objects, roots)
+    validate_export(output_path, static_objects, roots, detail_roots)
     print("EXPORTED", len(roots), "editable trees; polygons", dict(moved_counts), "file", output_path)
 
 

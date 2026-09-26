@@ -1,13 +1,13 @@
 [gd_scene format=3 uid="uid://y65h7dx8g0au"]
 
 [ext_resource type="Script" uid="uid://cy8hnu324w3uf" path="res://scripts/main.gd" id="1_main"]
-[ext_resource type="PackedScene" path="res://scenes/warm_island.tscn" id="2_0xm2m"]
 [ext_resource type="Environment" path="res://environments/woodland_evening.tres" id="3_evening"]
 [ext_resource type="NavigationMesh" path="res://navigation/town_walkable.res" id="4_nav"]
 [ext_resource type="Shape3D" path="res://navigation/town_collision.res" id="5_collision"]
+[ext_resource type="Shape3D" path="res://navigation/town_ground.res" id="14_ground"]
 [ext_resource type="PackedScene" path="res://scenes/town_life.tscn" id="6_life"]
 [ext_resource type="PackedScene" path="res://scenes/town_decorations.tscn" id="7_decor"]
-[ext_resource type="PackedScene" path="res://scenes/island_render_sections.tscn" id="8_render"]
+[ext_resource type="PackedScene" path="res://scenes/island_render_sections.scn" id="8_render"]
 [ext_resource type="Material" path="res://materials/endless_water.tres" id="10_water"]
 [ext_resource type="Script" path="res://scripts/main_tree_interaction.gd" id="11_trees"]
 [ext_resource type="PackedScene" path="res://scenes/build_land.tscn" id="12_build_land"]
@@ -23,9 +23,6 @@ size = Vector3(12000, 0.1, 12000)
 [node name="PetTown" type="Node3D" unique_id=614714254]
 physics_interpolation_mode = 2
 script = ExtResource("1_main")
-
-[node name="GrandMoonhaven" parent="." unique_id=1031562730 instance=ExtResource("2_0xm2m")]
-visible = false
 
 [node name="WoodlandEvening" type="WorldEnvironment" parent="."]
 environment = ExtResource("3_evening")
@@ -57,6 +54,13 @@ collision_mask = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="TownCollision"]
 shape = ExtResource("5_collision")
+
+[node name="TownGround" type="StaticBody3D" parent="."]
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TownGround"]
+shape = ExtResource("14_ground")
 
 [node name="TownLife" parent="." instance=ExtResource("6_life")]
 
@@ -94,5 +98,4 @@ script = ExtResource("11_trees")
 
 [node name="TownUI" type="CanvasLayer" parent="."]
 
-[editable path="GrandMoonhaven"]
 [editable path="TownDecorations"]

@@ -10,6 +10,9 @@ var purchases: Array = []
 var last_error := ""
 
 func path() -> String:
+	var test_dir := OS.get_environment("PET_TOWN_TEST_DATA_DIR")
+	if not test_dir.is_empty():
+		return test_dir.path_join(FILE_NAME)
 	return OS.get_environment("HOME").path_join(".pet-town").path_join(FILE_NAME)
 
 func load_wallet() -> bool:
@@ -64,6 +67,17 @@ func buy(item_id: String, price: int) -> bool:
 	spent = old_spent
 	purchases.pop_back()
 	return false
+
+func undo_last_purchase(item_id: String, price: int) -> bool:
+	if not load_wallet() or purchases.is_empty() or spent < price:
+		return false
+	var last: Dictionary = purchases.back()
+	if String(last.get("item", "")) != item_id or int(last.get("price", -1)) != price:
+		last_error = "Could not match the last purchase for refund."
+		return false
+	spent -= price
+	purchases.pop_back()
+	return _save_wallet()
 
 func _save_wallet() -> bool:
 	var folder := path().get_base_dir()

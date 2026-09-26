@@ -3,7 +3,7 @@ const USER_TREE_SCENE := preload("res://scenes/user_tree.tscn")
 
 func _is_fixed_surface(label: String) -> bool:
 	var value := label.to_lower()
-	for part in ["road", "junction", "avenue", "plaza spoke", "path", "lane", "island", "ocean", "water", "beach", "terrain", "clearing", "neighborhood green", "destination |", "district green", "shoreline", "ground", "lawn", "pier", "paving", "promenade", "walkway", "trail", "canal", "embankment"]:
+	for part in ["tenfold broad terraced island", "ocean", "deep sea", "sea glint"]:
 		if part in value:
 			return true
 	for effect in ["anim dancing fire tongue", "anim drifting firefly", "anim rising ember", "anim lighthouse rotating beacon", "anim windmill single rigid rotor"]:

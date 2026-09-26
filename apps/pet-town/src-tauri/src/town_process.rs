@@ -119,6 +119,8 @@ fn project_path() -> Option<PathBuf> {
         }
     }
     let candidates = [
+        repository_root().join("apps/pet-town-godot-next"),
+        std::env::current_dir().ok()?.join("apps/pet-town-godot-next"),
         repository_root().join("apps/pet-town-godot"),
         std::env::current_dir().ok()?.join("apps/pet-town-godot"),
     ];

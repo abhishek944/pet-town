@@ -3,7 +3,17 @@ extends "res://scripts/main_avatar.gd"
 const MODE_FILE := "town-mode.json"
 var town_mode := "chill"
 
+func _share_ocean_between_modes() -> void:
+	var ocean := get_node_or_null("TownDecorations/ReferenceGardens/BlenderAuthoredDetails/Calm open ocean") as MeshInstance3D
+	if ocean == null:
+		return
+	ocean.reparent(self, true)
+	ocean.name = "CalmOpenOcean"
+
 func _mode_path() -> String:
+	var test_dir := OS.get_environment("PET_TOWN_TEST_DATA_DIR")
+	if not test_dir.is_empty():
+		return test_dir.path_join(MODE_FILE)
 	return OS.get_environment("HOME").path_join(".pet-town").path_join(MODE_FILE)
 
 func _initialize_town_mode() -> void:
@@ -26,7 +36,8 @@ func _set_town_mode(value: String, persist := true) -> void:
 	get_node("TownLife").visible = not building
 	get_node("LiveAgents").visible = not building
 	(get_node("TownCollision") as StaticBody3D).collision_layer = 0 if building else 1
-	(get_node("BuildLandCollision") as StaticBody3D).collision_layer = 1 if building else 0
+	(get_node("TownGround") as StaticBody3D).collision_layer = 0 if building else 16
+	(get_node("BuildLandCollision") as StaticBody3D).collision_layer = 17 if building else 0
 	(get_node("WalkableTown") as NavigationRegion3D).enabled = not building
 	for node in get_node("TownDecorations").find_children("*", "CollisionShape3D", true, false):
 		(node as CollisionShape3D).disabled = building

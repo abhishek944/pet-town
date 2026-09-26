@@ -52,7 +52,10 @@ func _build_details_panel() -> void:
 	details_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	details_panel.visible = false
 	ui_root.add_child(details_panel)
-	_setup_avatar_viewer()
+	avatar_frame = Panel.new()
+	avatar_frame.clip_contents = true
+	avatar_frame.add_theme_stylebox_override("panel", _style(Color("26392f"), 14, Color("94ae9266"), 1))
+	details_panel.add_child(avatar_frame)
 	var eyebrow := Label.new()
 	eyebrow.text = "PET TOWN  /  COMPANION"
 	eyebrow.position = Vector2(20.0, 19.0)
@@ -127,11 +130,9 @@ func _detail_card(grid: GridContainer, title: String) -> Label:
 	box.add_child(value)
 	return value
 
-func _setup_avatar_viewer() -> void:
-	avatar_frame = Panel.new()
-	avatar_frame.clip_contents = true
-	avatar_frame.add_theme_stylebox_override("panel", _style(Color("26392f"), 14, Color("94ae9266"), 1))
-	details_panel.add_child(avatar_frame)
+func _ensure_avatar_viewer() -> void:
+	if is_instance_valid(avatar_container):
+		return
 	avatar_container = SubViewportContainer.new()
 	avatar_container.stretch = true
 	avatar_container.focus_mode = Control.FOCUS_ALL

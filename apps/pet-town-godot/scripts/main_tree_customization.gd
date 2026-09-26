@@ -1,14 +1,4 @@
-extends "res://scripts/main_tree_catalog_placement.gd"
-
-func _update_tree_customization() -> void:
-	if not is_instance_valid(tree_panel):
-		return
-	var controls_available := not bool(host.call("_help_is_open")) and not bool(host.call("_details_are_open")) and not bool(host.call("_settings_are_open"))
-	tree_panel.visible = tree_editor_open and controls_available
-	if placement_active and is_instance_valid(placement_tree):
-		placement_tree.visible = controls_available
-		if controls_available:
-			_update_tree_placement_preview(get_viewport().get_mouse_position())
+extends "res://scripts/main_tree_paver_interaction.gd"
 
 func _start_new_tree() -> void:
 	if build_mode:
@@ -40,6 +30,7 @@ func _start_moving_selected_tree() -> void:
 	placement_tree = selected_user_tree
 	placement_started_from_editor = tree_editor_open
 	move_start_transform = placement_tree.global_transform
+	move_undo_before = _item_undo_state(placement_tree)
 	placement_tree.set_selected(false)
 	placement_tree.set_placement_preview(true)
 	placement_active = true
@@ -53,14 +44,14 @@ func _update_tree_placement_preview(screen_position: Vector2) -> void:
 		return
 	var origin := camera.project_ray_origin(screen_position)
 	var item := _catalog_item(placement_tree.catalog_item_id)
-	var surface_layer := 8 if item.get("category", "") == "Waterfront" else 1
+	var surface_layer := 8 if item.get("category", "") == "Waterfront" else 16
 	var query := PhysicsRayQueryParameters3D.create(origin, origin + camera.project_ray_normal(screen_position) * 2000.0, surface_layer)
 	query.collide_with_areas = false
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	placement_has_surface = not hit.is_empty()
 	if placement_has_surface:
-		placement_tree.global_position = hit.position
-		placement_tree.global_position.y += hit.position.y - placement_tree.selection_marker.global_position.y
+		var ground_offset := placement_tree.ground_y() - placement_tree.global_position.y
+		placement_tree.global_position = hit.position - Vector3.UP * ground_offset
 		placement_tree.visible = true
 	else:
 		placement_tree.visible = false
@@ -68,17 +59,20 @@ func _update_tree_placement_preview(screen_position: Vector2) -> void:
 func _commit_tree_placement() -> void:
 	if not placement_active or not placement_has_surface or not is_instance_valid(placement_tree):
 		return
+	var before := move_undo_before if moving_existing_tree else {"id": placement_tree.tree_id, "mode": "build" if build_mode else "chill", "exists": false, "catalog_item_id": placement_tree.catalog_item_id}
 	if build_mode and not moving_existing_tree:
 		var item := _catalog_item(placement_tree.catalog_item_id)
 		if item.is_empty() or not build_wallet.load_wallet() or not build_wallet.buy(placement_tree.catalog_item_id, int(item["price"])):
 			tree_status.text = build_wallet.last_error if not build_wallet.last_error.is_empty() else "Could not complete this purchase."
 			return
+		before["refund"] = int(item["price"])
 	placement_tree.visible = true
 	placement_tree.set_placement_preview(false)
 	var placed_tree := placement_tree
 	placement_tree = null
 	placement_active = false
 	moving_existing_tree = false
+	move_undo_before = {}
 	if placement_started_from_editor:
 		_select_user_tree(placed_tree)
 	else:
@@ -86,6 +80,7 @@ func _commit_tree_placement() -> void:
 	placement_started_from_editor = false
 	tree_status.text = "Object placed. Double-click it to edit."
 	_save_current_layout()
+	_push_undo_state(before, true)
 
 func _cancel_tree_placement() -> void:
 	if not placement_active:
@@ -101,6 +96,7 @@ func _cancel_tree_placement() -> void:
 	placement_tree = null
 	placement_active = false
 	moving_existing_tree = false
+	move_undo_before = {}
 	placement_started_from_editor = false
 	placement_has_surface = false
 	tree_status.text = "Placement cancelled."
@@ -113,11 +109,18 @@ func _pick_user_tree(screen_position: Vector2) -> UserTree:
 	query.collide_with_areas = true
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	if hit.is_empty():
-		return null
+		return _pick_paver(screen_position)
 	var collider := hit.get("collider") as Area3D
 	if collider == null or collider.get_parent() == null:
-		return null
-	return collider.get_parent() as UserTree
+		return _pick_paver(screen_position)
+	var picked := collider.get_parent() as UserTree
+	if picked != null:
+		if picked.tree_id.begins_with("surface:"):
+			var paving := _pick_paver(screen_position)
+			if paving != null:
+				return paving
+		picked.set_selection_hit_position(hit.position)
+	return picked
 
 func _select_user_tree(tree: UserTree) -> void:
 	if is_instance_valid(selected_user_tree) and selected_user_tree != tree:
@@ -131,6 +134,8 @@ func _select_user_tree(tree: UserTree) -> void:
 		elif selected_user_tree.tree_id.begins_with("flower:"):
 			object_name = "Flower patch"
 		tree_selection_label.text = object_name.capitalize()
+		_show_selected_preview(selected_user_tree)
+		tree_status.visible = false
 		tree_scale_slider.set_value_no_signal(selected_user_tree.size_multiplier)
 		tree_scale_label.text = "%d%%" % roundi(selected_user_tree.size_multiplier * 100.0)
 	_refresh_tree_controls()
@@ -148,28 +153,35 @@ func _clear_tree_selection() -> void:
 		selected_user_tree.set_selected(false)
 	selected_user_tree = null
 	tree_selection_label.text = "No object selected"
-	tree_status.text = "Double-click an object to edit it, or browse objects."
+	_show_selected_preview(null)
+	tree_status.text = ""
+	tree_status.visible = false
 	_refresh_tree_controls()
 
 func _rotate_selected_tree(degrees: float) -> void:
 	if not is_instance_valid(selected_user_tree) or placement_active:
 		return
+	var before := _selected_undo_state()
 	var rotation := selected_user_tree.global_rotation
 	rotation.y = deg_to_rad(fposmod(rad_to_deg(rotation.y) + degrees, 360.0))
 	selected_user_tree.global_rotation = rotation
 	tree_status.text = "Rotation: %d°" % roundi(rad_to_deg(rotation.y))
 	_save_current_layout()
+	_push_undo_state(before)
 
 func _set_selected_tree_scale(value: float) -> void:
 	tree_scale_label.text = "%d%%" % roundi(value * 100.0)
 	if not is_instance_valid(selected_user_tree) or placement_active:
 		return
+	var before := _selected_undo_state() if scale_drag_before.is_empty() else {}
 	selected_user_tree.set_size_multiplier(value)
 	_save_current_layout()
+	_push_undo_state(before)
 
 func _delete_selected_tree() -> void:
 	if not is_instance_valid(selected_user_tree) or placement_active:
 		return
+	var before := _selected_undo_state()
 	var removed_tree := selected_user_tree
 	selected_user_tree = null
 	if removed_tree.is_authored:
@@ -183,3 +195,4 @@ func _delete_selected_tree() -> void:
 	tree_status.text = "Object deleted."
 	_refresh_tree_controls()
 	_save_current_layout.call_deferred()
+	_push_undo_state(before, true)

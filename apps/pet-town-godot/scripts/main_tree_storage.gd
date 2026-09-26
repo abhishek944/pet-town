@@ -1,4 +1,4 @@
-extends "res://scripts/main_tree_build_storage.gd"
+extends "res://scripts/main_tree_undo.gd"
 
 func _register_authored_trees() -> void:
 	for node in host.get_tree().get_nodes_in_group("editable_trees"):
@@ -26,7 +26,7 @@ func _save_tree_layout() -> void:
 		var tree := authored_trees[tree_id] as UserTree
 		if is_instance_valid(tree) and not tree.is_queued_for_deletion() and not tree.global_transform.is_equal_approx(authored_originals[tree_id]):
 			records.append(_tree_record(tree, "authored"))
-	var file := FileAccess.open(TREE_LAYOUT_PATH, FileAccess.WRITE)
+	var file := FileAccess.open(_town_layout_path(), FileAccess.WRITE)
 	if file == null:
 		tree_status.text = "Could not save this tree layout."
 		return
@@ -44,8 +44,10 @@ func _tree_record(tree: UserTree, kind: String) -> Dictionary:
 	}
 
 func _load_tree_layout() -> void:
-	var layout_path := TREE_LAYOUT_PATH
+	var layout_path := _town_layout_path()
 	if not FileAccess.file_exists(layout_path):
+		if not OS.get_environment("PET_TOWN_TEST_DATA_DIR").is_empty():
+			return
 		# Renaming the Godot project to Pet Town also changes its user:// folder.
 		# Read the previous layout once, then save it under the new game name.
 		var legacy_path := OS.get_data_dir().path_join("Godot/app_userdata/Grand Moonhaven Pet Town/town_layout.json")
@@ -103,7 +105,7 @@ func _load_tree_layout() -> void:
 		if tree_id.begins_with("tree-"):
 			next_tree_id = maxi(next_tree_id, int(tree_id.trim_prefix("tree-")) + 1)
 	tree_status.text = "%d custom tree%s and %d authored edit%s loaded." % [loaded_custom, "" if loaded_custom == 1 else "s", loaded_authored, "" if loaded_authored == 1 else "s"]
-	if layout_path != TREE_LAYOUT_PATH:
+	if layout_path != _town_layout_path():
 		_save_tree_layout()
 
 func _apply_tree_record(tree: UserTree, record: Dictionary, legacy: bool) -> bool:

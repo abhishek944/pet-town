@@ -2,6 +2,9 @@ extends "res://tools/partition_render_sections_helpers.gd"
 ## Offline static batching only. Preserves authored world-space triangles and materials.
 ## Authored trees are saved as individually addressable UserTree wrappers.
 const ORCHARD_TREE_BUILDER := preload("res://tools/orchard_tree_builder.gd")
+const EDITABLE_BATCH := preload("res://tools/batch_editable_model.gd")
+const MESH_REUSE := preload("res://tools/reuse_mesh_resources.gd")
+const SHADOW_BUDGET := preload("res://scripts/town_shadow_budget.gd")
 const EXPECTED_AUTHORED_TREES := 328
 const EXPECTED_ISLAND_ROOT_TREES := 323
 
@@ -11,6 +14,13 @@ func _initialize() -> void:
 func build() -> void:
 	var island = load("res://scenes/warm_island.tscn").instantiate()
 	root.add_child(island)
+	var discarded_triangles := 0
+	for source_name in ["North Meadow Scenic Walk", "South Meadow Scenic Walk"]:
+		var unused := island.get_node_or_null(source_name) as MeshInstance3D
+		assert(unused != null and not unused.visible, "Expected a hidden scenic-walk mesh")
+		assert(_mesh_triangle_count(unused.mesh) == 135200, "Scenic-walk source changed")
+		discarded_triangles += _mesh_triangle_count(unused.mesh)
+		unused.free()
 	var result = Node3D.new()
 	result.name = "IslandRenderSections"
 	root.add_child(result)
@@ -49,6 +59,7 @@ func build() -> void:
 	_assign_replacements(by_variant["round"], 48, "apple", replacements, 68)
 	_assign_replacements(by_variant["pine"], 29, "apple", replacements)
 	_assign_replacements(by_variant["apple"], by_variant["apple"].size(), "apple", replacements)
+	var merged_tree_nodes := 0
 	var expanded_round_count := 0
 	var new_grove_count := 0
 	for index in tree_roots.size():
@@ -60,6 +71,8 @@ func build() -> void:
 		var visual_source: Node3D = apple_donor if replacement == "apple" else donors.get(replacement, source)
 		var wrapper := _make_tree_wrapper(source, tree_id, "IslandTree_%03d" % index, visual_source)
 		var visible_variant := replacement if not replacement.is_empty() else _tree_variant(source)
+		wrapper.tree_variant = visible_variant
+		merged_tree_nodes += EDITABLE_BATCH.batch(wrapper, 2)
 		var hide_dense_tree := false
 		if String(source.name).begins_with("Expanded grove ") and visible_variant == "round":
 			hide_dense_tree = expanded_round_count % 10 != 0
@@ -69,8 +82,12 @@ func build() -> void:
 			new_grove_count += 1
 		if hide_dense_tree:
 			wrapper.visible = false
-			(wrapper.get_node("PickArea") as Area3D).collision_layer = 0
 		editable_trees.add_child(wrapper)
+		if hide_dense_tree:
+			wrapper.pick_area.collision_layer = 0
+			var hidden_model := wrapper.get_node("AuthoredModel")
+			wrapper.remove_child(hidden_model)
+			hidden_model.free()
 		_set_owner_recursive(wrapper, result)
 		for mesh_node in _tree_mesh_instances(source):
 			tree_mesh_ids[mesh_node.get_instance_id()] = true
@@ -80,6 +97,7 @@ func build() -> void:
 	assert(authored_tree_count == EXPECTED_AUTHORED_TREES, "Expected 328 editable island trees, found %d" % authored_tree_count)
 	var extracted_object_triangles := 0
 	var object_count := 0
+	var merged_object_nodes := 0
 	for source in island.get_children():
 		if not source is Node3D or _is_authored_tree_root(source) or _is_fixed_surface(String(source.name)):
 			continue
@@ -93,8 +111,10 @@ func build() -> void:
 				break
 		if contains_tree:
 			continue
-		var object_id := "object:%s" % String(source.name)
+		var name_label := String(source.name)
+		var object_id := "%s:%s" % ["surface" if "road" in name_label.to_lower() or "promenade" in name_label.to_lower() else "object", name_label]
 		var wrapper := _make_tree_wrapper(source, object_id, "IslandObject_%04d" % object_count)
+		merged_object_nodes += EDITABLE_BATCH.batch(wrapper)
 		editable_objects.add_child(wrapper)
 		_set_owner_recursive(wrapper, result)
 		for mesh_node in meshes:
@@ -149,8 +169,7 @@ func build() -> void:
 			assert(surface_triangles == source_triangles, "Static mesh triangle accounting failed")
 	var count := 0
 	var output_triangles := 0
-	# One draw surface per material and tile. Separate resources also avoid the
-	# engine's maximum-surface limit for mesh resources.
+	# One draw surface per material and tile.
 	for key in tiles:
 		for material in tiles[key]:
 			var tool: SurfaceTool = tiles[key][material]
@@ -158,19 +177,23 @@ func build() -> void:
 			var mesh := tool.commit()
 			output_triangles += mesh.get_faces().size() / 3
 			var path := "res://assets/cozy-island/render_sections/section_%04d.res" % count
+			mesh.surface_set_material(0, null)
 			ResourceSaver.save(mesh, path)
 			var part := MeshInstance3D.new()
 			part.name = "Section_%04d" % count
 			part.mesh = load(path)
+			part.set_surface_override_material(0, material)
 			if material != null and material.resource_name == "MH midnight turquoise":
 				part.visible = false
 			result.add_child(part)
 			part.owner = result
 			count += 1
 	assert(output_triangles == triangles, "Static batching lost triangles")
-	assert(triangles + extracted_tree_triangles + extracted_object_triangles == 574569, "Authored island triangle total changed")
+	assert(triangles + extracted_tree_triangles + extracted_object_triangles + discarded_triangles == 574569, "Authored island triangle total changed")
+	var reused_meshes: int = MESH_REUSE.canonicalize(result)
+	SHADOW_BUDGET.disable_tiny_casters(editable_objects)
 	var packed := PackedScene.new()
 	packed.pack(result)
 	ResourceSaver.save(packed, "res://scenes/island_render_sections.tscn")
-	print("BATCHED ", source_count, " original meshes into ", count, " static surfaces; preserved ", triangles, " static triangles, ", extracted_tree_triangles, " tree triangles across ", authored_tree_count, " trees and ", extracted_object_triangles, " triangles across ", object_count, " editable objects")
+	print("BATCHED ", source_count, " original meshes into ", count, " static surfaces; preserved ", triangles, " static triangles, ", extracted_tree_triangles, " tree triangles across ", authored_tree_count, " trees and ", extracted_object_triangles, " triangles across ", object_count, " editable objects; reused ", reused_meshes, " mesh resources")
 	quit()

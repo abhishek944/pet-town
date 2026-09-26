@@ -4,14 +4,16 @@ const TOWN_SETTINGS_SCRIPT := preload("res://scripts/town_settings.gd")
 
 @onready var tree_customization: Node = $UserTrees
 var settings_window: Control
-
 func _ready() -> void:
 	camera_target = overview_target
 	camera_distance = _overview_distance()
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	get_window().focus_entered.connect(_on_window_focus_entered)
 	get_window().focus_exited.connect(_on_window_focus_exited)
+	_request_smooth_frames()
+	_update_frame_budget(false, get_window().has_focus())
 	_build_ui()
+	_share_ocean_between_modes()
 	tree_customization.call("initialize", ui_root)
 	_initialize_town_mode()
 	_build_commands()
@@ -19,17 +21,14 @@ func _ready() -> void:
 	_layout_ui()
 	_update_camera()
 	_launch_bridge()
-
 func _exit_tree() -> void:
 	_send_bridge({"v": 1, "type": "activeChanged", "active": false})
 	_send_bridge({"v": 1, "type": "shutdown"})
-
 func _build_settings() -> void:
 	settings_window = TOWN_SETTINGS_SCRIPT.new() as Control
 	ui_root.add_child(settings_window)
 	settings_window.call("configure", self, tree_customization, MODEL_NAMES, MODEL_SCENES)
 	settings_window.connect("dismissed", _on_settings_dismissed)
-
 func _on_settings_dismissed() -> void:
 	_set_background_focus_enabled(true)
 	_refresh_command_hint()
@@ -49,12 +48,17 @@ func _open_settings_section(index: int) -> void:
 	_refresh_command_hint()
 
 func _input(event: InputEvent) -> void:
-	# Placement needs the first chance at world clicks; the open editor panel can
-	# otherwise consume them before _unhandled_input sees the move action.
+	if event is InputEventMouseMotion or event is InputEventMouseButton or event is InputEventKey:
+		_request_smooth_frames()
+	if bool(tree_customization.get("placement_active")) and event is InputEventMouseMotion:
+		tree_customization.call("_update_tree_placement_preview", (event as InputEventMouseMotion).position)
+	# Give placement first chance at world clicks before the editor consumes them.
 	if bool(tree_customization.get("placement_active")) and event is InputEventMouseButton:
 		var pointer := event as InputEventMouseButton
 		var panel := tree_customization.get("tree_panel") as Control
 		if not is_instance_valid(panel) or not panel.visible or not panel.get_global_rect().has_point(pointer.position):
+			if pointer.pressed and pointer.button_index == MOUSE_BUTTON_LEFT:
+				tree_customization.call("_update_tree_placement_preview", pointer.position)
 			if bool(tree_customization.call("_handle_tree_customization_input", event)):
 				return
 	if not event is InputEventKey or not event.pressed or event.echo:
@@ -64,6 +68,10 @@ func _input(event: InputEvent) -> void:
 		if key.keycode == KEY_ESCAPE:
 			_close_command_palette()
 			get_viewport().set_input_as_handled()
+		return
+	if (key.meta_pressed or key.ctrl_pressed) and key.keycode == KEY_Z and not _settings_are_open():
+		tree_customization.call("_undo_last_change")
+		get_viewport().set_input_as_handled()
 		return
 	if key.keycode == KEY_SLASH and not _settings_are_open() and not key.alt_pressed and not key.ctrl_pressed and not key.meta_pressed:
 		_open_command_palette()
@@ -94,6 +102,7 @@ func _physics_process(_delta: float) -> void:
 	controlled_pet.manual_direction = direction
 
 func _process(delta: float) -> void:
+	_update_frame_budget(not agents_by_id.is_empty() or following_pet or is_instance_valid(controlled_pet), get_window().has_focus())
 	_poll_bridge()
 	if bridge_pid <= 0 and Time.get_ticks_msec() >= bridge_retry_at:
 		_launch_bridge()

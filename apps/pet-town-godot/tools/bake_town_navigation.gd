@@ -9,6 +9,7 @@ func bake() -> void:
 	root.add_child(island)
 	var source = NavigationMeshSourceGeometryData3D.new()
 	var collision_faces = PackedVector3Array()
+	var ground_faces = PackedVector3Array()
 	var surface_count = 0
 	var obstacle_count = 0
 	var life: Node3D = load("res://scenes/town_life.tscn").instantiate()
@@ -50,6 +51,8 @@ func bake() -> void:
 		if ground or road or obstacle:
 			var faces = mesh_node.mesh.get_faces()
 			for v in faces: collision_faces.append(mesh_node.global_transform * v)
+			if ground or road:
+				for v in faces: ground_faces.append(mesh_node.global_transform * v)
 		if obstacle:
 			var b: AABB = mesh_node.global_transform * mesh_node.get_aabb()
 			var outline = PackedVector3Array([Vector3(b.position.x,0,b.position.z), Vector3(b.end.x,0,b.position.z), Vector3(b.end.x,0,b.end.z), Vector3(b.position.x,0,b.end.z)])
@@ -84,6 +87,9 @@ func bake() -> void:
 	var shape = ConcavePolygonShape3D.new()
 	shape.set_faces(collision_faces)
 	ResourceSaver.save(shape, "res://navigation/town_collision.res")
+	var ground_shape = ConcavePolygonShape3D.new()
+	ground_shape.set_faces(ground_faces)
+	ResourceSaver.save(ground_shape, "res://navigation/town_ground.res")
 	print("BAKED: ", surface_count, " ground/path meshes; ", obstacle_count, " obstacles; ", nav.get_polygon_count(), " polygons; ", collision_faces.size()/3, " collision triangles")
 	bake_animations()
 	island.queue_free()

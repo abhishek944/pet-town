@@ -64,23 +64,6 @@ func _build_help_board() -> void:
 	help_close.add_theme_stylebox_override("normal", _style(Color("315947"), 10, Color("d6aa6166"), 1))
 	help_close.pressed.connect(func() -> void: _toggle_help(false))
 	help_board.add_child(help_close)
-	var header := VBoxContainer.new()
-	help_board.add_child(header)
-	var eyebrow := Label.new()
-	eyebrow.text = "GRAND MOONHAVEN"
-	eyebrow.add_theme_font_size_override("font_size", 12)
-	eyebrow.add_theme_color_override("font_color", Color("d6aa61"))
-	header.add_child(eyebrow)
-	var title := Label.new()
-	title.text = "Town controls"
-	title.add_theme_font_size_override("font_size", 34)
-	title.add_theme_color_override("font_color", Color("f8f5ed"))
-	header.add_child(title)
-	var subtitle := Label.new()
-	subtitle.text = "Explore the island at your own pace."
-	subtitle.add_theme_font_size_override("font_size", 16)
-	subtitle.add_theme_color_override("font_color", Color("b8c0b7"))
-	header.add_child(subtitle)
 	var scroller := ScrollContainer.new()
 	scroller.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	help_board.add_child(scroller)
@@ -90,42 +73,43 @@ func _build_help_board() -> void:
 	var explore_controls := [
 		["Drag", "Move across town"], ["Option + Drag", "Orbit camera"],
 		["Pinch", "Zoom"], ["/objects", "Browse and place objects"],
-		["Double-click an object", "Open object editing"], ["R", "Town overview"],
+		["Double-click", "Edit an object"], ["⌘Z", "Undo last change"], ["R", "Town overview"],
 	]
-	_help_group(groups, "EXPLORE THE TOWN", explore_controls)
-	_help_group(groups, "LIVE AGENTS", [["Click", "Follow pet"], ["Right-click", "Open details"], ["Option + A", "Next agent"], ["C, then WASD / arrows", "Drive the selected pet"], ["Esc", "Close or release"]])
-	_help_group(groups, "TOWN COMMANDS", [["/chill", "Explore the complete island"], ["/build", "Build on open land"], ["/settings", "Open town studio"], ["F", "Fullscreen"]])
+	_help_group(groups, explore_controls)
+	_help_group(groups, [["Click", "Follow pet"], ["Right-click", "Open details"], ["Option + A", "Next agent"], ["C + WASD", "Drive the selected pet"], ["Esc", "Close or release"]])
+	_help_group(groups, [["/chill", "Explore the complete island"], ["/build", "Build on open land"], ["/settings", "Open town studio"], ["F", "Fullscreen"]])
 	var footer := Label.new()
 	footer.text = "Press Option+H or Escape to close"
 	footer.add_theme_font_size_override("font_size", 13)
 	footer.add_theme_color_override("font_color", Color("9ca59b"))
 	help_board.add_child(footer)
 
-func _help_group(parent: HBoxContainer, title: String, rows: Array) -> void:
+func _help_group(parent: HBoxContainer, rows: Array) -> void:
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.add_theme_stylebox_override("panel", _style(Color("26392f"), 12, Color("94ae9266"), 1))
 	parent.add_child(panel)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 12)
+	box.add_theme_constant_override("separation", 8)
 	panel.add_child(box)
-	var heading := Label.new()
-	heading.text = title
-	heading.add_theme_font_size_override("font_size", 13)
-	heading.add_theme_color_override("font_color", Color("d6aa61"))
-	box.add_child(heading)
 	for row in rows:
+		var line := HBoxContainer.new()
+		line.add_theme_constant_override("separation", 8)
+		box.add_child(line)
 		var key := Label.new()
 		key.text = row[0]
+		key.custom_minimum_size.x = 112
 		key.add_theme_font_size_override("font_size", 13)
 		key.add_theme_color_override("font_color", Color("f8f5ed"))
 		key.add_theme_stylebox_override("normal", _style(Color("315947"), 6, Color("94ae9266"), 1))
-		box.add_child(key)
+		line.add_child(key)
 		var description := Label.new()
 		description.text = row[1]
 		description.add_theme_font_size_override("font_size", 15)
 		description.add_theme_color_override("font_color", Color("dce1da"))
-		box.add_child(description)
+		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		description.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		line.add_child(description)
 
 func _toggle_help(show: bool) -> void:
 	help_scrim.visible = show
@@ -151,8 +135,9 @@ func _layout_ui() -> void:
 	var viewer_height := minf(338.0, size.y * 0.43)
 	avatar_frame.position = Vector2(16.0, 64.0)
 	avatar_frame.size = Vector2(panel_width - 32.0, viewer_height)
-	avatar_container.position = Vector2(1.0, 1.0)
-	avatar_container.size = avatar_frame.size - Vector2(2.0, 2.0)
+	if is_instance_valid(avatar_container):
+		avatar_container.position = Vector2(1.0, 1.0)
+		avatar_container.size = avatar_frame.size - Vector2(2.0, 2.0)
 	avatar_reset.position = Vector2(panel_width - 132.0, 78.0)
 	avatar_reset.size = Vector2(104.0, 40.0)
 	var content := details_name.get_parent() as VBoxContainer
@@ -160,18 +145,15 @@ func _layout_ui() -> void:
 	content.size = Vector2(panel_width - 40.0, maxf(180.0, size.y - content.position.y - 94.0))
 	details_action.position = Vector2(20.0, size.y - 72.0)
 	details_action.size = Vector2(panel_width - 40.0, 54.0)
-	help_board.size = Vector2(minf(1040.0, size.x - 32.0), minf(680.0, size.y - 32.0))
+	help_board.size = Vector2(minf(1040.0, size.x - 32.0), minf(465.0, size.y - 32.0))
 	help_board.position = (size - help_board.size) * 0.5
 	help_close.position = Vector2(help_board.size.x - 68.0, 15.0)
 	help_close.size = Vector2(44.0, 44.0)
-	var header := help_board.get_child(1) as VBoxContainer
-	header.position = Vector2(42.0, 38.0)
-	header.size = Vector2(help_board.size.x - 120.0, 90.0)
-	var scroller := help_board.get_child(2) as ScrollContainer
-	scroller.position = Vector2(42.0, 172.0)
-	scroller.size = Vector2(help_board.size.x - 84.0, help_board.size.y - 235.0)
+	var scroller := help_board.get_child(1) as ScrollContainer
+	scroller.position = Vector2(30.0, 70.0)
+	scroller.size = Vector2(help_board.size.x - 60.0, help_board.size.y - 118.0)
 	var groups := scroller.get_child(0) as HBoxContainer
 	groups.custom_minimum_size.x = scroller.size.x
-	var footer := help_board.get_child(3) as Label
-	footer.position = Vector2(42.0, help_board.size.y - 50.0)
+	var footer := help_board.get_child(2) as Label
+	footer.position = Vector2(30.0, help_board.size.y - 37.0)
 	footer.size = Vector2(360.0, 26.0)

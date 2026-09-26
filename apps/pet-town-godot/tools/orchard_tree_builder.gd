@@ -64,6 +64,7 @@ static func _make_tree_wrapper(source_root: Node3D, parts: Array[MeshInstance3D]
 	tree.name = node_name
 	tree.tree_id = tree_id
 	tree.is_authored = true
+	tree.tree_variant = "apple"
 	tree.transform = parent.global_transform.affine_inverse() * source_root.global_transform
 	for child in tree.get_children():
 		if child.name in ["SelectionMarker", "PickArea"]:

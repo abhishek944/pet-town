@@ -47,6 +47,8 @@ func _cycle_agent() -> void:
 func _open_details() -> void:
 	if selected_id.is_empty():
 		return
+	call("_ensure_avatar_viewer")
+	call("_layout_ui")
 	details_panel.visible = true
 	_refresh_details(true)
 	if has_method("_refresh_command_hint"):
@@ -55,6 +57,12 @@ func _open_details() -> void:
 func _close_details() -> void:
 	details_panel.visible = false
 	avatar_dragging = false
+	if is_instance_valid(avatar_container):
+		avatar_container.queue_free()
+	avatar_container = null
+	avatar_viewport = null
+	avatar_root = null
+	avatar_model = null
 	if has_method("_refresh_command_hint"):
 		call("_refresh_command_hint")
 

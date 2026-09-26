@@ -1,0 +1,43 @@
+config_version=5
+
+[application]
+config/name="Pet Town"
+config/description="A shared island for Pet Town Chill and Build modes"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+config/icon="res://branding/pet-town-icon.png"
+config/macos_native_icon="res://branding/pet-town-icon.icns"
+run/max_fps=30
+
+[display]
+window/size/viewport_width=1440
+window/size/viewport_height=900
+window/size/mode=2
+window/stretch/mode="canvas_items"
+
+[input]
+
+camera_left={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":65), Object(InputEventKey,"physical_keycode":4194319)]
+}
+camera_right={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":68), Object(InputEventKey,"physical_keycode":4194321)]
+}
+camera_up={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":87), Object(InputEventKey,"physical_keycode":4194320)]
+}
+camera_down={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":83), Object(InputEventKey,"physical_keycode":4194322)]
+}
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+anti_aliasing/quality/msaa_3d=0
+scaling_3d/scale=0.85
+environment/defaults/default_clear_color=Color(0.08, 0.15, 0.18, 1)

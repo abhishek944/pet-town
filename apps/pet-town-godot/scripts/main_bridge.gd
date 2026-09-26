@@ -151,8 +151,21 @@ func _send_bridge(message: Dictionary) -> void:
 	bridge_stdin.store_string(JSON.stringify(message) + "\n")
 	bridge_stdin.flush()
 
+var smooth_frames_until_msec := 0
+
+func _request_smooth_frames() -> void:
+	smooth_frames_until_msec = Time.get_ticks_msec() + 2000
+	Engine.max_fps = 60
+
+func _update_frame_budget(has_activity: bool, focused: bool) -> void:
+	var target := 15 if not focused else (60 if has_activity or Time.get_ticks_msec() < smooth_frames_until_msec else 30)
+	if Engine.max_fps != target:
+		Engine.max_fps = target
+
 func _on_window_focus_entered() -> void:
+	_request_smooth_frames()
 	_send_bridge({"v": 1, "type": "activeChanged", "active": true})
 
 func _on_window_focus_exited() -> void:
+	Engine.max_fps = 15
 	_send_bridge({"v": 1, "type": "activeChanged", "active": false})

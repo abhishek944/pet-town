@@ -36,7 +36,8 @@ func _handle_tree_customization_input(event: InputEvent) -> bool:
 			if is_instance_valid(picked_tree):
 				tree_editor_open = true
 				_select_user_tree(picked_tree)
-				tree_status.text = "Editing this object. Changes save automatically."
+				tree_status.text = ""
+				tree_status.visible = false
 				get_viewport().set_input_as_handled()
 				return true
 	return false

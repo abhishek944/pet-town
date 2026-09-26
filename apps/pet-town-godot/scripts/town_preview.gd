@@ -1,17 +1,85 @@
 class_name TownPreview
-extends RefCounted
+extends SubViewportContainer
 
-static func create(model: Node3D, dimensions := Vector2(172, 150)) -> SubViewportContainer:
-	var container := SubViewportContainer.new()
+var preview_viewport: SubViewport
+var snapshot: Texture2D
+var model_source: Node3D
+var scene_source: PackedScene
+var cache_key := ""
+var worker := false
+static var pending: Array[TownPreview] = []
+static var draining := false
+static var runner: TownPreview
+static var snapshots := {}
+
+static func discard_snapshot(key: String) -> void:
+	snapshots.erase(key)
+
+static func create_model(source: Node3D, key: String, dimensions := Vector2(172, 150)) -> TownPreview:
+	var container := TownPreview.new()
 	container.custom_minimum_size = dimensions
 	container.stretch = true
 	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	container.model_source = source
+	container.cache_key = key
+	return container
+
+static func create_scene(source: PackedScene, key: String, dimensions := Vector2(172, 150)) -> TownPreview:
+	var container := TownPreview.new()
+	container.custom_minimum_size = dimensions
+	container.stretch = true
+	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	container.scene_source = source
+	container.cache_key = key
+	return container
+
+func _ready() -> void:
+	if worker:
+		return
+	if snapshots.has(cache_key):
+		snapshot = snapshots[cache_key]
+		return
+	if DisplayServer.get_name() == "headless":
+		return
+	pending.append(self)
+	if not is_instance_valid(runner):
+		runner = TownPreview.new()
+		runner.worker = true
+		get_tree().root.add_child(runner)
+	if not draining:
+		draining = true
+		runner.call_deferred("_drain_pending")
+
+func _exit_tree() -> void:
+	if not worker:
+		pending.erase(self)
+
+func _drain_pending() -> void:
+	while not pending.is_empty():
+		var batch: Array[TownPreview] = []
+		for index in mini(3, pending.size()):
+			var card: TownPreview = pending.pop_front() as TownPreview
+			if is_instance_valid(card) and card.is_inside_tree() and not card.is_queued_for_deletion():
+				card._build_viewport()
+				batch.append(card)
+		await RenderingServer.frame_post_draw
+		for card in batch:
+			if is_instance_valid(card) and card.is_inside_tree() and not card.is_queued_for_deletion():
+				card._capture_once()
+		await get_tree().process_frame
+	draining = false
+
+func _build_viewport() -> void:
+	var model := scene_source.instantiate() as Node3D if scene_source != null else model_source.duplicate() as Node3D
+	if model == null:
+		return
 	var viewport := SubViewport.new()
-	viewport.size = Vector2i(maxi(160, int(dimensions.x * 1.5)), maxi(140, int(dimensions.y * 1.5)))
+	viewport.size = Vector2i(maxi(160, int(custom_minimum_size.x * 1.5)), maxi(140, int(custom_minimum_size.y * 1.5)))
 	viewport.world_3d = World3D.new()
 	viewport.transparent_bg = false
 	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
-	container.add_child(viewport)
+	add_child(viewport)
+	preview_viewport = viewport
 	var environment := WorldEnvironment.new()
 	var sky := Environment.new()
 	sky.background_mode = Environment.BG_COLOR
@@ -26,7 +94,8 @@ static func create(model: Node3D, dimensions := Vector2(172, 150)) -> SubViewpor
 	root.add_child(model)
 	var bounds := _bounds(model)
 	root.position = -bounds.get_center()
-	var span := maxf(maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z)) * 1.5, 0.8)
+	var framing := 1.0 if cache_key == "selected-object" else 1.5
+	var span := maxf(maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z)) * framing, 0.8)
 	var camera := Camera3D.new()
 	camera.current = true
 	camera.fov = 38.0
@@ -42,7 +111,21 @@ static func create(model: Node3D, dimensions := Vector2(172, 150)) -> SubViewpor
 	fill.light_color = Color("b4d7bd")
 	fill.light_energy = 1.2
 	viewport.add_child(fill)
-	return container
+func _capture_once() -> void:
+	if not is_instance_valid(preview_viewport):
+		return
+	var image := preview_viewport.get_texture().get_image()
+	if image.is_empty():
+		return
+	snapshot = ImageTexture.create_from_image(image)
+	snapshots[cache_key] = snapshot
+	preview_viewport.queue_free()
+	preview_viewport = null
+	queue_redraw()
+
+func _draw() -> void:
+	if snapshot != null:
+		draw_texture_rect(snapshot, Rect2(Vector2.ZERO, size), false)
 
 static func _bounds(model: Node3D) -> AABB:
 	var result := AABB()

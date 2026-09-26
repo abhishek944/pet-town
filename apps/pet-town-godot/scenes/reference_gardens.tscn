@@ -1,7 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="PackedScene" path="res://assets/cozy-island/reference-gardens-editable.glb" id="1_garden"]
-[ext_resource type="Script" path="res://scripts/reference_water_cleanup.gd" id="2_water_cleanup"]
+[ext_resource type="PackedScene" path="res://scenes/reference_gardens_trimmed.scn" id="1_garden"]
 [ext_resource type="PackedScene" path="res://scenes/garden_obstacles.tscn" id="3_obstacles"]
 
 [sub_resource type="Shader" id="BeaconShader"]
@@ -20,7 +19,6 @@ cap_top = false
 cap_bottom = false
 
 [node name="ReferenceGardens" type="Node3D"]
-script = ExtResource("2_water_cleanup")
 
 [node name="BlenderAuthoredDetails" parent="." instance=ExtResource("1_garden")]
 

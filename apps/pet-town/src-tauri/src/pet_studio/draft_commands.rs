@@ -114,10 +114,14 @@ pub fn data_url(bytes: &[u8]) -> String {
 }
 
 fn decode_data_url(value: &str) -> Result<Vec<u8>, String> {
-    let encoded = value
-        .strip_prefix("data:image/png;base64,")
-        .or_else(|| value.strip_prefix("data:image/apng;base64,"))
-        .ok_or_else(|| "Animation must be PNG or APNG image data.".to_string())?;
+    // FileReader uses the desktop webview's MIME guess, which may not identify .apng files.
+    // The decoded bytes are checked as PNG/APNG by validate_import below.
+    let (header, encoded) = value
+        .split_once(',')
+        .ok_or_else(|| "Animation must be base64 image data.".to_string())?;
+    if !header.starts_with("data:") || !header.ends_with(";base64") || header.len() > 256 {
+        return Err("Animation must be base64 image data.".into());
+    }
     if encoded.len() > MAX_IMAGE_BYTES * 2 {
         return Err("Animation image is too large.".into());
     }

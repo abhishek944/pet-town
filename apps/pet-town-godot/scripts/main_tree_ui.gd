@@ -1,5 +1,6 @@
 extends "res://scripts/main_tree_catalog_ui.gd"
 const TOWN_CATALOG_SCRIPT := preload("res://scripts/town_catalog.gd")
+const TOWN_PREVIEW_SCRIPT := preload("res://scripts/town_preview.gd")
 
 func initialize(root_control: Control) -> void:
 	ui_root = root_control
@@ -26,14 +27,8 @@ func _build_tree_customization() -> void:
 	content.add_theme_constant_override("separation", 8)
 	tree_panel.add_child(content)
 
-	var eyebrow := Label.new()
-	eyebrow.text = "TOWN CUSTOMIZATION"
-	eyebrow.add_theme_font_size_override("font_size", 11)
-	eyebrow.add_theme_color_override("font_color", Color("d6aa61"))
-	content.add_child(eyebrow)
-
 	var title := Label.new()
-	title.text = "Decorate Pet Town"
+	title.text = "Town customization"
 	title.add_theme_font_size_override("font_size", 23)
 	title.add_theme_color_override("font_color", Color("f8f5ed"))
 	content.add_child(title)
@@ -47,9 +42,9 @@ func _build_tree_customization() -> void:
 	content.add_child(add_button)
 
 	tree_status = Label.new()
-	tree_status.text = "Double-click an object to edit it, or browse objects."
+	tree_status.text = ""
 	tree_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	tree_status.custom_minimum_size.y = 42.0
+	tree_status.visible = false
 	tree_status.add_theme_font_size_override("font_size", 13)
 	tree_status.add_theme_color_override("font_color", Color("c8d0c6"))
 	content.add_child(tree_status)
@@ -59,13 +54,17 @@ func _build_tree_customization() -> void:
 	tree_selection_label.add_theme_font_size_override("font_size", 14)
 	tree_selection_label.add_theme_color_override("font_color", Color("f0e4c8"))
 	content.add_child(tree_selection_label)
+	tree_preview_holder = PanelContainer.new()
+	tree_preview_holder.visible = false
+	tree_preview_holder.add_theme_stylebox_override("panel", _tree_style(Color("26392f"), 10, Color("94ae9266"), 1))
+	content.add_child(tree_preview_holder)
 
 	var action_row := HBoxContainer.new()
 	action_row.add_theme_constant_override("separation", 6)
 	content.add_child(action_row)
 	tree_move_button = _tree_action_button(action_row, "Move", Callable(self, "_start_moving_selected_tree"))
-	tree_rotate_left_button = _tree_action_button(action_row, "↶ 15°", Callable(self, "_rotate_selected_tree").bind(-TREE_ROTATION_STEP))
-	tree_rotate_right_button = _tree_action_button(action_row, "↷ 15°", Callable(self, "_rotate_selected_tree").bind(TREE_ROTATION_STEP))
+	tree_rotate_left_button = _tree_action_button(action_row, "Left 15°", Callable(self, "_rotate_selected_tree").bind(-TREE_ROTATION_STEP))
+	tree_rotate_right_button = _tree_action_button(action_row, "Right 15°", Callable(self, "_rotate_selected_tree").bind(TREE_ROTATION_STEP))
 
 	var scale_row := HBoxContainer.new()
 	scale_row.add_theme_constant_override("separation", 8)
@@ -81,6 +80,12 @@ func _build_tree_customization() -> void:
 	tree_scale_slider.value = 1.0
 	tree_scale_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tree_scale_slider.value_changed.connect(Callable(self, "_set_selected_tree_scale"))
+	tree_scale_slider.drag_started.connect(func() -> void: scale_drag_before = _selected_undo_state())
+	tree_scale_slider.drag_ended.connect(func(_changed: bool) -> void:
+		if not scale_drag_before.is_empty():
+			_push_undo_state(scale_drag_before)
+			scale_drag_before = {}
+	)
 	scale_row.add_child(tree_scale_slider)
 	tree_scale_label = Label.new()
 	tree_scale_label.text = "100%"
@@ -95,13 +100,37 @@ func _build_tree_customization() -> void:
 	tree_done_button = _tree_action_button(finish_row, "Close", Callable(self, "_close_tree_editor"))
 
 	var note := Label.new()
-	note.text = "Move: point to a new spot and click. Right-click cancels. Changes save automatically."
+	note.text = "Move: click a new spot · Right-click cancels · ⌘Z undoes"
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.add_theme_font_size_override("font_size", 12)
 	note.add_theme_color_override("font_color", Color("9da79b"))
 	content.add_child(note)
 	_refresh_tree_controls()
 	_build_catalog_ui()
+
+func _show_selected_preview(tree: UserTree) -> void:
+	for child in tree_preview_holder.get_children():
+		tree_preview_holder.remove_child(child)
+		child.queue_free()
+	tree_preview_holder.visible = is_instance_valid(tree)
+	if not is_instance_valid(tree):
+		return
+	var model := tree.get_node_or_null("AuthoredModel") as Node3D
+	if model == null:
+		model = tree
+	TOWN_PREVIEW_SCRIPT.discard_snapshot("selected-object")
+	var preview := TOWN_PREVIEW_SCRIPT.create_model(model, "selected-object", Vector2(280, 142))
+	tree_preview_holder.add_child(preview)
+
+func _update_tree_customization() -> void:
+	if not is_instance_valid(tree_panel):
+		return
+	var controls_available := not bool(host.call("_help_is_open")) and not bool(host.call("_details_are_open")) and not bool(host.call("_settings_are_open"))
+	tree_panel.visible = tree_editor_open and controls_available
+	if placement_active and is_instance_valid(placement_tree):
+		placement_tree.visible = controls_available
+		if controls_available:
+			call("_update_tree_placement_preview", get_viewport().get_mouse_position())
 
 func _tree_action_button(parent: Container, label: String, callback: Callable) -> Button:
 	var button := Button.new()

@@ -25,14 +25,17 @@ pub(crate) fn set_hit_regions(regions: Vec<HitRegion>, state: tauri::State<'_, H
 
 pub(crate) fn show_window(window: &WebviewWindow) -> Result<(), String> {
     #[cfg(target_os = "macos")]
-    unsafe {
-        use objc2_app_kit::NSWindow;
-        let native_window: &NSWindow = &*window
-            .ns_window()
-            .map_err(|error| error.to_string())?
-            .cast();
-        native_window.orderFrontRegardless();
-        Ok(())
+    {
+        let target = window.clone();
+        window
+            .run_on_main_thread(move || unsafe {
+                use objc2_app_kit::NSWindow;
+                if let Ok(native_window) = target.ns_window() {
+                    let native_window: &NSWindow = &*native_window.cast();
+                    native_window.orderFrontRegardless();
+                }
+            })
+            .map_err(|error| error.to_string())
     }
     #[cfg(not(target_os = "macos"))]
     {
@@ -121,13 +124,17 @@ pub(crate) fn configure_window(app: &mut tauri::App) -> Result<(), Box<dyn std::
 
     #[cfg(target_os = "macos")]
     unsafe {
-        use objc2_app_kit::{NSWindow, NSWindowCollectionBehavior};
+        use objc2_app_kit::{NSStatusWindowLevel, NSWindow, NSWindowCollectionBehavior};
 
-        // Tauri's all-workspaces option sets CanJoinAllSpaces. FullScreenAuxiliary
-        // is additionally required for a companion window beside fullscreen apps.
         let native_window: &NSWindow = &*window.ns_window()?.cast();
+        // Tauri's always-on-top is only the floating level. Keep the village
+        // above ordinary app windows without using the screen-saver level.
+        native_window.setLevel(NSStatusWindowLevel);
+        // Joining all Spaces alone does not join other applications' Spaces
+        // (including Stage Manager and full-screen apps).
         let behavior = native_window.collectionBehavior()
             | NSWindowCollectionBehavior::CanJoinAllSpaces
+            | NSWindowCollectionBehavior::CanJoinAllApplications
             | NSWindowCollectionBehavior::FullScreenAuxiliary;
         native_window.setCollectionBehavior(behavior);
     }

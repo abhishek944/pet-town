@@ -111,7 +111,7 @@ The desktop menu's **Open 3D Town** action launches the local project. While God
 - `scripts/companion.gd`: normalized-status destination selection, navigation, animation, and retirement behavior.
 - `scripts/main.gd`: broker bridge, roster reconciliation, camera interactions, full-height details with a rotatable 3D avatar, and the Option+H controls board.
 - `scripts/interaction_spot.gd`: authored activity type and display metadata used for status-driven destinations.
-- `navigation/town_walkable.res` and `town_collision.res`: saved navigation and collision derived from the static island. Runtime startup does not bake or rebuild the world.
+- `navigation/town_walkable.res`, `town_collision.res`, and `town_ground.res`: saved navigation, general collision, and a separate terrain/path collision surface for object placement and selection markers. Runtime startup does not bake or rebuild the world.
 - `assets/kaykit/License.txt`: original CC0 license from the KayKit Adventurers 2.0 FREE pack, covering the six Adventurer GLBs, textures, and shared animation GLBs.
 - `assets/kaykit/skeletons/License.txt`: original CC0 license from the KayKit Skeletons 1.1 FREE pack, covering the four Skeleton GLBs and textures.
 
@@ -122,6 +122,8 @@ After editing the island mesh, regenerate navigation/collision and the shared an
 ```
 
 The offline bake reads the island and does not modify its meshes or placement. It includes terrain and gravel paths, with obstruction footprints for houses, trunks, rocks, and selected props. Characters follow the baked paths with collision capsules, gravity, and clearance-checked stepping over shallow gravel curbs. The harbor piers are not currently activity destinations; houses have no enterable interiors.
+
+Editable object selection uses `TownSelectionFootprint`: the yellow outline follows the object's authored base and is projected onto the terrain/path collision, or onto water where land is absent. Blender detail color batches are exported as individual flower patches so a bush selects and moves as a whole. The 5,323 authored paving stones render in grouped `MultiMesh` batches; selecting one creates only that stone's editable proxy, and the sparse layout records its changes. The plain Build mode land is the ground reference; visible roads, meadow patches, water details, and paving are Chill mode objects. Run the object checks in `var/test-checklist.md` after changing the island export or its collision bake.
 
 The retired autonomous-companion smoke script remains as historical navigation evidence, but it no longer represents the live broker-driven roster and is not part of the current verification flow. Verify live lifecycle and focus behavior with the desktop broker running.
 
@@ -148,7 +150,7 @@ Regression check (run without `--fixed-fps`, since it needs render frames betwee
 This deliberately uses 10 physics ticks per second and checks smooth constant-speed tracking, switching companions, resetting to the overview, and releasing follow by panning. It also reports the old raw-position approach for comparison.
 
 
-The island also has a static rendering scene in `scenes/island_render_sections.tscn`. Terrain and road surfaces remain batched by material and area; all 328 island trees are saved under `IslandRenderSections/EditableTrees`, and 1,160 authored object roots under `IslandRenderSections/EditableObjects`. The five original orchard wrappers carry their harvest apples. The hidden source scene continues to supply navigation and collision. Batch resources stay in the ignored local `assets/cozy-island/render_sections/` folder.
+The island also has a rendering scene in `scenes/island_render_sections.tscn`. The base terrain stays batched by material and area; all 328 island trees are saved under `IslandRenderSections/EditableTrees`, and 1,564 authored object and path roots under `IslandRenderSections/EditableObjects`. The five original orchard wrappers carry their harvest apples. The source scene supplies navigation and collision independently of the editable visuals. Batch resources stay in the ignored local `assets/cozy-island/render_sections/` folder.
 
 After replacing the Blender GLB, rebuild the saved rendering batches:
 
@@ -171,7 +173,9 @@ blender -b var/large-cozy-town/grand-moonhaven-reference-garden.blend \
 
 The Blender tool checks the expected tree geometry and verifies every static source mesh appears in the GLB. It also adds `Calm open ocean`, a static 240×240 water plane stored outside the optimized export collection, so creating the export scene does not silently drop it. Godot instances `scenes/reference_gardens.tscn` through `town_decorations.tscn`; saved collision shapes, warm-white lighting, and a fading lighthouse beam are unchanged. The existing broker and companion behavior are preserved.
 
-The default desktop renderer is now Forward+ with Metal on macOS, 2x MSAA, ambient occlusion and restrained glow. Compatibility remains the mobile override. The final overview measured about 48 FPS at 3024x1898 on this machine; this is a single-view measurement, not a guaranteed frame rate.
+The local dev script compiles that GLB into `scenes/reference_gardens_trimmed.scn` and removes 197 redundant deep-sea tiles. After a manual GLB export, regenerate the compiled scene with `"$GODOT" --headless --path apps/pet-town-godot --script res://tools/compile_reference_gardens.gd` before opening the town directly.
+
+The current renderer uses Godot Mobile on Metal on macOS, 0.8× 3D resolution, and restrained glow. 3D MSAA and SSAO are disabled. Profile the current scene with `tools/measure_render.gd`; older screenshot benchmarks do not describe the current build.
 
 The updated navigation bake passed all 132 directed routes among the 12 activity markers. Run `tests/reference_routes.gd` headlessly to repeat the connectivity check. `tools/reference_scene_review.gd` captures an isolated static visual review with the broker polling loop disabled only in that review tool. Normal gameplay still runs the full controller.
 
