@@ -39,7 +39,7 @@ cat >"$bundle/Contents/Info.plist" <<'PLIST'
   <key>CFBundleExecutable</key><string>pet-town</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleIconFile</key><string>icon.icns</string>
-  <key>CFBundleShortVersionString</key><string>0.1.8</string>
+  <key>CFBundleShortVersionString</key><string>1.0.0</string>
   <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PLIST
