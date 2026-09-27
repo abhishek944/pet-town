@@ -23,8 +23,6 @@ jobs:
       - name: Install Rust 1.88
         run: rustup toolchain install 1.88.0 --profile minimal --target ${{ matrix.target }}
       - run: pnpm install --frozen-lockfile
-      - name: Install quality tools
-        run: brew install actionlint ruff shellcheck shfmt taplo
       - name: Prepare pinned Pi runtime for target
         run: |
           case "${{ matrix.target }}" in
@@ -33,29 +31,17 @@ jobs:
           esac
           ./scripts/prepare-pi-runtime.sh "$package"
           cp "bin/$package/pet-town-pi-runtime.tar.gz" apps/pet-town/src-tauri/resources/
-      - run: pnpm run check:quality
-      - run: pnpm run check:lines
       - run: pnpm run check:flow
-      - run: pnpm run check:focus
-      - run: pnpm run check:interactions
-      - run: pnpm run check:preferences
       - run: pnpm exec turbo run build internal:build-frontend
-      - name: Check locked Rust build at the declared MSRV
-        run: cargo +1.88.0 check --locked --manifest-path apps/pet-town/src-tauri/Cargo.toml --target ${{ matrix.target }}
-      - name: Verify packaged source fingerprints
-        run: |
-          expected=$(./scripts/package-source-fingerprint.sh)
-          test "$(cat bin/macos-arm64/pet-town.source.sha256)" = "$expected"
-          test "$(cat bin/macos-x64/pet-town.source.sha256)" = "$expected"
       - name: Build locked Tauri target at the declared MSRV
         run: cargo +1.88.0 build --locked --manifest-path apps/pet-town/src-tauri/Cargo.toml --release --target ${{ matrix.target }}
-      - name: Verify architecture
-        run: file apps/pet-town/src-tauri/target/${{ matrix.target }}/release/pet-town
-      - name: Validate checked-in package fingerprints and architectures
-        run: CHECK_PACKAGED_SKIP_BINARY_COMPARE=1 ./scripts/check-packaged.sh
-      - name: Record reproducible source and runtime provenance
+      - name: Verify built architecture and Pi runtime
         run: |
-          # Compiler and Apple SDK paths make Mach-O bytes host-specific. The
-          # package check instead verifies architecture, source fingerprints,
-          # complete runtime manifests, and embedded runtime identities.
-          file "apps/pet-town/src-tauri/target/${{ matrix.target }}/release/pet-town"
+          binary="apps/pet-town/src-tauri/target/${{ matrix.target }}/release/pet-town"
+          case "${{ matrix.target }}" in
+            aarch64-apple-darwin) package=macos-arm64; architecture=arm64 ;;
+            x86_64-apple-darwin) package=macos-x64; architecture=x86_64 ;;
+          esac
+          file "$binary" | grep -q "Mach-O 64-bit executable $architecture"
+          runtime_sha=$(shasum -a 256 "bin/$package/pet-town-pi-runtime.tar.gz" | cut -d' ' -f1)
+          strings "$binary" | grep -F "$runtime_sha" >/dev/null

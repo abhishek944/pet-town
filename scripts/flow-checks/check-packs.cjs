@@ -43,17 +43,21 @@ for (const pet of petDirectories) {
   const result = compileBehaviorPack(manifest, assets);
   if (!result.pack) throw new Error(`${pet}/flow.json: ${JSON.stringify(result.diagnostics)}`);
   if (result.pack.id !== pet) throw new Error(`${pet}/flow.json: pack id must match its folder`);
-  if (Object.keys(assets).length !== 1 || assets["walk.png"] !== "walk.png")
-    throw new Error(`${pet}: expected only walk.png`);
+  const expectedAssets = ["blocked.png", "sleep.png", "walk.png"];
+  if (JSON.stringify(Object.keys(assets).sort()) !== JSON.stringify(expectedAssets))
+    throw new Error(`${pet}: expected blocked.png, sleep.png, and walk.png`);
   if (result.pack.states.idle.flow.type !== "hide")
     throw new Error(`${pet}/flow.json: idle visibility is not flow-authored`);
   if ("actions" in result.pack)
     throw new Error(`${pet}/flow.json: menu animations are not allowed`);
-  for (const state of ["working", "blocked", "done", "listening"]) {
-    if (
-      result.pack.stateAssignments[state].animation !==
-      (state === "listening" && manifest.clips.listen ? "listen" : "walk")
-    )
+  const expectedAnimations = {
+    working: "walk",
+    blocked: "think",
+    done: "sleep",
+    listening: manifest.clips.listen ? "listen" : "walk",
+  };
+  for (const [state, animation] of Object.entries(expectedAnimations)) {
+    if (result.pack.stateAssignments[state].animation !== animation)
       throw new Error(`${pet}/flow.json: ${state} has wrong APNG`);
   }
   if (result.pack.stateAssignments.working.action !== "walking")
@@ -65,4 +69,4 @@ for (const pet of petDirectories) {
   if (result.pack.stateAssignments.unknown.visible)
     throw new Error(`${pet}: unknown pet is visible`);
 }
-console.log("bundled ten-character walk-only pack checks: pass");
+console.log("bundled ten-character pack checks: pass");
