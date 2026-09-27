@@ -348,6 +348,12 @@ a {
   font-size: 9px;
   text-align: right;
 }
+.message[data-tone="success"] {
+  color: #7ee2aa;
+}
+.message[data-tone="info"] {
+  color: #e8c879;
+}
 footer {
   position: absolute;
   left: 18px;
@@ -514,6 +520,10 @@ footer[hidden],
   background: #173d2b;
   color: #7ee2aa;
 }
+.adapter-status[data-status="verificationRequired"] {
+  background: #453820;
+  color: #e8c879;
+}
 .adapter-status[data-status="builtIn"] {
   background: #263b55;
   color: #8bc0ff;
@@ -540,14 +550,6 @@ footer[hidden],
 .restored-focus {
   outline: 2px solid #5aaeff;
   outline-offset: 2px;
-}
-#agents-done {
-  padding: 5px 8.5px;
-}
-.agents-privacy {
-  margin: 10px 0 0;
-  color: #9296a0;
-  font-size: 9px;
 }
 .adapter-cards[aria-busy="true"] {
   opacity: 0.55;
@@ -599,15 +601,6 @@ footer[hidden],
   margin-top: 3px;
   color: #9296a0;
   font-size: 9px;
-}
-.settings-layout[data-tab="agents"] #dirty {
-  display: none;
-}
-.settings-layout[data-tab="agents"] #apply {
-  display: none;
-}
-.settings-layout[data-tab="agents"] #agents-done {
-  margin-left: auto;
 }
 @media (prefers-reduced-motion: reduce) {
   .preview-stage[data-locomotion="true"] .pet {
@@ -727,8 +720,7 @@ footer[hidden],
   background: #e0e1e5;
 }
 :root[data-theme="light"] .adapter-mechanism,
-:root[data-theme="light"] .agents-intro,
-:root[data-theme="light"] .agents-privacy {
+:root[data-theme="light"] .agents-intro {
   color: #50535a;
 }
 :root[data-theme="light"] .adapter-capability {
@@ -746,8 +738,7 @@ footer[hidden],
   }
   :root:not([data-theme="dark"]) .adapter-mechanism,
   :root:not([data-theme="dark"]) .adapter-detail-copy,
-  :root:not([data-theme="dark"]) .agents-intro,
-  :root:not([data-theme="dark"]) .agents-privacy {
+  :root:not([data-theme="dark"]) .agents-intro {
     color: #50535a;
   }
   :root:not([data-theme="dark"]) .adapter-capability {
@@ -769,6 +760,12 @@ footer[hidden],
 :root[data-theme="light"] .message {
   color: #a1251c;
 }
+:root[data-theme="light"] .message[data-tone="success"] {
+  color: #14683c;
+}
+:root[data-theme="light"] .message[data-tone="info"] {
+  color: #79520b;
+}
 :root[data-theme="light"] .about {
   color: #50535a;
 }
@@ -778,6 +775,12 @@ footer[hidden],
 @media (prefers-color-scheme: light) {
   :root[data-theme="system"] .message {
     color: #a1251c;
+  }
+  :root[data-theme="system"] .message[data-tone="success"] {
+    color: #14683c;
+  }
+  :root[data-theme="system"] .message[data-tone="info"] {
+    color: #79520b;
   }
   :root[data-theme="system"] .about {
     color: #50535a;

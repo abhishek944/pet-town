@@ -4,15 +4,15 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 source_app=${1:-"$root/var/godot-runtime/Godot.app"}
 target_app="$root/var/godot-runtime/Pet Town 3D.app"
-icon="$root/apps/pet-town-godot/assets/branding/pet-town-icon.icns"
+icon="$root/apps/pet-town-godot-next/branding/pet-town-icon.icns"
 
 if [ ! -x "$source_app/Contents/MacOS/Godot" ] || [ ! -f "$icon" ]; then
   echo "Godot app or Pet Town icon is missing" >&2
   exit 1
 fi
 if [ -x "$target_app/Contents/MacOS/Godot" ] &&
-   [ "$target_app" -nt "$source_app/Contents/MacOS/Godot" ] &&
-   [ "$target_app" -nt "$icon" ]; then
+  [ "$target_app" -nt "$source_app/Contents/MacOS/Godot" ] &&
+  [ "$target_app" -nt "$icon" ]; then
   printf '%s\n' "$target_app/Contents/MacOS/Godot"
   exit 0
 fi

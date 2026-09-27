@@ -60,7 +60,7 @@ export class AdapterSettings {
   private readonly cards = document.getElementById("adapter-cards")!;
   private adapters: AdapterSetupView[] = [];
   private busyId: string | null = null;
-  constructor(private readonly report: (message: string) => void) {}
+  constructor(private readonly report: (message: string, tone?: "success" | "info" | "error") => void) {}
   async load(): Promise<void> {
     this.cards.setAttribute("aria-busy", "true");
     try {
@@ -185,12 +185,12 @@ export class AdapterSettings {
     if (!confirm(message)) return;
     this.busyId = adapter.id;
     if (stayInDetail && returnTo) this.renderDetail(returnTo); else this.renderOverview(returnTo?.ids);
-    this.report(`${operation === "remove" ? "Removing" : operation === "update" ? "Updating" : "Connecting"} ${adapter.name}…`);
+    this.report(`${operation === "remove" ? "Removing" : operation === "update" ? "Updating" : "Connecting"} ${adapter.name}…`, "info");
     try {
       this.adapters = await invoke<AdapterSetupView[]>("set_adapter_enabled", { id: adapter.id, enabled });
-      this.report(this.adapters.find((item) => item.id === adapter.id)?.status === "verificationRequired" ? `${adapter.name} installed. Verify trust in Codex with /hooks.` : `${adapter.name} ${operation === "remove" ? "removed" : operation === "update" ? "updated" : "connected"}.`);
+      this.report(this.adapters.find((item) => item.id === adapter.id)?.status === "verificationRequired" ? `${adapter.name} installed. Verify trust in Codex with /hooks.` : `${adapter.name} ${operation === "remove" ? "removed" : operation === "update" ? "updated" : "connected"}.`, "success");
     } catch (error) {
-      this.report(String(error));
+      this.report(String(error), "error");
     } finally {
       this.busyId = null;
       if (stayInDetail && returnTo) this.renderDetail(returnTo, adapter.id); else this.renderOverview(returnTo?.ids);

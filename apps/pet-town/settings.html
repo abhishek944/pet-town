@@ -86,7 +86,7 @@
             <h2 tabindex="-1">4 · Assign and save</h2>
             <p id="studio-mapping-hint" class="hint">Import animations, then assign them to every required behavior.</p>
             <div id="studio-mappings" class="studio-mappings"></div>
-            <section class="studio-orchestrator" aria-labelledby="studio-orchestrator-title"><div><h3 id="studio-orchestrator-title">Mayor animations</h3><p class="hint studio-orchestrator-note">The mayor walks normally. The listening APNG runs only while you are speaking.</p><button id="studio-focus-orchestrator" class="secondary" type="button">Open assignment view</button></div><div class="studio-orchestrator-slots"><label><b>Walking</b><span class="studio-orchestrator-preview"><img id="studio-orchestrator-walk-preview" alt="Walking APNG preview" hidden /></span><input id="studio-import-walking" type="file" accept="image/png,image/apng,.png,.apng" aria-label="Choose Walking APNG" /><select id="studio-orchestrator-walk" aria-label="Walking animation assignment"><option value="">Choose…</option></select><small>Default state</small></label><label><b>Listening</b><span class="studio-orchestrator-preview"><img id="studio-orchestrator-listening-preview" alt="Listening APNG preview" hidden /></span><input id="studio-import-listening" type="file" accept="image/png,image/apng,.png,.apng" aria-label="Choose Listening APNG" /><select id="studio-orchestrator-listening" aria-label="Listening animation assignment"><option value="">Choose…</option></select><small>Waiting for your voice</small></label></div><div class="studio-orchestrator-actions"><button id="studio-preview-sequence" class="secondary" type="button">Preview sequence</button><button id="studio-assign-now" class="primary" type="button">Assign to mayor</button></div><label class="studio-assign"><input id="studio-assign-orchestrator" type="checkbox" /> Assign this pet to the mayor when saved</label></section>
+            <label class="studio-assign" id="studio-mayor-assignment"><input id="studio-assign-orchestrator" type="checkbox" /> Use this pet as Mayor when saved</label>
             <button id="studio-save" class="primary studio-save" type="button">Validate &amp; save pet</button>
           </section>
           <nav id="studio-wizard-nav" class="studio-wizard-nav" aria-label="Pet Studio steps"><button id="studio-wizard-previous" class="secondary" type="button">Previous</button><span id="studio-wizard-progress" role="status" aria-live="polite">Step 1 of 4</span><button id="studio-wizard-next" class="primary" type="button">Next</button></nav>
@@ -107,6 +107,10 @@
         </section>
         <section id="panel-app" class="panel" data-panel="app" role="tabpanel" aria-labelledby="tab-app" hidden>
           <h1>App</h1>
+          <h2>Town</h2>
+          <div class="group">
+            <div class="row"><span>3D Town<small>Explore the full town with your live agents.</small></span><button id="open-3d-town" class="primary" type="button">Open 3D Town</button></div>
+          </div>
           <h2>Village</h2>
           <div class="group">
             <div class="row"><span>Town visibility<small id="town-visibility-status">Checking current state…</small></span><button id="town-visibility-toggle" class="secondary" type="button">Hide Town</button></div>
@@ -118,6 +122,9 @@
             <label class="row"><span>Appearance</span><select id="settings-appearance"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
             <div class="row"><span>Also start with Herdr<small>Optional when you use Herdr alongside the standalone app.</small></span><button id="open-with-herdr" class="switch" type="button" role="switch" aria-checked="false" aria-label="Also start Pet Town when Herdr starts"></button></div>
           </div>
+          <div class="group">
+            <div class="row"><span>Pet Town<small>Close the desktop app and its 3D Town.</small></span><button id="quit-pet-town" class="secondary" type="button">Quit Pet Town</button></div>
+          </div>
           <p class="hint">Manual file edits can be loaded with the Herdr action <code>pet-town.reload-preferences</code>.</p>
           <button id="reset-all" class="secondary danger">Reset Everything…</button>
         </section>
@@ -125,7 +132,6 @@
           <h1 id="agents-title">Agent connections</h1>
           <p class="agents-intro">Connect the coding tools whose sessions should appear in your village.</p>
           <div id="adapter-cards" class="adapter-cards" role="list" aria-busy="true"></div>
-          <p class="agents-privacy">Prompt and code fields are never stored, displayed, or sent over the network.</p>
         </section>
         <section id="panel-about" class="panel" data-panel="about" role="tabpanel" aria-labelledby="tab-about" hidden>
           <h1>About Pet Town</h1>
@@ -137,6 +143,6 @@
       </section>
     </main>
     <p id="gallery-hint" class="hint" hidden>Choose a pet to adjust it, or open Studio to create one.</p>
-    <footer id="settings-footer"><button id="reset-pet" class="secondary" type="button">Reset pet</button><button id="agents-done" class="secondary" type="button" hidden>Done</button><span id="dirty" hidden>Unapplied changes</span><button id="apply" class="primary" type="button">Apply</button></footer>
+    <footer id="settings-footer"><button id="reset-pet" class="secondary" type="button">Reset pet</button><span id="dirty" hidden>Unapplied changes</span><button id="apply" class="primary" type="button">Apply</button></footer>
   </body>
 </html>

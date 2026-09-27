@@ -33,9 +33,10 @@ A hook sends its event to the local Pet Town process. The process stores only:
 - a safe project-folder basename when available;
 - the observation time;
 - a small allow-listed application focus hint when available;
+- for Codex, a validated local UUID thread ID in the private, owner-only session record (never in the public agent snapshot), used solely to open that conversation;
 - an optional private Herdr ownership claim.
 
-Prompts, code, tool arguments, output, credentials, transcript contents, full project paths, and raw harness session identifiers are not stored or sent to the web interface. Records expire after 24 hours if a harness cannot deliver its normal session-end event. The registry is time-bounded rather than count-capped: every valid live session and its end marker are retained during that window so high concurrency and delayed events cannot silently lose or resurrect pets.
+Prompts, code, tool arguments, output, credentials, transcript contents, and full project paths are not stored or sent to the web interface. Except for the private Codex thread route, raw harness session identifiers are not stored; no raw identifiers are sent to the web interface. Records expire after 24 hours if a harness cannot deliver its normal session-end event. The registry is time-bounded rather than count-capped: every valid live session and its end marker are retained during that window so high concurrency and delayed events cannot silently lose or resurrect pets.
 
 ## Duplicate prevention
 
@@ -43,7 +44,7 @@ When one of these harnesses runs inside Herdr, its event may carry a private cla
 
 ## Focus behavior
 
-A Herdr pet focuses its exact, revalidated pane. A standalone pet focuses the best already-running application known from the local hook environment. It does not start an application, choose an unverified terminal tab, or attach to a session. Attach and resume remain explicit actions in the coding tool.
+A Herdr pet focuses its exact, revalidated pane. A Codex pet first focuses the already-running Codex desktop app and, for a validated local UUID thread, opens `codex://threads/<id>` to select its conversation. Remote/SSH threads may not resolve in Codex Desktop. If Codex Desktop is not running, the pet falls back to its known running terminal/editor app. Other standalone pets focus the best already-running application known from the local hook environment. Pet Town does not start an application, choose an unverified terminal tab, or attach to a session. Attach and resume remain explicit actions in the coding tool.
 
 The local Godot town uses the same broker records through the Pet Town binary's private child bridge. Godot receives only the public agent fields and sends an opaque agent ID back when the user chooses **Open in Herdr**. Rust recollects the current roster and revalidates the private focus route before acting. While the fullscreen town is active, the desktop process temporarily suppresses the v1 pet strip; switching away restores the strip without changing the user's saved visibility preference.
 
@@ -56,7 +57,7 @@ These checks use real interactive harness sessions and are intentionally perform
 3. Trigger a normal tool operation. Confirm the pet shows working activity.
 4. For tools that expose permission events, trigger a safe permission prompt and confirm the pet waits without the hook changing the permission decision.
 5. Let the turn settle. Confirm the pet reaches its completed behavior, then exit the harness and confirm the pet disappears.
-6. Click the pet while the harness application is already running. Confirm the best existing application is focused and that no new application, terminal tab, or resumed session is created.
+6. Click the pet while the harness application is already running. Confirm the best existing application is focused and that no new application, terminal tab, or resumed session is created. For a local Codex Desktop thread, confirm clicking its pet selects the exact conversation; for a remote thread, confirm Codex opens but note that Codex's remote deep-link support may not navigate.
 7. Start the same harness inside a Herdr pane. Confirm the village shows one Herdr-owned pet rather than a Herdr pet plus a duplicate standalone pet.
 8. In Settings, choose **Remove…**. Confirm unrelated harness settings remain and a newly started session no longer appears.
 9. Repeat for Claude Code, Codex, OpenCode, Pi, Factory Droid, and Cursor.

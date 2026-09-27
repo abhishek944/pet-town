@@ -108,10 +108,6 @@ pub fn open_internal(
     let context = app
         .state::<SettingsSession>()
         .begin(app, pet_id, initial_tab);
-    if let Err(error) = app.emit_to("main", "village-pause", ()) {
-        app.state::<SettingsSession>().finish();
-        return Err(error.to_string());
-    }
     arm_readiness_timeout(app, app.state::<SettingsSession>().readiness_token());
     let result = if let Some(window) = app.get_webview_window("settings") {
         match window.emit("settings-selection", context) {
@@ -176,7 +172,5 @@ pub fn get_settings_context(state: tauri::State<'_, SettingsSession>) -> Setting
     state.context()
 }
 pub fn close(app: &AppHandle) {
-    if app.state::<SettingsSession>().finish() {
-        let _ = app.emit_to("main", "village-resume", ());
-    }
+    app.state::<SettingsSession>().finish();
 }

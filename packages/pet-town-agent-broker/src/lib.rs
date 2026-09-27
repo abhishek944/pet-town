@@ -1,5 +1,6 @@
 mod agents;
 mod command;
+mod event_focus;
 mod events;
 mod focus;
 mod herdr;
@@ -25,6 +26,10 @@ pub enum FocusRoute {
     },
     Application {
         bundle_id: String,
+    },
+    Codex {
+        thread_id: Option<String>,
+        fallback_bundle_id: Option<String>,
     },
 }
 

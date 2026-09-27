@@ -48,28 +48,25 @@ pub fn build(id: &str, request: &SavePackRequest, draft: &Draft) -> Result<Value
     if names.is_empty() {
         return Err("A pet needs at least one visible APNG.".into());
     }
-    if request.assign_to_orchestrator {
-        for name in [&request.orchestrator_walk, &request.orchestrator_listening] {
-            if !draft.animations.contains_key(name) {
-                return Err("Assign imported mayor APNGs.".into());
+    let orchestrator = if request.assign_to_orchestrator {
+        let animation = |state: &str| -> Result<String, String> {
+            let selection = &request.state_assignments[state];
+            if !selection.visible {
+                return Err(format!(
+                    "Choose an APNG for {state} to use this pet as Mayor."
+                ));
             }
-            names.insert(name.clone());
-        }
-        if draft.animations[&request.orchestrator_walk].role != "locomotion" {
-            return Err("Use the mayor Walking import for its walking APNG.".into());
-        }
-        if request.orchestrator_walk == request.orchestrator_listening {
-            return Err("Mayor Walking and Listening need different APNGs.".into());
-        }
-        states.insert(
-            "working".into(),
-            json!({"animation":request.orchestrator_walk,"action":"walking"}),
-        );
-        states.insert(
-            "listening".into(),
-            json!({"animation":request.orchestrator_listening,"action":"idle"}),
-        );
-    }
+            selection
+                .animation
+                .as_deref()
+                .and_then(|value| value.strip_prefix("imported:"))
+                .map(str::to_owned)
+                .ok_or_else(|| format!("Choose an imported APNG for {state}."))
+        };
+        Some(json!({"walking":animation("working")?,"listening":animation("listening")?}))
+    } else {
+        None
+    };
     let mut clips = serde_json::Map::new();
     for name in names {
         let item = &draft.animations[&name];
@@ -79,9 +76,6 @@ pub fn build(id: &str, request: &SavePackRequest, draft: &Draft) -> Result<Value
             "durationMs":item.duration_ms,"role":item.role,"sourceFacing":"right","mirror":true}),
         );
     }
-    let orchestrator = request.assign_to_orchestrator.then(
-        || json!({"walking":request.orchestrator_walk,"listening":request.orchestrator_listening}),
-    );
     Ok(
         json!({"formatVersion":1,"id":id,"packVersion":uuid::Uuid::new_v4().to_string(),
         "clips":clips,"states":states,"orchestratorAnimations":orchestrator}),
@@ -129,18 +123,21 @@ mod tests {
                 )
             })
             .collect();
-        let request = SavePackRequest {
+        let mut request = SavePackRequest {
             draft_id: "draft".into(),
             display_name: "Pet".into(),
             state_assignments,
             assign_to_orchestrator: false,
-            orchestrator_walk: String::new(),
-            orchestrator_listening: String::new(),
         };
         let manifest = build("user-pet", &request, &draft).unwrap();
         assert_eq!(manifest["clips"].as_object().unwrap().len(), 1);
         assert_eq!(manifest["states"]["working"]["action"], "walking");
         assert_eq!(manifest["states"]["blocked"]["animation"], "pet");
         assert_eq!(manifest["states"]["idle"]["visible"], false);
+        request.assign_to_orchestrator = true;
+        let mayor_manifest = build("mayor-pet", &request, &draft).unwrap();
+        assert_eq!(mayor_manifest["orchestratorAnimations"]["walking"], "pet");
+        assert_eq!(mayor_manifest["orchestratorAnimations"]["listening"], "pet");
+        assert_eq!(mayor_manifest["states"]["listening"]["animation"], "pet");
     }
 }

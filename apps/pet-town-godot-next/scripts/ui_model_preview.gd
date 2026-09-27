@@ -9,9 +9,10 @@ var drag_active := false
 
 func _ready() -> void:
 	stretch = true
-	custom_minimum_size = Vector2(220, 160)
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	tooltip_text = "Drag to rotate the 3D model"
+	focus_mode = Control.FOCUS_ALL
+	if custom_minimum_size == Vector2.ZERO:
+		custom_minimum_size = Vector2(220, 160)
+	tooltip_text = "Drag or focus and press Left/Right to rotate the 3D model"
 	viewport = SubViewport.new()
 	viewport.size = Vector2i(420, 320)
 	viewport.transparent_bg = false
@@ -72,7 +73,13 @@ func show_scene(scene: PackedScene) -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		drag_active = event.pressed
+		if event.pressed:
+			grab_focus()
 		accept_event()
 	elif event is InputEventMouseMotion and drag_active:
 		orbit.rotation.y += event.relative.x * 0.012
 		accept_event()
+	elif event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_LEFT or event.keycode == KEY_RIGHT:
+			orbit.rotation.y += -0.12 if event.keycode == KEY_LEFT else 0.12
+			accept_event()

@@ -3,7 +3,6 @@ use tauri::Manager;
 mod adapter_events;
 mod adapter_setup;
 mod agents;
-mod app_launch;
 mod app_menu;
 mod app_singleton;
 mod control;
@@ -41,6 +40,11 @@ pub use agents::{AgentSnapshot, AgentView};
 pub use preferences_commands::startup_enabled_from_disk;
 pub use sessions::snapshot_json;
 
+#[tauri::command]
+fn quit_pet_town(app: tauri::AppHandle) {
+    app.exit(0);
+}
+
 pub fn run_town_bridge() {
     town_bridge::run();
 }
@@ -68,12 +72,13 @@ pub fn run() {
             return;
         }
     };
-    tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
+    let builder = tauri::Builder::default().plugin(tauri_plugin_dialog::init());
+    #[cfg(target_os = "macos")]
+    let builder = builder.plugin(tauri_nspanel::init());
+    builder
         .manage(app_lock)
         .manage(window::HitRegions::default())
         .manage(village_visibility::VillageVisibility::default())
-        .manage(focus::FocusTargets::default())
         .manage(preferences::PreferencesStore::load_default())
         .manage(pet_studio::PetStudioState::load())
         .manage(orchestrator::OrchestratorState::default())
@@ -98,13 +103,6 @@ pub fn run() {
             window::configure_window(app)?;
             control::start(app.handle().clone());
             orchestrator::commands::preferences_changed(app.handle());
-            if app_launch::launched_from_app_bundle() {
-                let first_run = app
-                    .state::<preferences::PreferencesStore>()
-                    .consume_first_run();
-                let initial_tab = first_run.then_some("app".to_owned());
-                let _ = settings_window::open_internal(app.handle(), None, initial_tab);
-            }
             #[cfg(target_os = "macos")]
             window::start_hit_test_loop(app.handle().clone());
             Ok(())
@@ -142,6 +140,8 @@ pub fn run() {
             settings_window::is_settings_open,
             settings_window::open_preferences,
             settings_window::show_settings,
+            town_process::open_3d_town,
+            quit_pet_town,
             window::set_hit_regions,
             village_visibility::renderer_ready,
             village_visibility::set_village_visible,
@@ -164,7 +164,7 @@ pub fn run() {
                 app.state::<pet_studio::PetStudioState>().cleanup();
             }
             tauri::RunEvent::Reopen { .. } => {
-                let _ = settings_window::open_internal(app, None, None);
+                let _ = settings_window::open_internal(app, None, Some("app".into()));
             }
             _ => {}
         });

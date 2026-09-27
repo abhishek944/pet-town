@@ -9,20 +9,19 @@ func _set_inspector_size(value: float) -> void:
 		scale_requested.emit(value - editor.selected.scale.x)
 
 func _close_inspector() -> void:
-	if not is_instance_valid(editor):
-		return
-	editor.selected = null
-	if is_instance_valid(editor.marker):
-		editor.marker.visible = false
-	editor.state_changed.emit()
+	_dismiss_object_editor()
 
 func _refresh_inspector() -> void:
 	var item := editor.selected
-	inspector.visible = is_instance_valid(item) and not is_instance_valid(editor.preview)
+	var should_show := is_instance_valid(item) and not is_instance_valid(editor.preview)
+	if should_show and not inspector.visible:
+		agent_panel.visible = false
+		if settings_overlay.visible:
+			close_settings()
+	inspector.visible = should_show
 	if not is_instance_valid(item):
 		inspector_preview_asset_id = ""
 		return
-	inspector_name.text = "Town customization"
 	inspector_kind.text = String(item.definition["name"])
 	inspector_size_slider.set_value_no_signal(item.scale.x)
 	inspector_size_label.text = "%d%%" % int(roundf(item.scale.x * 100.0))

@@ -110,7 +110,46 @@ pub fn focus_route(route: &FocusRoute) -> Result<(), String> {
             agent_session_id,
         } => focus_herdr(pane_id, socket.as_deref(), agent_session_id),
         FocusRoute::Application { bundle_id } => activate_application(bundle_id),
+        FocusRoute::Codex {
+            thread_id,
+            fallback_bundle_id,
+        } => focus_codex(thread_id.as_deref(), fallback_bundle_id.as_deref()),
     }
+}
+
+#[cfg(target_os = "macos")]
+fn focus_codex(thread_id: Option<&str>, fallback: Option<&str>) -> Result<(), String> {
+    if activate_application("com.openai.codex").is_ok() {
+        if let Some(id) = thread_id.filter(|id| valid_codex_thread(id)) {
+            let url = format!("codex://threads/{id}");
+            let opened = std::process::Command::new("/usr/bin/open")
+                .args(["-b", "com.openai.codex", &url])
+                .status()
+                .map_err(|error| error.to_string())?;
+            if !opened.success() {
+                return Err("Codex could not open this local conversation".into());
+            }
+        }
+        return Ok(());
+    }
+    fallback.map_or_else(|| Err("Codex is not running".into()), activate_application)
+}
+
+fn valid_codex_thread(id: &str) -> bool {
+    let bytes = id.as_bytes();
+    bytes.len() == 36
+        && bytes.iter().enumerate().all(|(index, byte)| {
+            if [8, 13, 18, 23].contains(&index) {
+                *byte == b'-'
+            } else {
+                byte.is_ascii_hexdigit()
+            }
+        })
+}
+
+#[cfg(not(target_os = "macos"))]
+fn focus_codex(_thread_id: Option<&str>, _fallback: Option<&str>) -> Result<(), String> {
+    Err("Codex focus is unavailable on this platform".into())
 }
 
 #[cfg(not(target_os = "macos"))]

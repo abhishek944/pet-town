@@ -5,7 +5,7 @@ Each bundled 2D pet lives in `apps/pet-town/src/pets/<pet-id>/` with a `flow.jso
 A pet state chooses an APNG and one of two actions:
 
 - `idle`: keep the APNG playing while the pet stays in place.
-- `walking`: keep the APNG playing while the pet travels horizontally and turns at screen edges.
+- `walking`: keep the APNG playing while the pet travels horizontally and turns at screen edges. A visible walking state can set `speedPxPerSecond` (1–200); if omitted it uses 30 pixels per second. The pet's Gentle/Playful motion preference still adjusts this speed.
 
 Set `visible` to `false` to hide the whole pet, including its label and click target. A hidden state needs no APNG. The same APNG may be used by several states. The five agent states are `idle`, `working` (shown as Running), `blocked`, `done` (shown as Completed), and `unknown`. `listening` is an additional 2D state for the voice assistant; it does not change an ordinary agent's status.
 
@@ -23,7 +23,7 @@ Set `visible` to `false` to hide the whole pet, including its label and click ta
   },
   "states": {
     "idle": { "action": "idle", "visible": false },
-    "working": { "animation": "walk", "action": "walking" },
+    "working": { "animation": "walk", "action": "walking", "speedPxPerSecond": 40 },
     "blocked": { "animation": "doubt", "action": "idle" },
     "done": { "animation": "sleep", "action": "idle" },
     "unknown": { "action": "idle", "visible": false },
@@ -32,7 +32,7 @@ Set `visible` to `false` to hide the whole pet, including its label and click ta
 }
 ```
 
-The bundled KayKit pets currently contain only `walk.png`, so they reuse it for Blocked and Completed with the idle action until dedicated artwork is supplied. Pet Studio lets a user import different APNGs and assign each state independently. It requires at least one visible APNG for a new pet; Idle and Unknown are hidden by default.
+All ten bundled KayKit pets use `blocked.png` (a thought bubble that resolves to an exclamation) and `sleep.png` (growing cyan Zs) for Blocked and Completed. Running continues to use `walk.png`. Pet Studio lets a user import different APNGs and assign each state independently. It requires at least one visible APNG for a new pet; Idle and Unknown are hidden by default.
 
 An APNG must loop continuously, have a transparent background, contain 2–64 frames, fit a 64–1024 pixel canvas, and be no larger than 20 MB when imported through Pet Studio. The validator checks frame structure, decoding, and duration. Bundled assets are also checked by `scripts/check-apng-assets.py`.
 

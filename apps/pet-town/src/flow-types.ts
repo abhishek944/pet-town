@@ -7,6 +7,7 @@ export interface StateAssignment {
   animation: string | null;
   action: PetAction;
   visible: boolean;
+  speedPxPerSecond?: number;
 }
 export type ClipRole = "stationary" | "locomotion";
 export type SourceFacing = "left" | "right";

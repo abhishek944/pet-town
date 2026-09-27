@@ -8,11 +8,14 @@ config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://branding/pet-town-icon.png"
 config/macos_native_icon="res://branding/pet-town-icon.icns"
 run/max_fps=30
+boot_splash/bg_color=Color(0.07, 0.13, 0.1, 1)
+boot_splash/image="res://branding/welcome-to-pet-town.png"
+boot_splash/stretch_mode=4
 
 [display]
 window/size/viewport_width=1440
 window/size/viewport_height=900
-window/size/mode=2
+window/size/mode=3
 window/stretch/mode="canvas_items"
 
 [input]

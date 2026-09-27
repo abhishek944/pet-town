@@ -44,6 +44,11 @@ pub(crate) fn open(app: &AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+pub(crate) fn open_3d_town(app: AppHandle) -> Result<(), String> {
+    open(&app)
+}
+
 pub(crate) fn reap(app: &AppHandle) {
     let state = app.state::<TownProcess>();
     let Ok(mut stored) = state.0.lock() else {
@@ -120,9 +125,9 @@ fn project_path() -> Option<PathBuf> {
     }
     let candidates = [
         repository_root().join("apps/pet-town-godot-next"),
-        std::env::current_dir().ok()?.join("apps/pet-town-godot-next"),
-        repository_root().join("apps/pet-town-godot"),
-        std::env::current_dir().ok()?.join("apps/pet-town-godot"),
+        std::env::current_dir()
+            .ok()?
+            .join("apps/pet-town-godot-next"),
     ];
     candidates
         .into_iter()

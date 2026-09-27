@@ -25,6 +25,6 @@ Choose **Extend a pet** and select a base pet. The draft can reuse its existing 
 
 ## Draft and assistant boundaries
 
-Discarding a draft removes its temporary files without publishing a pet. If validation fails, the draft remains available for correction. The optional mayor assignment has additional Walking and Listening APNG requirements; those are checked before save. These Pet Studio packs control the **2D** pet appearance. The Godot town uses its own KayKit 3D companions and authored activity markers.
+Discarding a draft removes its temporary files without publishing a pet. If validation fails, the draft remains available for correction. To use a new pet as Mayor, choose APNGs in the existing Running and Listening rows and select **Use this pet as Mayor when saved**. The same APNG can cover both states; Listening plays while you speak. These Pet Studio packs control the **2D** pet appearance. The Godot town uses its own KayKit 3D companions and authored activity markers.
 
 **Format and checks:** [Pet behavior packs](behavior-packs.md), [bundled pet folders](../apps/pet-town/src/pets/README.md), and `pnpm run check:flow` from the repository root.

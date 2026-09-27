@@ -93,6 +93,9 @@ fn publish(
         observed_at_seconds: super::current_time_seconds(),
         hosted_owner_key: super::herdr_host::owner_key(session_id),
         focus_app: super::focus_hint::focus_application(source),
+        codex_thread_id: (source == "codex")
+            .then(|| super::focus_hint::validated_codex_thread(session_id))
+            .flatten(),
     };
     let bytes =
         serde_json::to_vec(&record).map_err(|_| "could not encode adapter event".to_string())?;

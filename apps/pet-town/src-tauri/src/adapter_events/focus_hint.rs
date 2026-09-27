@@ -1,3 +1,16 @@
+pub(super) fn validated_codex_thread(id: &str) -> Option<String> {
+    let bytes = id.as_bytes();
+    (bytes.len() == 36
+        && bytes.iter().enumerate().all(|(index, byte)| {
+            if [8, 13, 18, 23].contains(&index) {
+                *byte == b'-'
+            } else {
+                byte.is_ascii_hexdigit()
+            }
+        }))
+    .then(|| id.to_ascii_lowercase())
+}
+
 pub(super) fn focus_application(source: &str) -> Option<String> {
     if source == "cursor" {
         return Some("com.todesktop.230313mzl4w4u92".to_string());

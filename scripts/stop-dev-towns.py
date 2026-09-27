@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent
-project = root / "apps/pet-town-godot"
+project = root / "apps/pet-town-godot-next"
 target = root / "apps/pet-town/src-tauri/target"
 
 

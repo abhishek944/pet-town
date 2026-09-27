@@ -92,7 +92,7 @@ func pan_by(delta: Vector2) -> void:
 
 func toggle_fullscreen() -> void:
 	var window := get_window()
-	window.mode = Window.MODE_WINDOWED if window.mode == Window.MODE_EXCLUSIVE_FULLSCREEN else Window.MODE_EXCLUSIVE_FULLSCREEN
+	window.mode = Window.MODE_WINDOWED if window.mode in [Window.MODE_FULLSCREEN, Window.MODE_EXCLUSIVE_FULLSCREEN] else Window.MODE_FULLSCREEN
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo:

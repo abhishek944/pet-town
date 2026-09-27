@@ -20,7 +20,6 @@ pub fn valid(applied: PreferencesFile) -> StoreState {
         applied,
         warning: None,
         read_only: false,
-        first_run: false,
     }
 }
 
@@ -32,6 +31,5 @@ pub fn invalid(path: &Path, defaults: PreferencesFile, error: String) -> StoreSt
         applied: defaults,
         warning: Some(warning),
         read_only,
-        first_run: false,
     }
 }

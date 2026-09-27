@@ -54,8 +54,6 @@ pub struct SavePackRequest {
     pub display_name: String,
     pub state_assignments: HashMap<String, StateSelection>,
     pub assign_to_orchestrator: bool,
-    pub orchestrator_walk: String,
-    pub orchestrator_listening: String,
 }
 
 #[derive(Serialize)]

@@ -32,7 +32,7 @@ func _bake() -> void:
 				transformed.append(part.global_transform * point)
 			for index in indices:
 				collision_faces.append(transformed[index])
-			if name == "WalkableGround":
+			if name in ["WalkableGround", "Shore"]:
 				var offset := nav_vertices.size()
 				nav_vertices.append_array(transformed)
 				for i in range(0, indices.size(), 3):

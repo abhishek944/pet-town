@@ -1,4 +1,3 @@
-use crate::focus::FocusTargets;
 use pet_town_agent_broker::{AgentSnapshot, BrokerSnapshot};
 use std::collections::HashMap;
 
@@ -9,9 +8,7 @@ pub fn snapshot_json() -> String {
 }
 
 #[tauri::command]
-pub(crate) async fn list_agents(
-    targets: tauri::State<'_, FocusTargets>,
-) -> Result<AgentSnapshot, String> {
+pub(crate) async fn list_agents() -> Result<AgentSnapshot, String> {
     let collected = tauri::async_runtime::spawn_blocking(pet_town_agent_broker::collect)
         .await
         .unwrap_or_else(|_| BrokerSnapshot {
@@ -21,6 +18,5 @@ pub(crate) async fn list_agents(
             },
             focus_routes: HashMap::new(),
         });
-    targets.replace(collected.focus_routes);
     Ok(collected.snapshot)
 }

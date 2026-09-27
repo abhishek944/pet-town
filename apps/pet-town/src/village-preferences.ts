@@ -16,28 +16,16 @@ export async function installVillagePreferences(
     renderer.setPreferences(snapshot.preferences);
     onPreferences(snapshot.preferences);
   };
-  let pauseEvents = 0;
   await Promise.all([
     listen("village-pause", () => {
-      pauseEvents += 1;
       renderer.setPaused(true);
       pause();
     }),
     listen("village-resume", () => {
-      pauseEvents += 1;
       renderer.setPaused(false);
       resume();
     }),
     listen<PreferencesSnapshot>("preferences-applied", (event) => apply(event.payload)),
   ]);
-  const pauseCountBeforeSnapshot = pauseEvents;
-  const [initial, settingsOpen] = await Promise.all([
-    invoke<PreferencesSnapshot>("get_preferences"),
-    invoke<boolean>("is_settings_open"),
-  ]);
-  apply(initial);
-  if (pauseEvents === pauseCountBeforeSnapshot && settingsOpen) {
-    renderer.setPaused(true);
-    pause();
-  }
+  apply(await invoke<PreferencesSnapshot>("get_preferences"));
 }

@@ -29,7 +29,7 @@ User starts an agent in Herdr or a connected tool
 | `done`           | A turn finished; the session may still exist | The selected pet's completed assignment |
 | `unknown`        | Source has no usable activity state          | The selected pet's unknown assignment   |
 
-An event can move a standalone session between these states. Herdr's current snapshot supplies its own state. A `done` state is not a session-end signal: the pet can remain until the agent exits, a later event changes its state, or a visibility preference hides completed pets.
+An event can move a standalone session between these states. Herdr's current snapshot supplies its own state. For standalone Codex, `done` lasts five minutes after the completion event, then appears as `idle` on the next snapshot even without another hook. A new event can change its state sooner. This change does not extend the stored session's expiry. A `done` state is not a session-end signal: the pet can remain until the agent exits, a later event changes its state, or a visibility preference hides completed pets.
 
 On a normal standalone session-end event, the local record is removed. If that event never arrives, the record expires after 24 hours. A Herdr pet leaves when it no longer appears in the collected roster. The 2D village waits for three missed polls before fading a departed pet; the 3D town reconciles its companion roster against the latest bridge snapshot.
 

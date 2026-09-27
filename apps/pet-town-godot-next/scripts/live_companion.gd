@@ -4,14 +4,27 @@ extends CharacterBody3D
 const MODELS := [
 	preload("res://assets/companions/Knight.glb"),
 	preload("res://assets/companions/Ranger.glb"),
+	preload("res://assets/companions/Rogue.glb"),
+	preload("res://assets/companions/Barbarian.glb"),
 	preload("res://assets/companions/Mage.glb"),
+	preload("res://assets/companions/Rogue_Hooded.glb"),
+	preload("res://assets/companions/Skeleton_Mage.glb"),
+	preload("res://assets/companions/Skeleton_Minion.glb"),
+	preload("res://assets/companions/Skeleton_Rogue.glb"),
+	preload("res://assets/companions/Skeleton_Warrior.glb"),
+]
+const MODEL_NAMES := [
+	"Knight", "Ranger", "Rogue", "Barbarian", "Mage", "Hooded Rogue",
+	"Skeleton Mage", "Skeleton Minion", "Skeleton Rogue", "Skeleton Warrior",
 ]
 
 @onready var navigation_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var caption: Label3D = $Caption
 @onready var visual: Node3D = $Visual
+@onready var player: AnimationPlayer = $Visual/AnimationPlayer
 
 var agent_id := ""
+var model_index := 0
 var display_name := "Agent"
 var live_status := "working"
 var listening := false
@@ -19,7 +32,7 @@ var manual_direction := Vector3.ZERO
 var manually_controlled := false
 var walk_speed := 2.0
 var roam_origin := Vector3.ZERO
-var roam_radius := 22.0
+var roam_radius := 44.0
 var pause_left := 0.0
 var roam_index := 0
 
@@ -32,12 +45,14 @@ func configure(id: String, label: String, status: String) -> void:
 
 func _ready() -> void:
 	add_to_group("live_agents")
-	var model_index := 0 if agent_id == "pet-town-mayor" else _stable_seed() % MODELS.size()
+	model_index = 0 if agent_id == "pet-town-mayor" else _stable_seed() % MODELS.size()
 	var model := MODELS[model_index].instantiate() as Node3D
 	model.name = "Model"
 	model.scale = Vector3.ONE * 0.7
 	visual.add_child(model)
 	$Visual/Body.hide()
+	navigation_agent.velocity_computed.connect(_move_with_avoidance)
+	_animate("Idle_A")
 	_refresh()
 	call_deferred("_begin_roam")
 
@@ -47,24 +62,31 @@ func _physics_process(delta: float) -> void:
 		return
 	if pause_left > 0.0:
 		pause_left -= delta
+		navigation_agent.velocity = Vector3.ZERO
+		_walk(Vector3.ZERO, delta)
 		if pause_left <= 0.0:
 			_choose_destination()
 		return
 	if NavigationServer3D.map_get_iteration_id(navigation_agent.get_navigation_map()) == 0:
+		_walk(Vector3.ZERO, delta)
 		return
 	if navigation_agent.is_navigation_finished():
+		navigation_agent.velocity = Vector3.ZERO
+		_walk(Vector3.ZERO, delta)
 		pause_left = 1.5 + float(roam_index % 3)
 		return
 	var next := navigation_agent.get_next_path_position() - global_position
 	next.y = 0.0
-	_walk(next.normalized() if next.length() > 0.05 else Vector3.ZERO, delta)
+	navigation_agent.velocity = next.normalized() * walk_speed if next.length() > 0.05 else Vector3.ZERO
 
 func set_manual_control(value: bool) -> void:
 	manually_controlled = value
 	manual_direction = Vector3.ZERO
 	if value:
+		navigation_agent.avoidance_enabled = false
 		navigation_agent.target_position = global_position
 	else:
+		navigation_agent.avoidance_enabled = true
 		_choose_destination()
 
 func _begin_roam() -> void:
@@ -87,7 +109,7 @@ func _choose_destination() -> void:
 	roam_index += 1
 	var seed := _stable_seed()
 	var angle := fmod(float(seed) * 0.019 + float(roam_index) * 2.399963, TAU)
-	var radius := 5.0 + float((seed + roam_index * 7) % 15)
+	var radius := 5.0 + float((seed + roam_index * 7) % 40)
 	var candidate := roam_origin + Vector3(cos(angle), 0.0, sin(angle)) * minf(radius, roam_radius)
 	var nearest := NavigationServer3D.map_get_closest_point(navigation_agent.get_navigation_map(), candidate)
 	navigation_agent.target_position = nearest
@@ -105,8 +127,20 @@ func _walk(direction: Vector3, delta: float) -> void:
 	velocity.z = motion.z
 	velocity.y = 0.0 if is_on_floor() else velocity.y - 18.0 * delta
 	move_and_slide()
-	if motion.length_squared() > 0.001:
-		visual.rotation.y = lerp_angle(visual.rotation.y, atan2(motion.x, motion.z), minf(delta * 8.0, 1.0))
+	var actual := get_real_velocity()
+	actual.y = 0.0
+	if actual.length_squared() > 0.01:
+		visual.rotation.y = lerp_angle(visual.rotation.y, atan2(actual.x, actual.z), minf(delta * 8.0, 1.0))
+	_animate("Walking_A" if actual.length_squared() > 0.01 else "Idle_A")
+
+func _move_with_avoidance(safe_velocity: Vector3) -> void:
+	if manually_controlled:
+		return
+	_walk(safe_velocity / walk_speed, get_physics_process_delta_time())
+
+func _animate(clip: String) -> void:
+	if player.has_animation(clip) and player.current_animation != clip:
+		player.play(clip, 0.2)
 
 func _refresh() -> void:
 	caption.text = display_name + ("  •  Listening" if listening else "")

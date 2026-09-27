@@ -4,6 +4,16 @@ use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewWindow};
 
 const WINDOW_BOTTOM_MARGIN: i32 = 8;
 
+#[cfg(target_os = "macos")]
+tauri_nspanel::tauri_panel! {
+    panel!(PetPanel {
+        config: {
+            can_become_key_window: false,
+            is_floating_panel: true
+        }
+    })
+}
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct HitRegion {
@@ -123,19 +133,28 @@ pub(crate) fn configure_window(app: &mut tauri::App) -> Result<(), Box<dyn std::
     window.set_ignore_cursor_events(true)?;
 
     #[cfg(target_os = "macos")]
+    {
+        use tauri_nspanel::{StyleMask, WebviewWindowExt};
+        let panel = window.to_panel::<PetPanel>()?;
+        panel.add_style_mask(StyleMask::empty().nonactivating_panel().into())?;
+        panel.set_hides_on_deactivate(false);
+    }
+
+    #[cfg(target_os = "macos")]
     unsafe {
-        use objc2_app_kit::{NSStatusWindowLevel, NSWindow, NSWindowCollectionBehavior};
+        use objc2_app_kit::{NSScreenSaverWindowLevel, NSWindow, NSWindowCollectionBehavior};
 
         let native_window: &NSWindow = &*window.ns_window()?.cast();
-        // Tauri's always-on-top is only the floating level. Keep the village
-        // above ordinary app windows without using the screen-saver level.
-        native_window.setLevel(NSStatusWindowLevel);
+        // Full-screen apps occupy their own Space above the status-bar level.
+        // Use the screen-saver level so pets remain visible over those windows.
+        native_window.setLevel(NSScreenSaverWindowLevel);
         // Joining all Spaces alone does not join other applications' Spaces
         // (including Stage Manager and full-screen apps).
         let behavior = native_window.collectionBehavior()
             | NSWindowCollectionBehavior::CanJoinAllSpaces
             | NSWindowCollectionBehavior::CanJoinAllApplications
-            | NSWindowCollectionBehavior::FullScreenAuxiliary;
+            | NSWindowCollectionBehavior::FullScreenAuxiliary
+            | NSWindowCollectionBehavior::Stationary;
         native_window.setCollectionBehavior(behavior);
     }
 

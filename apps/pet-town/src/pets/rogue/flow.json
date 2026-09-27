@@ -8,7 +8,24 @@
       "durationMs": 960,
       "role": "locomotion",
       "sourceFacing": "right",
-      "mirror": true
+      "mirror": true,
+      "scale": 1.0
+    },
+    "think": {
+      "asset": "blocked.png",
+      "durationMs": 1200,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.0
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 1200,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.0
     }
   },
   "states": {
@@ -18,14 +35,15 @@
     },
     "working": {
       "animation": "walk",
-      "action": "walking"
+      "action": "walking",
+      "speedPxPerSecond": 72
     },
     "blocked": {
-      "animation": "walk",
+      "animation": "think",
       "action": "idle"
     },
     "done": {
-      "animation": "walk",
+      "animation": "sleep",
       "action": "idle"
     },
     "unknown": {

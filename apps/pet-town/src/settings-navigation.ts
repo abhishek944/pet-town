@@ -53,9 +53,8 @@ export class SettingsNavigation {
     document.getElementById("preview")!.hidden = !detail;
     document.getElementById("preview-selectors")!.hidden = !detail;
     document.getElementById("reset-pet")!.hidden = !detail;
-    document.getElementById("agents-done")!.hidden = name !== "agents";
     document.getElementById("gallery-hint")!.hidden = !gallery;
-    this.footer.hidden = name === "about" || name === "studio";
+    this.footer.hidden = name === "about" || name === "studio" || name === "agents";
     // One Apply/status pair always owns the same draft, regardless of view.
     const parent = gallery ? this.galleryPage : this.inspector;
     parent.append(this.message, this.footer);

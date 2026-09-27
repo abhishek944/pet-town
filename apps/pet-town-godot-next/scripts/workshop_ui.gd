@@ -6,12 +6,8 @@ func configure(source: WorkshopCatalog, credits: BuildWallet, builder: WorkshopE
 	wallet = credits
 	editor = builder
 	if companion_scenes.is_empty():
-		for name in ["Knight", "Ranger", "Mage"]:
-			var path := "res://assets/companions/%s.glb" % name
-			var scene := load(path) as PackedScene if ResourceLoader.exists(path) else null
-			if scene != null:
-				companion_names.append(name)
-				companion_scenes.append(scene)
+		companion_names.assign(LiveCompanion.MODEL_NAMES)
+		companion_scenes.assign(LiveCompanion.MODELS)
 	_build()
 	_refresh()
 	editor.state_changed.connect(_refresh)
@@ -22,6 +18,8 @@ func set_mode(mode: String) -> void:
 	if mode not in ["chill", "build"]:
 		return
 	town_mode = mode
+	if mode == "build" and is_instance_valid(agent_panel):
+		agent_panel.visible = false
 	_refresh()
 	if is_instance_valid(settings_overlay) and settings_overlay.visible:
 		_show_settings_page()
@@ -38,13 +36,14 @@ func _refresh() -> void:
 func _layout() -> void:
 	var view := get_viewport_rect().size
 	size = view
-	inspector.position = Vector2(18, 18)
-	inspector.size = Vector2(346, 408)
+	var inspector_width := minf(338, view.x)
+	inspector.position = Vector2(view.x - inspector_width, 0)
+	inspector.size = Vector2(inspector_width, view.y)
 	status_panel.position = Vector2(maxf(16, view.x * 0.5 - 210), view.y - 80)
 	status_panel.size = Vector2(420, 58)
 	if is_instance_valid(settings_panel):
-		settings_panel.size = Vector2(minf(1040, view.x - 32), minf(740, view.y - 32))
-		settings_panel.position = (view - settings_panel.size) * 0.5
+		settings_panel.size = view
+		settings_panel.position = Vector2.ZERO
 	if is_instance_valid(agent_panel):
-		agent_panel.position = Vector2(maxf(16, view.x - 380), 18)
-		agent_panel.size = Vector2(360, 620)
+		agent_panel.size = Vector2(minf(530, view.x - 32), minf(330, view.y - 32))
+		agent_panel.position = Vector2(view.x - agent_panel.size.x - 24, 24)

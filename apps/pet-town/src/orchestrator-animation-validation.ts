@@ -28,12 +28,12 @@ export function compileOrchestratorAnimations(
   rejectUnknownFields(context, input, ["walking", "listening"], "/orchestratorAnimations");
   const walking = typeof input.walking === "string" ? input.walking : "";
   const listening = typeof input.listening === "string" ? input.listening : "";
-  if (!hasOwn(context.clips, walking) || context.clips[walking]?.role !== "locomotion") {
+  if (!hasOwn(context.clips, walking)) {
     diagnostic(
       context,
       "E_ORCHESTRATOR_WALK",
       "/orchestratorAnimations/walking",
-      "Walking must reference a locomotion clip",
+      "Walking must reference a clip",
     );
   }
   if (!hasOwn(context.clips, listening)) {
@@ -42,14 +42,6 @@ export function compileOrchestratorAnimations(
       "E_ORCHESTRATOR_LISTEN",
       "/orchestratorAnimations/listening",
       "Listening must reference a clip",
-    );
-  }
-  if (walking && walking === listening) {
-    diagnostic(
-      context,
-      "E_ORCHESTRATOR_DISTINCT",
-      "/orchestratorAnimations",
-      "Walking and Listening must use different clips",
     );
   }
   if (!hasOwn(context.clips, walking) || !hasOwn(context.clips, listening)) return null;

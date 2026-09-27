@@ -32,6 +32,8 @@ pub(crate) struct AdapterEventRecord {
     pub(crate) observed_at_seconds: u64,
     pub(crate) hosted_owner_key: Option<String>,
     pub(crate) focus_app: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) codex_thread_id: Option<String>,
 }
 
 pub(crate) fn current_time_seconds() -> u64 {

@@ -11,7 +11,8 @@ if [ ! -x "$godot_app/Contents/MacOS/Godot" ]; then
   exit 1
 fi
 
-if [ ! -x "$workshop_app/Contents/MacOS/Godot" ]; then
+if [ ! -x "$workshop_app/Contents/MacOS/Godot" ] ||
+  [ "$(/usr/libexec/PlistBuddy -c 'Print :LSUIElement' "$workshop_app/Contents/Info.plist" 2>/dev/null || true)" != true ]; then
   ditto "$godot_app" "$workshop_app"
   python3 - "$workshop_app/Contents" "$project_dir/branding/pet-town-icon.icns" <<'PY'
 import plistlib
@@ -25,6 +26,8 @@ info = plistlib.loads(info_path.read_bytes())
 info["CFBundleIdentifier"] = "dev.pettown.workshop.debug"
 info["CFBundleName"] = "Pet Town Workshop"
 info["CFBundleDisplayName"] = "Pet Town Workshop"
+# The desktop app owns the Dock entry; the auxiliary workshop is a window, not a second app icon.
+info["LSUIElement"] = True
 info["CFBundleIconFile"] = "PetTownIcon.icns"
 info_path.write_bytes(plistlib.dumps(info))
 (contents / "Resources" / "PetTownIcon.icns").write_bytes(icon.read_bytes())

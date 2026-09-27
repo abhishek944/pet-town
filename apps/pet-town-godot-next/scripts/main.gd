@@ -1,26 +1,22 @@
-extends Node3D
+extends "res://scripts/workshop_input.gd"
 
 const CATALOG_SCRIPT := preload("res://scripts/catalog.gd")
 const WALLET_SCRIPT := preload("res://scripts/build_wallet.gd")
-
-@onready var camera: WorkshopCamera = $OrbitCamera
-@onready var editor: WorkshopEditor = $BuildEditor
-@onready var marker: WorkshopFootprintMarker = $FootprintMarker
-@onready var hud: WorkshopUI = $CanvasLayer/WorkshopUI
-@onready var modes: TownModeController = $TownModes
-@onready var bridge: LiveTownBridge = $LiveTownBridge
-@onready var agents: LiveAgentManager = $LiveAgents
-@onready var commands: TownCommandPalette = $CanvasLayer/TownCommands
+const NAVIGATION_SCRIPT := preload("res://scripts/workshop_navigation.gd")
 
 var catalog := CATALOG_SCRIPT.new() as WorkshopCatalog
 var wallet := WALLET_SCRIPT.new() as BuildWallet
+var navigation := NAVIGATION_SCRIPT.new() as Node
 
 func _ready() -> void:
+	get_window().mode = Window.MODE_FULLSCREEN
 	if not catalog.load_all():
 		push_error("The Pet Town object catalog could not load")
 		return
 	wallet.load_wallet()
 	editor.configure(catalog, wallet, camera, marker)
+	add_child(navigation)
+	navigation.configure($WorldBase/NavigationRegion3D, editor)
 	hud.configure(catalog, wallet, editor)
 	hud.place_requested.connect(editor.begin_place)
 	hud.move_requested.connect(editor.begin_move)
@@ -31,11 +27,13 @@ func _ready() -> void:
 	hud.undo_requested.connect(editor.undo_last)
 	editor.state_changed.connect(_refresh_undo)
 	hud.mode_requested.connect(_change_mode)
-	hud.agent_details_requested.connect(agents.follow_agent)
+	hud.agent_follow_requested.connect(agents.toggle_follow)
+	hud.agent_open_requested.connect(agents.focus_agent_in_desktop)
 	agents.configure($WorldBase/NavigationRegion3D, camera)
 	agents.focus_agent_requested.connect(bridge.focus_agent)
 	agents.selection_changed.connect(_on_agent_selected)
 	bridge.snapshot_received.connect(_on_snapshot)
+	bridge.focus_result.connect(_on_focus_result)
 	commands.command_requested.connect(_run_command)
 	modes.configure(editor, catalog, wallet)
 	modes.mode_changed.connect(_on_mode_changed)
@@ -76,12 +74,21 @@ func _on_snapshot(snapshot: Dictionary) -> void:
 func _refresh_agent_list() -> void:
 	var records: Array = []
 	for id in agents.records:
-		records.append(agents.records[id])
+		records.append(_display_record(String(id)))
 	hud.set_agents(records)
+	if hud.agent_panel.visible:
+		if agents.records.has(hud.agent_record_id):
+			hud.update_agent_status(_display_record(hud.agent_record_id))
+		else:
+			hud.agent_panel.visible = false
 
-func _on_agent_selected(id: String, record: Dictionary) -> void:
-	if not id.is_empty():
-		hud.show_agent_details(record)
+func _on_agent_selected(id: String, _record: Dictionary) -> void:
+	if hud.agent_panel.visible and not id.is_empty() and hud.agent_record_id != id:
+		hud.agent_panel.visible = false
+	hud.set_followed_agent(id)
+
+func _on_focus_result(id: String, ok: bool, message: String) -> void:
+	hud.show_focus_result(id, ok, message)
 
 func _run_command(command: String) -> void:
 	match command:
@@ -99,83 +106,6 @@ func _on_focus_exited() -> void:
 func _process(_delta: float) -> void:
 	camera.controls_enabled = not hud.settings_overlay.visible and not commands.panel.visible and agents.controlled_id.is_empty()
 	commands.hint.visible = not hud.settings_overlay.visible and not commands.panel.visible and not hud.agent_panel.visible
-
-func _input(event: InputEvent) -> void:
-	if not (event is InputEventKey) or not event.pressed or event.echo or event.keycode != KEY_ESCAPE:
-		return
-	if commands.panel.visible:
-		commands.close_palette()
-	elif hud.settings_overlay.visible:
-		hud.close_settings()
-	elif hud.agent_panel.visible:
-		hud.agent_panel.visible = false
-	elif hud.inspector.visible:
-		hud._close_inspector()
-	elif is_instance_valid(editor.preview):
-		editor.cancel_preview()
-	else:
-		return
-	get_viewport().set_input_as_handled()
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
-		var shortcut := event as InputEventKey
-		if shortcut.alt_pressed and shortcut.keycode in [KEY_S, KEY_H]:
-			if hud.settings_overlay.visible:
-				hud.close_settings()
-			else:
-				hud.open_settings(0)
-			get_viewport().set_input_as_handled()
-			return
-	if hud.settings_overlay.visible or commands.panel.visible:
-		return
-	if event is InputEventMouseMotion:
-		var motion := event as InputEventMouseMotion
-		if is_instance_valid(editor.preview):
-			editor.hover(motion.position)
-		elif camera.dragging:
-			camera.drag_to(motion.position, motion.alt_pressed)
-			get_viewport().set_input_as_handled()
-	elif event is InputEventMouseButton:
-		var button := event as InputEventMouseButton
-		if button.button_index == MOUSE_BUTTON_LEFT:
-			if is_instance_valid(editor.preview):
-				if button.pressed:
-					editor.click(button.position)
-			elif button.pressed and button.double_click and not button.alt_pressed:
-				camera.dragging = false
-				editor.select_at(button.position)
-			elif button.pressed:
-				camera.begin_drag(button.position, button.alt_pressed)
-			elif camera.end_drag(button.position) and modes.current_mode == "chill":
-				agents.select_at(button.position)
-			get_viewport().set_input_as_handled()
-		elif button.button_index == MOUSE_BUTTON_MIDDLE:
-			if button.pressed:
-				camera.begin_drag(button.position, true)
-			else:
-				camera.end_drag(button.position)
-			get_viewport().set_input_as_handled()
-		elif button.button_index == MOUSE_BUTTON_RIGHT and button.pressed:
-			camera.dragging = false
-			if is_instance_valid(editor.preview):
-				editor.cancel_preview()
-			elif modes.current_mode == "chill":
-				agents.select_at(button.position)
-			get_viewport().set_input_as_handled()
-		elif button.pressed and button.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
-			camera.zoom(0.88 if button.button_index == MOUSE_BUTTON_WHEEL_UP else 1.14)
-			get_viewport().set_input_as_handled()
-	elif event is InputEventMagnifyGesture:
-		camera.zoom(1.0 / maxf((event as InputEventMagnifyGesture).factor, 0.01))
-	elif event is InputEventKey and event.pressed and not event.echo:
-		var key := event as InputEventKey
-		if (key.meta_pressed or key.ctrl_pressed) and key.keycode == KEY_Z:
-			editor.undo_last()
-			get_viewport().set_input_as_handled()
-			return
-		match key.keycode:
-			KEY_ESCAPE: editor.cancel_preview()
-			KEY_DELETE, KEY_BACKSPACE: editor.delete_selected()
-			KEY_Q: editor.rotate_selected(-15)
-			KEY_E: editor.rotate_selected(15)
+	var followed_id := (camera.followed as LiveCompanion).agent_id if camera.followed is LiveCompanion else ""
+	if hud.followed_agent_id != followed_id:
+		hud.set_followed_agent(followed_id)

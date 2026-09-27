@@ -35,6 +35,12 @@ func run() -> void:
 		ui.open_settings(3)
 		if ui.settings_content.get_child_count() <= 2:
 			errors.append("3D object gallery is empty")
+		var object_grid := ui.settings_content.find_children("*", "GridContainer", true, false)
+		if object_grid.is_empty() or (object_grid[0] as GridContainer).columns != 4:
+			errors.append("Objects are not in four columns")
+		ui.call("_select_object", String(catalog.items[0]["id"]))
+		if ui.selected_object_id.is_empty() or ui.settings_content.find_children("*", "WorkshopModelPreview", true, false).is_empty():
+			errors.append("Object tile did not open details")
 		if not (ui.settings_tabs is VBoxContainer) or ui.settings_tabs.get_child_count() != 4:
 			errors.append("Town Studio is missing its left navigation")
 		ui.open_settings(0)
@@ -69,9 +75,33 @@ func run() -> void:
 		ui.open_settings(1)
 		if ui.settings_content.get_child_count() <= 2:
 			errors.append("companion gallery is empty")
-		ui.show_agent_details({"id": "agent-test", "label": "Test companion"})
+		var companion_grids := ui.settings_content.find_children("*", "GridContainer", true, false)
+		if companion_grids.is_empty() or (companion_grids[0] as GridContainer).columns != 4:
+			errors.append("Companions are not in four columns")
+		var many_agents: Array = []
+		for index in 8:
+			many_agents.append({"id": "agent-%d" % index, "label": "Companion %d" % index, "status": "working"})
+		ui.set_agents(many_agents)
+		await process_frame
+		ui.settings_scroll.scroll_vertical = 100
+		many_agents[0] = {"id": "agent-0", "label": "Companion 0", "status": "resting"}
+		ui.set_agents(many_agents)
+		await process_frame
+		if ui.settings_scroll.scroll_vertical != 100:
+			errors.append("Live companion updates reset gallery scroll")
+		ui.set_agents([{"id": "agent-test", "label": "Test companion", "status": "Exploring"}])
+		ui.call("_select_agent", "agent-test")
+		if ui.selected_agent_id != "agent-test" or ui.settings_content.find_children("*", "WorkshopModelPreview", true, false).is_empty():
+			errors.append("Companion tile did not open details")
+		ui.show_agent_details({"id": "agent-test", "label": "Test companion", "source": "herdr", "status": "working"})
+		await process_frame
 		if not ui.agent_panel.visible:
 			errors.append("agent details did not open")
+		if ui.agent_panel.size.y > 350:
+			errors.append("agent details panel is still oversized")
+		var agent_scroll := ui.agent_panel.get_child(0) as ScrollContainer
+		if agent_scroll.get_v_scroll_bar().visible:
+			errors.append("agent details still require scrolling")
 		ui.open_settings(2)
 		ui.close_settings()
 		if ui.settings_overlay.visible:

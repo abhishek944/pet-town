@@ -1,5 +1,5 @@
 use crate::agents::AgentView;
-use crate::{AdapterAgent, AdapterSnapshot, FocusRoute};
+use crate::{event_focus, AdapterAgent, AdapterSnapshot};
 use fs2::FileExt;
 use serde::Deserialize;
 use std::fs::{self, OpenOptions};
@@ -13,6 +13,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 const INPUT_LIMIT: usize = 64 * 1024;
 const RECORD_VERSION: u8 = 1;
 const MAX_AGE_SECONDS: u64 = 24 * 60 * 60;
+const CODEX_DONE_SECONDS: u64 = 5 * 60;
 const SOURCES: [&str; 6] = ["claude", "codex", "opencode", "pi", "factory", "cursor"];
 
 #[derive(Clone, Deserialize)]
@@ -26,6 +27,8 @@ struct EventRecord {
     observed_at_seconds: u64,
     hosted_owner_key: Option<String>,
     focus_app: Option<String>,
+    #[serde(default)]
+    codex_thread_id: Option<String>,
 }
 
 fn directory() -> Option<PathBuf> {
@@ -160,22 +163,31 @@ pub(crate) fn snapshot() -> AdapterSnapshot {
             agents: Vec::new(),
         };
     };
+    let current = now();
     let agents = records
         .into_iter()
         .map(|record| {
+            let status = if record.source == "codex"
+                && record.state == "done"
+                && current.saturating_sub(record.observed_at_seconds) >= CODEX_DONE_SECONDS
+            {
+                "idle".to_string()
+            } else {
+                record.state
+            };
             let id = format!("{}:{}", record.source, record.session_key);
+            let focus_route =
+                event_focus::route(&record.source, record.codex_thread_id, record.focus_app);
             AdapterAgent {
                 owner_key: id.clone(),
                 hosted_owner_key: record.hosted_owner_key,
                 view: AgentView {
                     id,
-                    status: record.state,
+                    status,
                     label: record.label,
                     source: record.source,
                 },
-                focus_route: record
-                    .focus_app
-                    .map(|bundle_id| FocusRoute::Application { bundle_id }),
+                focus_route,
             }
         })
         .collect();

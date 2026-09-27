@@ -106,6 +106,19 @@ func follow_agent(id: String) -> bool:
 	selection_changed.emit(id, records.get(id, {}))
 	return true
 
+func stop_follow() -> void:
+	release_control()
+	selected_id = ""
+	if is_instance_valid(camera):
+		camera.stop_follow()
+	selection_changed.emit("", {})
+
+func toggle_follow(id: String) -> void:
+	if selected_id == id and is_instance_valid(camera) and is_instance_valid(camera.followed):
+		stop_follow()
+	else:
+		follow_agent(id)
+
 func cycle_agent() -> void:
 	var ids := records.keys()
 	ids.sort()
@@ -128,19 +141,23 @@ func release_control() -> void:
 		pet.set_manual_control(false)
 	controlled_id = ""
 
-func focus_selected_in_desktop() -> void:
-	if not selected_id.is_empty() and String(records.get(selected_id, {}).get("source", "")) == "herdr":
-		focus_agent_requested.emit(selected_id)
+func focus_agent_in_desktop(id: String) -> void:
+	if records.has(id) and id != MAYOR_ID:
+		focus_agent_requested.emit(id)
 
 func select_at(screen_position: Vector2) -> bool:
 	if town_mode != "chill" or not is_instance_valid(camera):
 		return false
 	var origin := camera.project_ray_origin(screen_position)
-	var ray := PhysicsRayQueryParameters3D.create(origin, origin + camera.project_ray_normal(screen_position) * 500.0, 2)
+	var ray := PhysicsRayQueryParameters3D.create(origin, origin + camera.project_ray_normal(screen_position) * 500.0, 38)
+	ray.collide_with_areas = true
 	var hit := get_world_3d().direct_space_state.intersect_ray(ray)
 	if hit.is_empty():
 		return false
-	var pet := hit.collider as LiveCompanion
+	var collider := hit.collider as Node
+	var pet := collider as LiveCompanion
+	if pet == null and collider is Area3D:
+		pet = collider.get_parent() as LiveCompanion
 	return follow_agent(pet.agent_id) if is_instance_valid(pet) else false
 
 func _physics_process(_delta: float) -> void:
@@ -167,5 +184,4 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif key.keycode == KEY_C and not key.alt_pressed and not key.ctrl_pressed and not key.meta_pressed:
 			toggle_control()
 		elif key.keycode == KEY_ESCAPE:
-			release_control()
-			if is_instance_valid(camera): camera.stop_follow()
+			stop_follow()

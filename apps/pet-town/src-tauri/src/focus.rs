@@ -1,9 +1,7 @@
 mod herdr;
 
 pub(crate) use crate::focus_id::{herdr_owner_key, public_agent_id};
-use std::collections::HashMap;
 use std::ffi::OsString;
-use std::sync::Mutex;
 
 #[derive(Clone, Debug)]
 pub(crate) enum FocusRoute {
@@ -14,6 +12,10 @@ pub(crate) enum FocusRoute {
     },
     Application {
         bundle_id: String,
+    },
+    Codex {
+        thread_id: Option<String>,
+        fallback_bundle_id: Option<String>,
     },
 }
 
@@ -32,28 +34,14 @@ impl From<pet_town_agent_broker::FocusRoute> for FocusRoute {
             pet_town_agent_broker::FocusRoute::Application { bundle_id } => {
                 Self::Application { bundle_id }
             }
+            pet_town_agent_broker::FocusRoute::Codex {
+                thread_id,
+                fallback_bundle_id,
+            } => Self::Codex {
+                thread_id,
+                fallback_bundle_id,
+            },
         }
-    }
-}
-
-#[derive(Default)]
-pub(crate) struct FocusTargets(Mutex<HashMap<String, FocusRoute>>);
-
-impl FocusTargets {
-    pub(crate) fn replace<T>(&self, targets: HashMap<String, T>)
-    where
-        T: Into<FocusRoute>,
-    {
-        if let Ok(mut stored) = self.0.lock() {
-            *stored = targets
-                .into_iter()
-                .map(|(id, route)| (id, route.into()))
-                .collect();
-        }
-    }
-
-    fn get_route(&self, id: &str) -> Option<FocusRoute> {
-        self.0.lock().ok()?.get(id).cloned()
     }
 }
 
@@ -78,6 +66,13 @@ fn run_focus_route(herdr: &OsString, target: &FocusRoute) -> Result<(), String> 
             #[cfg(not(target_os = "macos"))]
             Err("application focus is unavailable on this platform".to_string())
         }
+        FocusRoute::Codex {
+            thread_id,
+            fallback_bundle_id,
+        } => pet_town_agent_broker::focus_route(&pet_town_agent_broker::FocusRoute::Codex {
+            thread_id: thread_id.clone(),
+            fallback_bundle_id: fallback_bundle_id.clone(),
+        }),
     }
 }
 
@@ -93,7 +88,7 @@ fn run_user_focus_route(herdr: &OsString, target: &FocusRoute) -> Result<(), Str
 
     herdr::verify(herdr, pane_id, socket.as_deref(), agent_session_id)?;
     #[cfg(target_os = "macos")]
-    let activation = crate::macos_activation::activate_herdr_host(herdr, socket.as_deref());
+    let _ = crate::macos_activation::activate_herdr_host(herdr, socket.as_deref());
     let verified = herdr::verify(herdr, pane_id, socket.as_deref(), agent_session_id)?;
     let focused = herdr::focus_verified(
         herdr,
@@ -102,8 +97,6 @@ fn run_user_focus_route(herdr: &OsString, target: &FocusRoute) -> Result<(), Str
         agent_session_id,
         &verified,
     );
-    #[cfg(target_os = "macos")]
-    activation?;
     focused
 }
 
@@ -117,15 +110,8 @@ pub(crate) fn focus_current_agent(id: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub(crate) async fn focus_agent(
-    id: String,
-    targets: tauri::State<'_, FocusTargets>,
-) -> Result<(), String> {
-    let target = targets
-        .get_route(&id)
-        .ok_or_else(|| "agent is no longer available".to_string())?;
-    let herdr = herdr_binary();
-    tauri::async_runtime::spawn_blocking(move || run_user_focus_route(&herdr, &target))
+pub(crate) async fn focus_agent(id: String) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || focus_current_agent(&id))
         .await
         .map_err(|_| "agent focus task failed".to_string())?
 }

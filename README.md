@@ -133,12 +133,12 @@ bundle.
 
 The repository is a pnpm workspace orchestrated by Turborepo. The production
 Tauri desktop application lives in `apps/pet-town`, the Godot implementation
-lives in `apps/pet-town-godot`, and the public landing page lives in `apps/web`.
+lives in `apps/pet-town-godot-next`, and the public landing page lives in `apps/web`.
 Repository scripts, plugin metadata, documentation, and checked-in packages
 remain at the root.
 
 For first-time development, use Corepack to select pnpm 10.28.2, then run `pnpm run dev`. That command installs dependencies and starts the Tauri desktop app after the clean Godot import. Changes made while development is running use the normal dev watchers; rerunning the command refreshes generated frontend/Godot state while retaining Cargo's incremental build cache. Start the landing page at `http://127.0.0.1:4173` with `pnpm run dev:web`. Type-check and lint commands still use Turbo. Godot development is
-documented in `apps/pet-town-godot/README.md`.
+documented in `apps/pet-town-godot-next/README.md`.
 
 ## Link for local development
 

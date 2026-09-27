@@ -83,7 +83,7 @@ def ring_mesh(name, rings, mat, height_offsets=None):
 def build():
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
-    # Top alone is the pet navigation source. Sand and cliff remain collidable.
+    # Meadow and shore are walkable; the steep cliff remains collision only.
     ring_mesh("WalkableGround", (0, 0.16, 0.32, 0.48, 0.64, 0.76, 0.86, 0.92), MEADOW)
     ring_mesh("Shore", (0.92, 0.98, 1.0), SHORE, (0, -0.14, -0.33))
     ring_mesh("Cliff", (1.0, 1.018, 1.032), CLIFF, (-0.33, -1.15, -3.1))

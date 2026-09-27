@@ -1,7 +1,13 @@
-interface VisibleBoundsRatios { top: number; bottom: number }
+interface VisibleBoundsRatios {
+  top: number;
+  bottom: number;
+}
 const visibleBoundsByAsset = new Map<string, VisibleBoundsRatios>();
 
-export function visibleBoundsRatios(image: HTMLImageElement, assetUrl: string): VisibleBoundsRatios {
+export function visibleBoundsRatios(
+  image: HTMLImageElement,
+  assetUrl: string,
+): VisibleBoundsRatios {
   const cached = visibleBoundsByAsset.get(assetUrl);
   if (cached) return cached;
   const empty = { top: 0, bottom: 0 };
@@ -23,10 +29,13 @@ export function visibleBoundsRatios(image: HTMLImageElement, assetUrl: string): 
         break;
       }
     }
-    const ratios = bottom < 0 ? empty : {
-      top: top / canvas.height,
-      bottom: (canvas.height - bottom - 1) / canvas.height,
-    };
+    const ratios =
+      bottom < 0
+        ? empty
+        : {
+            top: top / canvas.height,
+            bottom: (canvas.height - bottom - 1) / canvas.height,
+          };
     visibleBoundsByAsset.set(assetUrl, ratios);
     return ratios;
   } catch {
@@ -42,6 +51,8 @@ export function refreshCitizenLabelPosition(element: HTMLElement): void {
   const height = pet.getBoundingClientRect().height;
   const top = Number(pet.dataset.visibleTopRatio ?? 0);
   const bottom = Number(pet.dataset.visibleBottomRatio ?? 0);
-  if (Number.isFinite(top)) project.style.setProperty("--label-offset-y", `${(height * top).toFixed(2)}px`);
-  if (Number.isFinite(bottom)) stack.style.setProperty("--foot-offset-y", `${(height * bottom).toFixed(2)}px`);
+  if (Number.isFinite(top))
+    project.style.setProperty("--label-offset-y", `${(height * top).toFixed(2)}px`);
+  if (Number.isFinite(bottom))
+    stack.style.setProperty("--foot-offset-y", `${(height * bottom).toFixed(2)}px`);
 }

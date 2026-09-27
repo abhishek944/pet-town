@@ -91,10 +91,14 @@ export function compileBehaviorPack(
         continue;
       }
       if ("action" in stateValue) {
-        rejectUnknownFields(context, stateValue, ["animation", "action", "visible"], statePath);
+        rejectUnknownFields(context, stateValue, ["animation", "action", "visible", "speedPxPerSecond"], statePath);
         const action = stateValue.action;
         const visible = stateValue.visible === undefined ? true : stateValue.visible;
         const animation = stateValue.animation === undefined ? null : stateValue.animation;
+        const speedPxPerSecond = stateValue.speedPxPerSecond;
+        if (speedPxPerSecond !== undefined && (action !== "walking" || visible !== true || !isFiniteBetween(speedPxPerSecond, 1, LIMITS.moveSpeedMax))) {
+          diagnostic(context, "E_MOVE_SPEED", `${statePath}/speedPxPerSecond`, "Movement speed requires a visible walking state and must be within the supported range");
+        }
         if (action !== "idle" && action !== "walking") diagnostic(context, "E_STATE_ACTION", `${statePath}/action`, "Action must be idle or walking");
         if (typeof visible !== "boolean") diagnostic(context, "E_STATE_VISIBLE", `${statePath}/visible`, "Visible must be boolean");
         if (visible && (typeof animation !== "string" || !hasOwn(context.clips, animation))) {
@@ -105,6 +109,9 @@ export function compileBehaviorPack(
         }
         if ((action === "idle" || action === "walking") && typeof visible === "boolean" && (!visible || (typeof animation === "string" && hasOwn(context.clips, animation)))) {
           const assignment: StateAssignment = { animation: visible ? animation as string : null, action, visible };
+          if (action === "walking" && visible && isFiniteBetween(speedPxPerSecond, 1, LIMITS.moveSpeedMax)) {
+            assignment.speedPxPerSecond = speedPxPerSecond;
+          }
           stateAssignments[state] = assignment;
           compiledStates[state] = assignmentFlow(assignment);
         }

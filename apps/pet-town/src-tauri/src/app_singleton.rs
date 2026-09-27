@@ -71,14 +71,6 @@ fn owner_pid(file: &mut File, path: &std::path::Path) -> Option<libc::pid_t> {
     None
 }
 
-fn notify_owner(file: &mut File, path: &std::path::Path) {
-    if let Some(pid) = owner_pid(file, path) {
-        unsafe {
-            libc::kill(pid, libc::SIGUSR1);
-        }
-    }
-}
-
 #[cfg(unix)]
 pub(crate) fn signal_owner(signal: libc::c_int) -> Result<(), String> {
     let path = lock_path();
@@ -107,7 +99,7 @@ pub(crate) fn acquire_or_notify() -> Result<Option<AppLock>, String> {
         .map_err(|error| error.to_string())?;
     let acquired = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) } == 0;
     if !acquired {
-        notify_owner(&mut file, &path);
+        // A service restart may race the old process; only explicit user actions open Settings.
         return Ok(None);
     }
     file.set_len(0).map_err(|error| error.to_string())?;

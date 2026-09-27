@@ -39,7 +39,7 @@ export function assignmentFlow(value: StateAssignment): StateFlowManifest {
         type: "move",
         clip: value.animation!,
         durationMs: 2400,
-        speedPxPerSecond: 30,
+        speedPxPerSecond: value.speedPxPerSecond ?? 30,
       },
     };
   return { completion: "restart", flow: { type: "play", clip: value.animation! } };

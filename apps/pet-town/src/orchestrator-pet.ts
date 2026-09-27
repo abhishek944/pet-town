@@ -38,13 +38,14 @@ export function applyOrchestratorCitizen(
 export function orchestratorPack(base: CompiledBehaviorPack): CompiledBehaviorPack {
   const mapping = base.orchestratorAnimations;
   if (!mapping) return base;
+  const baseWorking = base.states.working.flow;
   const walking: StateFlowManifest = {
     completion: "restart",
     flow: {
       type: "move",
       clip: mapping.walking,
       durationMs: 2400,
-      speedPxPerSecond: 30,
+      speedPxPerSecond: baseWorking.type === "move" ? baseWorking.speedPxPerSecond : 30,
     },
   };
   const listening: StateFlowManifest = {

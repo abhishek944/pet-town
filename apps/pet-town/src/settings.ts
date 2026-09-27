@@ -1,5 +1,5 @@
 import { getVersion } from "@tauri-apps/api/app"; import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWindow } from "@tauri-apps/api/window"; import { listen } from "@tauri-apps/api/event";
+import { listen } from "@tauri-apps/api/event";
 import { characterDisplayName } from "./character-packs";
 import { configurePetPreview } from "./settings-state-map";
 import { loadPetPacks } from "./settings-pack-loader";
@@ -9,7 +9,7 @@ import { mergeAppliedDraft, settingsMessage, shouldShowApplyError } from "./sett
 import { renderChoiceControls, setSettingsReadOnly } from "./settings-choice-controls";
 import { SettingsStartupBuffer } from "./settings-startup"; import { SettingsNavigation } from "./settings-navigation";
 import { AdapterSettings } from "./settings-adapters"; import { AssistantSettings } from "./settings-assistant"; import { PetStudio } from "./settings-studio";
-import { VillageVisibilitySettings } from "./settings-village";
+import { VillageVisibilitySettings } from "./settings-village"; import { bindTownActions } from "./settings-town-actions";
 import { bindRange as bindInputRange, bindSwitch as bindInputSwitch } from "./settings-range";
 import { byId, setSwitch } from "./settings-dom";
 const petSelect = byId<HTMLSelectElement>("pet-select");
@@ -22,9 +22,10 @@ let selectedPetId = ""; let animationOptions: PreviewAnimationOption[] = [];
 let studio: PetStudio | undefined;
 let selectedAnimationId = "";
 let previewAction: "idle" | "walking" | null = null;
-let draftMessage = ""; let applyGeneration = 0; let applying = false;
-const adapterSettings = new AdapterSettings((next) => {
+let draftMessage = ""; let draftMessageTone: "success" | "info" | "error" = "error"; let applyGeneration = 0; let applying = false;
+const adapterSettings = new AdapterSettings((next, tone = "error") => {
   draftMessage = next;
+  draftMessageTone = tone;
   if (typeof snapshot !== "undefined") render();
 });
 const selectedAnimationByPet = new Map<string, string>(); const navigation = new SettingsNavigation((id) => {
@@ -94,6 +95,7 @@ function render(): void {
   apply.disabled = applying || !changed || snapshot.readOnly; resetPet.disabled = snapshot.readOnly;
   resetAll.disabled = applying || snapshot.readOnly;
   dirty.hidden = !changed; message.textContent = settingsMessage(draftMessage, snapshot.warning);
+  message.dataset.tone = snapshot.warning ? "error" : draftMessageTone;
 }
 const bindRange = (id: string, update: (value: number) => void) => bindInputRange(id, update, render);
 function bindControls(): void {
@@ -116,10 +118,9 @@ function bindControls(): void {
   bindSwitch("hide-completed-pets", (checked) => { draft.app.hideCompletedPets = checked; });
   byId<HTMLSelectElement>("completed-hide-delay").addEventListener("change", (event) => { draft.app.completedHideDelayMinutes = Number((event.currentTarget as HTMLSelectElement).value); render(); });
   bindSwitch("open-with-herdr", (checked) => { draft.app.openWithHerdr = checked; });
-  villageVisibility.bind();
+  villageVisibility.bind(); bindTownActions((error) => { draftMessage = error; draftMessageTone = "error"; render(); });
   byId<HTMLSelectElement>("settings-appearance").addEventListener("change", (event) => { draft.app.settingsAppearance = (event.currentTarget as HTMLSelectElement).value as SettingsAppearance; render(); });
   resetPet.addEventListener("click", () => { draft.pets[selectedPetId] = clonePreferences(snapshot.defaults).pets[selectedPetId]; render(); });
-  byId<HTMLButtonElement>("agents-done").addEventListener("click", () => { void getCurrentWindow().close(); });
   apply.addEventListener("click", () => { void applyDraft(); });
   resetAll.addEventListener("click", () => {
     if (confirm("Reset all Pet Town preferences?")) {
@@ -137,11 +138,12 @@ async function applyDraft(rememberSelection = true): Promise<void> {
     if (applied.revision >= snapshot.revision) {
       const merged = mergeAppliedDraft(draft, submitted, applied);
       snapshot = applied; draft = merged.draft;
-      if (generation === applyGeneration) draftMessage = merged.message;
+      if (generation === applyGeneration) { draftMessage = merged.message; draftMessageTone = "info"; }
     }
   } catch (error) {
     if (shouldShowApplyError(generation, applyGeneration, snapshot.revision, expectedRevision)) {
       draftMessage = String(error);
+      draftMessageTone = "error";
     }
   }
   if (generation === applyGeneration) { applying = false; render(); }
@@ -151,7 +153,7 @@ function installSnapshot(next: PreferencesSnapshot, selection?: string | null, p
   if (!next.petIds.length) throw new Error("No pets are available in this version.");
   const pending = preserveDraft && typeof draft !== "undefined" ? draft : null;
   const previous = pending ? snapshot.preferences : next.preferences;
-  snapshot = next; applyGeneration += 1; applying = false; draftMessage = "";
+  snapshot = next; applyGeneration += 1; applying = false; draftMessage = ""; draftMessageTone = "error";
   draft = pending ? mergeLocalPreferenceEdits(previous, pending, next.preferences) : clonePreferences(next.preferences);
   const preferred = selection ?? (selectedPetId || next.preferences.app.lastSelectedPetId);
   selectedPetId = next.petIds.includes(preferred) ? preferred : next.petIds[0];
@@ -172,8 +174,7 @@ async function start(): Promise<void> {
   if (extensionWarning) studioInstance.showExtensionWarning(extensionWarning);
   const startup = new SettingsStartupBuffer<PreferencesSnapshot, string | null>();
   await Promise.all([
-    listen<SettingsContext>("settings-selection", (event) =>
-      startup.receiveSelection(event.payload.selectedPetId, (id) => installSelection(id))),
+    listen<SettingsContext>("settings-selection", (event) => event.payload.initialTab === "app" ? navigation.show("app") : startup.receiveSelection(event.payload.selectedPetId, (id) => installSelection(id))),
     listen<PreferencesSnapshot>("preferences-reloaded", (event) => startup.receiveSnapshot(event.payload, installSnapshot)),
     listen<PreferencesSnapshot>("pet-studio-preferences", async (event) => {
       const warning = await loadPetPacks(); studioInstance.refreshSources(); if (warning) studioInstance.showExtensionWarning(warning);

@@ -1,29 +1,23 @@
 import { invoke } from "@tauri-apps/api/core"; import { behaviorPackForCharacter, characterDisplayName } from "./character-packs"; import type { HerdrState } from "./flow-types"; import { friendlyPetName } from "./preferences-types"; import { saveExtension, type ExtensionSaveResult } from "./settings-studio-extension";
-import { StudioOrchestrator } from "./studio-orchestrator"; import { showStudioImage } from "./settings-studio-media"; import { setStudioBusy, type StudioBusyOperation, waitForStudioPaint } from "./settings-studio-progress"; import { advanceStudioWizard } from "./settings-studio-steps"; import { bindStudioValidationClear, showStudioValidation } from "./settings-studio-validation"; import { StudioWorkflow } from "./settings-studio-workflow"; import { StudioWizard } from "./settings-studio-wizard";
+import { showStudioImage } from "./settings-studio-media"; import { setStudioBusy, type StudioBusyOperation, waitForStudioPaint } from "./settings-studio-progress"; import { advanceStudioWizard } from "./settings-studio-steps"; import { bindStudioValidationClear, showStudioValidation } from "./settings-studio-validation"; import { StudioWorkflow } from "./settings-studio-workflow"; import { StudioWizard } from "./settings-studio-wizard";
 type DraftView = { draftId: string; displayName: string }; type AnimationAssetView = { animationId: string; dataUrl: string }; type DraftDiscardResult = { cleanupWarning: string | null };
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 export class PetStudio {
   private draftId = ""; private approved = new Map<string, string>(); private busy = false;
-  private orchestrator = new StudioOrchestrator(); private workflow: StudioWorkflow; private wizard: StudioWizard;
+  private workflow: StudioWorkflow; private wizard: StudioWizard;
   constructor() {
-    this.workflow = new StudioWorkflow(() => { if (this.workflow.mode() === "extend" && location.hash === "#studio-orchestrator") location.hash = "studio"; this.workflow.sync(this.draftId); this.refreshApproved(); this.syncControls(); });
+    this.workflow = new StudioWorkflow(() => { this.workflow.sync(this.draftId); this.refreshApproved(); this.syncControls(); });
     this.wizard = new StudioWizard(() => void this.advanceWizard()); this.refreshSources();
     $("studio-name").addEventListener("input", () => this.syncControls()); $("studio-existing").addEventListener("change", () => this.syncControls());
     $("studio-cancel").addEventListener("click", () => void this.cancelDraft());
     $("studio-import-animation").addEventListener("change", (event) => void this.importApng(event, this.animationId(), "stationary"));
-    $("studio-import-walking").addEventListener("change", (event) => void this.importApng(event, "walk", "locomotion"));
-    $("studio-import-listening").addEventListener("change", (event) => void this.importApng(event, "listening", "stationary"));
     $("studio-save").addEventListener("click", () => void this.save());
-    $("studio-focus-orchestrator").addEventListener("click", () => { location.hash = location.hash === "#studio-orchestrator" ? "studio" : "studio-orchestrator"; });
     window.addEventListener("hashchange", () => this.syncRoute()); window.addEventListener("pet-studio-create-assistant-pet", () => this.status(this.workflow.startAssistantPet(this.draftId, this.busy, () => this.wizard.reset())));
     bindStudioValidationClear(); this.workflow.sync(this.draftId); this.syncRoute(); this.syncControls();
   }
   private syncRoute(): void {
-    const focused = location.hash === "#studio-orchestrator"; document.body.classList.toggle("studio-orchestrator-route", focused); this.wizard.setFocusedRoute(focused);
-    $("studio-heading-title").textContent = focused ? "Orchestrator animations" : "Pet Studio";
-    $("studio-heading-copy").textContent = focused ? "Use your imported APNGs for Walking and Listening." : "Create a local pet from your APNG animations.";
-    $("studio-focus-orchestrator").textContent = focused ? "Back to full Studio" : "Open assignment view"; $("studio-save").textContent = focused ? "Save assignments" : "Validate & save pet";
+    if (location.hash === "#studio-orchestrator") location.hash = "studio";
   }
   private mode() { return this.workflow.mode(); } refreshSources(): void { this.workflow.refreshSources(); }
   /** Import a Finder-selected APNG and assign it to the state that opened Studio. */
@@ -79,7 +73,7 @@ export class PetStudio {
     $<HTMLElement>("panel-studio").querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea").forEach((control) => { control.disabled = this.busy; }); this.workflow.lock(this.busy, this.draftId);
   }
   private resetDraftState(): void {
-    document.body.classList.remove("studio-has-draft"); this.approved.clear(); this.orchestrator.reset();
+    document.body.classList.remove("studio-has-draft"); this.approved.clear(); $<HTMLInputElement>("studio-assign-orchestrator").checked = false;
     const preview = $<HTMLImageElement>("studio-apng-preview"); preview.hidden = true; preview.removeAttribute("src"); $("studio-animation-step").hidden = true; $("studio-map-step").hidden = true; this.refreshApproved();
   }
   private async cancelDraft(): Promise<void> {
@@ -124,13 +118,16 @@ export class PetStudio {
     }
     const stateAssignments = this.workflow.stateAssignments();
     if (!Object.values(stateAssignments).some((assignment) => assignment.visible)) { this.status("Choose an APNG for at least one visible state."); return; }
-    if (!this.orchestrator.valid()) { this.status("Assign APNGs for mayor Walking and Listening.", false, ["studio-orchestrator-walk", "studio-orchestrator-listening"]); return; }
+    const assignToOrchestrator = $<HTMLInputElement>("studio-assign-orchestrator").checked;
+    if (assignToOrchestrator && (!stateAssignments.working.visible || !stateAssignments.listening.visible)) {
+      this.status("Choose APNGs for Running and Listening to use this pet as Mayor.", false, ["studio-state-working-animation", "studio-state-listening-animation"]); return;
+    }
     this.setBusy(true, "save-pet"); this.status("Validating and saving the pet…", false, [], true); await waitForStudioPaint();
-    try { const result = await invoke<ExtensionSaveResult>("save_pet_pack", { request: { draftId: this.draftId, displayName: $<HTMLInputElement>("studio-name").value.trim(), stateAssignments, ...this.orchestrator.selection() } }); this.draftId = ""; this.resetDraftState(); this.workflow.sync(""); this.wizard.reset(); this.status(result.reloadWarning ?? `Saved ${result.id}. It is now available in the village. Start a new draft to keep creating.`, !result.reloadWarning); }
+    try { const result = await invoke<ExtensionSaveResult>("save_pet_pack", { request: { draftId: this.draftId, displayName: $<HTMLInputElement>("studio-name").value.trim(), stateAssignments, assignToOrchestrator } }); this.draftId = ""; this.resetDraftState(); this.workflow.sync(""); this.wizard.reset(); this.status(result.reloadWarning ?? `Saved ${result.id}. It is now available in the village. Start a new draft to keep creating.`, !result.reloadWarning); }
     catch (error) { this.status(String(error)); } finally { this.setBusy(false); }
   }
   private refreshApproved(): void {
-    const names = [...this.approved.keys()]; $("studio-approved").textContent = names.length ? `Imported: ${names.map(friendlyPetName).join(", ")}` : "No imported animations yet."; this.workflow.refreshMappings(names); this.orchestrator.update(this.approved); this.syncControls();
+    const names = [...this.approved.keys()]; $("studio-approved").textContent = names.length ? `Imported: ${names.map(friendlyPetName).join(", ")}` : "No imported animations yet."; this.workflow.refreshMappings(names); this.syncControls();
   }
   private show(id: string, source: string): Promise<void> { return showStudioImage($<HTMLImageElement>(id), source); }
   private animationIdFromFilename(fileName: string, petId: string): string {

@@ -11,7 +11,9 @@ resources="$bundle/Contents/Resources"
 # A Rust rebuild can restart this runner before Launch Services finishes
 # removing the previous instance. Wait before replacing its executable.
 previous=$(pgrep -f "$app_binary" || true)
-if [ -n "$previous" ]; then kill $previous 2>/dev/null || true; fi
+for pid in $previous; do
+  kill "$pid" 2>/dev/null || true
+done
 attempt=0
 while pgrep -f "$app_binary" >/dev/null; do
   attempt=$((attempt + 1))
@@ -27,7 +29,7 @@ mkdir -p "$(dirname "$app_binary")" "$resources"
 cp "$binary" "$app_binary"
 cp "$source_dir/icons/icon.icns" "$resources/icon.icns"
 ln -sf "$source_dir/resources/pet-town-pi-runtime.tar.gz" "$resources/pet-town-pi-runtime.tar.gz"
-cat > "$bundle/Contents/Info.plist" <<'PLIST'
+cat >"$bundle/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
@@ -44,7 +46,9 @@ PLIST
 
 stop_app() {
   pids=$(pgrep -f "$app_binary" || true)
-  if [ -n "$pids" ]; then kill $pids 2>/dev/null || true; fi
+  for pid in $pids; do
+    kill "$pid" 2>/dev/null || true
+  done
 }
 trap stop_app EXIT INT TERM
 if [ "$#" -eq 0 ]; then

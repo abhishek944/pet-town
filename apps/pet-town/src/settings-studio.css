@@ -120,7 +120,7 @@
 .studio-mode-step .hint {
   margin: 7px 0 0;
 }
-.studio-panel[data-mode="extend"] .studio-orchestrator {
+.studio-panel[data-mode="extend"] #studio-mayor-assignment {
   display: none;
 }
 .studio-review {
@@ -178,65 +178,9 @@
 .studio-mappings label {
   display: block;
 }
-.studio-orchestrator {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
-  gap: 10px;
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px solid #7655ee66;
-  border-radius: 9px;
-  background: #7655ee10;
-}
-.studio-orchestrator h3 {
-  margin: 0;
-  font-size: 11px;
-}
-.studio-orchestrator p {
-  margin: 4px 0 0;
-}
-.studio-orchestrator-slots {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 7px;
-}
-.studio-orchestrator-slots > label {
-  padding: 8px;
-  border: 1px solid #ffffff17;
-  border-radius: 8px;
-  background: #11131855;
-}
-.studio-orchestrator-slots small {
-  display: block;
-  margin-top: 5px;
-  color: #9296a0;
-}
-.studio-orchestrator-preview {
-  display: flex;
-  height: 64px;
-  margin: 6px 0;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed #ffffff2d;
-  border-radius: 6px;
-}
-.studio-orchestrator-preview img {
-  max-width: 100%;
-  height: 60px;
-  object-fit: contain;
-}
-.studio-orchestrator-actions {
-  display: flex;
-  grid-column: 2;
-  justify-content: flex-end;
-  gap: 7px;
-}
-.studio-orchestrator[data-preview="walking"] .studio-orchestrator-slots > label:last-child,
-.studio-orchestrator[data-preview="listening"] .studio-orchestrator-slots > label:first-child {
-  opacity: 0.35;
-}
 .studio-assign {
-  grid-column: 1/-1;
+  display: block;
+  margin: 12px 0;
 }
 .studio-assign input {
   width: auto;
@@ -267,38 +211,6 @@
 .studio-wizard-nav .primary {
   justify-self: end;
   margin: 0;
-}
-body.studio-orchestrator-route.studio-has-draft .studio-step:not(#studio-map-step) {
-  display: none !important;
-}
-body.studio-orchestrator-route #studio-map-step > h2,
-body.studio-orchestrator-route #studio-map-step > p,
-body.studio-orchestrator-route #studio-mappings {
-  display: none;
-}
-body.studio-orchestrator-route .studio-orchestrator {
-  grid-template-columns: 1fr;
-  margin-top: 0;
-  padding: 14px;
-}
-body.studio-orchestrator-route .studio-orchestrator-note {
-  padding: 10px;
-  border: 1px solid #9c762c88;
-  border-radius: 8px;
-  background: #eab30818;
-  color: #edc65c;
-}
-body.studio-orchestrator-route .studio-orchestrator-actions {
-  grid-column: 1;
-}
-body.studio-orchestrator-route .studio-orchestrator-slots {
-  gap: 14px;
-}
-body.studio-orchestrator-route .studio-orchestrator-preview {
-  height: 120px;
-}
-body.studio-orchestrator-route .studio-orchestrator-preview img {
-  height: 116px;
 }
 .studio-message {
   min-height: 16px;
@@ -389,14 +301,6 @@ body.studio-orchestrator-route .studio-orchestrator-preview img {
   .studio-panel button[data-loading="true"]::before {
     animation: none;
   }
-  .studio-orchestrator-preview img {
-    display: none;
-  }
-  .studio-orchestrator-preview:after {
-    content: "Preview paused";
-    color: var(--muted);
-    font-size: 9px;
-  }
 }
 :root[data-theme="light"] .studio-step {
   background: #ffffff9c;
@@ -445,14 +349,7 @@ body.studio-orchestrator-route .studio-orchestrator-preview img {
   color: #222;
   border-color: #0003;
 }
-:root[data-theme="light"] .studio-orchestrator-slots > label {
-  background: #fff;
-  border-color: #0002;
-  color: #222;
-}
-:root[data-theme="light"] .studio-orchestrator-slots small {
-  color: #50535a;
-}
+
 @media (prefers-color-scheme: light) {
   :root[data-theme="system"] .studio-heading p,
   :root[data-theme="system"] .studio-step label,
@@ -493,14 +390,6 @@ body.studio-orchestrator-route .studio-orchestrator-preview img {
     background: #fff;
     color: #222;
     border-color: #0003;
-  }
-  :root[data-theme="system"] .studio-orchestrator-slots > label {
-    background: #fff;
-    border-color: #0002;
-    color: #222;
-  }
-  :root[data-theme="system"] .studio-orchestrator-slots small {
-    color: #50535a;
   }
 }
 .studio-state-row {
