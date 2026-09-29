@@ -41,7 +41,7 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 	if bool(mayor.get("active", false)):
 		var name := String(mayor.get("name", "Mayor")).strip_edges()
 		var status := "speaking" if bool(mayor.get("speaking", false)) else "listening" if bool(mayor.get("listening", false)) else "working" if bool(mayor.get("working", false)) else "idle"
-		next[MAYOR_ID] = {"id": MAYOR_ID, "label": name if not name.is_empty() else "Mayor", "status": status, "source": "mayor", "listening": bool(mayor.get("listening", false))}
+		next[MAYOR_ID] = {"id": MAYOR_ID, "label": name if not name.is_empty() else "Mayor", "status": status, "source": "mayor", "listening": bool(mayor.get("listening", false)), "firstmate_mode": bool(mayor.get("firstmateOwned", false))}
 	if bool(snapshot.get("available", false)):
 		var incoming: Variant = snapshot.get("agents", [])
 		if incoming is Array:
@@ -153,7 +153,7 @@ func release_control() -> void:
 	controlled_id = ""
 
 func focus_agent_in_desktop(id: String) -> void:
-	if records.has(id) and id != MAYOR_ID:
+	if records.has(id):
 		focus_agent_requested.emit(id)
 
 func select_at(screen_position: Vector2) -> bool:

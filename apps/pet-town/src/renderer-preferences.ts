@@ -1,5 +1,7 @@
 import { motionFactor, type PetPreferences, type PreferencesFile } from "./preferences-types";
-import type { CitizenState } from "./village";
+import { citizenSize, type CitizenState } from "./village";
+import { refreshCitizenLabelPosition } from "./renderer-image-bounds";
+import { effectivePetTheme } from "./ocean-assets";
 
 const FALLBACK: PetPreferences = {
   customName: "",
@@ -24,11 +26,34 @@ export function applyCitizenPreferences(
   preferences: PreferencesFile | null,
 ): void {
   const value = preferencesFor(element, preferences);
-  const preferredSize = (44 * value.appearance.scalePercent) / 100;
+  const ocean =
+    preferences?.app.stripTheme === "ocean" &&
+    effectivePetTheme(preferences, element.dataset.characterId ?? "") === "ocean";
+  const preferredSize = ((ocean ? 86 : 44) * value.appearance.scalePercent) / 100;
   element.style.setProperty("--citizen-size", `${Math.min(baseSize, preferredSize)}px`);
   element.style.setProperty("--citizen-opacity", String(value.appearance.opacityPercent / 100));
   element.style.setProperty("--label-scale", String(value.labels.textScalePercent / 100));
   element.dataset.labelVisibility = value.labels.visibility;
+}
+
+export function resizeCitizens(
+  root: HTMLElement,
+  elements: Iterable<HTMLElement>,
+  width: number,
+  preferences: PreferencesFile | null,
+  previousSize: number,
+): number {
+  const citizens = [...elements];
+  const visibleCount = citizens.filter((element) => !element.hidden).length;
+  const size = citizenSize(visibleCount, width, preferences?.app.stripTheme === "ocean" ? 96 : 77);
+  if (size !== previousSize) {
+    root.style.setProperty("--citizen-size", `${size}px`);
+    for (const element of citizens) {
+      applyCitizenPreferences(element, size, preferences);
+      refreshCitizenLabelPosition(element);
+    }
+  }
+  return size;
 }
 
 export function shouldHideCompleted(

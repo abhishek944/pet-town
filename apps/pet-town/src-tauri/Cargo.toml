@@ -1,6 +1,6 @@
 [package]
 name = "pet-town"
-version = "1.0.0"
+version = "1.1.0"
 description = "A transparent desktop village for live Herdr agents"
 authors = ["pet-town contributors"]
 edition = "2021"

@@ -73,8 +73,9 @@ func _companion_detail(record: Dictionary) -> void:
 		agent_view_requested.emit(id)
 	)
 	facts.add_child(view)
-	if String(record.get("source", "")) != "mayor":
-		var open := _button("Open in Herdr" if String(record.get("source", "")) == "herdr" else "Open agent")
+	if String(record.get("source", "")) != "mayor" or bool(record.get("firstmate_mode", false)):
+		var is_herdr := String(record.get("source", "")) == "herdr" or bool(record.get("firstmate_mode", false))
+		var open := _button("Open in Herdr" if is_herdr else "Open agent")
 		open.set_meta("focus_key", "open")
 		open.pressed.connect(func() -> void: agent_open_requested.emit(id))
 		facts.add_child(open)

@@ -1,0 +1,37 @@
+.rainforest-preview {
+  position: relative;
+  isolation: isolate;
+  height: 150px;
+  overflow: hidden;
+  color: #e5e9f0;
+  background: #11151d;
+}
+
+.rainforest-preview .rainforest-scene {
+  z-index: 1;
+}
+
+.rainforest-preview-copy {
+  position: absolute;
+  inset: 12px 18px;
+  font-size: 10px;
+}
+
+.rainforest-preview-controls {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  gap: 12px;
+}
+
+.rainforest-preview-controls span {
+  padding: 6px 12px;
+  border: 1px solid #687585;
+  border-radius: 6px;
+  background: #252f3d;
+}
+
+#rainforest-opacity-row[hidden],
+.rainforest-preview[hidden] {
+  display: none;
+}

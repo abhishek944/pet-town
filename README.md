@@ -52,8 +52,8 @@ user permissions, so review their manifest and source before installing.
 - Keeps **Preferences…** in each pet's right-click menu; menu animation actions are retired.
 - Opens a native macOS Settings window when the installed app launches, from **Preferences…** in a pet menu, or from the Herdr plugin action, with direct **Show Town / Hide Town** controls, per-character controls, a **Pet Studio**, and an **Agents** tab for atomic, reversible setup of all six standalone harness integrations.
 - Lets users create or extend a pet by importing transparent looping APNGs in Settings and choosing an APNG and idle or walking action for each state. The Pets page shows those assignments.
-- Adds a user-named voice assistant that uses the bundled Knight, listens locally for “Hey, <name>,” starts GPT-Live 1 without opening another visible window, and delegates computer work to a persistent Pi agent in a dedicated Herdr pane.
-- Runs that Pi agent with GPT-5.6 Luna at medium thinking, supports spoken task cancellation, and keeps voice transcripts ephemeral.
+- Adds a user-named Mayor using the bundled Knight and one persistent Firstmate primary in Herdr. Live mode uses GPT-Live for speech; Standard mode uses transcription and generated speech.
+- Runs Firstmate with GPT-5.6 Luna at medium thinking by default, supports task interruption, and keeps Live voice transcripts ephemeral.
 - Keeps the assistant independent from Pet Studio: its bundled Knight walk animation is fixed and cannot be replaced by user pet creation or extensions.
 - Includes every character in random assignment by default, lets users deselect unwanted characters, and immediately replaces visible deselected pets after Apply while preserving allowed assignments.
 - Optionally hides completed pets after 1, 5, 15, 30, or 60 minutes while continuing to monitor them and restoring them immediately when their state changes.
@@ -68,9 +68,9 @@ user permissions, so review their manifest and source before installing.
 ```text
 Standalone Tauri process
   ├─ Rust adapter broker: lifecycle records, Herdr discovery, and focus routes
-  ├─ Rust orchestrator state: local wake bridge, GPT-Live session creation, and Pi lifecycle
+  ├─ Rust orchestrator state: local wake bridge, GPT-Live session creation, and Firstmate lifecycle
   ├─ WebView: village, Settings, and ephemeral WebRTC voice conversation
-  └─ dedicated Herdr pane: bundled Pi → GPT-5.6 Luna / medium → Herdr skill
+  └─ dedicated Herdr pane: trusted Firstmate checkout → selected Pi model
        ↑
 optional Herdr plugin adapter (herdr-plugin.toml + scripts/supervisor.sh)
 ```
@@ -188,7 +188,7 @@ Use `pnpm run check:quality` for only formatting, linting, and type checks. Use 
 
 Ordinary village monitoring remains local. It does not send coding-agent prompts, code, tool arguments, output, credentials, full paths, or raw harness session IDs to OpenAI. Only opaque public IDs, normalized status, source names, and sanitized labels cross into the village interface.
 
-Voice is off until the user chooses **Start assistant** in Settings, and **Stop assistant** turns it off again. On-device recognition listens locally for the configured wake phrase; after the wake phrase is heard, microphone audio and ephemeral transcripts pass through GPT-Live 1 over WebRTC without opening another visible window. Only delegated conversation context and the concise Pi result are routed between GPT-Live and the dedicated Pi agent. Ending the conversation stops microphone capture immediately and clears app-held transcripts; five minutes without user speech also ends the paid Live session. The OpenAI API key stays in Rust memory and may come from `OPENAI_API_KEY` or the macOS Keychain item with service `pet-town.openai` and account `api-key`.
+Voice is off until the user starts Mayor in Settings. In Live mode, on-device recognition listens locally for the configured wake phrase; after the wake phrase is heard, microphone audio and ephemeral transcripts pass through GPT-Live 1 over WebRTC without opening another visible window. Delegated requests and completed Firstmate replies pass between GPT-Live and the selected Firstmate primary. In Standard mode, recorded speech is transcribed and sent to that same primary; completed replies use generated speech. Ending the conversation stops microphone capture immediately and clears app-held transcripts; five minutes without user speech also ends the paid Live session. The OpenAI API key stays in Rust memory and may come from `OPENAI_API_KEY` or the macOS Keychain item with service `pet-town.openai` and account `api-key`.
 
 Pet Studio does not contact an image provider. Users supply their own APNGs, which are validated and stored locally under `~/.pet-town/`. Existing-pet extensions are stored separately under `~/.pet-town/pet-packs/extensions/` as validated, versioned overlays, so bundled pet files remain immutable. The OpenAI API key is used only by the optional voice assistant and is never placed in command arguments, preferences, frontend state, or logs.
 

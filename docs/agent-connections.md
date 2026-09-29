@@ -44,6 +44,8 @@ When one of these harnesses runs inside Herdr, its event may carry a private cla
 
 ## Focus behavior
 
+Implementation changes must preserve the [documented pet focus flow](pet-focus.md), including the separate 2D helper, nonactivating macOS panel state, helper event-loop servicing, and exact running-app identity for Codex links. That guide includes the user-confirmed regression baseline and live checks.
+
 A Herdr pet focuses its exact, revalidated pane. A Codex pet first focuses the already-running Codex desktop app and, for a validated local UUID thread, opens `codex://threads/<id>` to select its conversation. Remote/SSH threads may not resolve in Codex Desktop. If Codex Desktop is not running, the pet falls back to its known running terminal/editor app. Successfully focusing Codex Desktop changes a completed standalone Codex pet to idle immediately; a fallback focus does not. Other standalone pets focus the best already-running application known from the local hook environment. Pet Town does not start an application, choose an unverified terminal tab, or attach to a session. Attach and resume remain explicit actions in the coding tool.
 
 The local Godot town uses the same broker records through the Pet Town binary's private child bridge. Godot receives only the public agent fields and sends an opaque agent ID back when the user chooses **Open in Herdr**. Rust recollects the current roster and revalidates the private focus route before acting. While the fullscreen town is active, the desktop process temporarily suppresses the v1 pet strip; switching away restores the strip without changing the user's saved visibility preference.

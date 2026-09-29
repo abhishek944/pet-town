@@ -59,6 +59,7 @@ export function updateCitizenElement(element: HTMLElement, citizen: CitizenState
   element.className = `citizen${citizen.retiring ? " retiring" : ""}`;
   element.dataset.agentId = citizen.id;
   element.dataset.characterId = citizen.sprite;
+  element.dataset.agentSource = citizen.source;
   element.dataset.status = citizen.status;
   element.dataset.doneSinceMs = citizen.doneSinceMs === null ? "" : String(citizen.doneSinceMs);
   const announced = citizen.source === "orchestrator"
@@ -94,6 +95,8 @@ export function applyFlowSample(
 ): boolean {
   const pet = element.querySelector<HTMLImageElement>("img.pet");
   if (!pet) return true;
+  const oceanAsset = themedAssetUrl ? "true" : "false";
+  if (element.dataset.oceanAsset !== oceanAsset) element.dataset.oceanAsset = oceanAsset;
 
   element.dataset.flowVisible = String(sample.visible);
   if (!sample.visible) {
@@ -131,8 +134,10 @@ export function applyFlowSample(
         pet.dataset.visibleTopRatio = String(bounds.top);
         pet.dataset.visibleBottomRatio = String(bounds.bottom);
         pet.dataset.assetReadyKey = assetKey;
+        // Reveal before measuring padding; hidden image boxes otherwise report zero height.
+        syncCitizenVisibility(element, pet, () => {});
         refreshCitizenLabelPosition(element);
-        syncCitizenVisibility(element, pet, onGeometryChange);
+        onGeometryChange();
       }).catch(() => {
         globalThis.clearTimeout(releaseTimer);
         if (pet.dataset.assetRequest !== request) return;

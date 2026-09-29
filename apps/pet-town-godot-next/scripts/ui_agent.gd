@@ -98,8 +98,8 @@ func show_agent_details(record: Dictionary) -> void:
 	agent_follow_button.pressed.connect(func() -> void: agent_follow_requested.emit(agent_id))
 	agent_follow_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.add_child(agent_follow_button)
-	if String(record.get("source", "")) != "mayor":
-		var is_herdr := String(record.get("source", "")) == "herdr"
+	if String(record.get("source", "")) != "mayor" or bool(record.get("firstmate_mode", false)):
+		var is_herdr := String(record.get("source", "")) == "herdr" or bool(record.get("firstmate_mode", false))
 		var open := _button("Open in Herdr ↗" if is_herdr else "Open agent ↗")
 		open.custom_minimum_size.y = 46
 		open.pressed.connect(func() -> void: agent_open_requested.emit(agent_id))

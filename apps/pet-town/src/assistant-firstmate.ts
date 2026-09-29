@@ -54,7 +54,9 @@ export class FirstmateVoice {
         if (this.starting || this.recorder?.state === "recording") this.release();
       }
     });
-    void listen("orchestrator-firstmate-retry", () => { void this.retryVoice(); });
+    void listen("orchestrator-firstmate-retry", () => {
+      void this.retryVoice();
+    });
     $<HTMLButtonElement>("disconnect").addEventListener("click", () => {
       this.stop();
       void getCurrentWindow().close();
@@ -73,8 +75,12 @@ export class FirstmateVoice {
       this.talkPolling = window.setInterval(() => void this.syncTalk(), 150);
       await this.poll();
       const generation = this.pressGeneration;
-      if (await invoke<boolean>("firstmate_talk_active") && generation === this.pressGeneration) await this.press();
-    } catch (reason) { this.error(reason); this.setState(String(reason)); }
+      if ((await invoke<boolean>("firstmate_talk_active")) && generation === this.pressGeneration)
+        await this.press();
+    } catch (reason) {
+      this.error(reason);
+      this.setState(String(reason));
+    }
   }
 
   private setState(text: string): void {
@@ -95,28 +101,53 @@ export class FirstmateVoice {
         this.externalTalk = false;
         if (this.starting || this.recorder?.state === "recording") this.release();
       }
-    } catch { /* A later poll retries a missed bridge state. */ }
-    finally { this.checkingTalk = false; }
+    } catch {
+      /* A later poll retries a missed bridge state. */
+    } finally {
+      this.checkingTalk = false;
+    }
   }
 
   private render(): void {
     const talk = $<HTMLButtonElement>("connect");
-    talk.textContent = this.recorder?.state === "recording" ? "Recording · release to send" : this.pendingReply && !this.playing ? "Reply ready · retry voice" : this.busy || this.awaitingReply || this.playing ? "Working…" : "Hold to talk";
-    talk.disabled = !this.ready || ((this.busy || this.awaitingReply || this.playing || this.pendingReply !== null) && this.recorder === null);
+    talk.textContent =
+      this.recorder?.state === "recording"
+        ? "Recording · release to send"
+        : this.pendingReply && !this.playing
+          ? "Reply ready · retry voice"
+          : this.busy || this.awaitingReply || this.playing
+            ? "Working…"
+            : "Hold to talk";
+    talk.disabled =
+      !this.ready ||
+      ((this.busy || this.awaitingReply || this.playing || this.pendingReply !== null) &&
+        this.recorder === null);
     $<HTMLButtonElement>("disconnect").disabled = false;
     $<HTMLButtonElement>("cancel").disabled = true;
     $<HTMLSelectElement>("workspace").hidden = true;
   }
 
   private async press(): Promise<void> {
-    if (this.disposed || !this.ready || this.busy || this.awaitingReply || this.playing || this.pendingReply || this.starting || this.recorder) return;
+    if (
+      this.disposed ||
+      !this.ready ||
+      this.busy ||
+      this.awaitingReply ||
+      this.playing ||
+      this.pendingReply ||
+      this.starting ||
+      this.recorder
+    )
+      return;
     this.starting = true;
     const generation = ++this.pressGeneration;
     this.setState("Requesting microphone…");
     try {
       await invoke("begin_firstmate_listening");
       this.listeningClaimed = true;
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
       if (generation !== this.pressGeneration || this.disposed) {
         stream.getTracks().forEach((track) => track.stop());
         if (this.listeningClaimed) {
@@ -125,13 +156,20 @@ export class FirstmateVoice {
         }
         return;
       }
-      const mime = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm"].find((candidate) => MediaRecorder.isTypeSupported(candidate));
-      if (!mime) { stream.getTracks().forEach((track) => track.stop()); throw new Error("This microphone cannot record a supported audio format."); }
+      const mime = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm"].find((candidate) =>
+        MediaRecorder.isTypeSupported(candidate),
+      );
+      if (!mime) {
+        stream.getTracks().forEach((track) => track.stop());
+        throw new Error("This microphone cannot record a supported audio format.");
+      }
       this.stream = stream;
       this.chunks = [];
       const recorder = new MediaRecorder(stream, { mimeType: mime });
       this.recorder = recorder;
-      recorder.ondataavailable = (event) => { if (event.data.size) this.chunks.push(event.data); };
+      recorder.ondataavailable = (event) => {
+        if (event.data.size) this.chunks.push(event.data);
+      };
       recorder.onstop = () => {
         stream.getTracks().forEach((track) => track.stop());
         if (this.stream === stream) this.stream = null;
@@ -147,9 +185,11 @@ export class FirstmateVoice {
         this.listeningClaimed = false;
         void invoke("set_firstmate_phase", { value: "ready" });
       }
-      this.error(reason); this.setState(String(reason));
+      this.error(reason);
+      this.setState(String(reason));
+    } finally {
+      if (generation === this.pressGeneration) this.starting = false;
     }
-    finally { if (generation === this.pressGeneration) this.starting = false; }
   }
 
   private release(): void {
@@ -163,8 +203,7 @@ export class FirstmateVoice {
         void invoke("set_firstmate_phase", { value: "working" });
       }
       this.recorder.stop();
-    }
-    else {
+    } else {
       this.stream?.getTracks().forEach((track) => track.stop());
       this.stream = null;
       if (this.listeningClaimed) {
@@ -184,7 +223,8 @@ export class FirstmateVoice {
     try {
       const blob = new Blob(this.chunks, { type: mime });
       this.chunks = [];
-      if (blob.size === 0 || blob.size > 15_000_000) throw new Error("Recording is empty or too long.");
+      if (blob.size === 0 || blob.size > 15_000_000)
+        throw new Error("Recording is empty or too long.");
       const audio = await this.toBase64(blob);
       const text = await invoke<string>("transcribe_firstmate_audio", { audio, mime });
       if (this.disposed) return;
@@ -195,9 +235,12 @@ export class FirstmateVoice {
       this.awaitingSince = Date.now();
     } catch (reason) {
       void invoke("set_firstmate_phase", { value: "ready" });
-      this.error(reason); this.setState(String(reason));
+      this.error(reason);
+      this.setState(String(reason));
+    } finally {
+      this.busy = false;
+      this.render();
     }
-    finally { this.busy = false; this.render(); }
   }
 
   private toBase64(blob: Blob): Promise<string> {
@@ -240,18 +283,25 @@ export class FirstmateVoice {
       this.awaitingReply = false;
       this.render();
       this.error(reason);
+    } finally {
+      this.pollingNow = false;
     }
-    finally { this.pollingNow = false; }
   }
 
   async retryVoice(): Promise<void> {
     if (this.disposed || !this.ready || this.playing) return;
-    if (this.pendingReply) { await this.playNext(); return; }
+    if (this.pendingReply) {
+      await this.playNext();
+      return;
+    }
     try {
       const text = await invoke<string | null>("latest_firstmate_reply");
       if (!text) throw new Error("There is no recent Firstmate reply to replay.");
       await this.playNext(text);
-    } catch (reason) { this.error(reason); this.setState(String(reason)); }
+    } catch (reason) {
+      this.error(reason);
+      this.setState(String(reason));
+    }
   }
 
   private async playNext(replayText?: string): Promise<void> {
@@ -277,13 +327,18 @@ export class FirstmateVoice {
       }
       this.awaitingReply = false;
       this.render();
-    } catch (reason) { playbackError = reason; this.error(reason); }
-    finally {
+    } catch (reason) {
+      playbackError = reason;
+      this.error(reason);
+    } finally {
       if (!this.disposed) void invoke("set_mayor_speech", { text, speaking: false });
-      if (!this.disposed) void invoke("set_firstmate_phase", { value: playbackError ? "working" : "ready" });
+      if (!this.disposed)
+        void invoke("set_firstmate_phase", { value: playbackError ? "working" : "ready" });
       this.playing = false;
       if (!this.disposed) {
-        this.setState(playbackError ? `${String(playbackError)} · Retry voice` : "Ready · hold to talk");
+        this.setState(
+          playbackError ? `${String(playbackError)} · Retry voice` : "Ready · hold to talk",
+        );
         this.render();
         if (!playbackError) void this.poll();
       }
@@ -291,6 +346,7 @@ export class FirstmateVoice {
   }
 
   stop(): void {
+    const canceledRecording = this.recorder?.state === "recording";
     this.disposed = true;
     this.ready = false;
     this.release();
@@ -298,7 +354,13 @@ export class FirstmateVoice {
     clearInterval(this.talkPolling);
     void invoke("stop_firstmate_audio");
     void invoke("set_mayor_speech", { text: "", speaking: false });
-    void invoke("set_firstmate_phase", { value: "ready" });
+    if (canceledRecording) void invoke("set_firstmate_phase", { value: "ready" });
+    else
+      void invoke<string>("firstmate_phase").then((phase) => {
+        if (phase === "speaking" || phase === "listening") {
+          return invoke("set_firstmate_phase", { value: "ready" });
+        }
+      });
     this.setState("Voice stopped");
     this.render();
   }

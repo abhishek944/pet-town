@@ -7,6 +7,7 @@ mod commentary;
 pub mod credentials;
 pub mod firstmate;
 pub mod firstmate_audio;
+pub mod firstmate_live;
 mod firstmate_talk;
 mod herdr;
 mod herdr_io;

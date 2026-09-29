@@ -54,6 +54,27 @@ body {
   display: none;
 }
 
+.village[data-strip-theme="ocean"] .project {
+  padding: 4px 8px;
+  font-size: calc(11px * var(--label-scale, 1));
+  font-weight: 600;
+}
+
+/* Ocean art has a shared canvas scale, independent of Standard state clip scales. */
+.village[data-strip-theme="ocean"] .citizen[data-ocean-asset="true"] .pet {
+  width: var(--citizen-size);
+}
+
+.village[data-strip-theme="ocean"] .citizen[data-ocean-asset="true"] .project {
+  transform: translateY(calc(var(--label-offset-y, 0px) + var(--citizen-size) * 0.14));
+}
+
+/* Independent rotation preserves sprite facing, frozen canvases and upright labels. */
+.village[data-strip-theme="ocean"] .pet {
+  rotate: var(--ocean-pitch, 0deg);
+  transform-origin: 50% calc(100% - var(--foot-offset-y, 0px));
+}
+
 .pet-stack {
   position: absolute;
   z-index: 2;

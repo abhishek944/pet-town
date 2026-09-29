@@ -48,7 +48,8 @@ export function refreshCitizenLabelPosition(element: HTMLElement): void {
   const project = element.querySelector<HTMLElement>(".project");
   const stack = element.querySelector<HTMLElement>(".pet-stack");
   if (!pet || !project || !stack || typeof pet.getBoundingClientRect !== "function") return;
-  const height = pet.getBoundingClientRect().height;
+  // Use the layout box: a wave's pitch must not change the transparent-padding anchor.
+  const height = pet.offsetHeight;
   const top = Number(pet.dataset.visibleTopRatio ?? 0);
   const bottom = Number(pet.dataset.visibleBottomRatio ?? 0);
   if (Number.isFinite(top))

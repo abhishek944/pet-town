@@ -1,7 +1,10 @@
 export const ASSISTANT_PET_ID = "knight";
 
 export type SettingsAppearance = "system" | "light" | "dark";
-export type StripTheme = "standard" | "ocean";
+export type StripTheme = "standard" | "ocean" | "rainforest" | "snowy";
+export type PetTheme = "standard" | "ocean";
+export type RainforestMode = "after-rain" | "firefly";
+export type SnowMode = "fresh-snow" | "aurora-night";
 export type LabelVisibility = "always" | "hover" | "hidden";
 export type MotionLevel = "gentle" | "standard" | "playful";
 
@@ -9,6 +12,10 @@ export interface AppPreferences {
   openWithHerdr: boolean;
   settingsAppearance: SettingsAppearance;
   stripTheme: StripTheme;
+  rainforestMode: RainforestMode;
+  rainforestOpacityPercent: number;
+  snowMode: SnowMode;
+  snowOpacityPercent: number;
   oceanOpacityPercent: number;
   oceanWaterlineHeightPx: number;
   lastSelectedPetId: string;
@@ -33,7 +40,7 @@ export interface OrchestratorPreferences {
 
 export interface PetPreferences {
   customName: string;
-  theme: StripTheme;
+  theme: PetTheme;
   includedInRandomCast: boolean;
   appearance: { scalePercent: number; opacityPercent: number };
   labels: { visibility: LabelVisibility; textScalePercent: number };

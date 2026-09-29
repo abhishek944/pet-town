@@ -1,6 +1,6 @@
 import { behaviorPackForCharacter } from "./character-packs";
 import { PET_STATES, type HerdrState } from "./flow-types";
-import { oceanRowingUrl } from "./ocean-assets";
+import { oceanClipName, oceanRowingUrl, oceanStateUrl } from "./ocean-assets";
 import type { StripTheme } from "./preferences-types";
 import { previewAnimations, type PreviewAnimationOption } from "./settings-preview";
 
@@ -12,7 +12,21 @@ export function configurePetPreview(
 ): PreviewAnimationOption[] {
   const oceanUrl = theme === "ocean" ? oceanRowingUrl(petId) : null;
   const options = oceanUrl
-    ? [{ id: "clip:ocean-rowing", label: "Ocean rowing", assetUrl: oceanUrl, scale: 1, locomotion: true }]
+    ? PET_STATES.flatMap((state) => {
+        const clip = oceanClipName(state);
+        const assetUrl = oceanStateUrl(petId, state);
+        return clip && assetUrl
+          ? [
+              {
+                id: `clip:${clip}`,
+                label: `Ocean ${state === "working" ? "rowing" : state}`,
+                assetUrl,
+                scale: 1,
+                locomotion: state === "working",
+              },
+            ]
+          : [];
+      })
     : previewAnimations(behaviorPackForCharacter(petId));
   renderStateMap(petId, onStatePreview, onEditState, options, oceanUrl !== null);
   return options;
@@ -55,15 +69,17 @@ export function renderStateMap(
       heading.className = "state-heading";
       heading.append(name, action);
       previewButton.append(heading);
+      const clipName = ocean ? oceanClipName(state) : assignment.animation;
+      const displayName = ocean
+        ? `Ocean ${state === "working" ? "rowing" : state}`
+        : assignment.animation;
       if (assigned) {
-        const assetUrl = options.find(
-          (item) => item.id === `clip:${ocean ? "ocean-rowing" : assignment.animation}`,
-        )?.assetUrl;
+        const assetUrl = options.find((item) => item.id === `clip:${clipName}`)?.assetUrl;
         if (assetUrl) {
           const thumb = document.createElement("img");
           thumb.className = "state-thumb";
           thumb.src = assetUrl;
-          thumb.alt = `${ocean ? "Ocean rowing" : assignment.animation} animation preview`;
+          thumb.alt = `${displayName} animation preview`;
           previewButton.append(thumb);
         }
       } else {
@@ -73,17 +89,15 @@ export function renderStateMap(
         previewButton.append(empty);
       }
       const animation = document.createElement("span");
-      animation.textContent = assigned ? `2D: ${ocean ? "Ocean rowing" : assignment.animation}` : "Hidden";
+      animation.textContent = assigned ? `2D: ${displayName}` : "Hidden";
       previewButton.append(animation);
       previewButton.disabled = !assigned;
       previewButton.setAttribute(
         "aria-label",
-        assigned
-          ? `Preview ${labels[state]}: ${ocean ? "Ocean rowing" : assignment.animation}`
-          : `${labels[state]} is hidden`,
+        assigned ? `Preview ${labels[state]}: ${displayName}` : `${labels[state]} is hidden`,
       );
       previewButton.addEventListener("click", () => {
-        if (assignment.animation) preview(ocean ? "ocean-rowing" : assignment.animation, assignment.action);
+        if (assigned && clipName) preview(clipName, assignment.action);
       });
       const editButton = document.createElement("button");
       editButton.type = "button";

@@ -6,7 +6,6 @@ import { startSpeechMeter } from "./assistant-meter"; import { iceComplete, inst
 import { renderVoiceStatus } from "./assistant-status";
 import { LiveTranscripts } from "./assistant-live-transcripts";
 import { FirstmateVoice } from "./assistant-firstmate";
-type Workspace = { id: string; label: string; project: string };
 type LiveAnswer = { sessionId: string; sdp: string }; const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 let connection: RTCPeerConnection | null = null, channel: RTCDataChannel | null = null;
 let microphone: MediaStream | null = null, stopMeter = () => {};
@@ -27,32 +26,16 @@ function error(value: unknown): void {
   if (message) void invoke(firstmateMode ? "report_orchestrator_diagnostic" : "report_orchestrator_error", { message });
 }
 async function load(): Promise<void> {
-  const [preferences, workspaces, status] = await Promise.all([
-    invoke<PreferencesSnapshot>("get_preferences"), invoke<Workspace[]>("list_orchestrator_workspaces"),
-    invoke<Status>("get_orchestrator_status"),
+  const [preferences, status] = await Promise.all([
+    invoke<PreferencesSnapshot>("get_preferences"), invoke<Status>("get_orchestrator_status"),
   ]);
   $("assistant-title").textContent = preferences.preferences.app.orchestrator.displayName;
   firstmateMode = preferences.preferences.app.orchestrator.mode === "firstmate";
   if (firstmateMode) {
     $("retry").textContent = "Retry voice";
-    $("workspace").parentElement!.hidden = true;
     $("voice-state").nextElementSibling!.textContent = "Hold to talk. Your speech is transcribed and sent to Firstmate; replies use an AI-generated voice.";
   }
   transcripts.setMayorName(preferences.preferences.app.orchestrator.displayName);
-  const workspace = $<HTMLSelectElement>("workspace");
-  workspace.replaceChildren(...workspaces.map((item) => new Option(`${item.label} · ${item.project}`, item.id)));
-  if (!workspaces.length) workspace.append(new Option("No Herdr workspace available", ""));
-  const savedWorkspace = preferences.preferences.app.orchestrator.workspaceId;
-  if (savedWorkspace && savedWorkspace.startsWith("/")) {
-    if (![...workspace.options].some((option) => option.value === savedWorkspace))
-      workspace.append(new Option(`Folder · ${savedWorkspace.split("/").pop() ?? savedWorkspace}`, savedWorkspace));
-    workspace.value = savedWorkspace;
-  } else if (savedWorkspace && workspaces.some((item) => item.id === savedWorkspace)) workspace.value = savedWorkspace;
-  else if (status.workspaceId && workspaces.some((item) => item.id === status.workspaceId)) workspace.value = status.workspaceId;
-  else {
-    workspace.prepend(new Option("Documents (default)", ""));
-    workspace.value = "";
-  }
   setStatus(status);
   if (firstmateMode) {
     firstmate = new FirstmateVoice(error);
@@ -70,9 +53,6 @@ async function connect(fromWake = false, wakeGeneration?: number): Promise<void>
   connecting = true; const attempt = ++connectionAttempt; error("");
   $<HTMLButtonElement>("connect").disabled = true; $<HTMLButtonElement>("disconnect").disabled = false;
   try {
-  const workspaceSelect = $<HTMLSelectElement>("workspace");
-  const workspaceId = workspaceSelect.value;
-  if (!workspaceId && workspaceSelect.options.length === 0) throw new Error("Choose a running Herdr workspace first.");
   await invoke("report_orchestrator_diagnostic", { message: "requesting microphone" });
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
@@ -90,9 +70,9 @@ async function connect(fromWake = false, wakeGeneration?: number): Promise<void>
   const offer = await peer.createOffer();
   await peer.setLocalDescription(offer); await iceComplete(peer);
   if (attempt !== connectionAttempt) { disposeAttempt(peer, stream, events); return; }
-  await invoke("report_orchestrator_diagnostic", { message: "starting Pi and GPT-Live" });
+  await invoke("report_orchestrator_diagnostic", { message: "starting Firstmate and GPT-Live" });
   const answer = await invoke<LiveAnswer>("start_orchestrator_session", {
-    workspaceId, sdp: peer.localDescription?.sdp ?? "", wakeGeneration: wakeGeneration ?? null,
+    workspaceId: "", sdp: peer.localDescription?.sdp ?? "", wakeGeneration: wakeGeneration ?? null,
   });
   await invoke("report_orchestrator_diagnostic", { message: "GPT-Live answer received" });
   if (attempt !== connectionAttempt) { disposeAttempt(peer, stream, events); return; }

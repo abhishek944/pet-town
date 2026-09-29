@@ -1,0 +1,52 @@
+.snowy-preview {
+  position: relative;
+  isolation: isolate;
+  height: 150px;
+  overflow: hidden;
+  color: #e5e9f0;
+  background: #11151d;
+}
+
+.snowy-preview > :not(.snow-preview-copy) {
+  z-index: 1;
+}
+
+.snow-preview-copy {
+  position: absolute;
+  z-index: 0;
+  inset: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  pointer-events: none;
+}
+
+.snow-preview-copy strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.snow-preview-controls {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.snow-preview-controls span {
+  padding: 6px 10px;
+  border: 1px solid #687585;
+  border-radius: 6px;
+  background: #252f3d;
+  color: #e5e9f0;
+}
+
+#snow-mode-row[hidden],
+#snow-opacity-row[hidden],
+#snow-preview[hidden] {
+  display: none;
+}

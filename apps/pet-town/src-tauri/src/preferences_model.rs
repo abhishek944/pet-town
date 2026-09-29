@@ -5,6 +5,14 @@ pub const SCHEMA_VERSION: u32 = 3;
 pub const ASSISTANT_PET_ID: &str = "knight";
 pub const COMPLETED_HIDE_DELAYS_MINUTES: [u16; 5] = [1, 5, 15, 30, 60];
 
+pub fn default_rainforest_opacity_percent() -> u8 {
+    36
+}
+
+pub fn default_snow_opacity_percent() -> u8 {
+    36
+}
+
 pub fn default_ocean_opacity_percent() -> u8 {
     36
 }
@@ -28,6 +36,14 @@ pub struct AppPreferences {
     pub settings_appearance: SettingsAppearance,
     #[serde(default)]
     pub strip_theme: StripTheme,
+    #[serde(default)]
+    pub rainforest_mode: RainforestMode,
+    #[serde(default = "default_rainforest_opacity_percent")]
+    pub rainforest_opacity_percent: u8,
+    #[serde(default)]
+    pub snow_mode: SnowMode,
+    #[serde(default = "default_snow_opacity_percent")]
+    pub snow_opacity_percent: u8,
     #[serde(default = "default_ocean_opacity_percent")]
     pub ocean_opacity_percent: u8,
     #[serde(default = "default_ocean_waterline_height_px")]
@@ -72,7 +88,7 @@ pub struct PetPreferences {
     #[serde(default)]
     pub custom_name: String,
     #[serde(default)]
-    pub theme: StripTheme,
+    pub theme: PetTheme,
     pub included_in_random_cast: bool,
     pub appearance: AppearancePreferences,
     pub labels: LabelPreferences,
@@ -118,6 +134,32 @@ pub enum StripTheme {
     #[default]
     Standard,
     Ocean,
+    Rainforest,
+    Snowy,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PetTheme {
+    #[default]
+    Standard,
+    Ocean,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum RainforestMode {
+    #[default]
+    AfterRain,
+    Firefly,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum SnowMode {
+    #[default]
+    FreshSnow,
+    AuroraNight,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -158,6 +200,10 @@ impl PreferencesFile {
                 open_with_herdr: true,
                 settings_appearance: SettingsAppearance::System,
                 strip_theme: StripTheme::Standard,
+                rainforest_mode: RainforestMode::AfterRain,
+                rainforest_opacity_percent: default_rainforest_opacity_percent(),
+                snow_mode: SnowMode::FreshSnow,
+                snow_opacity_percent: default_snow_opacity_percent(),
                 ocean_opacity_percent: default_ocean_opacity_percent(),
                 ocean_waterline_height_px: default_ocean_waterline_height_px(),
                 last_selected_pet_id: first,

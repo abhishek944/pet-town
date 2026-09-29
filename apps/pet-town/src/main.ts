@@ -1,6 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { installPetFocus } from "./pet-focus";
 import { installPetInteractions } from "./pet-interactions";
 import { VillageRenderer, type HitRegion } from "./renderer";
 import {
@@ -34,6 +33,16 @@ const villageElement = document.querySelector<HTMLElement>("#village");
 
 if (!villageElement) throw new Error("village root is missing");
 const village: HTMLElement = villageElement;
+void invoke("trace_pet_input", { stage: "ready" });
+for (const stage of ["pointerdown", "pointerup", "pointercancel", "click", "contextmenu"]) {
+  village.addEventListener(
+    stage,
+    () => {
+      void invoke("trace_pet_input", { stage });
+    },
+    true,
+  );
+}
 
 let citizens = new Map<string, CitizenState>();
 let activePetIds: readonly CharacterId[] = CHARACTER_IDS;
@@ -64,6 +73,9 @@ systemReducedMotion.addEventListener("change", (event) => {
   renderer.setSystemReducedMotion(event.matches);
 });
 installPetInteractions(village, {
+  focusAgent: (id) => {
+    void invoke("focus_agent", { id }).catch((error) => console.warn("Could not open pet", error));
+  },
   openPreferences: (id) => {
     const petId = citizens.get(id)?.sprite;
     if (petId) void invoke("open_preferences", { petId });
@@ -72,11 +84,6 @@ installPetInteractions(village, {
   moveDrag: (id, clientX) => renderer.moveDrag(id, clientX),
   endDrag: (id) => renderer.endDrag(id),
   geometryChanged: () => renderer.refreshHitRegions(),
-});
-installPetFocus(village, (id) => {
-  void invoke("focus_agent", { id }).catch(() => {
-    // The agent may have exited or moved since the latest poll.
-  });
 });
 
 function render(whilePaused = false): void {

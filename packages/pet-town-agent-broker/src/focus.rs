@@ -98,7 +98,6 @@ fn focus_herdr(pane_id: &str, socket: Option<&str>, expected_session: &str) -> R
 pub fn focus_route(route: &FocusRoute) -> Result<(), String> {
     focus_route_with_codex_activation(route).map(|_| ())
 }
-
 /// Returns whether Codex Desktop itself was activated (rather than a fallback app).
 pub fn focus_route_with_codex_activation(route: &FocusRoute) -> Result<bool, String> {
     match route {
@@ -117,11 +116,12 @@ pub fn focus_route_with_codex_activation(route: &FocusRoute) -> Result<bool, Str
 
 #[cfg(target_os = "macos")]
 fn focus_codex(thread_id: Option<&str>, fallback: Option<&str>) -> Result<bool, String> {
-    if activate_application("com.openai.codex").is_ok() {
+    if let Ok(application_path) = activate_application("com.openai.codex") {
         if let Some(id) = thread_id.filter(|id| valid_codex_thread(id)) {
+            let application_path = application_path.ok_or("Codex's bundle path is unavailable")?;
             let url = format!("codex://threads/{id}");
             let opened = std::process::Command::new("/usr/bin/open")
-                .args(["-b", "com.openai.codex", &url])
+                .args(["-a", &application_path, &url])
                 .status()
                 .map_err(|error| error.to_string())?;
             if !opened.success() {
@@ -153,12 +153,12 @@ fn focus_codex(_thread_id: Option<&str>, _fallback: Option<&str>) -> Result<bool
 }
 
 #[cfg(not(target_os = "macos"))]
-fn activate_application(_bundle_id: &str) -> Result<(), String> {
+fn activate_application(_bundle_id: &str) -> Result<Option<String>, String> {
     Err("application focus is unavailable on this platform".to_string())
 }
 
 #[cfg(target_os = "macos")]
-fn activate_application(bundle_id: &str) -> Result<(), String> {
+fn activate_application(bundle_id: &str) -> Result<Option<String>, String> {
     use objc2_app_kit::{NSApplicationActivationOptions, NSRunningApplication};
     use std::process::Command;
 
@@ -184,10 +184,15 @@ fn activate_application(bundle_id: &str) -> Result<(), String> {
         {
             continue;
         }
+        // Preserve the running installation when apps share a bundle ID.
+        let path = application
+            .bundleURL()
+            .and_then(|url| url.path())
+            .map(|path| path.to_string());
         application.unhide();
         return application
             .activateWithOptions(NSApplicationActivationOptions::ActivateAllWindows)
-            .then_some(())
+            .then_some(path)
             .ok_or_else(|| "macOS refused to activate the agent application".to_string());
     }
     Err("the agent application is not running".to_string())

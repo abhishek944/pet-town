@@ -1,0 +1,109 @@
+.rainforest-scene {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none !important;
+}
+
+.rainforest-scene[hidden] {
+  display: none !important;
+}
+
+.rainforest-scene svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.rainforest-scene svg * {
+  pointer-events: none;
+}
+
+.rainforest-scene .plant {
+  animation: rainforest-sway 7s ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+
+.rainforest-scene .vine {
+  animation: rainforest-sway 9s ease-in-out infinite alternate;
+  transform-origin: 95px 43px;
+}
+
+.rainforest-scene .mist {
+  animation: rainforest-drift 16s ease-in-out infinite alternate;
+}
+
+.rainforest-scene .waterline {
+  stroke-dasharray: 12 7;
+  animation: rainforest-flow 2s linear infinite;
+  animation-delay: var(--delay);
+}
+
+.rainforest-scene .ripple {
+  animation: rainforest-ripple 4s ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+
+.rainforest-scene .wings {
+  animation: rainforest-flap 0.55s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.rainforest-scene .firefly {
+  animation: rainforest-glimmer 5s ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+
+.rainforest-scene.is-frozen * {
+  animation-play-state: paused !important;
+}
+
+@keyframes rainforest-sway {
+  to {
+    rotate: 2deg;
+  }
+}
+
+@keyframes rainforest-drift {
+  to {
+    translate: 15px -7px;
+  }
+}
+
+@keyframes rainforest-flow {
+  to {
+    stroke-dashoffset: -38;
+  }
+}
+
+@keyframes rainforest-ripple {
+  to {
+    translate: 12px 0;
+    opacity: 0.2;
+  }
+}
+
+@keyframes rainforest-flap {
+  to {
+    scale: 0.4 1;
+  }
+}
+
+@keyframes rainforest-glimmer {
+  from {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 1;
+    translate: 4px -6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rainforest-scene * {
+    animation-play-state: paused !important;
+  }
+}

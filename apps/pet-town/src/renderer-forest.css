@@ -1,0 +1,12 @@
+/* Rainforest shares Standard's pet size, foot-padding correction and ground baseline. */
+.village[data-strip-theme="rainforest"] .project {
+  padding: 4px 8px;
+  border-color: rgb(219 237 207 / 0.2);
+  border-radius: 7px;
+  background: rgb(26 43 40 / 0.88);
+  color: #f7fff4;
+  font-size: calc(11px * var(--label-scale, 1));
+  font-weight: 600;
+  text-shadow: none;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.13);
+}

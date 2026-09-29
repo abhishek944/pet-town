@@ -1,13 +1,10 @@
 import { advanceTrack, BehaviorMachine, remapTrackPosition, type CompiledBehaviorPack } from "./flow-runtime";
-import { behaviorPackForCharacter } from "./character-packs";
-import { effectivePetTheme, oceanRowingUrl } from "./ocean-assets";
-import { createOceanWater, oceanWaveSampler, updateOceanWater } from "./ocean-water";
-import { citizenSize, type CitizenState } from "./village";
-import { freezePetFrame, unfreezePetFrame } from "./pet-freeze";
+import { behaviorPackForCharacter } from "./character-packs"; import { RendererScenery } from "./renderer-scenery";
+import type { CitizenState } from "./village"; import { freezePetFrame } from "./pet-freeze";
 import type { PreferencesFile } from "./preferences-types";
-import { applyMotionPosition, collectHitRegions } from "./renderer-layout";
+import { collectHitRegions } from "./renderer-layout";
 import { resolveLabelOverlaps } from "./renderer-labels";
-import { applyCitizenPreferences, shouldHideCompleted, shouldHideCompletedElement, travelDistanceFor } from "./renderer-preferences";
+import { applyCitizenPreferences, resizeCitizens, shouldHideCompleted, shouldHideCompletedElement, travelDistanceFor } from "./renderer-preferences";
 import { applyFlowSample, CITIZEN_TRACK_WIDTH, createCitizenElement, distanceWhileAssetPending, type HitRegion, motionSeed, refreshCitizenLabelPosition, SUSPENSION_GAP_MS, updateCitizenElement } from "./renderer-view";
 import { setPreferenceHidden } from "./renderer-visibility";
 export type { HitRegion } from "./renderer-view";
@@ -17,20 +14,19 @@ interface MotionState {
   pendingElapsedMs: number; dragging: boolean; dragOffsetX: number;
 }
 export class VillageRenderer {
-  private readonly oceanWater = createOceanWater();
+  private readonly scenery: RendererScenery;
   private readonly elements = new Map<string, HTMLElement>();
   private readonly motions = new Map<string, MotionState>();
   private currentCitizenSize = 44; private currentWidth = window.innerWidth;
   private lastTimestamp = 0; private logicalRemainderMs = 0;
   private lastHitRegionUpdate = 0;
-  private preferences: PreferencesFile | null = null; private paused = false;
-  private systemReducedMotion = false;
+  private preferences: PreferencesFile | null = null; private paused = false; private systemReducedMotion = false;
   constructor(
     private readonly root: HTMLElement,
     private readonly updateHitRegions: (regions: HitRegion[]) => void = () => {},
     private readonly behaviorPackForCitizen: (citizen: CitizenState) => CompiledBehaviorPack = (citizen) => behaviorPackForCharacter(citizen.sprite),
   ) {
-    this.root.prepend(this.oceanWater);
+    this.scenery = new RendererScenery(this.root);
     window.requestAnimationFrame(this.animate);
   }
   render(citizens: ReadonlyMap<string, CitizenState>, width: number): void {
@@ -41,8 +37,7 @@ export class VillageRenderer {
       if (!liveIds.has(id)) {
         element.dispatchEvent(new Event("citizen-hidden", { bubbles: true }));
         element.remove();
-        this.elements.delete(id);
-        this.motions.delete(id);
+        this.elements.delete(id); this.motions.delete(id);
       }
     }
     const maximumX = Math.max(0, width - CITIZEN_TRACK_WIDTH);
@@ -65,11 +60,8 @@ export class VillageRenderer {
           direction: motion?.direction ?? ((seed & 1) === 0 ? 1 : -1),
           maximumX: motion?.maximumX ?? maximumX,
           behavior: new BehaviorMachine(pack, citizen.id, citizen.status),
-          packFingerprint: pack.fingerprint,
-          fallbackAssetUrl,
-          pendingElapsedMs: 0,
-          dragging: false,
-          dragOffsetX: 0,
+          packFingerprint: pack.fingerprint, fallbackAssetUrl,
+          pendingElapsedMs: 0, dragging: false, dragOffsetX: 0,
         };
         this.motions.set(citizen.id, motion);
       } else {
@@ -84,8 +76,9 @@ export class VillageRenderer {
         motion.maximumX = maximumX;
       }
       if (motion.behavior.setStatus(citizen.status)) motion.pendingElapsedMs = 0;
-      applyFlowSample(element, motion.behavior.advance(0).sample,
-        motion.fallbackAssetUrl, this.refreshGeometry, this.themeAssetFor(element));
+      const sample = motion.behavior.advance(0).sample;
+      applyFlowSample(element, sample,
+        motion.fallbackAssetUrl, this.refreshGeometry, this.themeAssetFor(element, sample.state));
       this.applyDirectionAndPosition(element, motion, waveSampler);
     }
     this.refreshGeometry();
@@ -97,7 +90,9 @@ export class VillageRenderer {
     const logicalElapsed = shouldPause ? 0 : Math.max(0, frameGap) + this.logicalRemainderMs;
     const elapsedMs = Math.floor(logicalElapsed);
     this.logicalRemainderMs = shouldPause ? 0 : logicalElapsed - elapsedMs;
+    const oceanChanged = this.scenery.advance(this.paused || shouldPause ? 0 : elapsedMs, this.systemReducedMotion);
     if (this.paused) {
+      if (oceanChanged) this.refreshOceanWakes();
       for (const element of this.elements.values()) freezePetFrame(element);
       window.requestAnimationFrame(this.animate);
       return;
@@ -106,8 +101,8 @@ export class VillageRenderer {
     for (const [id, element] of this.elements) {
       const motion = this.motions.get(id);
       if (!motion || element.classList.contains("retiring")) continue;
-      const themedAssetUrl = this.themeAssetFor(element);
       const currentSample = motion.behavior.sample();
+      const themedAssetUrl = this.themeAssetFor(element, currentSample.state);
       if (motion.dragging) {
         applyFlowSample(element, currentSample, motion.fallbackAssetUrl, this.refreshGeometry, themedAssetUrl);
         this.applyDirectionAndPosition(element, motion, waveSampler);
@@ -126,10 +121,12 @@ export class VillageRenderer {
       const position = advanceTrack(motion.x, motion.direction, distance, motion.maximumX);
       motion.x = position.x;
       motion.direction = position.direction;
-      applyFlowSample(element, advance.sample, motion.fallbackAssetUrl, this.refreshGeometry, themedAssetUrl);
-      this.applyDirectionAndPosition(element, motion, waveSampler);
+      applyFlowSample(element, advance.sample, motion.fallbackAssetUrl, this.refreshGeometry,
+        this.themeAssetFor(element, advance.sample.state));
+      this.applyDirectionAndPosition(element, motion, waveSampler, distance !== 0 && advance.sample.moving);
     }
-    if (timestamp - this.lastHitRegionUpdate >= 160) {
+    this.refreshOceanWakes();
+    if (timestamp - this.lastHitRegionUpdate >= 50) {
       this.lastHitRegionUpdate = timestamp;
       this.publishHitRegions();
     }
@@ -141,10 +138,7 @@ export class VillageRenderer {
   }
   setPreferences(preferences: PreferencesFile): void {
     this.preferences = preferences;
-    this.root.dataset.stripTheme = preferences.app.stripTheme;
-    updateOceanWater(this.oceanWater, preferences.app.stripTheme, preferences.app.oceanOpacityPercent,
-      preferences.app.oceanWaterlineHeightPx);
-    this.root.style.setProperty("--ocean-citizen-bottom", `${preferences.app.oceanWaterlineHeightPx - 6}px`);
+    this.scenery.setPreferences(preferences);
     const waveSampler = this.currentWaveSampler();
     for (const [id, element] of this.elements) {
       setPreferenceHidden(element, shouldHideCompletedElement(element, this.preferences), this.refreshGeometry);
@@ -155,17 +149,15 @@ export class VillageRenderer {
     }
     this.refreshGeometry();
   }
-  setSystemReducedMotion(reduced: boolean): void { this.systemReducedMotion = reduced; }
+  setSystemReducedMotion(reduced: boolean): void {
+    this.systemReducedMotion = reduced;
+    this.scenery.setReduced(reduced, this.elements, this.motions);
+    this.publishHitRegions();
+  }
   setPaused(paused: boolean): void {
     this.paused = paused;
-    this.oceanWater.classList.toggle("is-paused", paused);
+    this.scenery.setPaused(paused, this.elements, this.motions);
     this.lastTimestamp = 0;
-    const waveSampler = this.currentWaveSampler();
-    for (const [id, element] of this.elements) {
-      if (paused) freezePetFrame(element); else unfreezePetFrame(element);
-      const motion = this.motions.get(id);
-      if (motion) this.applyDirectionAndPosition(element, motion, waveSampler);
-    }
     this.publishHitRegions();
   }
   beginDrag(id: string, clientX: number): boolean {
@@ -186,37 +178,16 @@ export class VillageRenderer {
   }
   endDrag(id: string): void {
     const motion = this.motions.get(id);
-    if (!motion) return;
-    motion.dragging = false;
-    this.publishHitRegions(); }
+    if (motion) { motion.dragging = false; this.publishHitRegions(); }
+  }
   refreshHitRegions(): void { this.publishHitRegions(); }
-  private themeAssetFor(element: HTMLElement): string | null {
-    const id = element.dataset.characterId ?? "";
-    return effectivePetTheme(this.preferences, id) === "ocean" ? oceanRowingUrl(id) : null;
-  }
-  private currentWaveSampler(): ((x: number) => number) | null {
-    return this.preferences?.app.stripTheme === "ocean"
-      ? oceanWaveSampler(this.oceanWater, this.preferences.app.oceanWaterlineHeightPx)
-      : null;
-  }
-  private applyDirectionAndPosition(
-    element: HTMLElement,
-    motion: MotionState,
-    waveSampler: ((x: number) => number) | null,
-  ): void {
-    applyMotionPosition(element, motion, waveSampler?.(motion.x + CITIZEN_TRACK_WIDTH / 2) ?? 0);
-  }
+  private themeAssetFor(element: HTMLElement, state: import("./flow-types").HerdrState): string | null { return this.scenery.assetFor(element, state); }
+  private currentWaveSampler(): ((x: number) => number) | null { return this.scenery.sampler(); }
+  private applyDirectionAndPosition(element: HTMLElement, motion: MotionState, sampler: ((x: number) => number) | null, walking?: boolean): void { this.scenery.position(element, motion, sampler, walking); }
+  private refreshOceanWakes(): void { this.scenery.updateWakes(this.elements, this.motions, this.currentCitizenSize); }
   private readonly refreshGeometry = (): void => {
-    const visibleCount = [...this.elements.values()].filter((element) => !element.hidden).length;
-    const size = citizenSize(visibleCount, this.currentWidth, 77);
-    if (size !== this.currentCitizenSize) {
-      this.currentCitizenSize = size;
-      this.root.style.setProperty("--citizen-size", `${size}px`);
-      for (const element of this.elements.values()) {
-        applyCitizenPreferences(element, size, this.preferences);
-        refreshCitizenLabelPosition(element);
-      }
-    }
+    this.currentCitizenSize = resizeCitizens(this.root, this.elements.values(), this.currentWidth, this.preferences, this.currentCitizenSize);
+    this.refreshOceanWakes();
     this.publishHitRegions();
   };
   private readonly publishHitRegions = (): void => {

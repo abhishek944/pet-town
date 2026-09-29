@@ -1,11 +1,9 @@
 import AVFoundation
 import Foundation
 import Speech
-
 typealias WakeCallback = @convention(c) (Bool, UnsafePointer<CChar>?, UInt64) -> Void
-
 private final class WakeController {
-    private let engine = AVAudioEngine()
+    private var engine = AVAudioEngine()
     private var task: SFSpeechRecognitionTask?
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var tapInstalled = false
@@ -16,8 +14,11 @@ private final class WakeController {
     private var callback: WakeCallback?
     private var lastTranscript = ""
     private var configurationObserver: NSObjectProtocol?
-
     fileprivate init() {
+        observeEngine()
+    }
+    private func observeEngine() {
+        if let configurationObserver { NotificationCenter.default.removeObserver(configurationObserver) }
         configurationObserver = NotificationCenter.default.addObserver(
             forName: .AVAudioEngineConfigurationChange,
             object: engine,
@@ -28,23 +29,21 @@ private final class WakeController {
             self.scheduleRestart()
         }
     }
-
     deinit {
         if let configurationObserver { NotificationCenter.default.removeObserver(configurationObserver) }
     }
-
     private func recognizer() -> SFSpeechRecognizer? {
         let current = SFSpeechRecognizer()
         if current?.supportsOnDeviceRecognition == true { return current }
         return SFSpeechRecognizer(locale: Locale(identifier: "en_US"))
     }
-
     func supported() -> Bool {
         recognizer()?.supportsOnDeviceRecognition == true
     }
-
     func start(_ phrase: String, rustGeneration: UInt64, callback: @escaping WakeCallback) {
         stop()
+        engine = AVAudioEngine()
+        observeEngine()
         let token = generation
         self.wantsListening = true
         self.phrases = phrase.split(separator: "\n").map { normalized(String($0)) }
@@ -89,7 +88,6 @@ private final class WakeController {
             }
         }
     }
-
     func stop() {
         wantsListening = false
         generation &+= 1
@@ -102,14 +100,12 @@ private final class WakeController {
         task = nil
         request = nil
     }
-
     private func normalized(_ value: String) -> String {
         value.lowercased()
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { !$0.isEmpty }
             .joined(separator: " ")
     }
-
     private func beginRecognition(_ token: UInt64) {
         guard wantsListening, generation == token else { return }
         guard let recognizer = recognizer(), recognizer.supportsOnDeviceRecognition else {
@@ -125,7 +121,13 @@ private final class WakeController {
         request.taskHint = .confirmation
         self.request = request
         let input = engine.inputNode
-        input.installTap(onBus: 0, bufferSize: 1024, format: input.outputFormat(forBus: 0)) {
+        let format = input.outputFormat(forBus: 0)
+        guard format.sampleRate > 0, format.channelCount > 0 else {
+            report(false, "Microphone input is not ready; retrying locally.")
+            scheduleRestart()
+            return
+        }
+        input.installTap(onBus: 0, bufferSize: 1024, format: format) {
             buffer, _ in request.append(buffer)
         }
         tapInstalled = true
@@ -161,6 +163,8 @@ private final class WakeController {
     private func scheduleRestart() {
         guard wantsListening else { return }
         stop()
+        engine = AVAudioEngine()
+        observeEngine()
         wantsListening = true
         let token = generation
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in

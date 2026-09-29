@@ -55,6 +55,7 @@ pub fn publish_mayor(state: &OrchestratorState, app: &AppHandle) {
             "speech": speech,
             "voiceStatus": voice_status,
             "firstmateMode": firstmate_mode,
+            "firstmateOwned": super::firstmate::firstmate_voice_ready(app.clone()),
             "speaking": pet.speaking,
         });
         if let Ok(bytes) = serde_json::to_vec(&payload) {
@@ -78,15 +79,7 @@ pub fn pet_state(state: &OrchestratorState, app: &AppHandle) -> OrchestratorPetS
     let runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
     OrchestratorPetState {
         active: configured.enabled && pet_ready,
-        citizen_id: Some(if firstmate {
-            "pet-town-assistant".into()
-        } else {
-            runtime
-                .agent
-                .as_ref()
-                .map(|agent| agent.public_id.clone())
-                .unwrap_or_else(|| "pet-town-assistant".into())
-        }),
+        citizen_id: Some("pet-town-assistant".into()),
         pet_id: configured.pet_id.clone(),
         display_name: configured.display_name.clone(),
         listening: if firstmate {
@@ -94,7 +87,11 @@ pub fn pet_state(state: &OrchestratorState, app: &AppHandle) -> OrchestratorPetS
         } else {
             runtime.listening
         },
-        working: !firstmate || phase == super::firstmate::WORKING,
+        working: if firstmate {
+            phase == super::firstmate::WORKING
+        } else {
+            runtime.active_task_id.is_some()
+        },
         speaking: if firstmate {
             phase == super::firstmate::SPEAKING
         } else {

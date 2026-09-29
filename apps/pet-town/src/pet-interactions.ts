@@ -14,6 +14,7 @@ function menuIcon(paths: readonly string[]): SVGSVGElement {
 }
 export interface PetInteractionDelegate {
   openPreferences(id: string): void;
+  focusAgent(id: string): void;
   beginDrag(id: string, clientX: number): boolean;
   moveDrag(id: string, clientX: number): void;
   endDrag(id: string): void;
@@ -107,6 +108,9 @@ export function installPetInteractions(
       delegate.endDrag(draggedId);
       suppressNextClick();
       event.preventDefault();
+    } else if (event.type === "pointerup" && draggedId
+      && Math.abs(event.clientX - startX) < DRAG_THRESHOLD_PX) {
+      delegate.focusAgent(draggedId);
     }
     pointerId = null;
     draggedId = null;

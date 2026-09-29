@@ -21,7 +21,9 @@ pub fn stop_orchestrator_session(app: AppHandle) {
         runtime.mayor_speaking = false;
         runtime.session_generation = runtime.session_generation.wrapping_add(1);
         runtime.canceling_task_id = None;
-        runtime.active_task_id.as_ref().and(runtime.agent.clone())
+        let agent = runtime.active_task_id.as_ref().and(runtime.agent.clone());
+        runtime.active_task_id = None;
+        agent
     };
     if let Some(agent) = active_agent {
         cancel_or_close(&state, agent);

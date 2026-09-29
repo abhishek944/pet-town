@@ -19,7 +19,6 @@ export function renderVoiceStatus(status: Status, connecting: boolean, pushToTal
     : "Connect voice";
   $<HTMLButtonElement>("disconnect").disabled = !status.liveConnected && !connecting;
   $<HTMLButtonElement>("cancel").disabled = !status.taskActive;
-  $<HTMLSelectElement>("workspace").disabled = status.liveConnected;
 }
 
 export function isMayorWake(utterance: string, mayorName: string): boolean {

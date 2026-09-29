@@ -1,14 +1,11 @@
 .ocean-water {
   position: absolute;
   z-index: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 102px;
+  inset: 0;
   overflow: hidden;
   pointer-events: none !important;
   --ocean-top-opacity: 0.36;
-  --ocean-bottom-opacity: 0.29;
+  --ocean-bottom-opacity: 0.288;
 }
 
 .ocean-water[hidden] {
@@ -16,17 +13,14 @@
 }
 
 .ocean-water svg {
-  position: absolute;
-  left: -24px;
-  bottom: 0;
-  width: calc(100% + 48px);
+  display: block;
+  width: 100%;
   height: 100%;
   pointer-events: none;
-  animation: ocean-surface-drift 8s ease-in-out infinite alternate;
 }
 
-.ocean-water.is-paused svg {
-  animation-play-state: paused;
+.ocean-water svg * {
+  pointer-events: none;
 }
 
 .ocean-top {
@@ -37,23 +31,33 @@
   stop-opacity: var(--ocean-bottom-opacity);
 }
 
+.ocean-wave-back {
+  stroke: #2acece;
+  stroke-width: 1;
+  opacity: 0.15;
+}
+
 .ocean-wave-depth {
-  stroke: #29bdd0;
-  stroke-opacity: 0.48;
-  stroke-width: 8;
-  transform: translateY(5px);
+  stroke: #2acece;
+  stroke-opacity: 0.3;
+  stroke-width: 7;
 }
 
 .ocean-wave-crest {
   stroke: #c5fbff;
-  stroke-width: 3.5;
+  stroke-opacity: 0.95;
+  stroke-width: 2.1;
 }
 
-@keyframes ocean-surface-drift {
-  from { transform: translateX(-10px); }
-  to { transform: translateX(10px); }
+.ocean-boat-wake,
+.ocean-boat-spray {
+  stroke: #c5fbff;
+  stroke-linecap: round;
+  stroke-width: 1.2;
+  opacity: 0.4;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ocean-water svg { animation: none; }
+.ocean-boat-spray {
+  stroke-width: 1.8;
+  opacity: 0.3;
 }

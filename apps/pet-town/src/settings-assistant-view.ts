@@ -20,12 +20,10 @@ export function renderAssistantStatus(
   const runningModel = status.piModel
     ? `${modelLabel(status.piModel)} · ${status.piThinking ?? "unknown"}`
     : configuredModel;
-  pi.textContent = configured?.mode === "firstmate"
-    ? "Starts in selected Firstmate folder"
-    : status.piConnected
-    ? `Running · ${runningModel}`
+  pi.textContent = status.piConnected
+    ? `Firstmate running · ${runningModel}`
     : configured?.enabled
-      ? `Starts after wake phrase · ${configuredModel}`
+      ? `Starts in selected Firstmate folder · ${configuredModel}`
       : `Disabled · ${configuredModel}`;
   ready.textContent = status.message;
   ready.dataset.ready = String(status.available && status.petReady && status.herdrConnected);
@@ -35,19 +33,22 @@ export function renderAssistantStatus(
     status.petReady &&
     status.herdrConnected &&
     !status.liveConnected;
-  live.textContent = configured?.mode === "firstmate"
-    ? status.available ? "STT + TTS ready" : "OpenAI key missing"
-    : status.liveConnected
-    ? "Connected · tools"
-    : status.available
-      ? configured?.enabled
-        ? status.wakeActivated || status.message === "Connecting voice"
-          ? "Connecting voice"
-          : configured.wakeEnabled
-            ? "Listening for wake phrase"
-            : "Voice idle"
-        : "Key found"
-      : "Key missing";
+  live.textContent =
+    configured?.mode === "firstmate"
+      ? status.available
+        ? "STT + TTS ready"
+        : "OpenAI key missing"
+      : status.liveConnected
+        ? "Connected · tools"
+        : status.available
+          ? configured?.enabled
+            ? status.wakeActivated || status.message === "Connecting voice"
+              ? "Connecting voice"
+              : configured.wakeEnabled
+                ? "Listening for wake phrase"
+                : "Voice idle"
+            : "Key found"
+          : "Key missing";
   live.dataset.ready = String(status.available);
   const reconnect = byId<HTMLButtonElement>("assistant-reconnect");
   const voiceHint = byId<HTMLElement>("assistant-voice-hint");
@@ -56,7 +57,8 @@ export function renderAssistantStatus(
     voiceHint.textContent = "";
   }
   reconnect.hidden = !voiceIdle || !configured?.wakeEnabled || status.wakeActivated;
-  reconnect.textContent = configured?.mode === "firstmate" ? "Listen for Mayor wake phrase" : "Listen for wake phrase";
+  reconnect.textContent =
+    configured?.mode === "firstmate" ? "Listen for Mayor wake phrase" : "Listen for wake phrase";
   if (status.voiceNote) {
     voiceHint.hidden = false;
     voiceHint.textContent = status.voiceNote;

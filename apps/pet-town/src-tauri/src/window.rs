@@ -2,8 +2,6 @@ use serde::Deserialize;
 use std::time::Duration;
 use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewWindow};
 
-const WINDOW_BOTTOM_MARGIN: i32 = 8;
-
 #[cfg(target_os = "macos")]
 tauri_nspanel::tauri_panel! {
     panel!(PetPanel {
@@ -87,7 +85,7 @@ fn refresh_mouse_passthrough(app: &tauri::AppHandle) -> Result<(), Box<dyn std::
 #[cfg(target_os = "macos")]
 pub(crate) fn start_hit_test_loop(app: tauri::AppHandle) {
     std::thread::spawn(move || loop {
-        std::thread::sleep(Duration::from_millis(33));
+        std::thread::sleep(Duration::from_millis(16));
         let target = app.clone();
         if app
             .run_on_main_thread(move || {
@@ -139,6 +137,17 @@ pub(crate) fn configure_window(app: &mut tauri::App) -> Result<(), Box<dyn std::
         use tauri_nspanel::{StyleMask, WebviewWindowExt};
         let panel = window.to_panel::<PetPanel>()?;
         panel.add_style_mask(StyleMask::empty().nonactivating_panel().into())?;
+        // Class conversion skips NSPanel initialization. Synchronize its
+        // WindowServer activation flag as well as its AppKit style mask.
+        unsafe {
+            use tauri_nspanel::objc2::{msg_send, sel};
+            let native = panel.as_panel();
+            let supported: bool =
+                msg_send![native, respondsToSelector: sel!(_setPreventsActivation:)];
+            if supported {
+                let _: () = msg_send![native, _setPreventsActivation: true];
+            }
+        }
         panel.set_hides_on_deactivate(false);
     }
 
@@ -165,8 +174,8 @@ pub(crate) fn configure_window(app: &mut tauri::App) -> Result<(), Box<dyn std::
         let window_height = window.outer_size()?.height;
         window.set_size(PhysicalSize::new(area.size.width, window_height))?;
         let x = area.position.x;
-        let y =
-            area.position.y + area.size.height as i32 - window_height as i32 - WINDOW_BOTTOM_MARGIN;
+        // Scenery must meet the work-area edge; pet clearance belongs to the renderer.
+        let y = area.position.y + area.size.height as i32 - window_height as i32;
         window.set_position(PhysicalPosition::new(x, y))?;
     }
 

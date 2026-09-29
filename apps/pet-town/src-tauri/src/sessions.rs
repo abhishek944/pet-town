@@ -1,4 +1,4 @@
-use pet_town_agent_broker::{AgentSnapshot, BrokerSnapshot};
+use pet_town_agent_broker::{AgentSnapshot, BrokerSnapshot, FocusRoute};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -8,31 +8,43 @@ struct MayorSessionOwner {
     log: PathBuf,
 }
 
+fn active_mayor_owner() -> Option<MayorSessionOwner> {
+    let path = crate::preferences_io::preferences_path().ok()?;
+    let firstmate_active = std::fs::read(&path)
+        .ok()
+        .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok())
+        .is_some_and(|preferences| preferences["app"]["orchestrator"]["enabled"] == true);
+    if !firstmate_active {
+        return None;
+    }
+    let owner = std::fs::read(path.with_file_name("firstmate-session.json"))
+        .ok()
+        .and_then(|bytes| serde_json::from_slice::<MayorSessionOwner>(&bytes).ok())?;
+    (!owner.pane.is_empty() && owner.log.is_absolute()).then_some(owner)
+}
+
+fn is_mayor_primary(route: &FocusRoute, owner: &MayorSessionOwner) -> bool {
+    matches!(route, FocusRoute::Herdr { pane_id, agent_session_id, .. }
+        if pane_id == &owner.pane && PathBuf::from(agent_session_id) == owner.log)
+}
+
+pub(crate) fn mayor_primary_route() -> Option<FocusRoute> {
+    let owner = active_mayor_owner()?;
+    pet_town_agent_broker::collect()
+        .focus_routes
+        .into_values()
+        .find(|route| is_mayor_primary(route, &owner))
+}
+
 pub(crate) fn collect_visible() -> BrokerSnapshot {
     let mut collected = pet_town_agent_broker::collect();
-    let Some(owner) = crate::preferences_io::preferences_path()
-        .ok()
-        .and_then(|path| std::fs::read(path.with_file_name("firstmate-session.json")).ok())
-        .and_then(|bytes| serde_json::from_slice::<MayorSessionOwner>(&bytes).ok())
-    else {
+    let Some(owner) = active_mayor_owner() else {
         return collected;
     };
-    if owner.pane.is_empty() || !owner.log.is_absolute() {
-        return collected;
-    }
     let owned_ids: Vec<String> = collected
         .focus_routes
         .iter()
-        .filter_map(|(id, route)| match route {
-            pet_town_agent_broker::FocusRoute::Herdr {
-                pane_id,
-                agent_session_id,
-                ..
-            } if pane_id == &owner.pane && PathBuf::from(agent_session_id) == owner.log => {
-                Some(id.clone())
-            }
-            _ => None,
-        })
+        .filter_map(|(id, route)| is_mayor_primary(route, &owner).then(|| id.clone()))
         .collect();
     collected
         .snapshot

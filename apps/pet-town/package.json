@@ -1,7 +1,7 @@
 {
   "name": "@pet-town/desktop",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Pet Town desktop application",
   "type": "module",
   "engines": {

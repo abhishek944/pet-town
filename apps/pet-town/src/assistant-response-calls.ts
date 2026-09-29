@@ -3,6 +3,7 @@ import { toolTaskContext } from "./assistant-context";
 import type { AssistantTasks, LiveEvent } from "./assistant-tasks";
 
 type PendingCall = { callId: string; name: string; args: string };
+type CallResult = { output: string; replyOffset?: number };
 
 export class AssistantResponseCalls {
   private responseCalls = new Map<string, PendingCall[]>();
@@ -78,31 +79,37 @@ export class AssistantResponseCalls {
     const ownsTask = this.tasks.activeDelegationId === null;
     if (ownsTask) this.tasks.activeDelegationId = outerId;
     let fallbackResult = "";
+    const deliveredOffsets: number[] = [];
     try {
       for (const call of calls) {
         if (attempt !== this.tasks.session.attempt()) return;
-        const output = await this.executeBackendCall(outerId, call);
-        if (call.name === "run_pi_task") fallbackResult = output;
+        const result = await this.executeBackendCall(outerId, call);
+        if (call.name === "run_firstmate_task") fallbackResult = result.output;
         if (
           !this.sendChannel({
             type: "response.item.create",
             event_id: crypto.randomUUID(),
-            item: { type: "function_call_output", call_id: call.callId, output },
+            item: { type: "function_call_output", call_id: call.callId, output: result.output },
           })
         ) {
           this.tasks.session.error(
-            "The Mayor voice connection closed before Pi's result could be delivered.",
+            "The Mayor voice connection closed before Firstmate's result could be delivered.",
           );
           return;
         }
+        if (result.replyOffset !== undefined) deliveredOffsets.push(result.replyOffset);
       }
       if (attempt === this.tasks.session.attempt()) {
         if (!this.sendChannel({ type: "response.create", event_id: crypto.randomUUID() })) {
           this.tasks.session.error(
-            "The Mayor voice connection closed before Pi's answer could continue.",
+            "The Mayor voice connection closed before Firstmate's answer could continue.",
           );
           return;
         }
+        for (const offset of deliveredOffsets)
+          await invoke("acknowledge_firstmate_reply", { offset }).catch((reason) =>
+            this.tasks.session.error(reason),
+          );
         if (fallbackResult) this.scheduleSpeechFallback(attempt, fallbackResult);
       }
     } finally {
@@ -123,7 +130,7 @@ export class AssistantResponseCalls {
       } catch {
         // A plain tool result can still be relayed.
       }
-      const content = `Pi has finished. Give the user this verified result now: ${result.slice(0, 1200)}`;
+      const content = `Firstmate has finished. Give the user this result now: ${result.slice(0, 1200)}`;
       if (
         !this.sendChannel({
           type: "session.commentary.append",
@@ -133,47 +140,56 @@ export class AssistantResponseCalls {
         })
       )
         this.tasks.session.error(
-          "Pi finished, but the Mayor voice connection closed before it could reply.",
+          "Firstmate finished, but the Mayor voice connection closed before it could reply.",
         );
     }, 10_000);
   }
-  private async executeBackendCall(outerId: string, call: PendingCall): Promise<string> {
+  private async executeBackendCall(outerId: string, call: PendingCall): Promise<CallResult> {
     try {
-      if (call.name === "run_pi_task") {
+      if (call.name === "run_firstmate_task") {
         let task = "";
         try {
           task = String(JSON.parse(call.args || "{}").task ?? "");
         } catch {
           task = "";
         }
-        const output = await invoke<string | null>("delegate_orchestrator_task", {
-          delegationId: outerId,
-          context: toolTaskContext(task),
-          full: true,
-        });
-        return JSON.stringify(
-          output
-            ? { status: "completed", result: output }
-            : {
-                status: "not_completed",
-                reason:
-                  "The Pi task did not finish (it may have been canceled). Tell the user plainly and ask whether to retry instead of assuming progress.",
-              },
+        const reply = await invoke<{ text: string; offset: number } | null>(
+          "delegate_firstmate_task",
+          {
+            delegationId: outerId,
+            context: toolTaskContext(task),
+          },
         );
+        return {
+          output: JSON.stringify(
+            reply
+              ? { status: "completed", result: reply.text }
+              : {
+                  status: "not_completed",
+                  reason:
+                    "The Firstmate task did not finish (it may have been canceled). Tell the user plainly and ask whether to retry instead of assuming progress.",
+                },
+          ),
+          replyOffset: reply?.offset,
+        };
       }
-      if (call.name === "cancel_pi_task") {
-        await invoke("cancel_orchestrator_task", { delegationId: outerId });
-        return JSON.stringify({ status: "canceled" });
+      if (call.name === "cancel_firstmate_task") {
+        await invoke("cancel_firstmate_task", {
+          delegationId: this.tasks.activeDelegationId ?? outerId,
+        });
+        return { output: JSON.stringify({ status: "interruption_requested" }) };
       }
-      return JSON.stringify({ status: "error", message: `Unknown tool: ${call.name}` });
+      return { output: JSON.stringify({ status: "error", message: `Unknown tool: ${call.name}` }) };
     } catch (reason) {
       this.tasks.session.error(reason);
-      return JSON.stringify({
-        status: "error",
-        message: String(reason),
-        recovery:
-          "Tell the user plainly what failed and suggest the next step instead of assuming the work is still running.",
-      });
+      return {
+        output: JSON.stringify({
+          status: "error",
+          message: String(reason),
+          recovery:
+            "Tell the user plainly what failed and suggest the next step instead of assuming the work is still running.",
+        }),
+      };
     }
   }
 }

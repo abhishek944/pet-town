@@ -10,6 +10,7 @@ pub async fn start_orchestrator_session(
     wake_generation: Option<u64>,
     app: AppHandle,
 ) -> Result<LiveAnswer, String> {
+    let _ = workspace_id; // Kept for older voice windows; Firstmate owns the work folder.
     if super::openai::api_key().is_none() {
         return Err("Add an OpenAI API key in the environment or Pet Town Keychain entry.".into());
     }
@@ -21,6 +22,11 @@ pub async fn start_orchestrator_session(
         .orchestrator;
     if configured.mode != crate::preferences_model::MayorMode::Live {
         return Err("GPT-Live is only available in Live mode.".into());
+    }
+    if configured.firstmate_path.is_none()
+        || configured.firstmate_path != configured.trusted_firstmate_path
+    {
+        return Err("Choose and trust the Firstmate folder in Mayor settings first.".into());
     }
     if !crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref()) {
         return Err("The bundled Knight mayor is unavailable.".into());
@@ -41,21 +47,9 @@ pub async fn start_orchestrator_session(
     };
     state.emit(&app);
     let preferences = app.state::<PreferencesStore>().snapshot().preferences;
-    // An empty id means the default session folder; a leading slash marks a
-    // picked session folder rather than a workspace id.
-    let workspace_id = if workspace_id.is_empty() {
-        default_session_folder()?
-    } else {
-        workspace_id
-    };
-    let workspace_id = if workspace_id.starts_with('/') {
-        super::herdr::workspace_for_folder(&workspace_id)?
-    } else {
-        workspace_id
-    };
-    // Start Pi and negotiate voice concurrently; neither requires the other.
-    let (pi, voice) = futures_util::future::join(
-        super::launcher::ensure(app.clone(), workspace_id),
+    // The same trusted Firstmate primary handles work in both voice modes.
+    let (firstmate, voice) = futures_util::future::join(
+        super::firstmate::start_firstmate(app.clone()),
         super::openai::create_session(
             sdp,
             &preferences.app.orchestrator.display_name,
@@ -63,8 +57,18 @@ pub async fn start_orchestrator_session(
         ),
     )
     .await;
-    pi?;
-    let answer = voice?;
+    if let Err(error) = firstmate {
+        let mut runtime = state.0.lock().unwrap_or_else(|reason| reason.into_inner());
+        runtime.connecting = false;
+        return Err(error);
+    }
+    let answer = voice.inspect_err(|_| {
+        state
+            .0
+            .lock()
+            .unwrap_or_else(|reason| reason.into_inner())
+            .connecting = false;
+    })?;
     {
         let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
         if runtime.session_generation != generation {
@@ -111,13 +115,6 @@ pub fn rearm_orchestrator_voice(app: AppHandle) -> Result<String, String> {
             format!("Listening for {phrases}. Say a wake phrase to start talking.")
         },
     )
-}
-
-fn default_session_folder() -> Result<String, String> {
-    let home = std::env::var("HOME").map_err(|_| {
-        "Your home folder is unavailable; choose a session folder in Settings.".to_string()
-    })?;
-    Ok(format!("{home}/Documents"))
 }
 
 pub fn preferences_changed(
@@ -190,7 +187,6 @@ pub fn preferences_changed(
     }
     if configured.enabled
         && pet_ready
-        && configured.mode == crate::preferences_model::MayorMode::Firstmate
         && configured.firstmate_path.is_some()
         && configured.firstmate_path == configured.trusted_firstmate_path
         && super::openai::api_key().is_some()

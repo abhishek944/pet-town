@@ -75,31 +75,29 @@ impl OrchestratorState {
                 runtime.degraded_note.clone(),
             )
         };
-        let pi_connected = !launching
-            && lifecycle_generation == observed_generation
-            && current_pane.as_deref() == observed_pane
-            && observed_pi;
+        let pi_connected = super::firstmate::firstmate_voice_ready(app.clone())
+            || (!launching
+                && lifecycle_generation == observed_generation
+                && current_pane.as_deref() == observed_pane
+                && observed_pi);
         let preferences = app.state::<PreferencesStore>().snapshot().preferences;
         let available = super::openai::api_key().is_some();
         let pet_ready = crate::pet_studio::orchestrator_pet_ready(
             preferences.app.orchestrator.pet_id.as_deref(),
         );
-        let firstmate =
+        let standard =
             preferences.app.orchestrator.mode == crate::preferences_model::MayorMode::Firstmate;
         let message = if !available {
             "OpenAI key not found"
         } else if !pet_ready {
             "Mayor pet required"
-        } else if firstmate
-            && (preferences.app.orchestrator.firstmate_path.is_none()
-                || preferences.app.orchestrator.firstmate_path
-                    != preferences.app.orchestrator.trusted_firstmate_path)
+        } else if preferences.app.orchestrator.firstmate_path.is_none()
+            || preferences.app.orchestrator.firstmate_path
+                != preferences.app.orchestrator.trusted_firstmate_path
         {
             "Choose and trust a Firstmate folder"
-        } else if firstmate && herdr_connected {
+        } else if standard && herdr_connected {
             "Ready — hold to talk"
-        } else if live_connected && !pi_connected {
-            "Mayor stopped — reconnect voice"
         } else if live_connected {
             "Voice connected"
         } else if connecting || wake_activated {
@@ -165,6 +163,8 @@ impl OrchestratorState {
             runtime.lifecycle_generation = runtime.lifecycle_generation.wrapping_add(1);
             runtime.launching = false;
             runtime.launch_signature = None;
+            runtime.active_task_id = None;
+            runtime.canceling_task_id = None;
             runtime.agent.clone()
         };
         let Some(agent) = agent else {

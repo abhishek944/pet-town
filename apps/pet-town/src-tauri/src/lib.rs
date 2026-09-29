@@ -1,5 +1,4 @@
 use tauri::Manager;
-
 mod adapter_events;
 mod adapter_setup;
 mod agents;
@@ -8,6 +7,7 @@ mod app_singleton;
 mod control;
 mod focus;
 mod focus_id;
+mod focus_trace;
 #[cfg(target_os = "macos")]
 mod global_mayor_shortcut;
 mod herdr_command;
@@ -120,6 +120,7 @@ pub fn run() {
             adapter_setup::set_adapter_enabled,
             sessions::list_agents,
             focus::focus_agent,
+            focus_trace::trace_pet_input,
             pet_studio::draft_commands::create_pet_draft,
             pet_studio::draft_commands::discard_pet_draft,
             pet_studio::draft_commands::import_pet_animation,
@@ -131,6 +132,8 @@ pub fn run() {
             pet_studio::pack_commands::save_pet_pack,
             orchestrator::task_cancel::cancel_orchestrator_task,
             orchestrator::task_commands::delegate_orchestrator_task,
+            orchestrator::firstmate_live::delegate_firstmate_task,
+            orchestrator::firstmate_live::cancel_firstmate_task,
             orchestrator::status_commands::get_orchestrator_status,
             orchestrator::credentials::openai_key_source,
             orchestrator::credentials::save_openai_key,

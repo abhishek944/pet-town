@@ -56,23 +56,24 @@ export class AssistantSettings {
     byId<HTMLSelectElement>("assistant-thinking").value = value.thinking;
     byId<HTMLSelectElement>("assistant-mode").value = value.mode;
     const firstmate = value.mode === "firstmate";
-    byId<HTMLElement>("assistant-firstmate-location").hidden = !firstmate;
+    byId<HTMLElement>("assistant-standard-controls").hidden = !firstmate;
     byId<HTMLElement>("assistant-live-conversation").hidden = firstmate;
     byId<HTMLElement>("assistant-live-prompt").hidden = firstmate;
     byId<HTMLElement>("assistant-model-hint").textContent = firstmate
       ? "This model runs the Firstmate primary agent in your selected checkout."
-      : "Live mode uses GPT-Live for conversation and this Pi model for delegated work.";
+      : "Live mode uses GPT-Live for speech and this model for Firstmate's work.";
     byId<HTMLElement>("assistant-connection-hint").textContent = firstmate
       ? "Wake or Option+M focuses Mayor. Hold to talk in Settings or hold Control+Option in the 3D town."
-      : "Wake or Option+M starts the GPT-Live conversation.";
+      : "Wake or Option+M starts GPT-Live, with computer work sent to Firstmate.";
     byId<HTMLButtonElement>("assistant-talk").disabled = !this.talkAvailable(value);
-    byId<HTMLButtonElement>("assistant-talk").textContent = this.talkLabel(firstmate && value.enabled);
+    byId<HTMLButtonElement>("assistant-talk").textContent = this.talkLabel(
+      firstmate && value.enabled,
+    );
     const firstmateFolder = byId<HTMLElement>("assistant-firstmate-folder");
     firstmateFolder.textContent = value.firstmatePath?.split("/").pop() || "Not selected";
     firstmateFolder.title = value.firstmatePath || "Choose a Firstmate checkout";
     const promptBox = byId<HTMLTextAreaElement>("assistant-system-prompt");
     if (promptBox.value !== value.systemPrompt) promptBox.value = value.systemPrompt;
-    this.renderFolder();
     const name = value.displayName.trim() || "Mayor";
     byId<HTMLElement>("assistant-intro").textContent = `Hi, I’m ${name}.`;
     byId<HTMLElement>("assistant-wake-phrase").textContent = value.enabled
@@ -89,21 +90,11 @@ export class AssistantSettings {
     this.renderStatus();
   }
 
-  private renderFolder(): void {
-    const saved = this.currentConfiguration()?.workspaceId ?? null;
-    const label = byId<HTMLElement>("assistant-folder");
-    if (saved && saved.startsWith("/")) {
-      label.textContent = saved.split("/").pop() || saved;
-      label.title = saved;
-    } else {
-      label.textContent = "Documents";
-      label.title = "Your Documents folder";
-    }
-  }
-
   private bind(): void {
     const talk = byId<HTMLButtonElement>("assistant-talk");
-    const releaseTalk = () => { void invoke("set_firstmate_talk", { active: false }).catch(() => {}); };
+    const releaseTalk = () => {
+      void invoke("set_firstmate_talk", { active: false }).catch(() => {});
+    };
     talk.addEventListener("pointerdown", (event) => {
       if (talk.disabled) return;
       event.preventDefault();
@@ -129,7 +120,8 @@ export class AssistantSettings {
     });
     window.addEventListener("blur", releaseTalk);
     byId<HTMLSelectElement>("assistant-mode").addEventListener("change", (event) => {
-      this.draft().app.orchestrator.mode = (event.currentTarget as HTMLSelectElement).value as "firstmate" | "live";
+      this.draft().app.orchestrator.mode = (event.currentTarget as HTMLSelectElement).value as
+        "firstmate" | "live";
       this.changed();
       this.render();
     });
@@ -140,7 +132,9 @@ export class AssistantSettings {
         (picked) => {
           button.disabled = false;
           if (typeof picked === "string" && picked) {
-            const trusted = window.confirm(`Trust and launch Pi with instructions and extensions from this Firstmate folder?\n\n${picked}\n\nOnly choose a checkout you trust.`);
+            const trusted = window.confirm(
+              `Trust and launch Pi with instructions and extensions from this Firstmate folder?\n\n${picked}\n\nOnly choose a checkout you trust.`,
+            );
             if (!trusted) return;
             this.draft().app.orchestrator.firstmatePath = picked;
             this.draft().app.orchestrator.trustedFirstmatePath = picked;
@@ -148,7 +142,9 @@ export class AssistantSettings {
             this.render();
           }
         },
-        () => { button.disabled = false; },
+        () => {
+          button.disabled = false;
+        },
       );
     });
     byId<HTMLInputElement>("assistant-name").addEventListener("input", (event) => {
@@ -170,23 +166,6 @@ export class AssistantSettings {
         event.currentTarget as HTMLTextAreaElement
       ).value;
       this.changed();
-    });
-    byId<HTMLButtonElement>("assistant-pick-folder").addEventListener("click", () => {
-      const button = byId<HTMLButtonElement>("assistant-pick-folder");
-      button.disabled = true;
-      open({ directory: true, multiple: false, title: "Choose Pi session folder" }).then(
-        (picked) => {
-          button.disabled = false;
-          if (typeof picked === "string" && picked) {
-            this.draft().app.orchestrator.workspaceId = picked;
-            this.changed();
-            this.renderFolder();
-          }
-        },
-        () => {
-          button.disabled = false;
-        },
-      );
     });
     byId<HTMLButtonElement>("assistant-toggle").addEventListener("click", () => {
       this.draft().app.orchestrator.enabled = !this.draft().app.orchestrator.enabled;
@@ -229,7 +208,9 @@ export class AssistantSettings {
     const configuration = this.currentConfiguration();
     renderAssistantStatus(this.status, configuration);
     byId<HTMLButtonElement>("assistant-talk").disabled = !this.talkAvailable(configuration);
-    byId<HTMLButtonElement>("assistant-talk").textContent = this.talkLabel(configuration?.mode === "firstmate" && !!configuration.enabled);
+    byId<HTMLButtonElement>("assistant-talk").textContent = this.talkLabel(
+      configuration?.mode === "firstmate" && !!configuration.enabled,
+    );
   }
 
   private talkLabel(firstmate: boolean): string {
@@ -241,12 +222,22 @@ export class AssistantSettings {
 
   private talkAvailable(value: PreferencesFile["app"]["orchestrator"] | null): boolean {
     const saved = this.applied();
-    return !!value?.enabled && value.mode === "firstmate" && !!value.firstmatePath
-      && value.firstmatePath === value.trustedFirstmatePath && this.status.available && this.voiceReady
-      && this.mayorPhase !== "working" && this.mayorPhase !== "speaking"
-      && !!saved?.enabled && saved.mode === value.mode && saved.firstmatePath === value.firstmatePath
-      && saved.trustedFirstmatePath === value.trustedFirstmatePath
-      && saved.model === value.model && saved.thinking === value.thinking;
+    return (
+      !!value?.enabled &&
+      value.mode === "firstmate" &&
+      !!value.firstmatePath &&
+      value.firstmatePath === value.trustedFirstmatePath &&
+      this.status.available &&
+      this.voiceReady &&
+      this.mayorPhase !== "working" &&
+      this.mayorPhase !== "speaking" &&
+      !!saved?.enabled &&
+      saved.mode === value.mode &&
+      saved.firstmatePath === value.firstmatePath &&
+      saved.trustedFirstmatePath === value.trustedFirstmatePath &&
+      saved.model === value.model &&
+      saved.thinking === value.thinking
+    );
   }
 
   private currentConfiguration(): PreferencesFile["app"]["orchestrator"] | null {

@@ -69,8 +69,8 @@ pub async fn create_session(
                     "tools": [
                         {
                             "type": "function",
-                            "name": "run_pi_task",
-                            "description": "Run computer work in the user's workspace through the local Pi agent. Pass the user's specific request.",
+                            "name": "run_firstmate_task",
+                            "description": "Send computer work to the Mayor's persistent Firstmate primary agent. Pass the user's specific request and wait for its completed reply.",
                             "parameters": {
                                 "type": "object",
                                 "properties": {
@@ -82,8 +82,8 @@ pub async fn create_session(
                         },
                         {
                             "type": "function",
-                            "name": "cancel_pi_task",
-                            "description": "Cancel the currently running Pi task when the user asks to stop or cancel it.",
+                            "name": "cancel_firstmate_task",
+                            "description": "Interrupt the currently running Firstmate task when the user asks to stop or cancel it.",
                             "parameters": {
                                 "type": "object",
                                 "properties": {

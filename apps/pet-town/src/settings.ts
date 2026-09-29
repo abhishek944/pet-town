@@ -3,9 +3,9 @@ import { listen } from "@tauri-apps/api/event";
 import { characterDisplayName } from "./character-packs";
 import { configurePetPreview } from "./settings-state-map";
 import { effectivePetTheme, oceanRowingUrl } from "./ocean-assets";
-import { createOceanWater, updateOceanWater } from "./ocean-water";
+import { createOceanWater, updateOceanWater } from "./ocean-water"; import { startOceanPreview } from "./ocean-preview";
 import { loadPetPacks } from "./settings-pack-loader";
-import { clonePreferences, friendlyPetName, motionFactor, preferencesEqual, type LabelVisibility, type MotionLevel, type PreferencesFile, type PreferencesSnapshot, type SettingsAppearance, type SettingsContext, type StripTheme } from "./preferences-types";
+import { clonePreferences, friendlyPetName, motionFactor, preferencesEqual, type LabelVisibility, type MotionLevel, type PetTheme, type PreferencesFile, type PreferencesSnapshot, type RainforestMode, type SettingsAppearance, type SettingsContext, type StripTheme } from "./preferences-types";
 import { selectedPreviewAnimationId, type PreviewAnimationOption } from "./settings-preview";
 import { mergeAppliedDraft, settingsMessage, shouldShowApplyError } from "./settings-apply"; import { mergeLocalPreferenceEdits } from "./settings-three-way";
 import { renderChoiceControls, setSettingsReadOnly } from "./settings-choice-controls";
@@ -14,6 +14,8 @@ import { AdapterSettings } from "./settings-adapters"; import { AssistantSetting
 import { VillageVisibilitySettings } from "./settings-village"; import { bindTownActions } from "./settings-town-actions";
 import { bindRange as bindInputRange, bindSwitch as bindInputSwitch } from "./settings-range";
 import { byId, setSwitch } from "./settings-dom";
+import { SettingsRainforest } from "./settings-rainforest";
+import { SettingsSnow } from "./settings-snow";
 const petSelect = byId<HTMLSelectElement>("pet-select");
 const previewPet = byId<HTMLImageElement>("preview-pet"); const preview = byId<HTMLElement>("preview");
 const oceanPreview = byId<HTMLElement>("ocean-preview"); const oceanPreviewWater = createOceanWater();
@@ -21,6 +23,8 @@ const resetPet = byId<HTMLButtonElement>("reset-pet"); const resetAll = byId<HTM
 const apply = byId<HTMLButtonElement>("apply"); const dirty = byId<HTMLElement>("dirty");
 const message = byId<HTMLElement>("message");
 let snapshot: PreferencesSnapshot; let draft: PreferencesFile;
+const rainforestSettings = new SettingsRainforest(() => draft, render);
+const snowSettings = new SettingsSnow(() => draft, render);
 let selectedPetId = ""; let animationOptions: PreviewAnimationOption[] = [];
 let studio: PetStudio | undefined;
 let selectedAnimationId = "";
@@ -56,7 +60,7 @@ function selectPreviewAnimations(): void {
       navigation.show("studio");
       studio?.importApngForState(petId, state, file);
     },
-    effectivePetTheme(draft, selectedPetId),
+    draft.app.stripTheme === "snowy" ? "standard" : effectivePetTheme(draft, selectedPetId),
   );
   selectedAnimationId = selectedPreviewAnimationId(animationOptions, selectedAnimationByPet.get(selectedPetId));
   selectedAnimationByPet.set(selectedPetId, selectedAnimationId);
@@ -94,23 +98,33 @@ function render(): void {
   const selectedTheme = effectivePetTheme(draft, selectedPetId);
   themeSelect.value = selectedTheme;
   themeSelect.querySelector<HTMLOptionElement>('option[value="ocean"]')!.disabled = !hasOceanArt;
-  byId<HTMLElement>("pet-theme-hint").textContent = !hasOceanArt
-    ? "Ocean animations are not available for this custom pet."
-    : draft.app.stripTheme === "ocean"
-      ? "App Ocean applies to every bundled pet. Switch App to Standard for individual choices."
-      : "Ocean currently uses one rowing APNG for every visible state.";
+  byId<HTMLElement>("pet-theme-hint").textContent = draft.app.stripTheme === "snowy"
+    ? "App Snowy uses Standard assets for every pet. Switch App to Standard for individual Ocean choices."
+    : draft.app.stripTheme === "rainforest"
+      ? "App Rainforest uses Standard animations for every pet. Switch App to Standard for individual Ocean choices."
+      : !hasOceanArt
+        ? "Ocean animations are not available for this custom pet."
+        : draft.app.stripTheme === "ocean"
+          ? "App Ocean applies to every bundled pet. Switch App to Standard for individual choices."
+          : "Ocean currently uses one rowing APNG for every visible state.";
   byId<HTMLElement>("state-map-hint").textContent = selectedTheme === "ocean"
     ? "Ocean currently shares its rowing APNG across visible states. Switch to Standard to replace state APNGs."
     : "Each state picks an APNG and whether the pet walks or stays in place. Select a visible state to preview its APNG.";
   setSwitch("pause-hover", item.motion.pauseOnHover);
   renderChoiceControls(draft, snapshot, item);
   setSettingsReadOnly(snapshot.readOnly);
-  themeSelect.disabled = snapshot.readOnly || !hasOceanArt || draft.app.stripTheme === "ocean";
+  themeSelect.disabled = snapshot.readOnly || !hasOceanArt || draft.app.stripTheme === "ocean" || draft.app.stripTheme === "rainforest" || draft.app.stripTheme === "snowy";
   setSwitch("open-with-herdr", draft.app.openWithHerdr);
   villageVisibility.render();
   assistantSettings.render();
   byId<HTMLSelectElement>("settings-appearance").value = draft.app.settingsAppearance;
   byId<HTMLSelectElement>("strip-theme").value = draft.app.stripTheme;
+  const rainforestMode = byId<HTMLSelectElement>("rainforest-mode");
+  rainforestMode.value = draft.app.rainforestMode;
+  rainforestMode.disabled = snapshot.readOnly || draft.app.stripTheme !== "rainforest";
+  byId<HTMLElement>("rainforest-mode-row").hidden = draft.app.stripTheme !== "rainforest";
+  rainforestSettings.render(draft, snapshot.readOnly);
+  snowSettings.render(draft, snapshot.readOnly);
   const waterlineSlider = byId<HTMLInputElement>("ocean-waterline");
   waterlineSlider.value = String(draft.app.oceanWaterlineHeightPx);
   waterlineSlider.disabled = snapshot.readOnly || draft.app.stripTheme !== "ocean";
@@ -151,7 +165,7 @@ function bindControls(): void {
   byId<HTMLSelectElement>("label-visibility").addEventListener("change", (event) => { pet().labels.visibility = (event.currentTarget as HTMLSelectElement).value as LabelVisibility; render(); });
   byId<HTMLSelectElement>("motion-level").addEventListener("change", (event) => { pet().motion.level = (event.currentTarget as HTMLSelectElement).value as MotionLevel; render(); });
   byId<HTMLSelectElement>("pet-theme").addEventListener("change", (event) => {
-    pet().theme = (event.currentTarget as HTMLSelectElement).value as StripTheme;
+    pet().theme = (event.currentTarget as HTMLSelectElement).value as PetTheme;
     selectPreviewAnimations();
     render();
   });
@@ -164,11 +178,26 @@ function bindControls(): void {
   byId<HTMLSelectElement>("settings-appearance").addEventListener("change", (event) => { draft.app.settingsAppearance = (event.currentTarget as HTMLSelectElement).value as SettingsAppearance; render(); });
   byId<HTMLSelectElement>("strip-theme").addEventListener("change", (event) => {
     const theme = (event.currentTarget as HTMLSelectElement).value as StripTheme;
+    const previousTheme = draft.app.stripTheme;
     draft.app.stripTheme = theme;
-    for (const [id, item] of Object.entries(draft.pets)) {
-      if (oceanRowingUrl(id)) item.theme = theme;
+    // Snowy overrides presentation without erasing individual Ocean choices.
+    if (theme !== "snowy" && !(previousTheme === "snowy" && theme === "standard")) {
+      for (const [id, item] of Object.entries(draft.pets)) {
+        if (oceanRowingUrl(id)) item.theme = theme === "ocean" ? "ocean" : "standard";
+      }
     }
     selectPreviewAnimations();
+    render();
+  });
+  byId<HTMLSelectElement>("rainforest-mode").addEventListener("change", (event) => {
+    const mode = (event.currentTarget as HTMLSelectElement).value;
+    if (mode !== "after-rain" && mode !== "firefly") {
+      draftMessage = "Choose a valid Rainforest mode.";
+      draftMessageTone = "error";
+      render();
+      return;
+    }
+    draft.app.rainforestMode = mode as RainforestMode;
     render();
   });
   resetPet.addEventListener("click", () => {
@@ -227,7 +256,7 @@ function installSelection(next: string | null, fromGallery = false, focus = true
   selectPreviewAnimations(); render(); navigation.show("pet", focus);
 }
 async function start(): Promise<void> {
-  oceanPreview.append(oceanPreviewWater);
+  oceanPreview.append(oceanPreviewWater); startOceanPreview(oceanPreviewWater);
   const extensionWarning = await loadPetPacks(); bindControls(); const studioInstance = new PetStudio(); studio = studioInstance;
   if (extensionWarning) studioInstance.showExtensionWarning(extensionWarning);
   const startup = new SettingsStartupBuffer<PreferencesSnapshot, string | null>();

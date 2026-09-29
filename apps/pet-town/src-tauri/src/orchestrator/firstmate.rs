@@ -1,7 +1,6 @@
 //! The Firstmate primary agent is a separate, persistent Pi session in the selected checkout.
 //! Only completed assistant text from Pi's structured session log is exposed to speech.
 use crate::preferences::PreferencesStore;
-use crate::preferences_model::MayorMode;
 use base64::Engine;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -184,8 +183,8 @@ fn configured(
         .preferences
         .app
         .orchestrator;
-    if !settings.enabled || settings.mode != MayorMode::Firstmate {
-        return Err("Start Mayor in Firstmate mode first.".into());
+    if !settings.enabled {
+        return Err("Start Mayor first.".into());
     }
     if settings.firstmate_path.is_none()
         || settings.firstmate_path != settings.trusted_firstmate_path
@@ -439,9 +438,7 @@ pub async fn start_firstmate(app: AppHandle) -> Result<(), String> {
     })
     .await
     .map_err(|_| "Could not start Firstmate.".to_string())??;
-    if busy {
-        set_phase(&app, WORKING);
-    }
+    set_phase(&app, if busy { WORKING } else { READY });
     app.state::<FirstmateState>()
         .3
         .store(true, Ordering::SeqCst);
@@ -507,11 +504,30 @@ pub async fn firstmate_agent_status(app: AppHandle) -> Result<String, String> {
     .map_err(|_| "Could not check Firstmate status.".to_string())?
 }
 
+pub fn interrupt(app: &AppHandle) -> Result<(), String> {
+    configured(app)?;
+    let agent = app
+        .state::<FirstmateState>()
+        .0
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .agent
+        .clone();
+    if agent.is_empty() {
+        return Err("Firstmate is not connected.".into());
+    }
+    super::herdr::command(
+        &["agent".into(), "send-keys".into(), agent, "esc".into()],
+        Duration::from_secs(5),
+    )
+    .map(|_| ())
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FirstmateReply {
-    text: String,
-    offset: u64,
+    pub(crate) text: String,
+    pub(crate) offset: u64,
 }
 
 /// Only completed assistant messages are eligible, never tools or terminal output.
@@ -686,6 +702,7 @@ pub fn latest_firstmate_reply(app: AppHandle) -> Result<Option<String>, String> 
 
 pub fn close(app: &AppHandle) {
     let state = app.state::<FirstmateState>();
+    state.3.store(false, Ordering::SeqCst);
     let session = {
         let mut current = state.0.lock().unwrap_or_else(|e| e.into_inner());
         if current.agent.is_empty() {

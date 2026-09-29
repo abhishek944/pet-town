@@ -1,5 +1,5 @@
 use crate::preferences_model::{
-    bundled_pet_ids, PreferencesFile, StripTheme, ASSISTANT_PET_ID, COMPLETED_HIDE_DELAYS_MINUTES,
+    bundled_pet_ids, PetTheme, PreferencesFile, ASSISTANT_PET_ID, COMPLETED_HIDE_DELAYS_MINUTES,
     SCHEMA_VERSION,
 };
 
@@ -10,6 +10,12 @@ impl PreferencesFile {
         }
         if !self.pets.contains_key(&self.app.last_selected_pet_id) {
             return Err("lastSelectedPetId is not an installed pet".to_string());
+        }
+        if self.app.rainforest_opacity_percent > 100 {
+            return Err("rainforestOpacityPercent must be 0–100".to_string());
+        }
+        if self.app.snow_opacity_percent > 100 {
+            return Err("snowOpacityPercent must be 0–100".to_string());
         }
         if !(16..=36).contains(&self.app.ocean_opacity_percent) {
             return Err("oceanOpacityPercent must be 16–36".to_string());
@@ -79,7 +85,7 @@ impl PreferencesFile {
         }
         let ocean_pets = bundled_pet_ids();
         for (id, pet) in &self.pets {
-            if pet.theme == StripTheme::Ocean && !ocean_pets.contains(id) {
+            if pet.theme == PetTheme::Ocean && !ocean_pets.contains(id) {
                 return Err(format!("{id}.theme has no Ocean animations"));
             }
             let custom_name = &pet.custom_name;

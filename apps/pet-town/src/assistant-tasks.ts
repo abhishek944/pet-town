@@ -44,7 +44,7 @@ export class AssistantTasks {
     const delegationId = this.activeDelegationId;
     if (!delegationId || this.cancellationSent) return;
     this.cancellationSent = true;
-    void invoke("cancel_orchestrator_task", { delegationId }).catch((reason) => {
+    void invoke("cancel_firstmate_task", { delegationId }).catch((reason) => {
       this.cancellationSent = false;
       this.session.error(reason);
     });
@@ -58,7 +58,7 @@ export class AssistantTasks {
     const delegationId = this.activeDelegationId;
     if (this.cancellationSent || !request || !delegationId) return;
     this.cancellationSent = true;
-    void invoke("cancel_orchestrator_task", { delegationId })
+    void invoke("cancel_firstmate_task", { delegationId })
       .then(() => {
         if (this.session.channel()?.readyState === "open")
           this.session.channel()?.send(
@@ -66,7 +66,7 @@ export class AssistantTasks {
               type: "session.commentary.append",
               event_id: crypto.randomUUID(),
               delegation_id: delegationId,
-              content: "The active Pi task was canceled.",
+              content: "Firstmate was asked to interrupt the active task.",
             }),
           );
       })
