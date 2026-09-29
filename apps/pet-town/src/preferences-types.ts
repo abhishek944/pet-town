@@ -1,10 +1,12 @@
 export const ASSISTANT_PET_ID = "knight";
 
 export type SettingsAppearance = "system" | "light" | "dark";
-export type StripTheme = "standard" | "ocean" | "rainforest" | "snowy";
+export type StripTheme = "standard" | "ocean" | "rainforest" | "snowy" | "desert";
 export type PetTheme = "standard" | "ocean";
 export type RainforestMode = "after-rain" | "firefly";
 export type SnowMode = "fresh-snow" | "aurora-night";
+export type DesertScene = "palm-spring" | "adobe-outpost" | "lantern-caravan";
+export type DesertMode = "golden-dunes" | "moonlit-oasis";
 export type LabelVisibility = "always" | "hover" | "hidden";
 export type MotionLevel = "gentle" | "standard" | "playful";
 
@@ -16,6 +18,9 @@ export interface AppPreferences {
   rainforestOpacityPercent: number;
   snowMode: SnowMode;
   snowOpacityPercent: number;
+  desertScene: DesertScene;
+  desertMode: DesertMode;
+  desertOpacityPercent: number;
   oceanOpacityPercent: number;
   oceanWaterlineHeightPx: number;
   lastSelectedPetId: string;

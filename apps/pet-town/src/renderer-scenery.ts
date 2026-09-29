@@ -1,6 +1,7 @@
 import { RendererOcean } from "./renderer-ocean";
 import { RendererRainforest } from "./rainforest";
 import { RendererSnowy } from "./snow";
+import { RendererDesert } from "./desert";
 import type { PreferencesFile } from "./preferences-types";
 import type { HerdrState } from "./flow-types";
 import type { PositionedMotion } from "./renderer-layout";
@@ -14,6 +15,7 @@ export class RendererScenery {
   private readonly ocean: RendererOcean;
   private readonly forest: RendererRainforest;
   private readonly snow: RendererSnowy;
+  private readonly desert: RendererDesert;
   private reduced = false;
   private paused = false;
 
@@ -21,6 +23,7 @@ export class RendererScenery {
     this.ocean = new RendererOcean(root);
     this.forest = new RendererRainforest(root);
     this.snow = new RendererSnowy(root);
+    this.desert = new RendererDesert(root);
   }
 
   setPreferences(preferences: PreferencesFile): void {
@@ -29,12 +32,15 @@ export class RendererScenery {
     this.forest.advance(0, this.reduced, this.paused);
     this.snow.setPreferences(preferences);
     this.snow.advance(0, this.reduced, this.paused);
+    this.desert.setPreferences(preferences);
+    this.desert.advance(0, this.reduced, this.paused);
   }
 
   advance(elapsedMs: number, reduced: boolean): boolean {
     this.reduced = reduced;
     this.forest.advance(elapsedMs, reduced, this.paused || document.hidden);
     this.snow.advance(elapsedMs, reduced, this.paused || document.hidden);
+    this.desert.advance(elapsedMs, reduced, this.paused || document.hidden);
     return this.ocean.advance(elapsedMs, reduced);
   }
 
@@ -42,6 +48,7 @@ export class RendererScenery {
     this.reduced = reduced;
     this.forest.advance(0, reduced, this.paused);
     this.snow.advance(0, reduced, this.paused);
+    this.desert.advance(0, reduced, this.paused);
     this.ocean.setReduced(reduced, elements, motions);
   }
 
@@ -49,6 +56,7 @@ export class RendererScenery {
     this.paused = paused;
     this.forest.advance(0, this.reduced, paused);
     this.snow.advance(0, this.reduced, paused);
+    this.desert.advance(0, this.reduced, paused);
     this.ocean.setPaused(paused, elements, motions);
   }
 

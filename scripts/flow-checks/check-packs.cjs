@@ -43,9 +43,21 @@ for (const pet of petDirectories) {
   const result = compileBehaviorPack(manifest, assets);
   if (!result.pack) throw new Error(`${pet}/flow.json: ${JSON.stringify(result.diagnostics)}`);
   if (result.pack.id !== pet) throw new Error(`${pet}/flow.json: pack id must match its folder`);
-  const expectedAssets = ["blocked.png", "sleep.png", "walk.png"];
-  if (JSON.stringify(Object.keys(assets).sort()) !== JSON.stringify(expectedAssets))
-    throw new Error(`${pet}: expected blocked.png, sleep.png, and walk.png`);
+  const requiredAssets = [
+    "blocked.png",
+    "listen.png",
+    "sleep.png",
+    "speak.png",
+    "walk.png",
+    "ocean-rowing.png",
+    "ocean-blocked.png",
+    "ocean-done.png",
+    "ocean-listening.png",
+    "ocean-speaking.png",
+  ];
+  const missingAssets = requiredAssets.filter((asset) => !Object.hasOwn(assets, asset));
+  if (missingAssets.length)
+    throw new Error(`${pet}: missing bundled artwork: ${missingAssets.join(", ")}`);
   if (result.pack.states.idle.flow.type !== "hide")
     throw new Error(`${pet}/flow.json: idle visibility is not flow-authored`);
   if ("actions" in result.pack)
@@ -54,7 +66,8 @@ for (const pet of petDirectories) {
     working: "walk",
     blocked: "think",
     done: "sleep",
-    listening: manifest.clips.listen ? "listen" : "walk",
+    listening: "listen",
+    speaking: "speak",
   };
   for (const [state, animation] of Object.entries(expectedAnimations)) {
     if (result.pack.stateAssignments[state].animation !== animation)
@@ -62,7 +75,7 @@ for (const pet of petDirectories) {
   }
   if (result.pack.stateAssignments.working.action !== "walking")
     throw new Error(`${pet}: running pet does not walk`);
-  for (const state of ["blocked", "done", "listening"]) {
+  for (const state of ["blocked", "done", "listening", "speaking"]) {
     if (result.pack.stateAssignments[state].action !== "idle")
       throw new Error(`${pet}: ${state} pet moves`);
   }

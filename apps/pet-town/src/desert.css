@@ -1,0 +1,18 @@
+.desert-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none !important;
+}
+.desert-scene[hidden] {
+  display: none;
+}
+.desert-scene svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.desert-scene * {
+  pointer-events: none;
+}

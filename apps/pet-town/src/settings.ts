@@ -16,6 +16,7 @@ import { bindRange as bindInputRange, bindSwitch as bindInputSwitch } from "./se
 import { byId, setSwitch } from "./settings-dom";
 import { SettingsRainforest } from "./settings-rainforest";
 import { SettingsSnow } from "./settings-snow";
+import { SettingsDesert } from "./settings-desert";
 const petSelect = byId<HTMLSelectElement>("pet-select");
 const previewPet = byId<HTMLImageElement>("preview-pet"); const preview = byId<HTMLElement>("preview");
 const oceanPreview = byId<HTMLElement>("ocean-preview"); const oceanPreviewWater = createOceanWater();
@@ -25,6 +26,7 @@ const message = byId<HTMLElement>("message");
 let snapshot: PreferencesSnapshot; let draft: PreferencesFile;
 const rainforestSettings = new SettingsRainforest(() => draft, render);
 const snowSettings = new SettingsSnow(() => draft, render);
+const desertSettings = new SettingsDesert(() => draft, render);
 let selectedPetId = ""; let animationOptions: PreviewAnimationOption[] = [];
 let studio: PetStudio | undefined;
 let selectedAnimationId = "";
@@ -60,7 +62,9 @@ function selectPreviewAnimations(): void {
       navigation.show("studio");
       studio?.importApngForState(petId, state, file);
     },
-    draft.app.stripTheme === "snowy" ? "standard" : effectivePetTheme(draft, selectedPetId),
+    draft.app.stripTheme === "snowy" || draft.app.stripTheme === "desert"
+      ? "standard"
+      : effectivePetTheme(draft, selectedPetId),
   );
   selectedAnimationId = selectedPreviewAnimationId(animationOptions, selectedAnimationByPet.get(selectedPetId));
   selectedAnimationByPet.set(selectedPetId, selectedAnimationId);
@@ -100,7 +104,9 @@ function render(): void {
   themeSelect.querySelector<HTMLOptionElement>('option[value="ocean"]')!.disabled = !hasOceanArt;
   byId<HTMLElement>("pet-theme-hint").textContent = draft.app.stripTheme === "snowy"
     ? "App Snowy uses Standard assets for every pet. Switch App to Standard for individual Ocean choices."
-    : draft.app.stripTheme === "rainforest"
+    : draft.app.stripTheme === "desert"
+      ? "App Desert Oasis uses Standard assets for every pet. Switch App to Standard for individual Ocean choices."
+      : draft.app.stripTheme === "rainforest"
       ? "App Rainforest uses Standard animations for every pet. Switch App to Standard for individual Ocean choices."
       : !hasOceanArt
         ? "Ocean animations are not available for this custom pet."
@@ -113,7 +119,7 @@ function render(): void {
   setSwitch("pause-hover", item.motion.pauseOnHover);
   renderChoiceControls(draft, snapshot, item);
   setSettingsReadOnly(snapshot.readOnly);
-  themeSelect.disabled = snapshot.readOnly || !hasOceanArt || draft.app.stripTheme === "ocean" || draft.app.stripTheme === "rainforest" || draft.app.stripTheme === "snowy";
+  themeSelect.disabled = snapshot.readOnly || !hasOceanArt || draft.app.stripTheme === "ocean" || draft.app.stripTheme === "rainforest" || draft.app.stripTheme === "snowy" || draft.app.stripTheme === "desert";
   setSwitch("open-with-herdr", draft.app.openWithHerdr);
   villageVisibility.render();
   assistantSettings.render();
@@ -125,6 +131,7 @@ function render(): void {
   byId<HTMLElement>("rainforest-mode-row").hidden = draft.app.stripTheme !== "rainforest";
   rainforestSettings.render(draft, snapshot.readOnly);
   snowSettings.render(draft, snapshot.readOnly);
+  desertSettings.render(draft, snapshot.readOnly);
   const waterlineSlider = byId<HTMLInputElement>("ocean-waterline");
   waterlineSlider.value = String(draft.app.oceanWaterlineHeightPx);
   waterlineSlider.disabled = snapshot.readOnly || draft.app.stripTheme !== "ocean";
@@ -180,8 +187,10 @@ function bindControls(): void {
     const theme = (event.currentTarget as HTMLSelectElement).value as StripTheme;
     const previousTheme = draft.app.stripTheme;
     draft.app.stripTheme = theme;
-    // Snowy overrides presentation without erasing individual Ocean choices.
-    if (theme !== "snowy" && !(previousTheme === "snowy" && theme === "standard")) {
+    // Snowy and Desert override presentation without erasing individual Ocean choices.
+    const preservePetThemes = theme === "snowy" || theme === "desert" ||
+      (theme === "standard" && (previousTheme === "snowy" || previousTheme === "desert"));
+    if (!preservePetThemes) {
       for (const [id, item] of Object.entries(draft.pets)) {
         if (oceanRowingUrl(id)) item.theme = theme === "ocean" ? "ocean" : "standard";
       }

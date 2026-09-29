@@ -13,6 +13,10 @@ pub fn default_snow_opacity_percent() -> u8 {
     36
 }
 
+pub fn default_desert_opacity_percent() -> u8 {
+    36
+}
+
 pub fn default_ocean_opacity_percent() -> u8 {
     36
 }
@@ -44,6 +48,12 @@ pub struct AppPreferences {
     pub snow_mode: SnowMode,
     #[serde(default = "default_snow_opacity_percent")]
     pub snow_opacity_percent: u8,
+    #[serde(default)]
+    pub desert_scene: DesertScene,
+    #[serde(default)]
+    pub desert_mode: DesertMode,
+    #[serde(default = "default_desert_opacity_percent")]
+    pub desert_opacity_percent: u8,
     #[serde(default = "default_ocean_opacity_percent")]
     pub ocean_opacity_percent: u8,
     #[serde(default = "default_ocean_waterline_height_px")]
@@ -136,6 +146,7 @@ pub enum StripTheme {
     Ocean,
     Rainforest,
     Snowy,
+    Desert,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
@@ -160,6 +171,23 @@ pub enum SnowMode {
     #[default]
     FreshSnow,
     AuroraNight,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum DesertScene {
+    #[default]
+    PalmSpring,
+    AdobeOutpost,
+    LanternCaravan,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum DesertMode {
+    #[default]
+    GoldenDunes,
+    MoonlitOasis,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -204,6 +232,9 @@ impl PreferencesFile {
                 rainforest_opacity_percent: default_rainforest_opacity_percent(),
                 snow_mode: SnowMode::FreshSnow,
                 snow_opacity_percent: default_snow_opacity_percent(),
+                desert_scene: DesertScene::PalmSpring,
+                desert_mode: DesertMode::GoldenDunes,
+                desert_opacity_percent: default_desert_opacity_percent(),
                 ocean_opacity_percent: default_ocean_opacity_percent(),
                 ocean_waterline_height_px: default_ocean_waterline_height_px(),
                 last_selected_pet_id: first,

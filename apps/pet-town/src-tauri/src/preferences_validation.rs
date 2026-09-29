@@ -17,6 +17,9 @@ impl PreferencesFile {
         if self.app.snow_opacity_percent > 100 {
             return Err("snowOpacityPercent must be 0–100".to_string());
         }
+        if self.app.desert_opacity_percent > 100 {
+            return Err("desertOpacityPercent must be 0–100".to_string());
+        }
         if !(16..=36).contains(&self.app.ocean_opacity_percent) {
             return Err("oceanOpacityPercent must be 16–36".to_string());
         }
