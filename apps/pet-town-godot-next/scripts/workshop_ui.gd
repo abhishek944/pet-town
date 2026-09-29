@@ -45,5 +45,8 @@ func _layout() -> void:
 		settings_panel.size = view
 		settings_panel.position = Vector2.ZERO
 	if is_instance_valid(agent_panel):
-		agent_panel.size = Vector2(minf(530, view.x - 32), minf(330, view.y - 32))
+		var content_height := agent_content.get_combined_minimum_size().y
+		var panel_padding := agent_panel.get_theme_stylebox("panel").get_minimum_size().y
+		var panel_height := minf(maxf(330, content_height + panel_padding), view.y - 48)
+		agent_panel.size = Vector2(minf(530, view.x - 32), panel_height)
 		agent_panel.position = Vector2(view.x - agent_panel.size.x - 24, 24)

@@ -10,9 +10,9 @@ pub struct AgentSession {
     pub pane_id: String,
     pub public_id: String,
     pub agent_name: String,
-    pub display_name: String,
     pub model: String,
     pub thinking: String,
+    pub configuration_signature: String,
 }
 
 impl AgentSession {
@@ -77,9 +77,9 @@ impl AgentSession {
             pane_id,
             public_id,
             agent_name,
-            display_name: preferences.display_name.clone(),
             model: preferences.model.clone(),
             thinking: preferences.thinking.clone(),
+            configuration_signature: super::launcher::signature(preferences),
         };
         Ok(session)
     }

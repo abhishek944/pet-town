@@ -45,6 +45,15 @@ body {
   display: none;
 }
 
+/* Keep Standard pets at their original screen baseline; Ocean raises the boat
+   above the translucent water body in the taller transparent strip. */
+.village[data-strip-theme="ocean"] .citizen {
+  bottom: var(--ocean-citizen-bottom, 82px);
+}
+.village[data-strip-theme="ocean"] .shadow {
+  display: none;
+}
+
 .pet-stack {
   position: absolute;
   z-index: 2;

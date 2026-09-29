@@ -12,7 +12,15 @@
       "scale": 1.2
     },
     "listen": {
-      "asset": "walk.png",
+      "asset": "listen.png",
+      "durationMs": 960,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.2
+    },
+    "speak": {
+      "asset": "speak.png",
       "durationMs": 960,
       "role": "stationary",
       "sourceFacing": "right",
@@ -61,10 +69,15 @@
     "listening": {
       "animation": "listen",
       "action": "idle"
+    },
+    "speaking": {
+      "animation": "speak",
+      "action": "idle"
     }
   },
   "orchestratorAnimations": {
     "walking": "walk",
-    "listening": "listen"
+    "listening": "listen",
+    "speaking": "speak"
   }
 }

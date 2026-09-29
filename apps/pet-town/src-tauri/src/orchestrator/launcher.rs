@@ -63,9 +63,7 @@ pub async fn ensure(app: AppHandle, workspace_id: String) -> Result<(), String> 
     };
     let matches = existing.as_ref().is_some_and(|agent| {
         agent.workspace_id == workspace_id
-            && agent.display_name == preferences.display_name
-            && agent.model == preferences.model
-            && agent.thinking == preferences.thinking
+            && agent.configuration_signature == signature(&preferences)
     });
     if matches {
         let candidate = existing.clone().unwrap();

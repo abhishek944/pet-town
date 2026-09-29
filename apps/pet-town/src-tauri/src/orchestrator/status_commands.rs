@@ -52,6 +52,23 @@ pub fn focus_mayor(app: AppHandle) {
 }
 
 #[tauri::command]
+pub fn set_mayor_speech(text: String, speaking: bool, app: AppHandle) {
+    app.state::<OrchestratorState>()
+        .set_mayor_speech(text, speaking, &app);
+}
+
+#[tauri::command]
+pub fn set_mayor_voice_status(status: String, app: AppHandle) {
+    let state = app.state::<OrchestratorState>();
+    state
+        .0
+        .lock()
+        .unwrap_or_else(|error| error.into_inner())
+        .mayor_voice_status = status.chars().take(160).collect();
+    state.emit(&app);
+}
+
+#[tauri::command]
 pub fn report_orchestrator_diagnostic(message: String) {
     eprintln!("[assistant trace] {message}");
 }
@@ -60,11 +77,11 @@ pub fn report_orchestrator_diagnostic(message: String) {
 pub fn report_orchestrator_error(message: String, app: AppHandle) {
     eprintln!("[assistant] {message}");
     let state = app.state::<OrchestratorState>();
-    state
-        .0
-        .lock()
-        .unwrap_or_else(|error| error.into_inner())
-        .wake_status = Some(format!("Voice start failed: {message}"));
+    let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
+    runtime.wake_status = Some(format!("Voice start failed: {message}"));
+    runtime.mayor_voice_status = message.chars().take(160).collect();
+    runtime.degraded_note = Some(format!("Last voice attempt failed: {message}"));
+    drop(runtime);
     state.emit(&app);
 }
 

@@ -4,9 +4,14 @@ mod agent_launch;
 mod agent_response;
 pub mod commands;
 mod commentary;
+pub mod credentials;
+pub mod firstmate;
+pub mod firstmate_audio;
+mod firstmate_talk;
 mod herdr;
 mod herdr_io;
 mod herdr_process;
+pub(crate) mod invoke;
 mod launch;
 mod launch_replace;
 mod launcher;
@@ -71,6 +76,7 @@ pub fn retry_exit(app: tauri::AppHandle) {
 
 pub fn prepare_exit(app: &tauri::AppHandle) {
     use tauri::Emitter;
+    // The Firstmate primary stays in Herdr so long-running work survives an app restart.
     wake::stop(app);
     let _ = app.emit_to("orchestrator", "orchestrator-exit", ());
 }

@@ -3,7 +3,9 @@ import { listen } from "@tauri-apps/api/event";
 import type { PreferencesSnapshot } from "./preferences-types";
 import type { OrchestratorStatus as Status } from "./orchestrator-status";
 import { startSpeechMeter } from "./assistant-meter"; import { iceComplete, installReleaseGuards } from "./assistant-webrtc"; import { AssistantTasks, type LiveEvent } from "./assistant-tasks";
-import { isMayorWake, renderVoiceStatus } from "./assistant-status"; import { appendTranscript, resetTranscript } from "./assistant-transcript";
+import { renderVoiceStatus } from "./assistant-status";
+import { LiveTranscripts } from "./assistant-live-transcripts";
+import { FirstmateVoice } from "./assistant-firstmate";
 type Workspace = { id: string; label: string; project: string };
 type LiveAnswer = { sessionId: string; sdp: string }; const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 let connection: RTCPeerConnection | null = null, channel: RTCDataChannel | null = null;
@@ -11,19 +13,18 @@ let microphone: MediaStream | null = null, stopMeter = () => {};
 let connecting = false, listening = false, pushToTalk = false;
 let closeTimer = 0, idleTimer = 0, connectionAttempt = 0;
 let currentStatus: Status | null = null;
-const tasks = new AssistantTasks({ attempt: () => connectionAttempt, channel: () => channel, status: () => currentStatus, error, resetIdle });
-let userUtterance = "";
-let lastUserUtterance = "";
-let lastInputAt = 0;
-let mayorName = "Mayor";
+let firstmate: FirstmateVoice | null = null;
+let firstmateMode = false;
+const tasks = new AssistantTasks({ attempt: () => connectionAttempt, channel: () => channel, error, resetIdle });
+const transcripts = new LiveTranscripts();
 function setStatus(status: Status): void {
   currentStatus = status; tasks.activeDelegationId = status.activeTaskId;
-  renderVoiceStatus(status, connecting, pushToTalk);
+  if (!firstmateMode) renderVoiceStatus(status, connecting, pushToTalk);
 }
 function error(value: unknown): void {
   const message = String(value);
   $("error").textContent = message;
-  if (message) void invoke("report_orchestrator_error", { message });
+  if (message) void invoke(firstmateMode ? "report_orchestrator_diagnostic" : "report_orchestrator_error", { message });
 }
 async function load(): Promise<void> {
   const [preferences, workspaces, status] = await Promise.all([
@@ -31,7 +32,13 @@ async function load(): Promise<void> {
     invoke<Status>("get_orchestrator_status"),
   ]);
   $("assistant-title").textContent = preferences.preferences.app.orchestrator.displayName;
-  mayorName = preferences.preferences.app.orchestrator.displayName;
+  firstmateMode = preferences.preferences.app.orchestrator.mode === "firstmate";
+  if (firstmateMode) {
+    $("retry").textContent = "Retry voice";
+    $("workspace").parentElement!.hidden = true;
+    $("voice-state").nextElementSibling!.textContent = "Hold to talk. Your speech is transcribed and sent to Firstmate; replies use an AI-generated voice.";
+  }
+  transcripts.setMayorName(preferences.preferences.app.orchestrator.displayName);
   const workspace = $<HTMLSelectElement>("workspace");
   workspace.replaceChildren(...workspaces.map((item) => new Option(`${item.label} · ${item.project}`, item.id)));
   if (!workspaces.length) workspace.append(new Option("No Herdr workspace available", ""));
@@ -47,10 +54,14 @@ async function load(): Promise<void> {
     workspace.value = "";
   }
   setStatus(status);
-  if (status.available && status.herdrConnected && status.wakeActivated)
+  if (firstmateMode) {
+    firstmate = new FirstmateVoice(error);
+    await firstmate.activate();
+  } else if (status.available && status.herdrConnected && status.wakeActivated)
     await connect(true, status.wakeGeneration);
 }
 async function connect(fromWake = false, wakeGeneration?: number): Promise<void> {
+  if (firstmateMode) return;
   if (closeTimer) {
     clearTimeout(closeTimer); closeTimer = 0;
     closeLocal(false);
@@ -100,29 +111,14 @@ async function connect(fromWake = false, wakeGeneration?: number): Promise<void>
 function handleEvent(raw: string): void {
   let event: LiveEvent;
   try { event = JSON.parse(raw) as LiveEvent; } catch { return; }
-  if (event.type === "session.input_transcript.delta" && event.delta) {
-    resetIdle(); userUtterance += event.delta; lastInputAt = Date.now(); appendTranscript("user", event.delta);
-  }
-  if (event.type === "session.input_transcript.done") {
-    const utterance = (event.transcript ?? userUtterance).trim(); userUtterance = "";
-    if (isMayorWake(utterance, mayorName)) void invoke("focus_mayor");
-    if (utterance) lastUserUtterance = utterance;
-    tasks.maybeCancel(utterance); }
+  transcripts.handle(event, resetIdle, (utterance) => tasks.maybeCancel(utterance));
   if (event.type === "session.output_transcript.delta" && event.delta) {
-    resetIdle(); tasks.cancellationSent = false;
-    if (Date.now() - lastInputAt > 2500) userUtterance = "";
-    appendTranscript("assistant", event.delta);
+    tasks.cancellationSent = false;
+    tasks.noteSpeech();
   }
   if (event.type === "response.event") {
     resetIdle();
     tasks.handleResponseEvent(event, connectionAttempt);
-  }
-  if (event.type === "session.delegation.created") {
-    resetIdle();
-    const task = userUtterance.trim() || lastUserUtterance;
-    userUtterance = "";
-    if (task.trim()) lastUserUtterance = task.trim();
-    tasks.handleDelegation(event, task);
   }
   if (event.type === "session.closed") closeLocal();
   if (event.type === "error") error(event.error?.message ?? "GPT-Live reported an error.");
@@ -140,13 +136,14 @@ function resetIdle(): void {
   clearTimeout(idleTimer); idleTimer = window.setTimeout(onIdleTimeout, 300_000);
 }
 function closeSession(): void {
+  if (firstmateMode) return;
   connectionAttempt += 1;
   void invoke("stop_orchestrator_session");
-  if (connecting) { closeLocal(); return; }
+  if (connecting) { closeLocal(false); return; }
   if (channel?.readyState === "open") channel.send(JSON.stringify({ type: "session.close" }));
   stopMeter(); microphone?.getTracks().forEach((track) => track.stop());
   if (listening) { listening = false; void invoke("set_orchestrator_listening", { value: false }); }
-  clearTimeout(closeTimer); closeTimer = window.setTimeout(closeLocal, 15_000);
+  clearTimeout(closeTimer); closeTimer = window.setTimeout(() => closeLocal(false), 15_000);
 }
 function disposeAttempt(peer: RTCPeerConnection, stream: MediaStream, events: RTCDataChannel): void {
   stream.getTracks().forEach((track) => track.stop());
@@ -156,13 +153,14 @@ function disposeAttempt(peer: RTCPeerConnection, stream: MediaStream, events: RT
   if (connection === peer) connection = null;
 }
 function closeLocal(notifyBackend: unknown = true): void {
+  const shouldNotifyBackend = notifyBackend !== false && closeTimer === 0;
   connectionAttempt += 1; connecting = false; clearTimeout(closeTimer); clearTimeout(idleTimer); closeTimer = 0; idleTimer = 0; stopMeter(); stopMeter = () => {}; microphone?.getTracks().forEach((track) => track.stop());
   microphone = null;
   channel?.removeEventListener("close", closeLocal); channel?.close(); channel = null; connection?.close(); connection = null;
-  resetTranscript(); userUtterance = ""; lastUserUtterance = ""; lastInputAt = 0; tasks.clear(); listening = false; pushToTalk = false;
-  if (notifyBackend !== false) void invoke("stop_orchestrator_session");
+  transcripts.clear(); tasks.clear(); listening = false; pushToTalk = false;
+  if (shouldNotifyBackend && !firstmateMode) void invoke("stop_orchestrator_session");
 }
-$("connect").addEventListener("click", () => { if (!connection) void connect(false).catch(error); });
+$("connect").addEventListener("click", () => { if (!firstmateMode && !connection) void connect(false).catch(error); });
 $("connect").addEventListener("pointerdown", () => {
   if (!connection || !pushToTalk || connecting) return;
   resetIdle(); microphone?.getAudioTracks().forEach((track) => { track.enabled = true; });
@@ -179,19 +177,30 @@ $("connect").addEventListener("keydown", (event) => {
   }
 });
 installReleaseGuards($("connect"), releaseTalk);
-$("retry").addEventListener("click", () => void load().catch(error));
+$("retry").addEventListener("click", () => {
+  if (firstmateMode) void firstmate?.retryVoice();
+  else void load().catch(error);
+});
 $("disconnect").addEventListener("click", closeSession);
 $("cancel").addEventListener("click", () => tasks.cancelActive());
 void listen("orchestrator-status-refresh", () => {
   void invoke<Status>("get_orchestrator_status")
     .then((status) => {
       setStatus(status);
+      if (firstmateMode) return;
       if (status.available && status.herdrConnected && status.wakeActivated)
         void connect(true, status.wakeGeneration).catch(error);
     })
     .catch(error);
 });
 void listen<string>("orchestrator-wake-status", (event) => { $("wake-status").textContent = event.payload; });
-void listen("orchestrator-disable", closeSession); void listen("orchestrator-exit", () => closeLocal(false)); void listen("orchestrator-reset", closeSession);
-window.addEventListener("beforeunload", closeLocal);
-void load().catch((reason) => { error(reason); void invoke("stop_orchestrator_session"); });
+void listen("orchestrator-mayor-invoked", () => {
+  if (!connection || connecting) return;
+  pushToTalk = false;
+  microphone?.getAudioTracks().forEach((track) => { track.enabled = true; });
+  $<HTMLButtonElement>("connect").textContent = "Listening";
+  resetIdle();
+});
+void listen("orchestrator-disable", () => { firstmate?.stop(); closeLocal(false); }); void listen("orchestrator-exit", () => { firstmate?.stop(); closeLocal(false); }); void listen("orchestrator-reset", () => { firstmate?.stop(); closeLocal(false); });
+window.addEventListener("beforeunload", () => { firstmate?.stop(); closeLocal(false); });
+void load().catch((reason) => { error(reason); if (!firstmateMode) void invoke("stop_orchestrator_session"); });

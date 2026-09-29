@@ -107,6 +107,11 @@ func show_agent_details(record: Dictionary) -> void:
 		actions.add_child(open)
 		if is_herdr:
 			agent_content.add_child(_label("Opens this companion's current Herdr pane", 11, MUTED))
+	agent_view_button = _button("", true)
+	agent_view_button.custom_minimum_size.y = 42
+	agent_view_button.pressed.connect(func() -> void: agent_view_requested.emit(agent_id))
+	agent_content.add_child(agent_view_button)
+	agent_content.add_child(_label("V switches view · C drives the companion", 11, MUTED))
 	agent_message = _label("", 12, MUTED)
 	agent_message.visible = false
 	agent_content.add_child(agent_message)
@@ -135,12 +140,21 @@ func set_followed_agent(id: String) -> void:
 		return
 	var following := id == agent_record_id
 	agent_follow_button.text = "Stop following" if following else "Follow companion"
-	agent_camera_label.text = "Following" if following else "Free view"
+	set_camera_view(first_person_view)
+
+func set_camera_view(value: bool) -> void:
+	first_person_view = value
+	if not agent_panel.visible or not is_instance_valid(agent_view_button):
+		return
+	var following := followed_agent_id == agent_record_id
+	agent_camera_label.text = ("First-person" if value else "Following") if following else "Free view"
+	agent_view_button.text = "Return to third-person · V" if value and following else "See through companion's eyes · V"
 
 func show_focus_result(id: String, ok: bool, message: String) -> void:
 	if agent_panel.visible and agent_record_id == id and is_instance_valid(agent_message):
 		agent_message.text = "" if ok else (message if not message.is_empty() else "Could not open this agent right now.")
 		agent_message.visible = not ok
+		call("_layout")
 	if settings_overlay.visible and selected_agent_id == id and is_instance_valid(settings_agent_message):
 		settings_agent_message.text = "" if ok else (message if not message.is_empty() else "Could not open this agent right now.")
 		settings_agent_message.visible = not ok

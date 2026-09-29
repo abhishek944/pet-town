@@ -26,6 +26,7 @@ const label = (state: HerdrState): string =>
     done: "Completed",
     unknown: "Unknown",
     listening: "Listening (mayor)",
+    speaking: "Speaking (mayor)",
   })[state];
 
 export class StudioWorkflow {

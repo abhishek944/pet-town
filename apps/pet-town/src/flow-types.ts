@@ -1,5 +1,5 @@
 export const HERDR_STATES = ["idle", "working", "blocked", "done", "unknown"] as const;
-export const PET_STATES = [...HERDR_STATES, "listening"] as const;
+export const PET_STATES = [...HERDR_STATES, "listening", "speaking"] as const;
 
 export type HerdrState = (typeof PET_STATES)[number];
 export type PetAction = "idle" | "walking";
@@ -85,7 +85,7 @@ export interface BehaviorPackManifest {
   packVersion: string;
   clips: Record<string, ClipManifest>;
   states: Record<(typeof HERDR_STATES)[number], StateFlowManifest | StateAssignment> &
-    Partial<Record<"listening", StateFlowManifest | StateAssignment>>;
+    Partial<Record<"listening" | "speaking", StateFlowManifest | StateAssignment>>;
   actions?: Record<string, unknown>;
   orchestratorAnimations?: OrchestratorAnimations | null;
 }
@@ -112,6 +112,7 @@ export interface CompiledClip {
 export interface OrchestratorAnimations {
   walking: string;
   listening: string;
+  speaking?: string;
 }
 
 export interface CompiledBehaviorPack {

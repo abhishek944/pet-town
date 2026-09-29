@@ -7,6 +7,8 @@ export interface OrchestratorView {
   petId: string | null;
   displayName: string;
   listening: boolean;
+  working?: boolean;
+  speaking?: boolean;
 }
 
 export function applyOrchestratorCitizen(
@@ -26,7 +28,7 @@ export function applyOrchestratorCitizen(
     id,
     label: view.displayName,
     source: "orchestrator",
-    status: view.listening ? "listening" : "working",
+    status: view.speaking ? "speaking" : view.listening ? "listening" : view.working ? "working" : "idle",
     sprite: view.petId,
     missedPolls: 0,
     retiring: false,
@@ -52,6 +54,10 @@ export function orchestratorPack(base: CompiledBehaviorPack): CompiledBehaviorPa
     completion: "restart",
     flow: { type: "play", clip: mapping.listening },
   };
+  const speaking: StateFlowManifest = {
+    completion: "restart",
+    flow: { type: "play", clip: mapping.speaking ?? mapping.listening },
+  };
   return Object.freeze({
     ...base,
     fingerprint: `${base.fingerprint}:orchestrator`,
@@ -62,6 +68,11 @@ export function orchestratorPack(base: CompiledBehaviorPack): CompiledBehaviorPa
       done: { animation: mapping.walking, action: "walking" as const, visible: true },
       unknown: { animation: mapping.walking, action: "walking" as const, visible: true },
       listening: { animation: mapping.listening, action: "idle" as const, visible: true },
+      speaking: {
+        animation: mapping.speaking ?? mapping.listening,
+        action: "idle" as const,
+        visible: true,
+      },
     }),
     states: Object.freeze({
       idle: walking,
@@ -70,6 +81,7 @@ export function orchestratorPack(base: CompiledBehaviorPack): CompiledBehaviorPa
       done: walking,
       unknown: walking,
       listening,
+      speaking,
     }),
   });
 }

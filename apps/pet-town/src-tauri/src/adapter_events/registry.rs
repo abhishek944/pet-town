@@ -4,6 +4,7 @@ use super::{
 };
 use fs2::FileExt;
 use std::fs::{self, OpenOptions};
+use std::io::Read;
 #[cfg(unix)]
 use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
 use std::path::PathBuf;
@@ -97,6 +98,51 @@ fn collect_records() -> Vec<(PathBuf, AdapterEventRecord)> {
             .then_with(|| left.1.session_key.cmp(&right.1.session_key))
     });
     records
+}
+
+/// Change only a still-current completed Codex session; a concurrent hook event wins.
+pub(crate) fn mark_codex_idle(id: &str) -> Result<(), String> {
+    let Some(key) = id
+        .strip_prefix("codex:")
+        .filter(|key| key.len() == 16 && key.bytes().all(|byte| byte.is_ascii_hexdigit()))
+    else {
+        return Err("invalid Codex agent ID".to_string());
+    };
+    with_lock(|| {
+        let path = super::record_path(&super::registry_directory()?, "codex", key);
+        let mut options = OpenOptions::new();
+        options.read(true);
+        #[cfg(unix)]
+        options.custom_flags(libc::O_NOFOLLOW);
+        let Ok(file) = options.open(&path) else {
+            return Ok(()); // The session ended while focus was in progress.
+        };
+        let mut bytes = Vec::new();
+        file.take(EVENT_INPUT_LIMIT + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|_| "could not read Codex session".to_string())?;
+        if bytes.len() > EVENT_INPUT_LIMIT as usize {
+            return Err("Codex session is too large".to_string());
+        }
+        let mut record: AdapterEventRecord =
+            serde_json::from_slice(&bytes).map_err(|_| "invalid Codex session".to_string())?;
+        if record.version != RECORD_VERSION
+            || record.source != "codex"
+            || record.session_key != key
+            || now_expired(&record)
+            || record.state != "done"
+        {
+            return Ok(());
+        }
+        record.state = "idle".to_string();
+        let bytes = serde_json::to_vec(&record)
+            .map_err(|_| "could not encode Codex session".to_string())?;
+        super::write_private_atomic(&path, &bytes)
+    })
+}
+
+fn now_expired(record: &AdapterEventRecord) -> bool {
+    current_time_seconds().saturating_sub(record.observed_at_seconds) > MAX_RECORD_AGE_SECONDS
 }
 
 pub(crate) fn prune_records() {

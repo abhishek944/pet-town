@@ -86,7 +86,7 @@ pub fn stage(
     for (state, selection) in &request.state_assignments {
         if !matches!(
             state.as_str(),
-            "idle" | "working" | "blocked" | "done" | "unknown" | "listening"
+            "idle" | "working" | "blocked" | "done" | "unknown" | "listening" | "speaking"
         ) {
             return Err("Choose a valid pet state to replace.".into());
         }

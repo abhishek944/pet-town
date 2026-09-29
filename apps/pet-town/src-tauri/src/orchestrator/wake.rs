@@ -7,7 +7,6 @@ static APP: OnceLock<AppHandle> = OnceLock::new();
 static TESTING: AtomicBool = AtomicBool::new(false);
 static GENERATION: AtomicU64 = AtomicU64::new(0);
 static PUBLICATION: Mutex<()> = Mutex::new(());
-
 #[cfg(target_os = "macos")]
 unsafe extern "C" {
     fn pv_wake_supported() -> bool;
@@ -22,7 +21,6 @@ unsafe extern "C" {
 pub fn generation() -> u64 {
     GENERATION.load(Ordering::SeqCst)
 }
-
 pub fn supported() -> bool {
     #[cfg(target_os = "macos")]
     {
@@ -31,11 +29,9 @@ pub fn supported() -> bool {
     #[cfg(not(target_os = "macos"))]
     false
 }
-
 pub fn start(app: &AppHandle, name: &str) -> Result<(), String> {
     begin(app, name, false, true)
 }
-
 fn begin(app: &AppHandle, name: &str, testing: bool, automatic: bool) -> Result<(), String> {
     if !supported() {
         return Err("On-device wake recognition is unavailable.".into());
@@ -104,16 +100,14 @@ pub fn stop(app: &AppHandle) {
 
 extern "C" fn wake_callback(found: bool, message: *const c_char, generation: u64) {
     let Some(app) = APP.get() else { return };
-    let testing = if found {
+    let testing = {
         let _publication = PUBLICATION
             .lock()
             .unwrap_or_else(|error| error.into_inner());
         if generation != GENERATION.load(Ordering::SeqCst) {
             return;
         }
-        TESTING.swap(false, Ordering::SeqCst)
-    } else {
-        false
+        found && TESTING.swap(false, Ordering::SeqCst)
     };
     let text = if message.is_null() {
         "Local wake status changed."
@@ -179,7 +173,6 @@ fn activate(app: AppHandle, generation: u64) -> Result<(), String> {
     if !crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref()) {
         return Err("The bundled Knight mayor is unavailable.".into());
     }
-    super::window::open_hidden(&app)?;
     let _publication = PUBLICATION
         .lock()
         .unwrap_or_else(|error| error.into_inner());
@@ -188,10 +181,29 @@ fn activate(app: AppHandle, generation: u64) -> Result<(), String> {
     if generation != GENERATION.load(Ordering::SeqCst) {
         return Err("Wake activation was canceled.".into());
     }
-    runtime.wake_activated = true;
-    runtime.connecting = true;
-    runtime.wake_status = Some("Wake phrase heard — connecting voice".into());
+    let live = configured.mode == crate::preferences_model::MayorMode::Live;
+    runtime.wake_activated = live;
+    runtime.connecting = live;
+    runtime.wake_status = Some(
+        if live {
+            "Wake phrase heard — connecting voice"
+        } else {
+            "Wake phrase heard — hold to talk"
+        }
+        .into(),
+    );
+    runtime.mayor_speech.clear();
+    runtime.mayor_speaking = false;
     drop(runtime);
+    super::window::open_hidden(&app).inspect_err(|_| {
+        let mut runtime = state.0.lock().unwrap_or_else(|reason| reason.into_inner());
+        runtime.wake_activated = false;
+        runtime.connecting = false;
+    })?;
     state.focus_mayor(&app);
+    drop(_publication);
+    if !live {
+        restart(&app);
+    }
     Ok(())
 }

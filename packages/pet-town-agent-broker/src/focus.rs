@@ -50,12 +50,14 @@ fn verify(
     })
 }
 
-fn command_ok(
+fn focus_target(
     binary: &OsString,
     socket: Option<&str>,
-    arguments: Vec<String>,
+    kind: &str,
+    id: &str,
     error: &str,
 ) -> Result<(), String> {
+    let arguments = vec![kind.to_string(), "focus".to_string(), id.to_string()];
     command::run(binary, socket, &arguments)
         .map(|_| ())
         .ok_or_else(|| error.to_string())
@@ -64,37 +66,28 @@ fn command_ok(
 fn focus_herdr(pane_id: &str, socket: Option<&str>, expected_session: &str) -> Result<(), String> {
     let binary = herdr::binary();
     let verified = verify(&binary, pane_id, socket, expected_session)?;
-    command_ok(
+    focus_target(
         &binary,
         socket,
-        vec![
-            "workspace".to_string(),
-            "focus".to_string(),
-            verified.workspace_id.clone(),
-        ],
+        "workspace",
+        &verified.workspace_id,
         "Herdr could not focus that workspace",
     )?;
-    command_ok(
+    focus_target(
         &binary,
         socket,
-        vec![
-            "tab".to_string(),
-            "focus".to_string(),
-            verified.tab_id.clone(),
-        ],
+        "tab",
+        &verified.tab_id,
         "Herdr could not focus that tab",
     )?;
     if verify(&binary, pane_id, socket, expected_session)? != verified {
         return Err("agent moved while focus was in progress".to_string());
     }
-    command_ok(
+    focus_target(
         &binary,
         socket,
-        vec![
-            "agent".to_string(),
-            "focus".to_string(),
-            pane_id.to_string(),
-        ],
+        "agent",
+        pane_id,
         "Herdr could not focus that agent",
     )?;
     #[cfg(target_os = "macos")]
@@ -103,13 +96,18 @@ fn focus_herdr(pane_id: &str, socket: Option<&str>, expected_session: &str) -> R
 }
 
 pub fn focus_route(route: &FocusRoute) -> Result<(), String> {
+    focus_route_with_codex_activation(route).map(|_| ())
+}
+
+/// Returns whether Codex Desktop itself was activated (rather than a fallback app).
+pub fn focus_route_with_codex_activation(route: &FocusRoute) -> Result<bool, String> {
     match route {
         FocusRoute::Herdr {
             pane_id,
             socket,
             agent_session_id,
-        } => focus_herdr(pane_id, socket.as_deref(), agent_session_id),
-        FocusRoute::Application { bundle_id } => activate_application(bundle_id),
+        } => focus_herdr(pane_id, socket.as_deref(), agent_session_id).map(|_| false),
+        FocusRoute::Application { bundle_id } => activate_application(bundle_id).map(|_| false),
         FocusRoute::Codex {
             thread_id,
             fallback_bundle_id,
@@ -118,7 +116,7 @@ pub fn focus_route(route: &FocusRoute) -> Result<(), String> {
 }
 
 #[cfg(target_os = "macos")]
-fn focus_codex(thread_id: Option<&str>, fallback: Option<&str>) -> Result<(), String> {
+fn focus_codex(thread_id: Option<&str>, fallback: Option<&str>) -> Result<bool, String> {
     if activate_application("com.openai.codex").is_ok() {
         if let Some(id) = thread_id.filter(|id| valid_codex_thread(id)) {
             let url = format!("codex://threads/{id}");
@@ -130,9 +128,11 @@ fn focus_codex(thread_id: Option<&str>, fallback: Option<&str>) -> Result<(), St
                 return Err("Codex could not open this local conversation".into());
             }
         }
-        return Ok(());
+        return Ok(true);
     }
-    fallback.map_or_else(|| Err("Codex is not running".into()), activate_application)
+    fallback
+        .map_or_else(|| Err("Codex is not running".into()), activate_application)
+        .map(|_| false)
 }
 
 fn valid_codex_thread(id: &str) -> bool {
@@ -148,7 +148,7 @@ fn valid_codex_thread(id: &str) -> bool {
 }
 
 #[cfg(not(target_os = "macos"))]
-fn focus_codex(_thread_id: Option<&str>, _fallback: Option<&str>) -> Result<(), String> {
+fn focus_codex(_thread_id: Option<&str>, _fallback: Option<&str>) -> Result<bool, String> {
     Err("Codex focus is unavailable on this platform".into())
 }
 

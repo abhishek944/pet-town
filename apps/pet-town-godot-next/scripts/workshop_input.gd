@@ -9,6 +9,10 @@ extends Node3D
 @onready var agents: LiveAgentManager = $LiveAgents
 @onready var commands: TownCommandPalette = $CanvasLayer/TownCommands
 
+var mayor_talk_held := false
+var mayor_ui_talk_active := false
+var mayor_ctrl_down := false
+var mayor_alt_down := false
 var last_clicked_agent_id := ""
 var last_click_position := Vector2.ZERO
 var last_click_at_ms := 0
@@ -20,7 +24,36 @@ func _display_record(id: String) -> Dictionary:
 		record["appearance_index"] = pet.model_index
 	return record
 
+func _toggle_agent_view(id: String) -> void:
+	var already_following := agents.selected_id == id and is_instance_valid(camera.followed)
+	if not already_following:
+		if not agents.follow_agent(id):
+			return
+	if not is_instance_valid(camera.followed):
+		return
+	if already_following:
+		camera.toggle_fpv()
+	else:
+		camera.set_fpv(true)
+	hud.set_camera_view(camera.fpv_enabled)
+	if camera.fpv_enabled:
+		hud.agent_panel.visible = false
+
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		var shortcut := event as InputEventKey
+		if shortcut.keycode == KEY_CTRL or shortcut.physical_keycode == KEY_CTRL:
+			mayor_ctrl_down = shortcut.pressed
+			_sync_mayor_talk()
+			return
+		if shortcut.keycode == KEY_ALT or shortcut.physical_keycode == KEY_ALT:
+			mayor_alt_down = shortcut.pressed
+			_sync_mayor_talk()
+			return
+		if shortcut.pressed and not shortcut.echo and shortcut.alt_pressed and not shortcut.ctrl_pressed and shortcut.keycode == KEY_M:
+			bridge.invoke_mayor()
+			get_viewport().set_input_as_handled()
+			return
 	if not (event is InputEventKey) or not event.pressed or event.echo or event.keycode != KEY_ESCAPE:
 		return
 	if commands.panel.visible:
@@ -37,10 +70,32 @@ func _input(event: InputEvent) -> void:
 		return
 	get_viewport().set_input_as_handled()
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		mayor_ctrl_down = false
+		mayor_alt_down = false
+		mayor_ui_talk_active = false
+		if is_instance_valid(commands):
+			commands.reset_mayor_talk()
+		if mayor_talk_held:
+			mayor_talk_held = false
+			bridge.mayor_talk(false)
+
+func _set_mayor_ui_talk(active: bool) -> void:
+	mayor_ui_talk_active = active
+	_sync_mayor_talk()
+
+func _sync_mayor_talk() -> void:
+	var held := mayor_ui_talk_active or (mayor_ctrl_down and mayor_alt_down) or (Input.is_key_pressed(KEY_CTRL) and Input.is_key_pressed(KEY_ALT))
+	if held == mayor_talk_held:
+		return
+	mayor_talk_held = held
+	bridge.mayor_talk(held)
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		var shortcut := event as InputEventKey
-		if shortcut.alt_pressed and shortcut.keycode in [KEY_S, KEY_H]:
+		if shortcut.alt_pressed and not shortcut.ctrl_pressed and shortcut.keycode in [KEY_S, KEY_H]:
 			if hud.settings_overlay.visible:
 				hud.close_settings()
 			else:
@@ -53,9 +108,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		var motion := event as InputEventMouseMotion
 		if is_instance_valid(editor.preview):
 			editor.hover(motion.position)
+		elif camera.fpv_enabled:
+			camera.look_by(motion.relative)
+			get_viewport().set_input_as_handled()
 		elif camera.dragging:
 			camera.drag_to(motion.position, motion.alt_pressed)
 			get_viewport().set_input_as_handled()
+	elif event is InputEventPanGesture and camera.fpv_enabled:
+		camera.look_by((event as InputEventPanGesture).delta * 6.0)
+		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		var button := event as InputEventMouseButton
 		if button.button_index == MOUSE_BUTTON_LEFT:
@@ -100,6 +161,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera.zoom(1.0 / maxf((event as InputEventMagnifyGesture).factor, 0.01))
 	elif event is InputEventKey and event.pressed and not event.echo:
 		var key := event as InputEventKey
+		if key.keycode == KEY_SPACE and not agents.controlled_id.is_empty() and not key.alt_pressed and not key.ctrl_pressed and not key.meta_pressed:
+			var controlled := agents.agents.get(agents.controlled_id) as LiveCompanion
+			if is_instance_valid(controlled):
+				controlled.request_jump()
+				get_viewport().set_input_as_handled()
+			return
+		if key.keycode == KEY_V and not key.alt_pressed and not key.ctrl_pressed and not key.meta_pressed and not agents.selected_id.is_empty():
+			_toggle_agent_view(agents.selected_id)
+			get_viewport().set_input_as_handled()
+			return
 		if (key.meta_pressed or key.ctrl_pressed) and key.keycode == KEY_Z:
 			editor.undo_last()
 			get_viewport().set_input_as_handled()

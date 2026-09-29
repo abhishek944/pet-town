@@ -25,9 +25,20 @@ export function compileOrchestratorAnimations(
     );
     return null;
   }
-  rejectUnknownFields(context, input, ["walking", "listening"], "/orchestratorAnimations");
+  rejectUnknownFields(
+    context,
+    input,
+    ["walking", "listening", "speaking"],
+    "/orchestratorAnimations",
+  );
   const walking = typeof input.walking === "string" ? input.walking : "";
   const listening = typeof input.listening === "string" ? input.listening : "";
+  const speaking =
+    input.speaking === undefined
+      ? undefined
+      : typeof input.speaking === "string"
+        ? input.speaking
+        : "";
   if (!hasOwn(context.clips, walking)) {
     diagnostic(
       context,
@@ -44,10 +55,27 @@ export function compileOrchestratorAnimations(
       "Listening must reference a clip",
     );
   }
-  if (!hasOwn(context.clips, walking) || !hasOwn(context.clips, listening)) return null;
+  if (speaking !== undefined && !hasOwn(context.clips, speaking)) {
+    diagnostic(
+      context,
+      "E_ORCHESTRATOR_SPEAK",
+      "/orchestratorAnimations/speaking",
+      "Speaking must reference a clip",
+    );
+  }
+  if (
+    !hasOwn(context.clips, walking) ||
+    !hasOwn(context.clips, listening) ||
+    (speaking !== undefined && !hasOwn(context.clips, speaking))
+  )
+    return null;
   if (isRecord(statesInput) && statesInput.listening === undefined) {
     stateAssignments.listening = { animation: listening, action: "idle", visible: true };
     compiledStates.listening = assignmentFlow(stateAssignments.listening);
   }
-  return { walking, listening };
+  if (isRecord(statesInput) && statesInput.speaking === undefined) {
+    stateAssignments.speaking = { animation: speaking ?? listening, action: "idle", visible: true };
+    compiledStates.speaking = assignmentFlow(stateAssignments.speaking);
+  }
+  return { walking, listening, ...(speaking === undefined ? {} : { speaking }) };
 }

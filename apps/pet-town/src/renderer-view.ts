@@ -62,7 +62,7 @@ export function updateCitizenElement(element: HTMLElement, citizen: CitizenState
   element.dataset.status = citizen.status;
   element.dataset.doneSinceMs = citizen.doneSinceMs === null ? "" : String(citizen.doneSinceMs);
   const announced = citizen.source === "orchestrator"
-    ? (citizen.status === "listening" ? "Listening" : "Walking") : citizen.status;
+    ? (citizen.status === "speaking" ? "Speaking" : citizen.status === "listening" ? "Listening" : "Walking") : citizen.status;
   element.setAttribute("aria-label", `${citizen.label}, ${announced}`);
 
   const project = element.querySelector<HTMLElement>(".project");
@@ -90,6 +90,7 @@ export function applyFlowSample(
   sample: FlowSample,
   fallbackAssetUrl = "",
   onGeometryChange: () => void = () => {},
+  themedAssetUrl: string | null = null,
 ): boolean {
   const pet = element.querySelector<HTMLImageElement>("img.pet");
   if (!pet) return true;
@@ -101,7 +102,7 @@ export function applyFlowSample(
   }
 
   const clip = sample.clip;
-  const assetUrl = (sample.held ? clip?.holdAssetUrl : clip?.assetUrl)
+  const assetUrl = themedAssetUrl ?? (sample.held ? clip?.holdAssetUrl : clip?.assetUrl)
     ?? clip?.assetUrl
     ?? fallbackAssetUrl;
   const assetKey = JSON.stringify([assetUrl, sample.clipEpoch, sample.held]);

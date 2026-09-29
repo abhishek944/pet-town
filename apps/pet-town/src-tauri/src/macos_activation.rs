@@ -8,7 +8,8 @@ use std::process::Command;
 use std::time::{Duration, Instant};
 
 const MAX_PROCESS_OUTPUT_BYTES: usize = 1024 * 1024;
-const ACTIVATION_TIMEOUT: Duration = Duration::from_secs(1);
+// Switching from another app's full-screen Space can outlast a short focus request.
+const ACTIVATION_TIMEOUT: Duration = Duration::from_secs(3);
 
 #[derive(Deserialize)]
 struct SessionList {

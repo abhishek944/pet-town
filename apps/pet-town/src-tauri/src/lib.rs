@@ -8,12 +8,16 @@ mod app_singleton;
 mod control;
 mod focus;
 mod focus_id;
+#[cfg(target_os = "macos")]
+mod global_mayor_shortcut;
 mod herdr_command;
 mod herdr_state;
 #[cfg(target_os = "macos")]
 mod macos_activation;
 #[cfg(target_os = "macos")]
 mod macos_app_focus;
+#[cfg(unix)]
+mod mayor_retry_signal;
 mod orchestrator;
 mod pet_studio;
 mod preferences;
@@ -82,6 +86,8 @@ pub fn run() {
         .manage(preferences::PreferencesStore::load_default())
         .manage(pet_studio::PetStudioState::load())
         .manage(orchestrator::OrchestratorState::default())
+        .manage(orchestrator::firstmate::FirstmateState::default())
+        .manage(orchestrator::firstmate_audio::FirstmateAudioState::default())
         .manage(settings_window::SettingsSession::default())
         .manage(town_process::TownProcess::default())
         .on_window_event(|window, event| {
@@ -102,7 +108,9 @@ pub fn run() {
             window::create_village_window(app)?;
             window::configure_window(app)?;
             control::start(app.handle().clone());
-            orchestrator::commands::preferences_changed(app.handle());
+            #[cfg(target_os = "macos")]
+            global_mayor_shortcut::start();
+            orchestrator::commands::preferences_changed(app.handle(), None);
             #[cfg(target_os = "macos")]
             window::start_hit_test_loop(app.handle().clone());
             Ok(())
@@ -124,12 +132,33 @@ pub fn run() {
             orchestrator::task_cancel::cancel_orchestrator_task,
             orchestrator::task_commands::delegate_orchestrator_task,
             orchestrator::status_commands::get_orchestrator_status,
+            orchestrator::credentials::openai_key_source,
+            orchestrator::credentials::save_openai_key,
+            orchestrator::credentials::import_openai_key_from_shell,
             orchestrator::status_commands::get_orchestrator_pet_state,
             orchestrator::status_commands::focus_mayor,
+            orchestrator::status_commands::set_mayor_speech,
+            orchestrator::status_commands::set_mayor_voice_status,
             orchestrator::status_commands::report_orchestrator_diagnostic,
             orchestrator::status_commands::report_orchestrator_error,
             orchestrator::status_commands::list_orchestrator_workspaces,
             orchestrator::task_cancel::set_orchestrator_listening,
+            orchestrator::firstmate::set_firstmate_talk,
+            orchestrator::firstmate::firstmate_talk_active,
+            orchestrator::firstmate::begin_firstmate_listening,
+            orchestrator::firstmate::firstmate_phase,
+            orchestrator::firstmate::set_firstmate_phase,
+            orchestrator::firstmate::firstmate_voice_ready,
+            orchestrator::firstmate::start_firstmate,
+            orchestrator::firstmate::firstmate_agent_status,
+            orchestrator::firstmate::send_firstmate_text,
+            orchestrator::firstmate::poll_firstmate_replies,
+            orchestrator::firstmate::acknowledge_firstmate_reply,
+            orchestrator::firstmate::latest_firstmate_reply,
+            orchestrator::firstmate::transcribe_firstmate_audio,
+            orchestrator::firstmate::speak_firstmate_text,
+            orchestrator::firstmate_audio::play_firstmate_audio,
+            orchestrator::firstmate_audio::stop_firstmate_audio,
             orchestrator::commands::start_orchestrator_session,
             orchestrator::commands::rearm_orchestrator_voice,
             orchestrator::task_cancel::stop_orchestrator_session,

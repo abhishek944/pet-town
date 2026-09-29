@@ -20,7 +20,9 @@ export function renderAssistantStatus(
   const runningModel = status.piModel
     ? `${modelLabel(status.piModel)} · ${status.piThinking ?? "unknown"}`
     : configuredModel;
-  pi.textContent = status.piConnected
+  pi.textContent = configured?.mode === "firstmate"
+    ? "Starts in selected Firstmate folder"
+    : status.piConnected
     ? `Running · ${runningModel}`
     : configured?.enabled
       ? `Starts after wake phrase · ${configuredModel}`
@@ -30,21 +32,31 @@ export function renderAssistantStatus(
   const voiceIdle =
     configured?.enabled === true &&
     status.available &&
+    status.petReady &&
     status.herdrConnected &&
     !status.liveConnected;
-  live.textContent = status.liveConnected
-    ? status.voiceMode === "tools"
-      ? "Connected · tools"
-      : "Connected · basic"
+  live.textContent = configured?.mode === "firstmate"
+    ? status.available ? "STT + TTS ready" : "OpenAI key missing"
+    : status.liveConnected
+    ? "Connected · tools"
     : status.available
       ? configured?.enabled
-        ? "Idle — voice paused"
+        ? status.wakeActivated || status.message === "Connecting voice"
+          ? "Connecting voice"
+          : configured.wakeEnabled
+            ? "Listening for wake phrase"
+            : "Voice idle"
         : "Key found"
       : "Key missing";
   live.dataset.ready = String(status.available);
   const reconnect = byId<HTMLButtonElement>("assistant-reconnect");
   const voiceHint = byId<HTMLElement>("assistant-voice-hint");
-  reconnect.hidden = !voiceIdle;
+  if (voiceHint.dataset.mode !== configured?.mode) {
+    voiceHint.dataset.mode = configured?.mode ?? "";
+    voiceHint.textContent = "";
+  }
+  reconnect.hidden = !voiceIdle || !configured?.wakeEnabled || status.wakeActivated;
+  reconnect.textContent = configured?.mode === "firstmate" ? "Listen for Mayor wake phrase" : "Listen for wake phrase";
   if (status.voiceNote) {
     voiceHint.hidden = false;
     voiceHint.textContent = status.voiceNote;
@@ -52,7 +64,11 @@ export function renderAssistantStatus(
     const name = configured?.displayName.trim() || "Mayor";
     voiceHint.hidden = false;
     if (!voiceHint.textContent || voiceHint.textContent === "Starting voice listener…") {
-      voiceHint.textContent = `Voice paused after 5 idle minutes. Say “Hey Mayor” or “Hey ${name}”, or press the button to listen again.`;
+      voiceHint.textContent = configured?.wakeEnabled
+        ? configured?.mode === "firstmate"
+          ? `Say “Hey Mayor” or “Hey ${name}” to focus Mayor. Hold to talk in Settings or hold Control+Option in the 3D town.`
+          : `Say “Hey Mayor” or “Hey ${name}” to talk using Live mode.`
+        : "Wake listening is off.";
     }
   } else {
     reconnect.disabled = false;

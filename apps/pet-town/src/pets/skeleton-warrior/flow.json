@@ -11,6 +11,22 @@
       "mirror": true,
       "scale": 1.25
     },
+    "listen": {
+      "asset": "listen.png",
+      "durationMs": 960,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.25
+    },
+    "speak": {
+      "asset": "speak.png",
+      "durationMs": 960,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.25
+    },
     "think": {
       "asset": "blocked.png",
       "durationMs": 1200,
@@ -51,8 +67,17 @@
       "visible": false
     },
     "listening": {
-      "animation": "walk",
+      "animation": "listen",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "speak",
       "action": "idle"
     }
+  },
+  "orchestratorAnimations": {
+    "walking": "walk",
+    "listening": "listen",
+    "speaking": "speak"
   }
 }

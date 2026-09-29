@@ -6,10 +6,10 @@ export interface PositionedMotion {
   dragging: boolean;
 }
 
-export function applyMotionPosition(element: HTMLElement, motion: PositionedMotion): void {
+export function applyMotionPosition(element: HTMLElement, motion: PositionedMotion, waveOffsetY = 0): void {
   element.classList.toggle("direction-right", motion.direction === 1);
   element.classList.toggle("direction-left", motion.direction === -1);
-  element.style.transform = `translate3d(${motion.x.toFixed(2)}px, 0, 0)`;
+  element.style.transform = `translate3d(${motion.x.toFixed(2)}px, ${waveOffsetY.toFixed(2)}px, 0)`;
 }
 
 export function collectHitRegions(

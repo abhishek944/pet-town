@@ -47,7 +47,11 @@ private final class WakeController {
         stop()
         let token = generation
         self.wantsListening = true
-        self.phrases = Array(Set(phrase.lowercased().split(separator: "\n").map(String.init)))
+        self.phrases = phrase.split(separator: "\n").map { normalized(String($0)) }
+            .filter { !$0.isEmpty }
+            .reduce(into: [String]()) { ordered, candidate in
+                if !ordered.contains(candidate) { ordered.append(candidate) }
+            }
         self.rustGeneration = rustGeneration
         self.callback = callback
         self.lastTranscript = ""
@@ -115,7 +119,9 @@ private final class WakeController {
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.requiresOnDeviceRecognition = true
         request.shouldReportPartialResults = true
-        request.contextualStrings = phrases + phrases.map { $0.replacingOccurrences(of: "hey ", with: "") }
+        request.contextualStrings = phrases.flatMap {
+            [$0, $0.replacingOccurrences(of: "hey ", with: "")]
+        }
         request.taskHint = .confirmation
         self.request = request
         let input = engine.inputNode
@@ -127,7 +133,7 @@ private final class WakeController {
             guard let self, self.generation == token else { return }
             if let text = result?.bestTranscription.formattedString.lowercased() {
                 let heard = " \(normalized(text)) "
-                if phrases.contains(where: { heard.contains(" \(self.normalized($0)) ") }) {
+                if phrases.contains(where: { heard.contains(" \($0) ") }) {
                     report(true, "Wake phrase heard.")
                     stop()
                     return

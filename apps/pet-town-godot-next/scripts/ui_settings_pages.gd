@@ -24,6 +24,7 @@ func _town_page() -> void:
 	guide.add_child(_label("CONTROLS", 12, GOLD))
 	guide.add_child(_label("Move around the island", 23, CREAM))
 	guide.add_child(_label("Drag to move · Scroll to zoom · R to reset", 14, MUTED))
+	guide.add_child(_label("V first-person · Trackpad look · C drive · WASD move · Space jump", 14, MUTED))
 
 func _camera_page() -> void:
 	_heading("Set your point of view", "Move closer to inspect an object, or pull back for the whole island.")
@@ -77,3 +78,37 @@ func _camera_page() -> void:
 			slider.value = 72
 	)
 	card.add_child(reset)
+
+func _sound_page() -> void:
+	_heading("Island sounds", "Choose which sounds you want to hear in town.")
+	var ambience_card := _card(settings_content)
+	_sound_option(ambience_card, "Nature ambience", "Distant surf · Coastal wind · Palms · Dawn birds", ambience == null or ambience.enabled, func() -> void:
+		if ambience != null:
+			ambience.set_enabled(not ambience.enabled)
+	)
+	var footsteps_card := _card(settings_content)
+	_sound_option(footsteps_card, "Walking sounds", "Footsteps while driving a companion, in either camera view", ambience == null or ambience.footsteps_enabled, func() -> void:
+		if ambience != null:
+			ambience.set_footsteps_enabled(not ambience.footsteps_enabled)
+	)
+
+func _sound_option(card: VBoxContainer, title: String, detail: String, active: bool, change: Callable) -> void:
+	var shell := card.get_parent() as Control
+	shell.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	shell.custom_minimum_size.x = 550
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 18)
+	card.add_child(row)
+	var description := VBoxContainer.new()
+	description.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(description)
+	description.add_child(_label(title, 21, CREAM))
+	description.add_child(_label(detail, 14, MUTED))
+	var toggle := _button("Off" if active else "On")
+	toggle.custom_minimum_size.x = 94
+	toggle.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	toggle.pressed.connect(func() -> void:
+		change.call()
+		toggle.text = "On" if toggle.text == "Off" else "Off"
+	)
+	row.add_child(toggle)

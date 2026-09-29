@@ -3,6 +3,7 @@ import type { CitizenState } from "./village";
 
 const FALLBACK: PetPreferences = {
   customName: "",
+  theme: "standard",
   includedInRandomCast: true,
   appearance: { scalePercent: 100, opacityPercent: 100 },
   labels: { visibility: "always", textScalePercent: 100 },

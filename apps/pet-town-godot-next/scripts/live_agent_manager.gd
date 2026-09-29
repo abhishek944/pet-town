@@ -5,6 +5,7 @@ signal focus_agent_requested(id: String)
 signal selection_changed(id: String, record: Dictionary)
 
 const COMPANION := preload("res://scenes/agents/live_companion.tscn")
+const MAYOR_CAMERA_FOCUS := preload("res://scripts/mayor_camera_focus.gd")
 const MAYOR_ID := "pet-town-mayor"
 
 var camera: WorkshopCamera
@@ -15,7 +16,7 @@ var selected_id := ""
 var controlled_id := ""
 var town_mode := "chill"
 var mayor_focus_serial := -1
-var drag_origin := Vector2.ZERO
+var mayor_state: Dictionary = {}
 
 func configure(region: NavigationRegion3D, view: WorkshopCamera) -> void:
 	navigation_region = region
@@ -39,7 +40,8 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 	var mayor: Dictionary = snapshot.get("mayor", {}) if snapshot.get("mayor", {}) is Dictionary else {}
 	if bool(mayor.get("active", false)):
 		var name := String(mayor.get("name", "Mayor")).strip_edges()
-		next[MAYOR_ID] = {"id": MAYOR_ID, "label": name if not name.is_empty() else "Mayor", "status": "working", "source": "mayor", "listening": bool(mayor.get("listening", false))}
+		var status := "speaking" if bool(mayor.get("speaking", false)) else "listening" if bool(mayor.get("listening", false)) else "working" if bool(mayor.get("working", false)) else "idle"
+		next[MAYOR_ID] = {"id": MAYOR_ID, "label": name if not name.is_empty() else "Mayor", "status": status, "source": "mayor", "listening": bool(mayor.get("listening", false))}
 	if bool(snapshot.get("available", false)):
 		var incoming: Variant = snapshot.get("agents", [])
 		if incoming is Array:
@@ -64,8 +66,11 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 			pet = _spawn(id, record)
 		pet.configure(id, String(record.get("label", "Agent")), String(record.get("status", "working")))
 		pet.listening = bool(record.get("listening", false))
+		if id == MAYOR_ID:
+			pet.set_mayor_state(camera, mayor)
 		pet.call("_refresh")
 	records = next
+	mayor_state = mayor
 	if not records.has(selected_id):
 		release_control()
 		selected_id = ""
@@ -73,11 +78,17 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 			camera.stop_follow()
 		selection_changed.emit("", {})
 	var serial := int(mayor.get("focusSerial", 0))
-	if serial != mayor_focus_serial:
+	if mayor_focus_serial < 0:
+		mayor_focus_serial = serial # An earlier focus request is not a new Town event.
+	elif serial != mayor_focus_serial:
 		mayor_focus_serial = serial
 		if serial > 0 and town_mode == "chill" and records.has(MAYOR_ID):
-			follow_agent(MAYOR_ID)
-
+			focus_mayor()
+func focus_mayor() -> void:
+	if not records.has(MAYOR_ID) or not is_instance_valid(camera): return
+	release_control()
+	if follow_agent(MAYOR_ID):
+		MAYOR_CAMERA_FOCUS.frame(camera, agents[MAYOR_ID] as LiveCompanion)
 func _spawn(id: String, record: Dictionary) -> LiveCompanion:
 	var pet := COMPANION.instantiate() as LiveCompanion
 	pet.configure(id, String(record.get("label", "Agent")), String(record.get("status", "working")))
@@ -88,7 +99,7 @@ func _spawn(id: String, record: Dictionary) -> LiveCompanion:
 	if is_instance_valid(navigation_region):
 		var map := navigation_region.get_navigation_map()
 		if NavigationServer3D.map_get_iteration_id(map) > 0:
-			desired = NavigationServer3D.map_get_closest_point(map, desired)
+			desired = NavigationServer3D.map_get_closest_point(map, desired) + Vector3.UP * LiveCompanion.NAV_SPAWN_CLEARANCE
 	pet.global_position = desired
 	agents[id] = pet
 	return pet
@@ -166,6 +177,9 @@ func _physics_process(_delta: float) -> void:
 	var pet := agents.get(controlled_id) as LiveCompanion
 	if not is_instance_valid(pet):
 		controlled_id = ""
+		return
+	if not is_instance_valid(camera) or camera.followed != pet:
+		stop_follow()
 		return
 	var direction := Vector3.ZERO
 	if Input.is_key_pressed(KEY_W): direction.z -= 1.0

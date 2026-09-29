@@ -85,7 +85,7 @@ export function compileBehaviorPack(
     for (const state of PET_STATES) {
       const stateValue: unknown = input.states[state];
       const statePath = `/states/${state}`;
-      if (state === "listening" && stateValue === undefined) continue;
+      if ((state === "listening" || state === "speaking") && stateValue === undefined) continue;
       if (!isRecord(stateValue)) {
         diagnostic(context, "E_STATE_MISSING", statePath, "Required Herdr state is missing");
         continue;
@@ -144,6 +144,10 @@ export function compileBehaviorPack(
   if (!compiledStates.listening && compiledStates.blocked) {
     compiledStates.listening = compiledStates.blocked;
     stateAssignments.listening = stateAssignments.blocked;
+  }
+  if (!compiledStates.speaking && compiledStates.listening) {
+    compiledStates.speaking = compiledStates.listening;
+    stateAssignments.speaking = stateAssignments.listening;
   }
 
   for (const state of HERDR_STATES) {

@@ -1,8 +1,14 @@
-use tauri::{AppHandle, LogicalPosition, Manager, Position, WebviewUrl, WebviewWindowBuilder};
+use tauri::{
+    webview::PageLoadEvent, AppHandle, Emitter, LogicalPosition, Manager, Position, WebviewUrl,
+    WebviewWindowBuilder,
+};
 
 const RUNTIME_POSITION: LogicalPosition<f64> = LogicalPosition::new(0.0, 0.0);
 
 pub fn destroy(app: &AppHandle) {
+    app.state::<super::firstmate::FirstmateState>()
+        .3
+        .store(false, std::sync::atomic::Ordering::SeqCst);
     if let Some(window) = app.get_webview_window("orchestrator") {
         let _ = window.destroy();
     }
@@ -27,8 +33,13 @@ pub fn open_hidden(app: &AppHandle) -> Result<(), String> {
     .decorations(false)
     .focused(false)
     .skip_taskbar(true)
-    // WebKit will not resolve microphone capture for a hidden or offscreen
-    // page. Keep the 1px undecorated runtime onscreen without exposing UI.
+    .on_page_load(|window, payload| {
+        if matches!(payload.event(), PageLoadEvent::Finished) {
+            let _ = window.emit("orchestrator-status-refresh", ());
+        }
+    })
+    // WebKit needs a visible onscreen page for microphone capture.
+    // Keep the 1px undecorated runtime onscreen without adding a Mayor window.
     .visible(true)
     .build()
     .map(|_| ())

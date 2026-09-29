@@ -1,5 +1,5 @@
 use super::agent::AgentSession;
-use super::status_types::{OrchestratorPetState, OrchestratorStatus};
+use super::status_types::OrchestratorStatus;
 use crate::preferences::PreferencesStore;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
@@ -13,6 +13,9 @@ pub struct Runtime {
     pub listening: bool,
     pub wake_activated: bool,
     pub mayor_focus_serial: u64,
+    pub mayor_speech: String,
+    pub mayor_voice_status: String,
+    pub mayor_speaking: bool,
     pub wake_status: Option<String>,
     pub active_task_id: Option<String>,
     pub canceling_task_id: Option<String>,
@@ -26,7 +29,6 @@ pub struct Runtime {
     pub launch_signature: Option<String>,
     pub selected_workspace_id: Option<String>,
     pub degraded_note: Option<String>,
-    pub responses_backend: bool,
 }
 
 #[derive(Default)]
@@ -43,6 +45,7 @@ impl OrchestratorState {
     ) -> OrchestratorStatus {
         let (
             launching,
+            connecting,
             live_connected,
             listening,
             active_task_id,
@@ -54,11 +57,11 @@ impl OrchestratorState {
             lifecycle_generation,
             current_pane,
             degraded_note,
-            responses_backend,
         ) = {
             let runtime = self.0.lock().unwrap_or_else(|error| error.into_inner());
             (
                 runtime.launching,
+                runtime.connecting,
                 runtime.live_connected,
                 runtime.listening,
                 runtime.active_task_id.clone(),
@@ -70,7 +73,6 @@ impl OrchestratorState {
                 runtime.lifecycle_generation,
                 runtime.agent.as_ref().map(|agent| agent.pane_id.clone()),
                 runtime.degraded_note.clone(),
-                runtime.responses_backend,
             )
         };
         let pi_connected = !launching
@@ -82,14 +84,26 @@ impl OrchestratorState {
         let pet_ready = crate::pet_studio::orchestrator_pet_ready(
             preferences.app.orchestrator.pet_id.as_deref(),
         );
+        let firstmate =
+            preferences.app.orchestrator.mode == crate::preferences_model::MayorMode::Firstmate;
         let message = if !available {
             "OpenAI key not found"
         } else if !pet_ready {
             "Mayor pet required"
+        } else if firstmate
+            && (preferences.app.orchestrator.firstmate_path.is_none()
+                || preferences.app.orchestrator.firstmate_path
+                    != preferences.app.orchestrator.trusted_firstmate_path)
+        {
+            "Choose and trust a Firstmate folder"
+        } else if firstmate && herdr_connected {
+            "Ready — hold to talk"
         } else if live_connected && !pi_connected {
             "Mayor stopped — reconnect voice"
         } else if live_connected {
             "Voice connected"
+        } else if connecting || wake_activated {
+            "Connecting voice"
         } else if pi_connected {
             "Voice idle — say the wake phrase"
         } else if herdr_connected && preferences.app.orchestrator.enabled {
@@ -113,13 +127,6 @@ impl OrchestratorState {
             wake_activated,
             wake_generation: super::wake::generation(),
             workspace_id,
-            voice_mode: if live_connected && responses_backend {
-                "tools".to_string()
-            } else if live_connected {
-                "basic".to_string()
-            } else {
-                "idle".to_string()
-            },
             voice_note: degraded_note.clone(),
             message: if !live_connected {
                 degraded_note.unwrap_or_else(|| message.to_string())
@@ -128,7 +135,6 @@ impl OrchestratorState {
             },
         }
     }
-
     pub fn set_listening(&self, value: bool, app: &AppHandle) {
         self.0
             .lock()
@@ -136,15 +142,6 @@ impl OrchestratorState {
             .listening = value;
         self.emit(app);
     }
-
-    pub fn pet_state(&self, app: &AppHandle) -> OrchestratorPetState {
-        super::state_publication::pet_state(self, app)
-    }
-
-    pub fn emit(&self, app: &AppHandle) {
-        super::state_publication::publish(self, app);
-    }
-
     pub fn mark_exiting(&self) {
         self.0
             .lock()
@@ -160,6 +157,10 @@ impl OrchestratorState {
             runtime.listening = false;
             runtime.wake_activated = false;
             runtime.wake_status = None;
+            runtime.mayor_speech.clear();
+            runtime.mayor_voice_status.clear();
+            runtime.mayor_speaking = false;
+            runtime.degraded_note = None;
             runtime.session_generation = runtime.session_generation.wrapping_add(1);
             runtime.lifecycle_generation = runtime.lifecycle_generation.wrapping_add(1);
             runtime.launching = false;

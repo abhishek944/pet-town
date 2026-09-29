@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 
 pub use agents::AgentView;
-pub use focus::focus_route;
+pub use focus::{focus_route, focus_route_with_codex_activation};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]

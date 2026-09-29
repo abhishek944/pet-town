@@ -252,6 +252,42 @@ input:focus-visible {
 .row select {
   min-width: 100px;
 }
+.wave-controls-heading {
+  padding: 9px 11px 4px;
+  color: #c5fbff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.wave-controls-heading small {
+  display: block;
+  margin-top: 2px;
+  color: #9296a0;
+  font-size: 9px;
+  font-weight: 400;
+}
+.ocean-preview {
+  position: relative;
+  height: 178px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #35393e, #4b5158);
+}
+.ocean-preview::before {
+  content: "Live wave preview";
+  position: absolute;
+  z-index: 1;
+  top: 9px;
+  left: 11px;
+  color: #e5f4f5;
+  font-size: 9px;
+  text-shadow: 0 1px 3px #182328;
+}
+.ocean-preview[hidden],
+#ocean-opacity-row[hidden],
+#ocean-waterline-row[hidden],
+.wave-controls-heading[hidden] {
+  display: none;
+}
 #pet-custom-name {
   width: min(190px, 48%);
   height: 28px;

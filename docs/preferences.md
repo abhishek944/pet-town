@@ -15,12 +15,15 @@ The **Pets** section opens an **All pets** gallery showing every bundled or Pet 
 Opening Preferences from a desktop pet goes directly to that character's settings. General Settings entry and the **Pets** toolbar button open the gallery. The detail view has a character selector and a **2D agent states** list. Each row shows the state's APNG playing, its clip name, and its action. 3D settings live in the town itself, not here. Select a visible state to preview its assigned APNG and movement action. Previewing a state does not change the character's behavior or save another preference. Use **+ Add** or **Replace** on a row to choose an APNG for that state in Pet Studio. If the same character appears more than once, every copy shares these settings:
 
 - whether the character is included in random assignment;
+- its 2D animation theme (Standard or, for bundled pets, Ocean);
 - pet size and opacity;
 - label visibility and text size;
 - Gentle, Standard, or Playful walking speed;
 - stop walking while hovered.
 
 Every bundled or newly created character is included by default. Users can deselect characters they do not want, but at least one character must remain included. Applying a draft immediately replaces any visible deselected character while preserving assignments that are still allowed. Random assignment uses each included character once before repeating characters when there are more agents than included pets.
+
+Selecting **Ocean** in **App → 2D strip theme** switches every bundled pet to its separate Ocean rowing APNG after Apply, even if an older saved preference still says Standard for individual pets. Selecting Standard there returns all bundled pets to Standard; while App is Standard, individual bundled pets may be switched to Ocean in Pets. The per-pet selector is locked while App Ocean controls the whole strip. Only rowing art is available so far: all visible states of an Ocean pet currently share its rowing APNG, while state visibility and walking/stationary actions still come from the behavior pack. Switch back to Standard to edit state APNGs in Pet Studio. Custom pets without Ocean assets remain Standard. App Ocean also draws a full-width, always-on Soft Surf wave and translucent water beneath the pets, even if no pets are visible. The small **Waves** controls include a live preview, **Waterline height** slider (50–146 px above the strip bottom, 88 px by default), and **Water opacity** slider (16% Glass Shallows to 36% Clear Ocean by default). Boats follow the exact displayed wave contour while walking or while the surface drifts, rather than traveling in a straight horizontal line. Water never catches clicks, and Reduce Motion stops its gentle drift.
 
 The macOS **Reduce motion** accessibility setting also keeps preview and desktop pets in place while their sprite animations continue.
 
@@ -48,7 +51,7 @@ Preferences are stored at:
 
 The preferences file is created after the first successful Apply or after Pet Studio activates a character with default settings. Pet Studio creates its private working folder when the application starts. A missing preferences file uses built-in defaults.
 
-The version 3 JSON contains a schema version, a small `app` object (including non-secret orchestrator settings), and one complete entry under `pets` for every installed bundled or Pet Studio character ID. It is safe to inspect and edit while Pet Town is stopped. It never contains prompts, project paths, pane or session IDs, socket paths, or agent output.
+The version 3 JSON contains a schema version, a small `app` object (including non-secret orchestrator settings), and one complete entry under `pets` for every installed bundled or Pet Studio character ID. Older version 3 pet entries without `theme` remain valid and default to `standard`; older App entries without `oceanOpacityPercent` or `oceanWaterlineHeightPx` default to 36% Clear Ocean and an 88 px waterline. It is safe to inspect and edit while Pet Town is stopped. It never contains prompts, project paths, pane or session IDs, socket paths, or agent output.
 
 After editing the file manually, reload it with:
 

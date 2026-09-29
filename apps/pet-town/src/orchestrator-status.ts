@@ -12,7 +12,6 @@ export type OrchestratorStatus = {
   wakeActivated: boolean;
   wakeGeneration: number;
   workspaceId: string | null;
-  voiceMode: string;
   voiceNote: string | null;
   message: string;
 };

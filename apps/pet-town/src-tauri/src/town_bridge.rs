@@ -7,9 +7,36 @@ const PROTOCOL_VERSION: u64 = 1;
 const MAX_COMMAND_BYTES: usize = 16 * 1024;
 const SNAPSHOT_INTERVAL: Duration = Duration::from_millis(500);
 
+struct HeldMayorTalk(bool);
+
+impl HeldMayorTalk {
+    fn set(&mut self, active: bool) {
+        let signal = if active {
+            libc::SIGVTALRM
+        } else {
+            libc::SIGPROF
+        };
+        match crate::app_singleton::signal_owner(signal) {
+            Ok(()) => self.0 = active,
+            Err(error) => eprintln!("[mayor push-to-talk] {error}"),
+        }
+    }
+}
+
+impl Drop for HeldMayorTalk {
+    fn drop(&mut self) {
+        if self.0 {
+            let _ = crate::app_singleton::signal_owner(libc::SIGPROF);
+        }
+    }
+}
+
 enum Command {
     Active(bool),
     Focus { id: String },
+    InvokeMayor,
+    MayorTalk(bool),
+    MayorRetryVoice,
     Shutdown,
     InputClosed,
 }
@@ -19,13 +46,19 @@ pub(crate) fn run() {
     std::thread::spawn(move || read_commands(sender));
     let stdout = io::stdout();
     let mut output = BufWriter::new(stdout.lock());
+    let mut held_talk = HeldMayorTalk(false);
 
     if write_snapshot(&mut output).is_err() {
         return;
     }
     loop {
         match receiver.recv_timeout(SNAPSHOT_INTERVAL) {
-            Ok(Command::Active(active)) => signal_town_state(active),
+            Ok(Command::Active(active)) => {
+                if !active && held_talk.0 {
+                    held_talk.set(false);
+                }
+                signal_town_state(active);
+            }
             Ok(Command::Focus { id }) => {
                 let result = crate::focus::focus_current_agent(&id);
                 let response = json!({
@@ -33,12 +66,29 @@ pub(crate) fn run() {
                     "type": "focusResult",
                     "id": id,
                     "ok": result.is_ok(),
-                    "message": result.err(),
+                    "message": result.err().unwrap_or_default(),
                 });
                 if write_message(&mut output, &response).is_err() {
                     signal_town_state(false);
                     return;
                 }
+            }
+            Ok(Command::InvokeMayor) => {
+                let result = crate::app_singleton::signal_owner(libc::SIGALRM);
+                let response = json!({
+                    "v": PROTOCOL_VERSION,
+                    "type": "mayorInvokeResult",
+                    "ok": result.is_ok(),
+                    "message": result.err().unwrap_or_default(),
+                });
+                if write_message(&mut output, &response).is_err() {
+                    signal_town_state(false);
+                    return;
+                }
+            }
+            Ok(Command::MayorTalk(active)) => held_talk.set(active),
+            Ok(Command::MayorRetryVoice) => {
+                let _ = crate::app_singleton::signal_owner(libc::SIGIO);
             }
             Ok(Command::Shutdown | Command::InputClosed) => {
                 signal_town_state(false);
@@ -96,13 +146,16 @@ fn parse_command(line: &str) -> Option<Command> {
             let id = value.get("id")?.as_str()?.trim();
             (!id.is_empty() && id.len() <= 256).then(|| Command::Focus { id: id.to_string() })
         }
+        "invokeMayor" => Some(Command::InvokeMayor),
+        "mayorTalk" => Some(Command::MayorTalk(value.get("active")?.as_bool()?)),
+        "mayorRetryVoice" => Some(Command::MayorRetryVoice),
         "shutdown" => Some(Command::Shutdown),
         _ => None,
     }
 }
 
 fn write_snapshot(output: &mut impl Write) -> io::Result<()> {
-    let collected = pet_town_agent_broker::collect();
+    let collected = crate::sessions::collect_visible();
     let mayor = read_mayor_state();
     write_message(
         output,

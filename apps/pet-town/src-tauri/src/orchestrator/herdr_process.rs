@@ -83,6 +83,14 @@ fn output(arguments: &[String], timeout: Duration) -> Result<Vec<u8>, String> {
         if detail.contains("agent_not_found") || detail.contains("tab_not_found") {
             return Err("Herdr target not found.".into());
         }
+        if let Ok(value) = serde_json::from_slice::<Value>(&error_bytes) {
+            if let (Some(code), Some(message)) = (
+                value["error"]["code"].as_str(),
+                value["error"]["message"].as_str(),
+            ) {
+                return Err(format!("Herdr {code}: {message}"));
+            }
+        }
         return Err("Herdr rejected the orchestrator operation.".into());
     }
     Ok(bytes)

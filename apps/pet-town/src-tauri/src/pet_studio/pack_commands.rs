@@ -30,7 +30,7 @@ pub fn save_pet_pack(
         .register_pet(id.clone(), assign_orchestrator);
     let _ = app.emit_to("main", "preferences-applied", &snapshot);
     let _ = app.emit("pet-studio-preferences", &snapshot);
-    crate::orchestrator::commands::preferences_changed(&app);
+    crate::orchestrator::commands::preferences_changed(&app, None);
     let reload_warning = app
         .emit_to("main", "user-packs-changed", ())
         .err()

@@ -1,12 +1,16 @@
 export const ASSISTANT_PET_ID = "knight";
 
 export type SettingsAppearance = "system" | "light" | "dark";
+export type StripTheme = "standard" | "ocean";
 export type LabelVisibility = "always" | "hover" | "hidden";
 export type MotionLevel = "gentle" | "standard" | "playful";
 
 export interface AppPreferences {
   openWithHerdr: boolean;
   settingsAppearance: SettingsAppearance;
+  stripTheme: StripTheme;
+  oceanOpacityPercent: number;
+  oceanWaterlineHeightPx: number;
   lastSelectedPetId: string;
   hideCompletedPets: boolean;
   completedHideDelayMinutes: number;
@@ -14,6 +18,9 @@ export interface AppPreferences {
 }
 
 export interface OrchestratorPreferences {
+  mode: "firstmate" | "live";
+  firstmatePath: string | null;
+  trustedFirstmatePath: string | null;
   enabled: boolean;
   displayName: string;
   model: "gpt-5.6-luna" | "gpt-5.6-sol" | "gpt-5.6-terra";
@@ -26,6 +33,7 @@ export interface OrchestratorPreferences {
 
 export interface PetPreferences {
   customName: string;
+  theme: StripTheme;
   includedInRandomCast: boolean;
   appearance: { scalePercent: number; opacityPercent: number };
   labels: { visibility: LabelVisibility; textScalePercent: number };

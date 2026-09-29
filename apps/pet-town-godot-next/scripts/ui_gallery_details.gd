@@ -56,7 +56,8 @@ func _companion_detail(record: Dictionary) -> void:
 	facts.add_child(_label(String(record.get("label", "Companion")), 31, CREAM))
 	facts.add_child(_label("Status: %s" % String(record.get("status", "—")).capitalize(), 16, CREAM))
 	facts.add_child(_label("Source: %s" % String(record.get("source", "—")).capitalize(), 15, CREAM))
-	facts.add_child(_label("Camera: %s" % ("Following" if followed_agent_id == String(record.get("id", "")) else "Free view"), 15, CREAM))
+	var camera_state := ("First-person" if first_person_view else "Following") if followed_agent_id == String(record.get("id", "")) else "Free view"
+	facts.add_child(_label("Camera: %s" % camera_state, 15, CREAM))
 	var id := String(record.get("id", ""))
 	var follow := _button("Stop following" if followed_agent_id == id else "Follow companion", true)
 	follow.set_meta("focus_key", "follow")
@@ -65,6 +66,13 @@ func _companion_detail(record: Dictionary) -> void:
 		_show_settings_page()
 	)
 	facts.add_child(follow)
+	var view := _button("Return to third-person" if first_person_view and followed_agent_id == id else "See through companion's eyes")
+	view.set_meta("focus_key", "view")
+	view.pressed.connect(func() -> void:
+		close_settings()
+		agent_view_requested.emit(id)
+	)
+	facts.add_child(view)
 	if String(record.get("source", "")) != "mayor":
 		var open := _button("Open in Herdr" if String(record.get("source", "")) == "herdr" else "Open agent")
 		open.set_meta("focus_key", "open")

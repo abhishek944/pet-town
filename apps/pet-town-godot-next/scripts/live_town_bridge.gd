@@ -4,6 +4,7 @@ extends Node
 
 signal snapshot_received(snapshot: Dictionary)
 signal focus_result(id: String, ok: bool, message: String)
+signal mayor_invoke_result(ok: bool, message: String)
 
 var bridge_pid := -1
 var bridge_pipe: FileAccess
@@ -51,8 +52,18 @@ func focus_agent(id: String) -> void:
 	if not id.strip_edges().is_empty():
 		_send({"type": "focusAgent", "id": id})
 
+func invoke_mayor() -> void:
+	_send({"type": "invokeMayor"})
+
+func mayor_talk(active: bool) -> void:
+	_send({"type": "mayorTalk", "active": active})
+
+func retry_mayor_voice() -> void:
+	_send({"type": "mayorRetryVoice"})
+
 func stop() -> void:
 	if bridge_pid > 0:
+		mayor_talk(false)
 		_send({"type": "activeChanged", "active": false})
 		_send({"type": "shutdown"})
 	bridge_pid = -1
@@ -70,7 +81,9 @@ func accept_line(line: String) -> void:
 		"snapshot":
 			snapshot_received.emit(value)
 		"focusResult":
-			focus_result.emit(String(value.get("id", "")), bool(value.get("ok", false)), String(value.get("message", "")))
+			focus_result.emit(str(value.get("id", "")), bool(value.get("ok", false)), str(value.get("message", "")) if value.get("message") != null else "")
+		"mayorInvokeResult":
+			mayor_invoke_result.emit(bool(value.get("ok", false)), str(value.get("message", "")) if value.get("message") != null else "")
 
 func _send(message: Dictionary) -> void:
 	if bridge_pipe == null:

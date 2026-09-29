@@ -5,6 +5,14 @@ pub const SCHEMA_VERSION: u32 = 3;
 pub const ASSISTANT_PET_ID: &str = "knight";
 pub const COMPLETED_HIDE_DELAYS_MINUTES: [u16; 5] = [1, 5, 15, 30, 60];
 
+pub fn default_ocean_opacity_percent() -> u8 {
+    36
+}
+
+pub fn default_ocean_waterline_height_px() -> u16 {
+    88
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PreferencesFile {
@@ -18,6 +26,12 @@ pub struct PreferencesFile {
 pub struct AppPreferences {
     pub open_with_herdr: bool,
     pub settings_appearance: SettingsAppearance,
+    #[serde(default)]
+    pub strip_theme: StripTheme,
+    #[serde(default = "default_ocean_opacity_percent")]
+    pub ocean_opacity_percent: u8,
+    #[serde(default = "default_ocean_waterline_height_px")]
+    pub ocean_waterline_height_px: u16,
     pub last_selected_pet_id: String,
     pub hide_completed_pets: bool,
     pub completed_hide_delay_minutes: u16,
@@ -27,6 +41,12 @@ pub struct AppPreferences {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct OrchestratorPreferences {
+    #[serde(default)]
+    pub mode: MayorMode,
+    #[serde(default)]
+    pub firstmate_path: Option<String>,
+    #[serde(default)]
+    pub trusted_firstmate_path: Option<String>,
     pub enabled: bool,
     pub display_name: String,
     pub model: String,
@@ -38,11 +58,21 @@ pub struct OrchestratorPreferences {
     pub system_prompt: String,
 }
 
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum MayorMode {
+    #[default]
+    Firstmate,
+    Live,
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PetPreferences {
     #[serde(default)]
     pub custom_name: String,
+    #[serde(default)]
+    pub theme: StripTheme,
     pub included_in_random_cast: bool,
     pub appearance: AppearancePreferences,
     pub labels: LabelPreferences,
@@ -82,6 +112,14 @@ pub enum SettingsAppearance {
     Dark,
 }
 
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum StripTheme {
+    #[default]
+    Standard,
+    Ocean,
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum LabelVisibility {
@@ -119,10 +157,16 @@ impl PreferencesFile {
             app: AppPreferences {
                 open_with_herdr: true,
                 settings_appearance: SettingsAppearance::System,
+                strip_theme: StripTheme::Standard,
+                ocean_opacity_percent: default_ocean_opacity_percent(),
+                ocean_waterline_height_px: default_ocean_waterline_height_px(),
                 last_selected_pet_id: first,
                 hide_completed_pets: false,
                 completed_hide_delay_minutes: 5,
                 orchestrator: OrchestratorPreferences {
+                    mode: MayorMode::Firstmate,
+                    firstmate_path: None,
+                    trusted_firstmate_path: None,
                     enabled: false,
                     display_name: "Mayor".to_string(),
                     model: "gpt-5.6-luna".to_string(),

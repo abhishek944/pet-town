@@ -105,7 +105,7 @@ func _build() -> void:
 	spacer.custom_minimum_size.y = 12
 	actions.add_child(spacer)
 	var browse := _button("Browse objects", true)
-	browse.pressed.connect(func() -> void: open_settings(3))
+	browse.pressed.connect(func() -> void: open_settings(4))
 	actions.add_child(browse)
 	var note := _label("Right-click cancels a move · ⌘Z undoes", 12, MUTED)
 	actions.add_child(note)

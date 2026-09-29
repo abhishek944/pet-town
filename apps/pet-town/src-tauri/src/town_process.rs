@@ -56,8 +56,7 @@ pub(crate) fn reap(app: &AppHandle) {
     };
     let exited = stored
         .as_mut()
-        .and_then(|child| child.try_wait().ok())
-        .is_some();
+        .is_some_and(|child| matches!(child.try_wait(), Ok(Some(_))));
     if exited {
         *stored = None;
         let _ = crate::village_visibility::set_town_active(app, false);

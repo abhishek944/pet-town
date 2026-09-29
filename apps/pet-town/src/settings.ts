@@ -2,8 +2,10 @@ import { getVersion } from "@tauri-apps/api/app"; import { invoke } from "@tauri
 import { listen } from "@tauri-apps/api/event";
 import { characterDisplayName } from "./character-packs";
 import { configurePetPreview } from "./settings-state-map";
+import { effectivePetTheme, oceanRowingUrl } from "./ocean-assets";
+import { createOceanWater, updateOceanWater } from "./ocean-water";
 import { loadPetPacks } from "./settings-pack-loader";
-import { clonePreferences, friendlyPetName, motionFactor, preferencesEqual, type LabelVisibility, type MotionLevel, type PreferencesFile, type PreferencesSnapshot, type SettingsAppearance, type SettingsContext } from "./preferences-types";
+import { clonePreferences, friendlyPetName, motionFactor, preferencesEqual, type LabelVisibility, type MotionLevel, type PreferencesFile, type PreferencesSnapshot, type SettingsAppearance, type SettingsContext, type StripTheme } from "./preferences-types";
 import { selectedPreviewAnimationId, type PreviewAnimationOption } from "./settings-preview";
 import { mergeAppliedDraft, settingsMessage, shouldShowApplyError } from "./settings-apply"; import { mergeLocalPreferenceEdits } from "./settings-three-way";
 import { renderChoiceControls, setSettingsReadOnly } from "./settings-choice-controls";
@@ -14,6 +16,7 @@ import { bindRange as bindInputRange, bindSwitch as bindInputSwitch } from "./se
 import { byId, setSwitch } from "./settings-dom";
 const petSelect = byId<HTMLSelectElement>("pet-select");
 const previewPet = byId<HTMLImageElement>("preview-pet"); const preview = byId<HTMLElement>("preview");
+const oceanPreview = byId<HTMLElement>("ocean-preview"); const oceanPreviewWater = createOceanWater();
 const resetPet = byId<HTMLButtonElement>("reset-pet"); const resetAll = byId<HTMLButtonElement>("reset-all");
 const apply = byId<HTMLButtonElement>("apply"); const dirty = byId<HTMLElement>("dirty");
 const message = byId<HTMLElement>("message");
@@ -30,7 +33,9 @@ const adapterSettings = new AdapterSettings((next, tone = "error") => {
 });
 const selectedAnimationByPet = new Map<string, string>(); const navigation = new SettingsNavigation((id) => {
   installSelection(id, true);
-}, () => selectedPetId); const assistantSettings = new AssistantSettings(() => draft, render);
+}, () => selectedPetId); const assistantSettings = new AssistantSettings(
+  () => draft, render, () => snapshot?.preferences.app.orchestrator ?? null,
+);
 const villageVisibility = new VillageVisibilitySettings((error) => { draftMessage = error; render(); });
 function pet() { return draft.pets[selectedPetId]; }
 function isDirty(): boolean { return !preferencesEqual(draft, snapshot.preferences); }
@@ -51,6 +56,7 @@ function selectPreviewAnimations(): void {
       navigation.show("studio");
       studio?.importApngForState(petId, state, file);
     },
+    effectivePetTheme(draft, selectedPetId),
   );
   selectedAnimationId = selectedPreviewAnimationId(animationOptions, selectedAnimationByPet.get(selectedPetId));
   selectedAnimationByPet.set(selectedPetId, selectedAnimationId);
@@ -83,13 +89,42 @@ function render(): void {
   byId<HTMLInputElement>("label-size").value = String(item.labels.textScalePercent);
   byId<HTMLOutputElement>("label-size-value").value = `${item.labels.textScalePercent}%`;
   byId<HTMLSelectElement>("motion-level").value = item.motion.level;
+  const themeSelect = byId<HTMLSelectElement>("pet-theme");
+  const hasOceanArt = Boolean(oceanRowingUrl(selectedPetId));
+  const selectedTheme = effectivePetTheme(draft, selectedPetId);
+  themeSelect.value = selectedTheme;
+  themeSelect.querySelector<HTMLOptionElement>('option[value="ocean"]')!.disabled = !hasOceanArt;
+  byId<HTMLElement>("pet-theme-hint").textContent = !hasOceanArt
+    ? "Ocean animations are not available for this custom pet."
+    : draft.app.stripTheme === "ocean"
+      ? "App Ocean applies to every bundled pet. Switch App to Standard for individual choices."
+      : "Ocean currently uses one rowing APNG for every visible state.";
+  byId<HTMLElement>("state-map-hint").textContent = selectedTheme === "ocean"
+    ? "Ocean currently shares its rowing APNG across visible states. Switch to Standard to replace state APNGs."
+    : "Each state picks an APNG and whether the pet walks or stays in place. Select a visible state to preview its APNG.";
   setSwitch("pause-hover", item.motion.pauseOnHover);
   renderChoiceControls(draft, snapshot, item);
   setSettingsReadOnly(snapshot.readOnly);
+  themeSelect.disabled = snapshot.readOnly || !hasOceanArt || draft.app.stripTheme === "ocean";
   setSwitch("open-with-herdr", draft.app.openWithHerdr);
   villageVisibility.render();
   assistantSettings.render();
   byId<HTMLSelectElement>("settings-appearance").value = draft.app.settingsAppearance;
+  byId<HTMLSelectElement>("strip-theme").value = draft.app.stripTheme;
+  const waterlineSlider = byId<HTMLInputElement>("ocean-waterline");
+  waterlineSlider.value = String(draft.app.oceanWaterlineHeightPx);
+  waterlineSlider.disabled = snapshot.readOnly || draft.app.stripTheme !== "ocean";
+  byId<HTMLOutputElement>("ocean-waterline-value").value = `${draft.app.oceanWaterlineHeightPx}px`;
+  byId<HTMLElement>("ocean-waterline-row").hidden = draft.app.stripTheme !== "ocean";
+  byId<HTMLElement>("ocean-waves-heading").hidden = draft.app.stripTheme !== "ocean";
+  const opacitySlider = byId<HTMLInputElement>("ocean-opacity");
+  opacitySlider.value = String(draft.app.oceanOpacityPercent);
+  opacitySlider.disabled = snapshot.readOnly || draft.app.stripTheme !== "ocean";
+  byId<HTMLOutputElement>("ocean-opacity-value").value = `${draft.app.oceanOpacityPercent}%`;
+  byId<HTMLElement>("ocean-opacity-row").hidden = draft.app.stripTheme !== "ocean";
+  oceanPreview.hidden = draft.app.stripTheme !== "ocean";
+  updateOceanWater(oceanPreviewWater, "ocean", draft.app.oceanOpacityPercent,
+    draft.app.oceanWaterlineHeightPx);
   document.documentElement.dataset.theme = draft.app.settingsAppearance;
   const changed = isDirty();
   apply.disabled = applying || !changed || snapshot.readOnly; resetPet.disabled = snapshot.readOnly;
@@ -105,6 +140,8 @@ function bindControls(): void {
     render();
   });
   bindRange("pet-size", (value) => { pet().appearance.scalePercent = value; });
+  bindRange("ocean-opacity", (value) => { draft.app.oceanOpacityPercent = value; });
+  bindRange("ocean-waterline", (value) => { draft.app.oceanWaterlineHeightPx = value; });
   byId<HTMLInputElement>("pet-custom-name").addEventListener("input", (event) => {
     pet().customName = (event.currentTarget as HTMLInputElement).value;
     render();
@@ -113,6 +150,11 @@ function bindControls(): void {
   bindRange("label-size", (value) => { pet().labels.textScalePercent = value; });
   byId<HTMLSelectElement>("label-visibility").addEventListener("change", (event) => { pet().labels.visibility = (event.currentTarget as HTMLSelectElement).value as LabelVisibility; render(); });
   byId<HTMLSelectElement>("motion-level").addEventListener("change", (event) => { pet().motion.level = (event.currentTarget as HTMLSelectElement).value as MotionLevel; render(); });
+  byId<HTMLSelectElement>("pet-theme").addEventListener("change", (event) => {
+    pet().theme = (event.currentTarget as HTMLSelectElement).value as StripTheme;
+    selectPreviewAnimations();
+    render();
+  });
   bindSwitch("pause-hover", (checked) => { pet().motion.pauseOnHover = checked; });
   bindSwitch("include-random-cast", (checked) => { pet().includedInRandomCast = checked; });
   bindSwitch("hide-completed-pets", (checked) => { draft.app.hideCompletedPets = checked; });
@@ -120,11 +162,25 @@ function bindControls(): void {
   bindSwitch("open-with-herdr", (checked) => { draft.app.openWithHerdr = checked; });
   villageVisibility.bind(); bindTownActions((error) => { draftMessage = error; draftMessageTone = "error"; render(); });
   byId<HTMLSelectElement>("settings-appearance").addEventListener("change", (event) => { draft.app.settingsAppearance = (event.currentTarget as HTMLSelectElement).value as SettingsAppearance; render(); });
-  resetPet.addEventListener("click", () => { draft.pets[selectedPetId] = clonePreferences(snapshot.defaults).pets[selectedPetId]; render(); });
+  byId<HTMLSelectElement>("strip-theme").addEventListener("change", (event) => {
+    const theme = (event.currentTarget as HTMLSelectElement).value as StripTheme;
+    draft.app.stripTheme = theme;
+    for (const [id, item] of Object.entries(draft.pets)) {
+      if (oceanRowingUrl(id)) item.theme = theme;
+    }
+    selectPreviewAnimations();
+    render();
+  });
+  resetPet.addEventListener("click", () => {
+    draft.pets[selectedPetId] = clonePreferences(snapshot.defaults).pets[selectedPetId];
+    selectPreviewAnimations();
+    render();
+  });
   apply.addEventListener("click", () => { void applyDraft(); });
   resetAll.addEventListener("click", () => {
     if (confirm("Reset all Pet Town preferences?")) {
       draft = clonePreferences(snapshot.defaults);
+      selectPreviewAnimations();
       void applyDraft(false);
     }
   });
@@ -138,6 +194,7 @@ async function applyDraft(rememberSelection = true): Promise<void> {
     if (applied.revision >= snapshot.revision) {
       const merged = mergeAppliedDraft(draft, submitted, applied);
       snapshot = applied; draft = merged.draft;
+      selectPreviewAnimations();
       if (generation === applyGeneration) { draftMessage = merged.message; draftMessageTone = "info"; }
     }
   } catch (error) {
@@ -170,6 +227,7 @@ function installSelection(next: string | null, fromGallery = false, focus = true
   selectPreviewAnimations(); render(); navigation.show("pet", focus);
 }
 async function start(): Promise<void> {
+  oceanPreview.append(oceanPreviewWater);
   const extensionWarning = await loadPetPacks(); bindControls(); const studioInstance = new PetStudio(); studio = studioInstance;
   if (extensionWarning) studioInstance.showExtensionWarning(extensionWarning);
   const startup = new SettingsStartupBuffer<PreferencesSnapshot, string | null>();

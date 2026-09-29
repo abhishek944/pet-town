@@ -1,15 +1,4 @@
-let transcript = "";
-let transcriptRole = "";
-
-export function readTranscript(): string {
-  return transcript;
-}
-
 export function appendTranscript(role: "user" | "assistant", delta: string): void {
-  transcript = `${transcript}${transcriptRole === role ? "" : `\n${role}: `}${delta}`.slice(
-    -22_000,
-  );
-  transcriptRole = role;
   const container = document.getElementById("transcript")!;
   container.querySelector(".empty")?.remove();
   let paragraph = container.lastElementChild as HTMLElement | null;
@@ -24,8 +13,6 @@ export function appendTranscript(role: "user" | "assistant", delta: string): voi
 }
 
 export function resetTranscript(): void {
-  transcript = "";
-  transcriptRole = "";
   document.getElementById("transcript")!.replaceChildren(
     Object.assign(document.createElement("p"), {
       className: "empty",

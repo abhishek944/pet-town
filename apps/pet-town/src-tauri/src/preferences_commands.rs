@@ -28,18 +28,25 @@ pub fn apply_preferences(
     state: tauri::State<'_, PreferencesStore>,
 ) -> Result<PreferencesSnapshot, String> {
     draft.normalize_assistant();
+    let previous = state.snapshot().preferences.app.orchestrator;
     let snapshot = state.apply(draft, expected_revision)?;
     let _ = app.emit_to("main", "preferences-applied", &snapshot);
-    crate::orchestrator::commands::preferences_changed(&app);
+    crate::orchestrator::commands::preferences_changed(&app, Some(&previous));
     Ok(snapshot)
 }
 
 pub fn reload_and_emit(app: &AppHandle) -> Result<PreferencesSnapshot, String> {
+    let previous = app
+        .state::<PreferencesStore>()
+        .snapshot()
+        .preferences
+        .app
+        .orchestrator;
     match app.state::<PreferencesStore>().reload() {
         Ok(snapshot) => {
             let _ = app.emit("preferences-reloaded", &snapshot);
             let _ = app.emit_to("main", "preferences-applied", &snapshot);
-            crate::orchestrator::commands::preferences_changed(app);
+            crate::orchestrator::commands::preferences_changed(app, Some(&previous));
             Ok(snapshot)
         }
         Err(error) => {

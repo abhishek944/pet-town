@@ -4,7 +4,7 @@ func open_settings(page := 0) -> void:
 	agent_panel.visible = false
 	if inspector.visible:
 		_dismiss_object_editor()
-	settings_page = clampi(page, 0, 3)
+	settings_page = clampi(page, 0, 4)
 	selected_companion = -1
 	selected_agent_id = ""
 	selected_object_id = ""
@@ -43,8 +43,8 @@ func _build_settings() -> void:
 	settings_tabs = VBoxContainer.new()
 	settings_tabs.add_theme_constant_override("separation", 7)
 	rail.add_child(settings_tabs)
-	for index in 4:
-		var tab := _button(["⌂   Town", "♞   Companions", "◉   Camera", "◇   Objects"][index])
+	for index in 5:
+		var tab := _button(["⌂   Town", "♞   Companions", "◉   Camera", "♫   Sound", "◇   Objects"][index])
 		tab.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		tab.custom_minimum_size.y = 48
 		tab.pressed.connect(_select_settings_page.bind(index))
@@ -108,8 +108,8 @@ func _show_settings_page(reset_scroll := true) -> void:
 	var previous_scroll := settings_scroll.scroll_vertical
 	_clear(settings_content)
 	settings_agent_message = null
-	var object_gallery := settings_page == 3 and selected_object_id.is_empty()
-	settings_breadcrumb.text = ["YOUR ISLAND", "YOUR ISLAND / COMPANIONS", "YOUR ISLAND / CAMERA", "YOUR ISLAND / OBJECTS"][settings_page]
+	var object_gallery := settings_page == 4 and selected_object_id.is_empty()
+	settings_breadcrumb.text = ["YOUR ISLAND", "YOUR ISLAND / COMPANIONS", "YOUR ISLAND / CAMERA", "YOUR ISLAND / SOUND", "YOUR ISLAND / OBJECTS"][settings_page]
 	settings_header.visible = not object_gallery
 	settings_footer.visible = not object_gallery
 	settings_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if object_gallery else ScrollContainer.SCROLL_MODE_AUTO
@@ -123,7 +123,8 @@ func _show_settings_page(reset_scroll := true) -> void:
 		0: _town_page()
 		1: _companions_page()
 		2: _camera_page()
-		3: _objects_page()
+		3: _sound_page()
+		4: _objects_page()
 	settings_scroll.set_deferred("scroll_vertical", 0 if reset_scroll else previous_scroll)
 	call_deferred("_layout")
 

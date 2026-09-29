@@ -37,6 +37,8 @@ fn compile_wake_bridge() {
             "-target",
             target,
             "src/orchestrator/wake_bridge.swift",
+            "src/orchestrator/firstmate_record.swift",
+            "src/orchestrator/global_mayor_shortcut.swift",
             "-o",
         ])
         .arg(&library)
@@ -69,6 +71,8 @@ fn compile_wake_bridge() {
     );
     println!("cargo:rerun-if-changed=Info.plist");
     println!("cargo:rerun-if-changed=src/orchestrator/wake_bridge.swift");
+    println!("cargo:rerun-if-changed=src/orchestrator/firstmate_record.swift");
+    println!("cargo:rerun-if-changed=src/orchestrator/global_mayor_shortcut.swift");
 }
 
 fn runtime_hash() -> String {

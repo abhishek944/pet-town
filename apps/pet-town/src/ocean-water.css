@@ -1,0 +1,59 @@
+.ocean-water {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 102px;
+  overflow: hidden;
+  pointer-events: none !important;
+  --ocean-top-opacity: 0.36;
+  --ocean-bottom-opacity: 0.29;
+}
+
+.ocean-water[hidden] {
+  display: none;
+}
+
+.ocean-water svg {
+  position: absolute;
+  left: -24px;
+  bottom: 0;
+  width: calc(100% + 48px);
+  height: 100%;
+  pointer-events: none;
+  animation: ocean-surface-drift 8s ease-in-out infinite alternate;
+}
+
+.ocean-water.is-paused svg {
+  animation-play-state: paused;
+}
+
+.ocean-top {
+  stop-opacity: var(--ocean-top-opacity);
+}
+
+.ocean-bottom {
+  stop-opacity: var(--ocean-bottom-opacity);
+}
+
+.ocean-wave-depth {
+  stroke: #29bdd0;
+  stroke-opacity: 0.48;
+  stroke-width: 8;
+  transform: translateY(5px);
+}
+
+.ocean-wave-crest {
+  stroke: #c5fbff;
+  stroke-width: 3.5;
+}
+
+@keyframes ocean-surface-drift {
+  from { transform: translateX(-10px); }
+  to { transform: translateX(10px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocean-water svg { animation: none; }
+}

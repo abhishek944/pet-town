@@ -19,6 +19,9 @@ pub async fn start_orchestrator_session(
         .preferences
         .app
         .orchestrator;
+    if configured.mode != crate::preferences_model::MayorMode::Live {
+        return Err("GPT-Live is only available in Live mode.".into());
+    }
     if !crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref()) {
         return Err("The bundled Knight mayor is unavailable.".into());
     }
@@ -32,6 +35,7 @@ pub async fn start_orchestrator_session(
             runtime.wake_activated = false;
         }
         runtime.connecting = true;
+        runtime.degraded_note = None;
         runtime.session_generation = runtime.session_generation.wrapping_add(1);
         runtime.session_generation
     };
@@ -52,17 +56,15 @@ pub async fn start_orchestrator_session(
     // Start Pi and negotiate voice concurrently; neither requires the other.
     let (pi, voice) = futures_util::future::join(
         super::launcher::ensure(app.clone(), workspace_id),
-        super::openai::create_session(sdp, &preferences.app.orchestrator.display_name),
+        super::openai::create_session(
+            sdp,
+            &preferences.app.orchestrator.display_name,
+            &preferences.app.orchestrator.system_prompt,
+        ),
     )
     .await;
     pi?;
-    let (result, note) = voice;
-    {
-        let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
-        runtime.responses_backend = note.is_none() && result.is_ok();
-        runtime.degraded_note = note;
-    }
-    let answer = result?;
+    let answer = voice?;
     {
         let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
         if runtime.session_generation != generation {
@@ -96,10 +98,19 @@ pub fn rearm_orchestrator_voice(app: AppHandle) -> Result<String, String> {
     super::window::open_hidden(&app)?;
     super::wake::start(&app, &configured.display_name)?;
     app.state::<OrchestratorState>().emit(&app);
-    Ok(format!(
-        "Listening for \u{201c}Hey, {}\u{201d}. Say the wake phrase to start talking.",
-        configured.display_name.trim()
-    ))
+    let name = configured.display_name.trim();
+    let phrases = if name.eq_ignore_ascii_case("mayor") {
+        "“Hey Mayor”".to_string()
+    } else {
+        format!("“Hey Mayor” or “Hey {name}”")
+    };
+    Ok(
+        if configured.mode == crate::preferences_model::MayorMode::Firstmate {
+            format!("Listening for {phrases}. Say a wake phrase to focus Mayor, then hold to talk.")
+        } else {
+            format!("Listening for {phrases}. Say a wake phrase to start talking.")
+        },
+    )
 }
 
 fn default_session_folder() -> Result<String, String> {
@@ -109,9 +120,15 @@ fn default_session_folder() -> Result<String, String> {
     Ok(format!("{home}/Documents"))
 }
 
-pub fn preferences_changed(app: &AppHandle) {
+pub fn preferences_changed(
+    app: &AppHandle,
+    previous: Option<&crate::preferences_model::OrchestratorPreferences>,
+) {
     let preferences = app.state::<PreferencesStore>().snapshot().preferences;
     let configured = &preferences.app.orchestrator;
+    if previous.is_some_and(|value| configured == value) {
+        return;
+    }
     let state = app.state::<OrchestratorState>();
     {
         let mut runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
@@ -125,19 +142,27 @@ pub fn preferences_changed(app: &AppHandle) {
         let launch_changed =
             runtime.launching && runtime.launch_signature.as_deref() != Some(signature.as_str());
         launch_changed
-            || runtime.agent.as_ref().is_some_and(|agent| {
-                agent.display_name != configured.display_name
-                    || agent.model != configured.model
-                    || agent.thinking != configured.thinking
-            })
+            || runtime
+                .agent
+                .as_ref()
+                .is_some_and(|agent| agent.configuration_signature != signature)
     };
-    if changed {
+    if changed
+        || previous.is_some_and(|old| {
+            old.mode != configured.mode
+                || old.firstmate_path != configured.firstmate_path
+                || old.trusted_firstmate_path != configured.trusted_firstmate_path
+        })
+    {
+        let _ = super::firstmate::set_firstmate_talk(false, app.clone());
         let _ = app.emit_to("orchestrator", "orchestrator-reset", ());
         super::window::destroy(app);
         state.shutdown();
     }
     let pet_ready = crate::pet_studio::orchestrator_pet_ready(configured.pet_id.as_deref());
     if !configured.enabled {
+        let _ = super::firstmate::set_firstmate_talk(false, app.clone());
+        super::firstmate::close(app);
         super::wake::stop(app);
         let _ = app.emit_to("orchestrator", "orchestrator-disable", ());
         super::window::destroy(app);
@@ -153,9 +178,24 @@ pub fn preferences_changed(app: &AppHandle) {
                 eprintln!("[assistant runtime] {error}");
             }
         });
-        let _ = super::wake::start(app, &configured.display_name);
+        let voice_active = {
+            let runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
+            runtime.live_connected || runtime.connecting || runtime.wake_activated
+        };
+        if !voice_active {
+            let _ = super::wake::start(app, &configured.display_name);
+        }
     } else {
         super::wake::stop(app);
+    }
+    if configured.enabled
+        && pet_ready
+        && configured.mode == crate::preferences_model::MayorMode::Firstmate
+        && configured.firstmate_path.is_some()
+        && configured.firstmate_path == configured.trusted_firstmate_path
+        && super::openai::api_key().is_some()
+    {
+        let _ = super::window::open_hidden(app);
     }
     state.emit(app);
 }

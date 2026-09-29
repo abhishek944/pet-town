@@ -9,6 +9,7 @@ signal cancel_requested
 signal undo_requested
 signal mode_requested(mode: String)
 signal agent_follow_requested(agent_id: String)
+signal agent_view_requested(agent_id: String)
 signal agent_open_requested(agent_id: String)
 
 const CREAM := Color("f8f5ed")
@@ -21,6 +22,7 @@ var catalog: WorkshopCatalog
 var wallet: BuildWallet
 var editor: WorkshopEditor
 var town_mode := "chill"
+var ambience: AmbientSound
 var agents: Array[Dictionary] = []
 var companion_names: Array[String] = []
 var companion_scenes: Array[PackedScene] = []
@@ -59,7 +61,9 @@ var agent_panel: PanelContainer
 var agent_content: VBoxContainer
 var agent_record_id := ""
 var followed_agent_id := ""
+var first_person_view := false
 var agent_follow_button: Button
+var agent_view_button: Button
 var agent_camera_label: Label
 var agent_status_label: Label
 var agent_message: Label

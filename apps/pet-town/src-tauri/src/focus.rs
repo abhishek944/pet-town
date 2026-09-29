@@ -86,26 +86,43 @@ fn run_user_focus_route(herdr: &OsString, target: &FocusRoute) -> Result<(), Str
         return run_focus_route(herdr, target);
     };
 
-    herdr::verify(herdr, pane_id, socket.as_deref(), agent_session_id)?;
-    #[cfg(target_os = "macos")]
-    let _ = crate::macos_activation::activate_herdr_host(herdr, socket.as_deref());
     let verified = herdr::verify(herdr, pane_id, socket.as_deref(), agent_session_id)?;
-    let focused = herdr::focus_verified(
+    herdr::focus_verified(
         herdr,
         pane_id,
         socket.as_deref(),
         agent_session_id,
         &verified,
-    );
-    focused
+    )?;
+    // Select the pane before exposing the terminal window to avoid showing its
+    // previously selected workspace during the app switch.
+    #[cfg(target_os = "macos")]
+    crate::macos_activation::activate_herdr_host(herdr, socket.as_deref())?;
+    Ok(())
 }
 
 pub(crate) fn focus_current_agent(id: &str) -> Result<(), String> {
-    let target = pet_town_agent_broker::collect()
+    let target = crate::sessions::collect_visible()
         .focus_routes
         .remove(id)
         .map(FocusRoute::from)
         .ok_or_else(|| "agent is no longer available".to_string())?;
+    if let FocusRoute::Codex {
+        thread_id,
+        fallback_bundle_id,
+    } = &target
+    {
+        let activated = pet_town_agent_broker::focus_route_with_codex_activation(
+            &pet_town_agent_broker::FocusRoute::Codex {
+                thread_id: thread_id.clone(),
+                fallback_bundle_id: fallback_bundle_id.clone(),
+            },
+        )?;
+        if activated {
+            crate::adapter_events::mark_codex_idle(id)?;
+        }
+        return Ok(());
+    }
     run_user_focus_route(&herdr_binary(), &target)
 }
 

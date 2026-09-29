@@ -2,7 +2,15 @@ use super::types::{Draft, SavePackRequest, StateSelection};
 use serde_json::{json, Value};
 use std::collections::HashSet;
 
-const STATES: [&str; 6] = ["idle", "working", "blocked", "done", "unknown", "listening"];
+const STATES: [&str; 7] = [
+    "idle",
+    "working",
+    "blocked",
+    "done",
+    "unknown",
+    "listening",
+    "speaking",
+];
 
 fn state_value(selection: &StateSelection, animation: Option<&str>) -> Result<Value, String> {
     if !matches!(selection.action.as_str(), "idle" | "walking") {
@@ -21,7 +29,7 @@ pub fn build(id: &str, request: &SavePackRequest, draft: &Draft) -> Result<Value
             .keys()
             .any(|state| !STATES.contains(&state.as_str()))
     {
-        return Err("Assign all six pet states.".into());
+        return Err("Assign all seven pet states.".into());
     }
     let mut names = HashSet::new();
     let mut states = serde_json::Map::new();
@@ -63,7 +71,12 @@ pub fn build(id: &str, request: &SavePackRequest, draft: &Draft) -> Result<Value
                 .map(str::to_owned)
                 .ok_or_else(|| format!("Choose an imported APNG for {state}."))
         };
-        Some(json!({"walking":animation("working")?,"listening":animation("listening")?}))
+        let mut mapping =
+            json!({"walking":animation("working")?,"listening":animation("listening")?});
+        if request.state_assignments["speaking"].visible {
+            mapping["speaking"] = json!(animation("speaking")?);
+        }
+        Some(mapping)
     } else {
         None
     };

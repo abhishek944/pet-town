@@ -16,7 +16,6 @@ pub struct OrchestratorStatus {
     pub wake_activated: bool,
     pub wake_generation: u64,
     pub workspace_id: Option<String>,
-    pub voice_mode: String,
     pub voice_note: Option<String>,
     pub message: String,
 }
@@ -29,4 +28,6 @@ pub struct OrchestratorPetState {
     pub pet_id: Option<String>,
     pub display_name: String,
     pub listening: bool,
+    pub working: bool,
+    pub speaking: bool,
 }

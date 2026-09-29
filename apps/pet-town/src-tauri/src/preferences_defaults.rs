@@ -1,12 +1,13 @@
 use crate::preferences_model::{
     AppearancePreferences, LabelPreferences, LabelVisibility, MotionLevel, MotionPreferences,
-    PetPreferences,
+    PetPreferences, StripTheme,
 };
 
 impl Default for PetPreferences {
     fn default() -> Self {
         Self {
             custom_name: String::new(),
+            theme: StripTheme::Standard,
             included_in_random_cast: true,
             appearance: AppearancePreferences {
                 scale_percent: 100,
