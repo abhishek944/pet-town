@@ -1,13 +1,17 @@
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AgentView {
     pub id: String,
     pub status: String,
     pub label: String,
     pub source: String,
+    #[serde(default)]
+    pub supports_terminal: bool,
+    #[serde(default)]
+    pub remote_machine: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -84,6 +88,8 @@ pub(crate) fn parse_agent_list(text: &str) -> Result<Vec<ParsedAgent>, serde_jso
                     status: normalized_status(&agent.agent_status),
                     label: safe_project_name(project_path),
                     source: "unknown".to_string(),
+                    supports_terminal: false,
+                    remote_machine: None,
                 },
                 tab_id: agent.tab_id,
                 workspace_id: agent.workspace_id,

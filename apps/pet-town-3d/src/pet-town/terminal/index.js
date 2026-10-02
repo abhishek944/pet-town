@@ -124,7 +124,7 @@ export function createTerminalDock({ context, controller, bridge, onVisibility }
     update(next, currentContext = context) {
       if (disposed) return;
       context = currentContext;
-      const eligible = next?.source === "herdr" && !next.isMayor;
+      const eligible = next?.source === "herdr" && next.supportsTerminal === true && !next.isMayor;
       const id = eligible ? next.id : null;
       if (id !== selectedId) {
         selectedId = id;
