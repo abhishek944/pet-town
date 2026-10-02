@@ -24,7 +24,7 @@ fn active_mayor_owner() -> Option<MayorSessionOwner> {
 }
 
 fn is_mayor_primary(route: &FocusRoute, owner: &MayorSessionOwner) -> bool {
-    matches!(route, FocusRoute::Herdr { pane_id, agent_session_id, .. }
+    matches!(route, FocusRoute::Herdr { pane_id, agent_session_id, machine: None, .. }
         if pane_id == &owner.pane && PathBuf::from(agent_session_id) == owner.log)
 }
 
@@ -71,6 +71,7 @@ fn collect_with_activity() -> BrokerSnapshot {
 }
 
 pub fn snapshot_json() -> String {
+    pet_town_agent_broker::refresh_remote();
     let collected = collect_visible();
     serde_json::to_string(&collected.snapshot)
         .unwrap_or_else(|_| r#"{"available":false,"agents":[]}"#.to_string())
