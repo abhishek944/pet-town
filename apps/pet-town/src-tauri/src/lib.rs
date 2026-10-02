@@ -8,6 +8,7 @@ mod app_singleton;
 mod control;
 mod focus;
 mod focus_id;
+mod focus_route;
 mod focus_trace;
 #[cfg(target_os = "macos")]
 mod global_mayor_shortcut;
