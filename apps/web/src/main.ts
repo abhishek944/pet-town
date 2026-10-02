@@ -62,9 +62,12 @@ async function initializeCharacters(): Promise<void> {
   };
   const characterById = new Map(characters.map((character) => [character.id, character]));
   for (const [key, characterId] of Object.entries(previewPets)) {
-    const image = document.querySelector<HTMLImageElement>(`[data-pet="${key}"]`);
+    const images = document.querySelectorAll<HTMLImageElement>(`[data-pet="${key}"]`);
     const character = characterById.get(characterId);
-    if (image && character) image.src = character.image;
+    if (character)
+      images.forEach((image) => {
+        image.src = character.image;
+      });
   }
 
   characters.forEach((character, index) => {
@@ -110,12 +113,12 @@ async function preferredMacDownload(): Promise<{ href: string; label: string; hi
   const intel = values?.architecture?.toLowerCase().includes("x86") ?? false;
   return intel
     ? {
-        href: "https://github.com/abhishek944/pet-town/releases/download/v0.1.8/Pet-Town-macOS-Intel.dmg",
+        href: "https://github.com/abhishek944/pet-town/releases/download/v1.2.0/Pet-Town-macOS-Intel.dmg",
         label: "Download for Intel Mac",
         hint: "Intel Mac detected · Apple Silicon option available",
       }
     : {
-        href: "https://github.com/abhishek944/pet-town/releases/download/v0.1.8/Pet-Town-macOS-Apple-Silicon.dmg",
+        href: "https://github.com/abhishek944/pet-town/releases/download/v1.2.0/Pet-Town-macOS-Apple-Silicon.dmg",
         label: "Download for macOS",
         hint: "Apple Silicon recommended · Intel option available",
       };
@@ -127,13 +130,9 @@ void preferredMacDownload().then(({ href, label, hint }) => {
     link.href = href;
     if (href.startsWith("#")) link.removeAttribute("download");
   });
-  const heroLabel = document.querySelector<HTMLElement>(".js-download-label");
-  const footerLabel = document.querySelector<HTMLElement>(".js-footer-download-label");
-  if (heroLabel) heroLabel.textContent = label;
-  if (footerLabel)
-    footerLabel.textContent = href.startsWith("#")
-      ? "See available Mac downloads ↓"
-      : "Bring the village to your Mac ↓";
+  document.querySelectorAll<HTMLElement>(".js-download-label").forEach((element) => {
+    element.textContent = label;
+  });
   document.querySelectorAll<HTMLElement>(".js-platform-hint").forEach((element) => {
     element.textContent = hint;
   });

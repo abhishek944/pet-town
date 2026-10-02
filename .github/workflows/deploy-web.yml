@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "apps/web/**"
+      - "apps/pet-town-3d/**"
       - "apps/pet-town/src/pets/**"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -38,7 +39,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Build landing page
+      - name: Build landing page and public town
         env:
           VITE_BASE_PATH: /pet-town/
         run: pnpm --filter @pet-town/web build

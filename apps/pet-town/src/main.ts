@@ -24,6 +24,7 @@ import type { PreferencesFile } from "./preferences-types";
 import {
   applyOrchestratorCitizen,
   orchestratorPack,
+  validOrchestratorView,
   type OrchestratorView,
 } from "./orchestrator-pet";
 
@@ -145,17 +146,6 @@ async function reloadUserPacks(): Promise<void> {
     render(true);
   } catch {
     // Invalid or unavailable user packs never prevent bundled pets from loading.
-  }
-}
-
-function validOrchestratorView(view: OrchestratorView | null): OrchestratorView | null {
-  if (!view) return null;
-  try {
-    return view.petId && bundledBehaviorPackForCharacter(view.petId).orchestratorAnimations
-      ? view
-      : null;
-  } catch {
-    return null;
   }
 }
 

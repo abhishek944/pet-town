@@ -1,5 +1,5 @@
 use std::fs::{File, OpenOptions};
-use std::io::{Read, Seek, SeekFrom, Write};
+use std::io::Write;
 use std::os::fd::AsRawFd;
 use std::path::PathBuf;
 
@@ -14,75 +14,6 @@ pub(crate) fn lock_path() -> PathBuf {
             std::env::temp_dir().join(format!("pet-town-{}", unsafe { libc::geteuid() }))
         })
         .join(".local/state/pet-town/app.lock")
-}
-
-#[cfg(target_os = "macos")]
-fn is_pet_town_process(pid: libc::pid_t) -> bool {
-    let mut buffer = [0_u8; libc::PATH_MAX as usize];
-    let length = unsafe {
-        libc::proc_pidpath(
-            pid,
-            buffer.as_mut_ptr().cast(),
-            u32::try_from(buffer.len()).unwrap_or(u32::MAX),
-        )
-    };
-    if length <= 0 {
-        return false;
-    }
-    std::path::Path::new(std::str::from_utf8(&buffer[..length as usize]).unwrap_or(""))
-        .file_name()
-        .is_some_and(|name| name == "pet-town")
-}
-
-#[cfg(not(target_os = "macos"))]
-fn is_pet_town_process(pid: libc::pid_t) -> bool {
-    unsafe { libc::kill(pid, 0) == 0 }
-}
-
-#[cfg(target_os = "macos")]
-fn owns_lock(path: &std::path::Path, pid: libc::pid_t) -> bool {
-    std::process::Command::new("lsof")
-        .args(["-t", "--"])
-        .arg(path)
-        .output()
-        .ok()
-        .filter(|output| output.status.success())
-        .and_then(|output| String::from_utf8(output.stdout).ok())
-        .is_some_and(|owners| owners.lines().any(|owner| owner.trim() == pid.to_string()))
-}
-
-#[cfg(not(target_os = "macos"))]
-fn owns_lock(_path: &std::path::Path, _pid: libc::pid_t) -> bool {
-    true
-}
-
-fn owner_pid(file: &mut File, path: &std::path::Path) -> Option<libc::pid_t> {
-    for _ in 0..10 {
-        let mut value = String::new();
-        let _ = file.seek(SeekFrom::Start(0));
-        let _ = file.read_to_string(&mut value);
-        if let Ok(pid) = value.trim().parse::<libc::pid_t>() {
-            if pid > 0 && is_pet_town_process(pid) && owns_lock(path, pid) {
-                return Some(pid);
-            }
-        }
-        std::thread::sleep(std::time::Duration::from_millis(10));
-    }
-    None
-}
-
-#[cfg(unix)]
-pub(crate) fn signal_owner(signal: libc::c_int) -> Result<(), String> {
-    let path = lock_path();
-    let mut file = OpenOptions::new()
-        .read(true)
-        .open(&path)
-        .map_err(|_| "Pet Town is not running".to_string())?;
-    let pid = owner_pid(&mut file, &path).ok_or_else(|| "Pet Town is not running".to_string())?;
-    let result = unsafe { libc::kill(pid, signal) };
-    (result == 0)
-        .then_some(())
-        .ok_or_else(|| "Pet Town could not receive the town state".to_string())
 }
 
 pub(crate) fn acquire_or_notify() -> Result<Option<AppLock>, String> {

@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "skiff-raccoon-sky-pirate",
+  "packVersion": "3",
+  "clips": {
+    "sneaky-march": {
+      "asset": "walk.png",
+      "durationMs": 690,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "telescope-scan": {
+      "asset": "work.png",
+      "durationMs": 960,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "sneaky-march",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "telescope-scan",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "telescope-scan",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "telescope-scan",
+      "action": "idle"
+    }
+  }
+}

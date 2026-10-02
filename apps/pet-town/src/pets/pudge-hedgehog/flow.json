@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "pudge-hedgehog",
+  "packVersion": "3",
+  "clips": {
+    "quick-trot": {
+      "asset": "walk.png",
+      "durationMs": 680,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "leaf-gather": {
+      "asset": "work.png",
+      "durationMs": 800,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "quick-trot",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "leaf-gather",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "leaf-gather",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "leaf-gather",
+      "action": "idle"
+    }
+  }
+}

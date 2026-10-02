@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "jun-clockwork-apprentice",
+  "packVersion": "3",
+  "clips": {
+    "tool-belt-walk": {
+      "asset": "walk.png",
+      "durationMs": 750,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "bird-repair": {
+      "asset": "work.png",
+      "durationMs": 990,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "tool-belt-walk",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "bird-repair",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "bird-repair",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "bird-repair",
+      "action": "idle"
+    }
+  }
+}

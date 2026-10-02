@@ -19,7 +19,7 @@ function collectAssets(directory, current = directory) {
     }),
   );
 }
-const expectedPets = [
+const kaykitPets = [
   "barbarian",
   "hooded-rogue",
   "knight",
@@ -31,9 +31,32 @@ const expectedPets = [
   "skeleton-rogue",
   "skeleton-warrior",
 ];
+const restoredPets = {
+  "bao-panda-chef": ["waddle", "bamboo-chop"],
+  "bigfoot-yeti": ["lumbering-lope", "snow-toss"],
+  "brassbell-automaton-porter": ["heavy-march", "parcel-sort"],
+  cat: ["stalk", "watch"],
+  dog: ["sprint", "listen"],
+  "ember-fox-ronin": ["scout", "sword-practice"],
+  "fern-potted-plant": ["leaf-sway-step", "sprout-leaf"],
+  "gus-mail-carrier": ["quick-stride", "letter-sort"],
+  "human-male": ["patrol", "inspect"],
+  "jun-clockwork-apprentice": ["tool-belt-walk", "bird-repair"],
+  "kip-penguin-postman": ["waddle", "parcel-toss"],
+  "mira-dune-spear-scout": ["dune-patrol", "spear-drill"],
+  "mossback-turtle-monk": ["staff-walk", "gentle-bow"],
+  "nib-dragon-hatchling": ["toddle-hop", "flame-puff"],
+  "pebble-slime-knight": ["lid-block", "lid-block"],
+  "pudge-hedgehog": ["quick-trot", "leaf-gather"],
+  "skiff-raccoon-sky-pirate": ["sneaky-march", "telescope-scan"],
+  "sol-capybara": ["slow-stroll", "steam-soak"],
+  viking: ["march", "ponder"],
+  "wisp-little-ghost": ["float-drift", "boo-puff"],
+};
+const expectedPets = [...kaykitPets, ...Object.keys(restoredPets)].sort();
 if (JSON.stringify(petDirectories) !== JSON.stringify(expectedPets)) {
   throw new Error(
-    `bundled roster does not match the ten humanoid characters: ${petDirectories.join(", ")}`,
+    `bundled roster does not match the thirty characters: ${petDirectories.join(", ")}`,
   );
 }
 for (const pet of petDirectories) {
@@ -44,10 +67,7 @@ for (const pet of petDirectories) {
   if (!result.pack) throw new Error(`${pet}/flow.json: ${JSON.stringify(result.diagnostics)}`);
   if (result.pack.id !== pet) throw new Error(`${pet}/flow.json: pack id must match its folder`);
   const requiredAssets = [
-    "blocked.png",
-    "listen.png",
     "sleep.png",
-    "speak.png",
     "walk.png",
     "ocean-rowing.png",
     "ocean-blocked.png",
@@ -55,6 +75,8 @@ for (const pet of petDirectories) {
     "ocean-listening.png",
     "ocean-speaking.png",
   ];
+  if (kaykitPets.includes(pet)) requiredAssets.push("blocked.png", "listen.png", "speak.png");
+  else requiredAssets.push("wave.png", "done.png");
   const missingAssets = requiredAssets.filter((asset) => !Object.hasOwn(assets, asset));
   if (missingAssets.length)
     throw new Error(`${pet}: missing bundled artwork: ${missingAssets.join(", ")}`);
@@ -62,12 +84,13 @@ for (const pet of petDirectories) {
     throw new Error(`${pet}/flow.json: idle visibility is not flow-authored`);
   if ("actions" in result.pack)
     throw new Error(`${pet}/flow.json: menu animations are not allowed`);
+  const restored = restoredPets[pet];
   const expectedAnimations = {
-    working: "walk",
-    blocked: "think",
+    working: restored ? restored[0] : "walk",
+    blocked: restored ? restored[1] : "think",
     done: "sleep",
-    listening: "listen",
-    speaking: "speak",
+    listening: restored ? restored[1] : "listen",
+    speaking: restored ? restored[1] : "speak",
   };
   for (const [state, animation] of Object.entries(expectedAnimations)) {
     if (result.pack.stateAssignments[state].animation !== animation)
@@ -82,4 +105,4 @@ for (const pet of petDirectories) {
   if (result.pack.stateAssignments.unknown.visible)
     throw new Error(`${pet}: unknown pet is visible`);
 }
-console.log("bundled ten-character pack checks: pass");
+console.log("bundled thirty-character pack checks: pass");

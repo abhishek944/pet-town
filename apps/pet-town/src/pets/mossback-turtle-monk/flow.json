@@ -1,0 +1,70 @@
+{
+  "formatVersion": 1,
+  "id": "mossback-turtle-monk",
+  "packVersion": "3",
+  "clips": {
+    "staff-walk": {
+      "asset": "walk.png",
+      "durationMs": 870,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "gentle-bow": {
+      "asset": "work.png",
+      "durationMs": 1110,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "staff-walk",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "gentle-bow",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "gentle-bow",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "gentle-bow",
+      "action": "idle"
+    }
+  },
+  "orchestratorAnimations": {
+    "walking": "staff-walk",
+    "listening": "gentle-bow"
+  }
+}

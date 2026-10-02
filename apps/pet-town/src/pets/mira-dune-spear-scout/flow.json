@@ -1,0 +1,74 @@
+{
+  "formatVersion": 1,
+  "id": "mira-dune-spear-scout",
+  "packVersion": "3",
+  "clips": {
+    "dune-patrol": {
+      "asset": "walk.png",
+      "durationMs": 720,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "spear-drill": {
+      "asset": "work.png",
+      "durationMs": 810,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "map-check": {
+      "durationMs": 810,
+      "role": "locomotion",
+      "asset": "map.png",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "dune-patrol",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "spear-drill",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "spear-drill",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "spear-drill",
+      "action": "idle"
+    }
+  }
+}

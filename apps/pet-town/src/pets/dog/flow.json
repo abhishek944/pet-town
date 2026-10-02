@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "dog",
+  "packVersion": "5",
+  "clips": {
+    "sprint": {
+      "asset": "walk.png",
+      "durationMs": 720,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "listen": {
+      "asset": "walk.png",
+      "durationMs": 720,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "sprint",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "listen",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "listen",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "listen",
+      "action": "idle"
+    }
+  }
+}

@@ -3,16 +3,6 @@ use std::process::Command;
 
 const MAX_PROCESS_OUTPUT_BYTES: usize = 1024 * 1024;
 
-pub(crate) fn activate_process(pid: u32) -> Result<(), String> {
-    let application = NSRunningApplication::runningApplicationWithProcessIdentifier(pid as i32)
-        .ok_or_else(|| "the town application is not running".to_string())?;
-    application.unhide();
-    application
-        .activateWithOptions(NSApplicationActivationOptions::ActivateAllWindows)
-        .then_some(())
-        .ok_or_else(|| "macOS refused to activate the town".to_string())
-}
-
 pub(crate) fn activate_running_application(bundle_id: &str) -> Result<(), String> {
     let output = Command::new("/bin/ps")
         .env_remove("OPENAI_API_KEY")

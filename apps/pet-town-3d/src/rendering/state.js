@@ -1,0 +1,20 @@
+/** Shared rendering data. Initialized explicitly before the game systems start. */
+export const renderingState = {
+  fullscreenVertexShader: undefined,
+  postDepthShaderUtilities: undefined,
+  ambientOcclusionFragmentShader: undefined,
+  ambientOcclusionBlurFragmentShader: undefined,
+  depthOfFieldDownsampleFragmentShader: undefined,
+  kawaseBlurFragmentShader: undefined,
+  sunShaftMaskFragmentShader: undefined,
+  sunShaftBlurFragmentShader: undefined,
+  bloomHighPassFragmentShader: undefined,
+  postCompositeFragmentShader: undefined,
+  colorGradeOutputFragmentShader: undefined,
+  colorGradeOutputVertexShader: undefined,
+  postprocessingModule: undefined,
+  renderingQualityTiers: undefined,
+  toneMappingModes: undefined,
+  timeOfDayColorGrades: undefined,
+  postprocessingState: undefined,
+};

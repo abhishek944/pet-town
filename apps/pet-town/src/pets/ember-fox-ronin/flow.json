@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "ember-fox-ronin",
+  "packVersion": "3",
+  "clips": {
+    "scout": {
+      "asset": "walk.png",
+      "durationMs": 630,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "sword-practice": {
+      "asset": "work.png",
+      "durationMs": 750,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "scout",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "sword-practice",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "sword-practice",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "sword-practice",
+      "action": "idle"
+    }
+  }
+}

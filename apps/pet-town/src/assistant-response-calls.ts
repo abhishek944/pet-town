@@ -3,7 +3,8 @@ import { toolTaskContext } from "./assistant-context";
 import type { AssistantTasks, LiveEvent } from "./assistant-tasks";
 
 type PendingCall = { callId: string; name: string; args: string };
-type CallResult = { output: string; replyOffset?: number };
+type FirstmateReply = { text: string; offset: number; sessionToken: string };
+type CallResult = { output: string; reply?: FirstmateReply };
 
 export class AssistantResponseCalls {
   private responseCalls = new Map<string, PendingCall[]>();
@@ -79,7 +80,7 @@ export class AssistantResponseCalls {
     const ownsTask = this.tasks.activeDelegationId === null;
     if (ownsTask) this.tasks.activeDelegationId = outerId;
     let fallbackResult = "";
-    const deliveredOffsets: number[] = [];
+    const deliveredReplies: FirstmateReply[] = [];
     try {
       for (const call of calls) {
         if (attempt !== this.tasks.session.attempt()) return;
@@ -97,7 +98,7 @@ export class AssistantResponseCalls {
           );
           return;
         }
-        if (result.replyOffset !== undefined) deliveredOffsets.push(result.replyOffset);
+        if (result.reply) deliveredReplies.push(result.reply);
       }
       if (attempt === this.tasks.session.attempt()) {
         if (!this.sendChannel({ type: "response.create", event_id: crypto.randomUUID() })) {
@@ -106,10 +107,11 @@ export class AssistantResponseCalls {
           );
           return;
         }
-        for (const offset of deliveredOffsets)
-          await invoke("acknowledge_firstmate_reply", { offset }).catch((reason) =>
-            this.tasks.session.error(reason),
-          );
+        for (const reply of deliveredReplies)
+          await invoke("acknowledge_firstmate_reply", {
+            offset: reply.offset,
+            sessionToken: reply.sessionToken,
+          }).catch((reason) => this.tasks.session.error(reason));
         if (fallbackResult) this.scheduleSpeechFallback(attempt, fallbackResult);
       }
     } finally {
@@ -153,13 +155,10 @@ export class AssistantResponseCalls {
         } catch {
           task = "";
         }
-        const reply = await invoke<{ text: string; offset: number } | null>(
-          "delegate_firstmate_task",
-          {
-            delegationId: outerId,
-            context: toolTaskContext(task),
-          },
-        );
+        const reply = await invoke<FirstmateReply | null>("delegate_firstmate_task", {
+          delegationId: outerId,
+          context: toolTaskContext(task),
+        });
         return {
           output: JSON.stringify(
             reply
@@ -170,7 +169,7 @@ export class AssistantResponseCalls {
                     "The Firstmate task did not finish (it may have been canceled). Tell the user plainly and ask whether to retry instead of assuming progress.",
                 },
           ),
-          replyOffset: reply?.offset,
+          reply: reply ?? undefined,
         };
       }
       if (call.name === "cancel_firstmate_task") {

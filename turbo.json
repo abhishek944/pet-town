@@ -14,6 +14,7 @@
       "dependsOn": ["^build"],
       "inputs": [
         "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/pet-town-3d/**",
         "$TURBO_ROOT$/apps/pet-town/src/pets/**",
         "$TURBO_ROOT$/bin/macos-*/**"
       ],
@@ -22,6 +23,8 @@
     "@pet-town/desktop#internal:build-frontend": {
       "inputs": [
         "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/pet-town-3d/**",
+        "$TURBO_ROOT$/scripts/build-pet-town-frontends.sh",
         "$TURBO_ROOT$/apps/pet-town/src/pets/**",
         "$TURBO_ROOT$/bin/macos-*/**"
       ],

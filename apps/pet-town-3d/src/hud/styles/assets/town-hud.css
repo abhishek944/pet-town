@@ -1,0 +1,32 @@
+#hud { --pk-font: Nunito, ui-rounded, system-ui, sans-serif; --slot: 43px; --ink: #4c402f; --ink-2: #817258; }
+#hud .pk-tl { left: 24px; top: 22px; gap: 0; }
+#hud .pk-clock { gap: 11px; padding: 10px 15px; width: 192px; min-width: 192px; height: 64px; border: 1px solid #e9d7b5; border-radius: 18px; background: #fff8e9f7; box-shadow: 0 3px 0 #c9b08c, 0 9px 20px #23392133; transform: none; }
+#hud .pk-clock .pk-dial { width: 40px; height: 40px; border: 0; flex: none; box-shadow: none; }
+#hud .pk-time { font: 700 24px/1.1 Fraunces, Georgia, serif !important; letter-spacing: 0; gap: 5px; }
+#hud .pk-time b { font-weight: 700; }
+#hud .pk-time small { font: 800 11px Nunito, sans-serif; }
+#hud .pk-period { display: none; }
+#hud .pk-weather { padding: 0; margin: 4px 0 0; gap: 4px; border: 0; box-shadow: none; background: none; font: 700 12px/1 Nunito, sans-serif; display: flex; white-space: nowrap; }
+#hud .pk-weather .wx { display: none; }
+#hud .pk-weather .sep { width: 2px; height: 2px; margin: 0; }
+#hud .pk-tr { top: 24px; right: 24px; gap: 8px; flex-direction: row; transform: none; }
+#hud .pk-btn { width: 44px !important; height: 44px !important; border: 1px solid #dec49a; border-radius: 14px; background: #fff9e9; box-shadow: 0 3px 0 #bfa57e; color: #725638; padding: 0; }
+#hud .pk-btn svg { width: 21px; height: 21px; }
+#hud .pk-btn:hover { transform: translateY(-1px); }
+#hud .pk-btn.muted { color: #b36243; }
+#hud .pk-btn .pk-kbd { right: -3px; bottom: -7px; min-width: 17px; height: 17px; border: 1px solid #dec8a5; border-radius: 5px; background: #f8ecd5; font-size: 9px; padding: 1px 4px; box-shadow: none; }
+#hud .pk-bottom { bottom: 22px; gap: 11px; }
+#hud .pk-hotbar { gap: 5px; padding: 8px 11px; border-radius: 18px; background: linear-gradient(#b28351,#9c6d42); border: 2px solid #dec099; box-shadow: 0 4px 0 #62492f,0 9px 20px #25392330; transform: none; opacity: 1; }
+#hud .pk-slot { flex: none; width: var(--slot); height: 45px; border: 1px solid #d8bf97; border-radius: 9px; background: #f2e2c3; box-shadow: none; padding: 2px 0 0; }
+#hud .pk-slot.sel { background: #fff7df; border: 2px solid #fff8e1; box-shadow: 0 0 0 2px #496b44; transform: translateY(-4px); }
+#hud .pk-slot canvas { width: 32px; height: 32px; }
+#hud .pk-slot .n { display: block; left: 4px; top: 2px; font-size: 9px; color: #716449; }
+#hud .pk-slot:focus-visible, #hud .pk-btn:focus-visible { outline: 3px solid #355b43; outline-offset: 4px; }
+#hud .pk-blockname { padding: 4px 14px; border: 0; border-radius: 20px; background: #fff8e9eb; color: #6b553b; font-size: 12px; opacity: 1; transform: none; box-shadow: none; }
+#hud .pk-blockname .sw { display: none; }
+#hud .pk-scrim { background: #17271d55; backdrop-filter: blur(3px); }
+@media (max-width: 700px) { #hud { --slot: clamp(24px,calc((100vw - 104px) / 12),43px); } #hud .pk-hotbar { gap: 3px; padding: 8px; } #hud .pk-slot canvas { width: 90%; height: auto; } }
+@media (pointer: coarse) { #hud .pk-hotbar { max-width: calc(100vw - 24px); overflow-x: auto; } #hud .pk-slot { width: 44px; height: 44px; } }
+#hud [hidden] { display: none !important; }
+#game:focus { outline: none; }
+#hud .pk-weather { height: auto; }

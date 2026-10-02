@@ -1,0 +1,20 @@
+/** Shared hud data. Initialized explicitly before the game systems start. */
+export const hudState = {
+  hudStyles: undefined,
+  cloudIconPath: undefined,
+  hudIcons: undefined,
+  touchControlMediaQuery: undefined,
+  touchControlStyles: undefined,
+  touchJumpIconMarkup: undefined,
+  touchControlsElement: undefined,
+  simulatedTouchKeys: undefined,
+  hudModule: undefined,
+  hudContext: undefined,
+  hudElements: undefined,
+  hudRootElement: undefined,
+  hudRuntime: undefined,
+  clockSkyColorStops: undefined,
+  hudProjectionScratch: undefined,
+  splashCameraSettings: undefined,
+  hudApi: undefined,
+};

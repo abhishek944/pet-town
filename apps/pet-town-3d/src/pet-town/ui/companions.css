@@ -1,0 +1,299 @@
+.town-labels {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  overflow: hidden;
+}
+.town-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 2px solid #fff8;
+  border-radius: 30px;
+  padding: 3px 9px;
+  color: #51463d;
+  background: #fffbf1e8;
+  font:
+    700 11px ui-rounded,
+    system-ui,
+    sans-serif;
+  box-shadow: 0 2px 5px #3b302423;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.town-label[data-selected="true"] {
+  background: #ddf3d8;
+  border-color: #a1c995;
+}
+.town-companions {
+  position: fixed;
+  top: 100px;
+  left: 24px;
+  z-index: 24;
+  pointer-events: none;
+}
+.town-companions button {
+  pointer-events: auto;
+}
+.town-roster-toggle {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 39px;
+  padding: 8px 13px;
+  font-weight: 900 !important;
+  border: 2px solid #d8b788;
+  border-radius: 12px;
+  color: #fff1d2 !important;
+  background: linear-gradient(#ac794b, #946239);
+  box-shadow:
+    0 3px 0 #66472c,
+    0 8px 16px #3044292b;
+}
+.town-roster-toggle kbd {
+  font:
+    800 11px Nunito,
+    sans-serif;
+  color: #f0d8b4;
+}
+.town-list-panel {
+  position: fixed;
+  left: 24px;
+  top: 152px;
+  width: min(348px, calc(100vw - 48px));
+  background: #fff6e6;
+  color: #493f30;
+  border: 2px solid #d4b78c;
+  border-radius: 20px;
+  box-shadow:
+    0 5px 0 #a07a4f,
+    0 15px 38px #243b3040;
+  overflow: hidden;
+  pointer-events: auto;
+}
+.town-picker-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 18px 14px;
+  border-bottom: 1px solid #dfcfb0;
+  background: linear-gradient(#fbf2df, #f7ecd6);
+}
+.town-picker-head h2 {
+  font:
+    700 23px/1.1 Fraunces,
+    Georgia,
+    serif;
+  margin: 0;
+}
+.town-count {
+  font:
+    800 12px Nunito,
+    sans-serif;
+  border: 1px solid #d5c39f;
+  border-radius: 12px;
+  padding: 3px 8px;
+  margin-left: 5px;
+  vertical-align: 3px;
+}
+.town-picker-head p {
+  font-size: 12px;
+  color: #76694e;
+  margin: 6px 0 0;
+}
+.town-dismiss {
+  background: #f5e8d0;
+  border: 1px solid #d7c09a;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  flex: none;
+  font-size: 17px !important;
+  color: #745638 !important;
+}
+.town-roster {
+  padding: 9px;
+  max-height: 336px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #c3a976 transparent;
+  scrollbar-width: thin;
+}
+.town-entry {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  padding: 8px 10px;
+  text-align: left;
+  min-height: 60px;
+  color: #504431;
+}
+.town-entry:hover {
+  background: #f0e8d2;
+}
+.town-entry[aria-pressed="true"] {
+  background: #e8edce;
+  border-color: #aebc8b;
+}
+.town-identity-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+.town-identity-row strong {
+  font:
+    800 14px/1.1 Nunito,
+    sans-serif;
+  overflow-wrap: anywhere;
+}
+.town-work-state {
+  font:
+    800 11px/1.1 Nunito,
+    sans-serif;
+  color: #6b6a50;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.town-work-state i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #638858;
+  flex: none;
+}
+.town-work-state[data-status="blocked"] i {
+  background: #af7345;
+}
+.town-work-state[data-status="done"] i {
+  background: #668386;
+}
+.town-work-state[data-status="idle"] i {
+  background: #a08443;
+}
+.town-following {
+  font-size: 10px;
+  color: #54703d;
+  text-align: right;
+  line-height: 1.2;
+  max-width: 53px;
+}
+.town-following b {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+.town-picker-foot {
+  font-size: 11px;
+  color: #79694c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 17px;
+  border-top: 1px solid #dfcfb0;
+  background: #f4e9d3;
+  gap: 12px;
+}
+.town-picker-foot kbd {
+  font:
+    800 11px Nunito,
+    sans-serif;
+  background: #fff7e4;
+  padding: 2px 5px;
+  border: 1px solid #d6c6a4;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.town-open-settings {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 11px !important;
+  white-space: nowrap;
+}
+.town-list-panel button:focus-visible {
+  outline-offset: -3px;
+}
+.town-empty {
+  padding: 26px 19px 31px;
+  text-align: center;
+  min-height: 165px;
+}
+.town-empty > span {
+  margin: 0 auto 12px;
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  background: #e6e9cd;
+  color: #6f8054;
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+}
+.town-empty h3 {
+  font:
+    700 20px Fraunces,
+    Georgia,
+    serif;
+  margin: 0 0 9px;
+}
+.town-empty p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #6a634d;
+  margin: 0;
+}
+.town-feedback {
+  max-width: 348px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff6e6;
+}
+@media (max-height: 705px) {
+  .town-list-panel {
+    top: 145px;
+    bottom: 112px;
+    display: flex;
+    flex-direction: column;
+  }
+  .town-picker-head,
+  .town-picker-foot {
+    flex-shrink: 0;
+  }
+  .town-roster {
+    min-height: 0;
+    flex: 1;
+    max-height: none;
+  }
+  .town-empty {
+    min-height: 0;
+    overflow: auto;
+    padding: 13px 18px;
+  }
+  .town-empty > span {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  .town-dismiss {
+    width: 44px;
+  }
+  .town-picker-foot {
+    padding: 5px 12px;
+  }
+}
+.town-companions[data-under-dialog="true"] {
+  z-index: 5;
+}

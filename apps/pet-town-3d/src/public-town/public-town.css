@@ -1,0 +1,137 @@
+.public-town-tools {
+  position: fixed;
+  z-index: 3;
+  top: 100px;
+  left: max(24px, env(safe-area-inset-left));
+  display: flex;
+  gap: 7px;
+  pointer-events: auto;
+}
+.public-town-tools[hidden] {
+  display: none;
+}
+.public-town-tools[data-welcome="true"] {
+  top: 22px;
+  z-index: 32;
+}
+.public-town-tools a,
+.public-town-tools button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font:
+    800 12px Nunito,
+    system-ui,
+    sans-serif;
+  min-height: 44px;
+  padding: 10px 13px;
+  color: #624626;
+  background: #fff6e8ef;
+  border: 2px solid #d4b489;
+  border-radius: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #88664070;
+}
+.public-town-tools button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.public-town-tools :focus-visible {
+  outline: 3px solid #315f42;
+  outline-offset: 3px;
+}
+.public-town-error {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  box-sizing: border-box;
+  border: 0;
+  z-index: 40;
+  display: grid;
+  place-content: center;
+  gap: 16px;
+  padding: 28px;
+  background: #fbfaf6;
+  color: #382f26;
+  text-align: center;
+  font:
+    16px/1.6 system-ui,
+    sans-serif;
+}
+.public-town-error h1 {
+  font:
+    42px Georgia,
+    serif;
+  margin: 0;
+}
+.public-town-error p {
+  max-width: 520px;
+  margin: 0;
+}
+.public-town-error button,
+.public-town-error a {
+  padding: 12px 20px;
+  border: 1px solid #d4b489;
+  border-radius: 8px;
+  background: #fff6e8;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+.public-boot-links {
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+}
+.public-boot-links a,
+.public-boot-links button {
+  color: #624626;
+  background: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+@media (max-width: 600px) {
+  body.public-town #hud .pk-toasts {
+    top: 158px;
+  }
+  body.public-town #hud .pk-tl {
+    left: 18px;
+  }
+  body.public-town #hud .pk-tr {
+    right: 18px;
+  }
+  body.public-town #hud .pk-clock {
+    width: min(192px, calc(100vw - 200px));
+    min-width: 0;
+    gap: 6px;
+    padding: 8px;
+  }
+  .public-town-tools {
+    left: max(18px, env(safe-area-inset-left));
+    gap: 5px;
+  }
+  .public-town-tools a,
+  .public-town-tools button {
+    padding: 9px 10px;
+  }
+}
+@media (max-width: 380px) {
+  body.public-town #hud .pk-dial {
+    display: none;
+  }
+}
+.pk-coarse body.public-town #hud .pk-hotbar {
+  max-width: calc(100vw - 24px);
+  overflow-x: auto;
+}
+.pk-coarse body.public-town #hud .pk-slot {
+  width: 44px;
+  height: 44px;
+}

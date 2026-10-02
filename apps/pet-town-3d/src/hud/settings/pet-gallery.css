@@ -1,0 +1,269 @@
+#hud .town-settings [hidden] {
+  display: none !important;
+}
+#hud .town-settings .appearance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 17px;
+}
+#hud .town-settings .appearance-row h3 {
+  font-size: 13px;
+  margin: 0 0 4px;
+}
+#hud .town-settings .appearance-row p {
+  font-size: 12px;
+  color: #716449;
+  margin: 0;
+}
+#hud .town-settings .appearance-row button,
+#hud .town-settings .pet-back {
+  border: 1px solid #d4bf9a;
+  border-radius: 9px;
+  background: #fff8e8;
+  color: #59614b;
+  padding: 9px 13px;
+  font-size: 12px;
+  min-height: 40px;
+}
+#hud .town-settings.pet-gallery-open .settings-body {
+  padding: 18px 25px 20px;
+  max-height: 580px;
+}
+#hud .town-settings .pet-back {
+  border: 0;
+  background: none;
+  padding: 0;
+  min-height: 26px;
+  margin-bottom: 8px;
+}
+#hud .town-settings .pet-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+#hud .town-settings .pet-section-title h2 {
+  font:
+    700 23px Fraunces,
+    Georgia,
+    serif;
+  margin: 0;
+}
+#hud .town-settings .pet-section-title p {
+  font-size: 11px;
+  color: #746b53;
+  margin: 4px 0 0;
+}
+#hud .town-settings .pet-pill {
+  border: 1px solid #d5c5a6;
+  border-radius: 20px;
+  padding: 5px 9px;
+  font-size: 10px;
+  color: #777054;
+  white-space: nowrap;
+}
+#hud .town-settings .pet-preview {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  min-height: 242px;
+  gap: 18px;
+  border-radius: 15px;
+  background: linear-gradient(110deg, #e9ead8, #f4ecd9);
+  border: 1px solid #ddd3b7;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+#hud .town-settings .pet-stage {
+  width: 270px;
+  height: 242px;
+  position: relative;
+}
+#hud .town-settings .pet-model {
+  width: 100%;
+  height: 100%;
+}
+#hud .town-settings .pet-model canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#hud .town-settings .pet-turn {
+  position: absolute;
+  bottom: 10px;
+  left: 14px;
+  font-size: 10px;
+  border: 1px solid #d1ceb6;
+  background: #fff9e8e0;
+  border-radius: 15px;
+  padding: 5px 11px;
+  color: #59614b;
+  min-height: 28px;
+}
+#hud .town-settings .pet-detail {
+  padding: 20px 19px 17px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+#hud .town-settings .pet-species {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  color: #73765c;
+  margin: 0 0 4px;
+}
+#hud .town-settings .pet-detail h3 {
+  font:
+    700 32px Fraunces,
+    Georgia,
+    serif;
+  color: #4d4936;
+  margin: 0;
+}
+#hud .town-settings .pet-description {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 8px 0;
+  max-width: 325px;
+  color: #70654d;
+}
+#hud .town-settings .pet-trait {
+  font-size: 11px;
+  color: #6f7657;
+  margin: 0 0 10px;
+}
+#hud .town-settings .pet-colors {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 15px;
+}
+#hud .town-settings .pet-colors span {
+  width: 14px;
+  height: 14px;
+  border: 1px solid #4b493722;
+  border-radius: 50%;
+}
+#hud .town-settings .pet-use {
+  margin-top: auto;
+  background: #426448;
+  border: 1px solid #355939;
+  border-radius: 9px;
+  color: #fff7e3;
+  padding: 10px 16px;
+  min-height: 40px;
+  font-size: 12px;
+}
+#hud .town-settings .pet-use:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+#hud .town-settings .pet-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+#hud .town-settings .pet-card {
+  padding: 0 0 10px;
+  border: 1px solid #dacbae;
+  border-radius: 13px;
+  background: #fffaf0;
+  text-align: center;
+  overflow: hidden;
+  color: #4b4937;
+  position: relative;
+  min-width: 0;
+}
+#hud .town-settings .pet-card[aria-pressed="true"] {
+  border: 2px solid #567b58;
+  padding-bottom: 9px;
+  background: #eff0db;
+}
+#hud .town-settings .pet-thumb {
+  display: block;
+  width: 100%;
+  height: 130px;
+  pointer-events: none;
+}
+#hud .town-settings .pet-thumb .town-portrait {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: none !important;
+}
+#hud .town-settings .pet-thumb .town-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+#hud .town-settings .pet-card strong {
+  display: block;
+  font-size: 13px;
+}
+#hud .town-settings .pet-card small {
+  display: block;
+  font-size: 10px;
+  color: #7b6e53;
+  margin-top: 2px;
+}
+#hud .town-settings .pet-check {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #52734e;
+  color: #fff9ea;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+}
+#hud .town-settings .pet-card:not([aria-pressed="true"]) .pet-check {
+  display: none;
+}
+#hud .town-settings .pet-footnote {
+  font-size: 10px;
+  color: #7d725b;
+  margin: 12px 0 0;
+}
+#hud .town-settings .pet-notice {
+  font-size: 11px;
+  color: #426448;
+  margin: 8px 0 0;
+  min-height: 12px;
+  overflow-wrap: anywhere;
+}
+#hud .town-settings button:focus-visible {
+  outline: 3px solid #365e81;
+  outline-offset: 3px;
+}
+@media (max-width: 650px) {
+  #hud .town-settings.pet-gallery-open .settings-body {
+    padding: 16px;
+  }
+  #hud .town-settings .pet-preview {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  #hud .town-settings .pet-stage {
+    width: 100%;
+    height: 240px;
+  }
+  #hud .town-settings .pet-detail {
+    padding: 0 18px 18px;
+  }
+  #hud .town-settings .pet-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #hud .town-settings .pet-section-title {
+    align-items: flex-start;
+  }
+  #hud .town-settings .pet-pill {
+    white-space: normal;
+  }
+}

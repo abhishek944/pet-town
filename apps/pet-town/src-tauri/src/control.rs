@@ -9,10 +9,13 @@ use tauri::{AppHandle, Manager};
 static OPEN_SETTINGS: AtomicBool = AtomicBool::new(false);
 static RELOAD_PREFERENCES: AtomicBool = AtomicBool::new(false);
 static VISIBILITY_REQUEST: AtomicI8 = AtomicI8::new(0);
-static TOWN_ACTIVE_REQUEST: AtomicI8 = AtomicI8::new(0);
 static INVOKE_MAYOR: AtomicBool = AtomicBool::new(false);
 static MAYOR_TALK: AtomicI8 = AtomicI8::new(0);
 static STOP: AtomicBool = AtomicBool::new(false);
+
+pub(crate) fn set_town_talk(active: bool) {
+    MAYOR_TALK.store(if active { 1 } else { -1 }, Ordering::SeqCst);
+}
 
 #[cfg(unix)]
 extern "C" fn request_settings(_signal: libc::c_int) {
@@ -30,14 +33,6 @@ extern "C" fn request_show(_signal: libc::c_int) {
 #[cfg(unix)]
 extern "C" fn request_hide(_signal: libc::c_int) {
     VISIBILITY_REQUEST.store(-1, Ordering::SeqCst);
-}
-#[cfg(unix)]
-extern "C" fn request_town_active(_signal: libc::c_int) {
-    TOWN_ACTIVE_REQUEST.store(1, Ordering::SeqCst);
-}
-#[cfg(unix)]
-extern "C" fn request_town_inactive(_signal: libc::c_int) {
-    TOWN_ACTIVE_REQUEST.store(-1, Ordering::SeqCst);
 }
 #[cfg(unix)]
 extern "C" fn request_mayor(_signal: libc::c_int) {
@@ -74,14 +69,6 @@ pub fn install_signal_handlers() {
         libc::signal(
             libc::SIGHUP,
             request_hide as *const () as libc::sighandler_t,
-        );
-        libc::signal(
-            libc::SIGURG,
-            request_town_active as *const () as libc::sighandler_t,
-        );
-        libc::signal(
-            libc::SIGWINCH,
-            request_town_inactive as *const () as libc::sighandler_t,
         );
         libc::signal(
             libc::SIGALRM,
@@ -121,13 +108,6 @@ pub fn start(app: AppHandle) {
                     let _ = crate::village_visibility::set(&target, visibility > 0);
                 });
             }
-            let town_active = TOWN_ACTIVE_REQUEST.swap(0, Ordering::SeqCst);
-            if town_active != 0 {
-                let target = app.clone();
-                let _ = app.run_on_main_thread(move || {
-                    let _ = crate::village_visibility::set_town_active(&target, town_active > 0);
-                });
-            }
             if INVOKE_MAYOR.swap(false, Ordering::SeqCst) {
                 if let Err(error) = crate::orchestrator::invoke::invoke_mayor(&app) {
                     eprintln!("[mayor shortcut] {error}");
@@ -147,6 +127,7 @@ pub fn start(app: AppHandle) {
             #[cfg(not(target_os = "macos"))]
             let global_talk = false;
             let should_talk = town_talk || global_talk;
+            let mut talk_error = None;
             if should_talk != talk_active {
                 talk_active = should_talk;
                 if let Err(error) =
@@ -154,11 +135,13 @@ pub fn start(app: AppHandle) {
                 {
                     eprintln!("[mayor push-to-talk] {error}");
                     crate::orchestrator::status_commands::set_mayor_voice_status(
-                        error,
+                        error.clone(),
                         app.clone(),
                     );
+                    talk_error = Some(error);
                 }
             }
+            crate::town_voice::talk_applied(&app, town_talk, talk_error);
             crate::town_process::reap(&app);
             if OPEN_SETTINGS.swap(false, Ordering::SeqCst) {
                 let target = app.clone();

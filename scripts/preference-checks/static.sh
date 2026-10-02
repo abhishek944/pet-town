@@ -16,31 +16,31 @@ grep -q '>Pet</span>' settings.html
 grep -q '<svg viewBox="0 0 24 24" focusable="false">' settings.html
 grep -q 'getElementById("preview")!.hidden = !detail' src/settings-navigation.ts
 grep -q 'getElementById("preview-selectors")!.hidden = !detail' src/settings-navigation.ts
-if grep -q 'freezePetFrame' src/settings.ts; then
+if grep -q 'freezePetFrame' src/settings.ts src/settings/*.ts; then
   echo "system Reduce Motion still freezes the preview sprite" >&2
   exit 1
 fi
-grep -q 'preview.dataset.pauseOnHover' src/settings.ts
+grep -q 'preview.dataset.pauseOnHover' src/settings/pet-preview.ts
 [ "$(grep -o 'class="switch"[^>]*role="switch"' settings.html | wc -l | tr -d ' ')" = 4 ]
-grep -q 'bindSwitch("pause-hover"' src/settings.ts
-grep -q 'bindSwitch("include-random-cast"' src/settings.ts
-grep -q 'bindSwitch("hide-completed-pets"' src/settings.ts
-grep -q 'completed-hide-delay' src/settings.ts
+grep -q 'bindSwitch("pause-hover"' src/settings/pet-controls.ts
+grep -q 'bindSwitch("include-random-cast"' src/settings/pet-controls.ts
+grep -q 'bindSwitch("hide-completed-pets"' src/settings/app-controls.ts
+grep -q 'completed-hide-delay' src/settings/app-controls.ts
 grep -q 'invoke<boolean>("is_settings_open")' src/village-preferences.ts
-grep -q 'SettingsStartupBuffer' src/settings.ts
-grep -q 'next.revision < snapshot.revision' src/settings.ts
-grep -q 'draft: submitted, expectedRevision' src/settings.ts
-grep -q 'mergeAppliedDraft' src/settings.ts
-grep -q 'generation === applyGeneration' src/settings.ts
-grep -q 'applying || !changed' src/settings.ts
-grep -q 'resetAll.disabled = applying' src/settings.ts
+grep -q 'SettingsStartupBuffer' src/settings/start.ts
+grep -q 'next.revision < this.snapshot.revision' src/settings/draft.ts
+grep -A1 'draft: submitted,' src/settings/draft.ts | grep -q 'expectedRevision'
+grep -q 'mergeAppliedDraft' src/settings/draft.ts
+grep -q 'generation === this.applyGeneration' src/settings/draft.ts
+grep -q 'this.applying || !changed' src/settings/draft.ts
+grep -Fq 'byId<HTMLButtonElement>("reset-all").disabled = this.applying' src/settings/draft.ts
 grep -q 'village.dispatchEvent(new Event("village-pause"))' src/main.ts
-grep -q 'settingsMessage' src/settings.ts
+grep -q 'settingsMessage' src/settings/draft.ts
 grep -q 'hide-completed-pets.*disabled = snapshot.readOnly' src/settings-choice-controls.ts
 grep -q 'setSettingsReadOnly' src/settings-choice-controls.ts
 grep -q 'class="settings-loading"' settings.html
-grep -q 'classList.remove("settings-loading")' src/settings.ts
-grep -q 'await invoke("show_settings")' src/settings.ts
+grep -q 'classList.remove("settings-loading")' src/settings/start.ts
+grep -q 'await invoke("show_settings")' src/settings/start.ts
 grep -q 'settings_window::show_settings' src-tauri/src/lib.rs
 grep -A14 'WebviewWindowBuilder::new' src-tauri/src/settings_window.rs | grep -q '\.visible(false)'
 if grep -q '\.on_page_load' src-tauri/src/lib.rs; then
@@ -68,10 +68,10 @@ grep -A3 '^:root\[data-theme="light"\] \.row small {' src/settings.css | grep -q
 grep -A4 '^:root\[data-theme="light"\] code {' src/settings.css | grep -q 'background: #0000000a;'
 grep -A4 '^:root\[data-theme="light"\] code {' src/settings.css | grep -q 'color: #35373d;'
 grep -q ':root:not(\[data-theme="dark"\]) \.secondary' src/settings.css
-grep -q 'bindSwitch("open-with-herdr"' src/settings.ts
+grep -q 'bindSwitch("open-with-herdr"' src/settings/app-controls.ts
 [ "$(grep -o 'type="checkbox"' settings.html | wc -l | tr -d ' ')" = 1 ]
 grep -q 'id="studio-assign-orchestrator" type="checkbox"' settings.html
-grep -q 'selectedPreviewAnimationId(animationOptions' src/settings.ts
+grep -A1 'this.selectedAnimationId = selectedPreviewAnimationId(' src/settings/pet-preview.ts | grep -q 'this.animationOptions'
 grep -q 'id="pet-state-map"' settings.html
 grep -q 'id="studio-operation-status".*aria-live="polite"' settings.html
 grep -q 'id="studio-import-animation".*accept="image/png,image/apng' settings.html

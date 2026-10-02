@@ -28,7 +28,6 @@ apps/pet-town/src/renderer-view.ts
 apps/pet-town/src/renderer.ts
 apps/pet-town/src/settings-adapters.ts
 apps/pet-town/src/settings-studio.ts
-apps/pet-town/src/settings.ts
 apps/pet-town/src/state-flow-machine.ts
 
 *.gif

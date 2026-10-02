@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "gus-mail-carrier",
+  "packVersion": "3",
+  "clips": {
+    "quick-stride": {
+      "asset": "walk.png",
+      "durationMs": 800,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "letter-sort": {
+      "asset": "work.png",
+      "durationMs": 880,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "quick-stride",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "letter-sort",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "letter-sort",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "letter-sort",
+      "action": "idle"
+    }
+  }
+}

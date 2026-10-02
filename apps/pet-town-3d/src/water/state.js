@@ -1,0 +1,20 @@
+/** Shared water data. Initialized explicitly before the game systems start. */
+export const waterState = {
+  waterFieldBorderPadding: undefined,
+  waterFieldDeepDepth: undefined,
+  waterCoastDistanceLimit: undefined,
+  waterSwellWaves: undefined,
+  waterSwellShader: undefined,
+  waterRippleLifetime: undefined,
+  waterRippleSpeed: undefined,
+  waterSurfaceCommonShader: undefined,
+  waterSurfaceVertexDeclarations: undefined,
+  waterSurfaceVertexTransform: undefined,
+  waterSurfaceFragmentDeclarations: undefined,
+  waterSurfaceFragmentOutput: undefined,
+  waterWetnessShader: undefined,
+  waterSplashParticleCapacity: undefined,
+  waterSystem: undefined,
+  waterIntegerLevelInset: undefined,
+  waterRuntimeState: undefined,
+};

@@ -3,10 +3,6 @@
 
 fn main() {
     let arguments: Vec<String> = std::env::args().collect();
-    if arguments.iter().any(|argument| argument == "--town-bridge") {
-        pet_town_lib::run_town_bridge();
-        return;
-    }
     if arguments.iter().any(|argument| argument == "--snapshot") {
         println!("{}", pet_town_lib::snapshot_json());
         return;

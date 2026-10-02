@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "bao-panda-chef",
+  "packVersion": "3",
+  "clips": {
+    "waddle": {
+      "asset": "walk.png",
+      "durationMs": 800,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "bamboo-chop": {
+      "asset": "work.png",
+      "durationMs": 1050,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "waddle",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "bamboo-chop",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "bamboo-chop",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "bamboo-chop",
+      "action": "idle"
+    }
+  }
+}

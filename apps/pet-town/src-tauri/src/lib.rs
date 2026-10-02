@@ -2,6 +2,7 @@ use tauri::Manager;
 mod adapter_events;
 mod adapter_setup;
 mod agents;
+mod app_events;
 mod app_menu;
 mod app_singleton;
 mod control;
@@ -33,8 +34,11 @@ mod preferences_validation;
 mod sessions;
 mod settings_window;
 mod settings_window_lifecycle;
-mod town_bridge;
+mod town_commands;
 mod town_process;
+mod town_snapshot;
+mod town_terminal;
+mod town_voice;
 mod village_visibility;
 mod window;
 
@@ -43,15 +47,6 @@ pub use adapter_setup::{configure_adapter, setups_json};
 pub use agents::{AgentSnapshot, AgentView};
 pub use preferences_commands::startup_enabled_from_disk;
 pub use sessions::snapshot_json;
-
-#[tauri::command]
-fn quit_pet_town(app: tauri::AppHandle) {
-    app.exit(0);
-}
-
-pub fn run_town_bridge() {
-    town_bridge::run();
-}
 
 pub fn focus_agent_from_cli(id: &str) -> Result<(), String> {
     focus::focus_current_agent(id)
@@ -89,20 +84,9 @@ pub fn run() {
         .manage(orchestrator::firstmate::FirstmateState::default())
         .manage(orchestrator::firstmate_audio::FirstmateAudioState::default())
         .manage(settings_window::SettingsSession::default())
-        .manage(town_process::TownProcess::default())
-        .on_window_event(|window, event| {
-            if window.label() == "settings"
-                && matches!(
-                    event,
-                    tauri::WindowEvent::CloseRequested { .. } | tauri::WindowEvent::Destroyed
-                )
-            {
-                settings_window::close(window.app_handle());
-            }
-            if window.label() == "orchestrator" && matches!(event, tauri::WindowEvent::Destroyed) {
-                orchestrator::task_cancel::stop_orchestrator_session(window.app_handle().clone());
-            }
-        })
+        .manage(town_process::TownWindowState::default())
+        .manage(town_terminal::TownTerminalState::default())
+        .on_window_event(app_events::window_event)
         .setup(|app| {
             app_menu::install(app)?;
             window::create_village_window(app)?;
@@ -173,7 +157,12 @@ pub fn run() {
             settings_window::open_preferences,
             settings_window::show_settings,
             town_process::open_3d_town,
-            quit_pet_town,
+            town_snapshot::get_town_snapshot,
+            town_commands::town_action,
+            town_terminal::town_terminal_open,
+            town_terminal::town_terminal_send,
+            town_terminal::town_terminal_close,
+            town_commands::quit_pet_town,
             window::set_hit_regions,
             village_visibility::renderer_ready,
             village_visibility::set_village_visible,
@@ -196,7 +185,7 @@ pub fn run() {
                 app.state::<pet_studio::PetStudioState>().cleanup();
             }
             tauri::RunEvent::Reopen { .. } => {
-                let _ = settings_window::open_internal(app, None, Some("app".into()));
+                town_process::reopen(app);
             }
             _ => {}
         });

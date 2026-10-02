@@ -74,7 +74,10 @@ async fn run(
     if !active(app, id) {
         return Ok(None);
     }
-    if firstmate::poll_firstmate_replies(app.clone())?.is_some() {
+    if firstmate::poll_firstmate_replies(app.clone())
+        .await?
+        .is_some()
+    {
         return Err("Firstmate has an earlier reply waiting. Open Standard mode to hear it before sending another request.".into());
     }
     if !active(app, id) {
@@ -86,7 +89,7 @@ async fn run(
         if !active(app, id) {
             return Ok(None);
         }
-        if let Some(reply) = firstmate::poll_firstmate_replies(app.clone())? {
+        if let Some(reply) = firstmate::poll_firstmate_replies(app.clone()).await? {
             return Ok(Some(reply));
         }
         if started.elapsed() > Duration::from_secs(5) {

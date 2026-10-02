@@ -15,6 +15,8 @@ directories = [
     app / "src",
     app / "src-tauri",
     app / "public",
+    root / "apps" / "pet-town-3d" / "src",
+    root / "apps" / "pet-town-3d" / "public",
     root / "packages" / "pet-town-agent-broker",
 ]
 for directory in directories:
@@ -36,6 +38,11 @@ for path in (
     root / "pnpm-workspace.yaml",
     root / "turbo.json",
     root / "scripts" / "build.sh",
+    root / "scripts" / "build-pet-town-frontends.sh",
+    root / "apps" / "pet-town-3d" / "index.html",
+    root / "apps" / "pet-town-3d" / "package.json",
+    root / "apps" / "pet-town-3d" / "vite.config.js",
+    root / "apps" / "pet-town-3d" / "THIRD_PARTY_NOTICES.md",
     root / "scripts" / "check-packaged.sh",
     root / "scripts" / "check-dmg.sh",
     root / "scripts" / "prepare-pi-runtime.sh",

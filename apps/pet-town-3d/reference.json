@@ -1,0 +1,36 @@
+{
+  "reference": "https://pokopia-teal.vercel.app/",
+  "demonstration": "https://x.com/0xpaulius/status/2105062821574914406",
+  "capturedOn": "2026-09-30",
+  "title": "Bloomvale",
+  "threeRevision": "186",
+  "runtime": {
+    "source": "https://pokopia-teal.vercel.app/assets/index-Bto4rdvX.js",
+    "sha256": "5b2670761994144dda8530a997a973ee6604a543b94286394f740165a46afd21",
+    "bytes": 1513300,
+    "role": "Captured reference only; not a runtime or build dependency"
+  },
+  "document": {
+    "source": "https://pokopia-teal.vercel.app/",
+    "sha256": "a31e89d3d5d7f2dd1a3b0e08f9b8245a452ad53cc92ae95d068667ef40d3e475",
+    "role": "Original reference hash; local HTML now imports source"
+  },
+  "externalResources": [
+    "https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap",
+    "https://fonts.gstatic.com"
+  ],
+  "notes": [
+    "Game algorithms and procedural assets were reconstructed from the delivered runtime.",
+    "Three.js core and official addons are imported from npm rather than copied game bundles.",
+    "CSS, GLSL and HTML templates live in source files.",
+    "Saves retain the original schema and browser origin behavior.",
+    "No original source map or game-specific license was supplied in the downloaded build."
+  ],
+  "implementation": {
+    "entry": "src/main.js",
+    "engine": "three@0.186.0",
+    "build": "vite@6.4.3",
+    "recovery": "Editable ES modules with recovered semantic names; original authored names and comments unavailable",
+    "compiledGameDependency": false
+  }
+}

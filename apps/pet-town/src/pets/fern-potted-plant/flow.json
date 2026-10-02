@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "fern-potted-plant",
+  "packVersion": "3",
+  "clips": {
+    "leaf-sway-step": {
+      "asset": "walk.png",
+      "durationMs": 720,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "sprout-leaf": {
+      "asset": "work.png",
+      "durationMs": 960,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "leaf-sway-step",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "sprout-leaf",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "sprout-leaf",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "sprout-leaf",
+      "action": "idle"
+    }
+  }
+}

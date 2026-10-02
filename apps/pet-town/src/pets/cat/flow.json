@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "cat",
+  "packVersion": "5",
+  "clips": {
+    "stalk": {
+      "asset": "walk.png",
+      "durationMs": 720,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "watch": {
+      "asset": "walk.png",
+      "durationMs": 720,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "stalk",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "watch",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "watch",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "watch",
+      "action": "idle"
+    }
+  }
+}

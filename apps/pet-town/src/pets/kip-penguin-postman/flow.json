@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "kip-penguin-postman",
+  "packVersion": "3",
+  "clips": {
+    "waddle": {
+      "asset": "walk.png",
+      "durationMs": 720,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "parcel-toss": {
+      "asset": "work.png",
+      "durationMs": 800,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "waddle",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "parcel-toss",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "parcel-toss",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "parcel-toss",
+      "action": "idle"
+    }
+  }
+}

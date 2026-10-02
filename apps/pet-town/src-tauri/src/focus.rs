@@ -157,7 +157,7 @@ pub(crate) async fn focus_agent(id: String) -> Result<(), String> {
     crate::focus_trace::record("focus requested");
     #[cfg(target_os = "macos")]
     crate::focus_trace::frontmost("before focus");
-    // Use the same headless focus boundary as the Godot bridge. AppKit focus
+    // Both renderers use this isolated, headless focus boundary. AppKit focus
     // requests must not compete with the nonactivating overlay's GUI process.
     let result = tauri::async_runtime::spawn_blocking(move || {
         let executable = std::env::current_exe().map_err(|error| error.to_string())?;

@@ -1,165 +1,129 @@
-use std::path::{Path, PathBuf};
-use std::process::{Child, Command, Stdio};
-use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Mutex,
+};
+use tauri::{webview::PageLoadEvent, AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+
+pub(crate) const TOWN_LABEL: &str = "town";
 
 #[derive(Default)]
-pub(crate) struct TownProcess(Mutex<Option<Child>>);
+pub(crate) struct TownWindowState {
+    opening: Mutex<()>,
+    pub(crate) active: AtomicBool,
+    pub(crate) talking: Mutex<crate::town_voice::TownTalkState>,
+    pub(crate) roster: Mutex<crate::town_snapshot::TownRosterCache>,
+}
+
+pub(crate) fn allowed_url(url: &tauri::Url) -> bool {
+    if cfg!(debug_assertions) {
+        url.scheme() == "http"
+            && url.host_str() == Some("127.0.0.1")
+            && url.port() == Some(1422)
+            && url.path() == "/"
+    } else {
+        let local = (url.scheme() == "tauri" && url.host_str() == Some("localhost"))
+            || (url.scheme() == "http" && url.host_str() == Some("tauri.localhost"));
+        local && url.path() == "/town/index.html"
+    }
+}
 
 pub(crate) fn open(app: &AppHandle) -> Result<(), String> {
-    let state = app.state::<TownProcess>();
-    let mut stored = state
-        .0
-        .lock()
-        .map_err(|_| "the town process state is unavailable".to_string())?;
-    if let Some(child) = stored.as_mut() {
-        if child
-            .try_wait()
-            .map_err(|error| error.to_string())?
-            .is_none()
-        {
-            return activate(child.id());
-        }
-        *stored = None;
-    }
-
-    let runtime = godot_runtime().ok_or_else(|| {
-        "Godot 4 is unavailable. Set PET_TOWN_GODOT_BIN to the Godot executable.".to_string()
-    })?;
-    let project = project_path().ok_or_else(|| {
-        "The local Godot town project is unavailable. Set PET_TOWN_GODOT_PROJECT.".to_string()
-    })?;
-    let bridge = std::env::current_exe().map_err(|error| error.to_string())?;
-    let child = Command::new(runtime)
-        .args(["--path", project.to_string_lossy().as_ref()])
-        .env("PET_TOWN_BRIDGE_BIN", bridge)
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()
-        .map_err(|error| format!("the Godot town could not start: {error}"))?;
-    let pid = child.id();
-    *stored = Some(child);
-    let _ = activate(pid);
+    let state = app.state::<TownWindowState>();
+    let _opening = state
+        .opening
+        .try_lock()
+        .map_err(|_| "The town window is already opening.")?;
+    let window = if let Some(window) = app.get_webview_window(TOWN_LABEL) {
+        window
+    } else {
+        #[cfg(debug_assertions)]
+        let url = WebviewUrl::External("http://127.0.0.1:1422/".parse().unwrap());
+        #[cfg(not(debug_assertions))]
+        let url = WebviewUrl::App("town/index.html".into());
+        WebviewWindowBuilder::new(app, TOWN_LABEL, url)
+            .title("Pet Town")
+            .inner_size(1280.0, 820.0)
+            .min_inner_size(800.0, 560.0)
+            .resizable(true)
+            .fullscreen(true)
+            .decorations(true)
+            .transparent(false)
+            .focusable(true)
+            .focused(true)
+            .visible(true)
+            .center()
+            .on_navigation(allowed_url)
+            .on_page_load(|window, payload| {
+                if matches!(payload.event(), PageLoadEvent::Started) {
+                    crate::town_voice::release_talk(window.app_handle());
+                    crate::town_terminal::release(window.app_handle());
+                }
+            })
+            .build()
+            .map_err(|error| format!("The 3D town could not open: {error}"))?
+    };
+    window
+        .unminimize()
+        .and_then(|_| window.show())
+        .and_then(|_| window.set_fullscreen(true))
+        .and_then(|_| window.set_focus())
+        .map_err(|error| error.to_string())?;
+    set_active(app, window.is_focused().unwrap_or(false));
     Ok(())
 }
 
 #[tauri::command]
-pub(crate) fn open_3d_town(app: AppHandle) -> Result<(), String> {
-    open(&app)
+pub(crate) async fn open_3d_town(app: AppHandle) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || open(&app))
+        .await
+        .map_err(|_| "The 3D town window could not be opened.".to_string())?
 }
 
-pub(crate) fn reap(app: &AppHandle) {
-    let state = app.state::<TownProcess>();
-    let Ok(mut stored) = state.0.lock() else {
+fn set_active(app: &AppHandle, active: bool) {
+    let state = app.state::<TownWindowState>();
+    let changed = state.active.swap(active, Ordering::SeqCst) != active;
+    if !active {
+        crate::town_voice::release_talk(app);
+        crate::town_terminal::release(app);
+    }
+    if changed {
+        let _ = crate::village_visibility::set_town_active(app, active);
+    }
+}
+
+pub(crate) fn window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
+    if window.label() != TOWN_LABEL {
         return;
-    };
-    let exited = stored
-        .as_mut()
-        .is_some_and(|child| matches!(child.try_wait(), Ok(Some(_))));
-    if exited {
-        *stored = None;
-        let _ = crate::village_visibility::set_town_active(app, false);
+    }
+    match event {
+        tauri::WindowEvent::Focused(active) => set_active(window.app_handle(), *active),
+        tauri::WindowEvent::CloseRequested { .. } | tauri::WindowEvent::Destroyed => {
+            set_active(window.app_handle(), false)
+        }
+        _ => {}
+    }
+}
+
+// Retain the control-loop hook as a fallback if a platform misses the close event.
+pub(crate) fn reap(app: &AppHandle) {
+    if app.state::<TownWindowState>().active.load(Ordering::SeqCst)
+        && app.get_webview_window(TOWN_LABEL).is_none()
+    {
+        set_active(app, false);
     }
 }
 
 pub(crate) fn stop(app: &AppHandle) {
-    let state = app.state::<TownProcess>();
-    let child = state.0.lock().ok().and_then(|mut stored| stored.take());
-    if let Some(mut child) = child {
-        let _ = child.kill();
-        let _ = child.wait();
+    set_active(app, false);
+    if let Some(window) = app.get_webview_window(TOWN_LABEL) {
+        let _ = window.destroy();
     }
-    let _ = crate::village_visibility::set_town_active(app, false);
 }
 
-fn godot_runtime() -> Option<PathBuf> {
-    if let Some(path) = executable_env("PET_TOWN_GODOT_BIN") {
-        return Some(path);
+pub(crate) fn reopen(app: &AppHandle) {
+    if app.get_webview_window(TOWN_LABEL).is_some() {
+        let _ = open(app);
+    } else {
+        let _ = crate::settings_window::open_internal(app, None, Some("app".into()));
     }
-    if let Some(path) = branded_godot_runtime() {
-        return Some(path);
-    }
-    let mut candidates = vec![
-        PathBuf::from("/Applications/Godot.app/Contents/MacOS/Godot"),
-        repository_root().join("var/godot-runtime/Godot.app/Contents/MacOS/Godot"),
-    ];
-    if let Some(home) = std::env::var_os("HOME") {
-        candidates.push(PathBuf::from(home).join("Applications/Godot.app/Contents/MacOS/Godot"));
-    }
-    candidates
-        .into_iter()
-        .find(|candidate| candidate.is_file())
-        .or_else(|| executable_on_path("godot"))
-        .or_else(|| executable_on_path("Godot"))
-}
-
-#[cfg(target_os = "macos")]
-fn branded_godot_runtime() -> Option<PathBuf> {
-    let root = repository_root();
-    let script = root.join("scripts/prepare-pet-town-godot-app.sh");
-    let source = root.join("var/godot-runtime/Godot.app");
-    if !script.is_file() || !source.is_dir() {
-        return None;
-    }
-    let output = Command::new("sh").arg(script).arg(source).output().ok()?;
-    if !output.status.success() {
-        return None;
-    }
-    let path = PathBuf::from(String::from_utf8(output.stdout).ok()?.trim());
-    path.is_file().then_some(path)
-}
-
-#[cfg(not(target_os = "macos"))]
-fn branded_godot_runtime() -> Option<PathBuf> {
-    None
-}
-
-fn project_path() -> Option<PathBuf> {
-    if let Some(path) = std::env::var_os("PET_TOWN_GODOT_PROJECT") {
-        let path = PathBuf::from(path);
-        if path.join("project.godot").is_file() {
-            return Some(path);
-        }
-    }
-    let candidates = [
-        repository_root().join("apps/pet-town-godot-next"),
-        std::env::current_dir()
-            .ok()?
-            .join("apps/pet-town-godot-next"),
-    ];
-    candidates
-        .into_iter()
-        .find(|candidate| candidate.join("project.godot").is_file())
-}
-
-fn repository_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .ancestors()
-        .nth(3)
-        .unwrap_or_else(|| Path::new(env!("CARGO_MANIFEST_DIR")))
-        .to_path_buf()
-}
-
-fn executable_env(name: &str) -> Option<PathBuf> {
-    let path = PathBuf::from(std::env::var_os(name)?);
-    path.is_file().then_some(path)
-}
-
-fn executable_on_path(name: &str) -> Option<PathBuf> {
-    std::env::var_os("PATH")
-        .into_iter()
-        .flat_map(|paths| std::env::split_paths(&paths).collect::<Vec<_>>())
-        .map(|directory| directory.join(name))
-        .find(|candidate| candidate.is_file())
-}
-
-#[cfg(target_os = "macos")]
-fn activate(pid: u32) -> Result<(), String> {
-    crate::macos_app_focus::activate_process(pid)
-}
-
-#[cfg(not(target_os = "macos"))]
-fn activate(_pid: u32) -> Result<(), String> {
-    Ok(())
 }

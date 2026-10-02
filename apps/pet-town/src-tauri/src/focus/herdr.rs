@@ -1,6 +1,9 @@
-use crate::herdr_command::run_herdr_command;
+use crate::herdr_command::{run_herdr_command, run_herdr_command_with_timeout};
 use serde::Deserialize;
 use std::ffi::OsString;
+use std::time::Duration;
+
+const FOCUS_TIMEOUT: Duration = Duration::from_secs(8);
 
 #[derive(Deserialize)]
 struct AgentGetEnvelope {
@@ -70,7 +73,7 @@ fn focus_command(
     arguments: Vec<String>,
     error: &str,
 ) -> Result<(), String> {
-    run_herdr_command(herdr, socket, &arguments)
+    run_herdr_command_with_timeout(herdr, socket, &arguments, FOCUS_TIMEOUT)
         .map(|_| ())
         .ok_or_else(|| error.to_string())
 }

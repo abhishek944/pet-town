@@ -1,15 +1,15 @@
 {
   "name": "@pet-town/desktop",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Pet Town desktop application",
   "type": "module",
   "engines": {
     "node": ">=20.19.0"
   },
   "scripts": {
-    "internal:dev-frontend": "vite",
-    "internal:build-frontend": "pnpm run typecheck && vite build",
+    "internal:dev-frontend": "python3 ../../scripts/dev-town-frontends.py",
+    "internal:build-frontend": "pnpm run typecheck && sh ../../scripts/build-pet-town-frontends.sh",
     "typecheck": "tsc --noEmit",
     "lint": "pnpm run lint:eslint",
     "lint:eslint": "eslint src vite.config.ts --config ../../eslint.config.js",

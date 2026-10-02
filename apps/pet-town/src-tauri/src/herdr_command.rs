@@ -22,6 +22,7 @@ fn terminate_process_group(child: &mut Child) {
 fn collect_child_output(
     child: &mut Child,
     mut stdout: ChildStdout,
+    timeout: Duration,
 ) -> Option<(ExitStatus, Vec<u8>)> {
     use std::os::fd::AsRawFd;
 
@@ -33,7 +34,7 @@ fn collect_child_output(
         return None;
     }
 
-    let deadline = Instant::now() + HERDR_TIMEOUT;
+    let deadline = Instant::now() + timeout;
     let mut bytes = Vec::new();
     let mut buffer = [0_u8; 8192];
     loop {
@@ -93,6 +94,7 @@ fn collect_child_output(
 fn collect_child_output(
     child: &mut Child,
     mut stdout: ChildStdout,
+    timeout: Duration,
 ) -> Option<(ExitStatus, Vec<u8>)> {
     let reader = std::thread::spawn(move || {
         let mut bytes = Vec::new();
@@ -101,7 +103,7 @@ fn collect_child_output(
             .read_to_end(&mut bytes)
             .map(|_| bytes)
     });
-    let status = match child.wait_timeout(HERDR_TIMEOUT) {
+    let status = match child.wait_timeout(timeout) {
         Ok(Some(status)) => status,
         _ => {
             terminate_process_group(child);
@@ -116,6 +118,15 @@ pub(crate) fn run_herdr_command(
     herdr: &OsString,
     socket: Option<&str>,
     arguments: &[String],
+) -> Option<String> {
+    run_herdr_command_with_timeout(herdr, socket, arguments, HERDR_TIMEOUT)
+}
+
+pub(crate) fn run_herdr_command_with_timeout(
+    herdr: &OsString,
+    socket: Option<&str>,
+    arguments: &[String],
+    timeout: Duration,
 ) -> Option<String> {
     let mut command = Command::new(herdr);
     command
@@ -135,7 +146,7 @@ pub(crate) fn run_herdr_command(
 
     let mut child = command.spawn().ok()?;
     let stdout = child.stdout.take()?;
-    let (status, bytes) = collect_child_output(&mut child, stdout)?;
+    let (status, bytes) = collect_child_output(&mut child, stdout, timeout)?;
     status
         .success()
         .then(|| String::from_utf8(bytes).ok())

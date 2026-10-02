@@ -1,0 +1,180 @@
+<section
+  class="town-settings"
+  data-town-ui="settings"
+  role="dialog"
+  aria-labelledby="town-settings-title"
+  aria-modal="true"
+  hidden
+>
+  <header class="settings-header">
+    <div>
+      <h1 id="town-settings-title">Town settings</h1>
+      <p>A little company for your time in town.</p>
+    </div>
+    <button type="button" class="close" data-a="close" aria-label="Close settings">Close ×</button>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="Settings sections">
+    <button
+      type="button"
+      id="town-tab-companion"
+      role="tab"
+      aria-controls="town-panel-companion"
+      aria-selected="true"
+      data-tab="companion"
+    >
+      Companions</button
+    ><button
+      type="button"
+      id="town-tab-world"
+      role="tab"
+      aria-controls="town-panel-world"
+      aria-selected="false"
+      tabindex="-1"
+      data-tab="world"
+    >
+      World</button
+    ><button
+      type="button"
+      id="town-tab-help"
+      role="tab"
+      aria-controls="town-panel-help"
+      aria-selected="false"
+      tabindex="-1"
+      data-tab="help"
+    >
+      How to play
+    </button>
+  </nav>
+  <div class="settings-body">
+    <div
+      id="town-panel-companion"
+      role="tabpanel"
+      aria-labelledby="town-tab-companion"
+      data-panel="companion"
+    >
+      <div data-companion-profile>
+        <div class="profile">
+          <span data-field="portrait"></span>
+          <div class="profile-name">
+            <h2 data-field="name">Choose a companion</h2>
+            <p data-field="following">Pick someone from the list.</p>
+          </div>
+          <select data-control="companion" aria-label="Selected companion">
+            <option value="">Choose a companion</option>
+          </select>
+        </div>
+        <div class="appearance-row">
+          <div>
+            <h3>Your pet</h3>
+            <p data-field="appearance">Choose a companion to change its pet.</p>
+          </div>
+          <button type="button" data-control="change-pet">Change pet</button>
+        </div>
+        <div class="control-grid">
+          <section class="control-tile">
+            <h3>Companion control</h3>
+            <p data-field="controlHint">Follow a companion to walk and jump.</p>
+            <button type="button" class="action" data-control="control">
+              <span>Control</span> <kbd>C</kbd>
+            </button>
+          </section>
+          <section class="control-tile">
+            <h3>Camera view</h3>
+            <p>Choose how you see the town.</p>
+            <div class="camera-choices">
+              <button type="button" data-control="third">Third person</button
+              ><button type="button" data-control="first">First person <kbd>V</kbd></button>
+            </div>
+          </section>
+        </div>
+        <div class="profile-actions">
+          <button type="button" data-control="focus">Open agent ↗</button
+          ><button type="button" class="leave" data-control="leave">
+            Leave companion <kbd>Esc</kbd>
+          </button>
+        </div>
+        <p class="settings-feedback" data-field="feedback" role="status" hidden></p>
+        <p class="note">
+          Close this panel to return to the town. Your Mayor conversation stays connected.
+        </p>
+      </div>
+      <div data-pet-gallery hidden></div>
+    </div>
+    <div
+      id="town-panel-world"
+      role="tabpanel"
+      aria-labelledby="town-tab-world"
+      data-panel="world"
+      hidden
+    >
+      <div class="world-settings">
+        <h2>World sound</h2>
+        <div class="setting-row">
+          <div>
+            Music &amp; town sounds
+            <p>Mayor voice has its own controls.</p>
+          </div>
+          <button type="button" data-control="mute"><span>Muted</span> <kbd>M</kbd></button>
+        </div>
+        <label class="volume-label"
+          >World volume
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            data-control="volume"
+            aria-label="World volume" /><output data-field="volume"></output
+        ></label>
+        <p class="note">
+          Your builds are saved on this device. Reset world opens a separate confirmation.
+        </p>
+      </div>
+    </div>
+    <div
+      id="town-panel-help"
+      role="tabpanel"
+      aria-labelledby="town-tab-help"
+      data-panel="help"
+      hidden
+    >
+      <div class="guide">
+        <section class="guide-group">
+          <h4>Getting around</h4>
+          <div class="guide-row"><span>Walk</span><kbd>W A S D</kbd></div>
+          <div class="guide-row"><span>Jump · hold to glide</span><kbd>Space</kbd></div>
+          <div class="guide-row"><span>Run</span><kbd>Shift</kbd></div>
+          <div class="guide-row"><span>Turn camera</span><kbd>Q E</kbd></div>
+          <div class="guide-row"><span>Look around</span><kbd>Right drag</kbd></div>
+          <div class="guide-row"><span>Zoom</span><kbd>Scroll</kbd></div>
+        </section>
+        <section class="guide-group">
+          <h4>Building</h4>
+          <div class="guide-row"><span>Place / break</span><kbd>Right / Left click</kbd></div>
+          <div class="guide-row"><span>Choose block</span><kbd>1 … =</kbd></div>
+          <div class="guide-row"><span>Cycle blocks</span><kbd>Shift + scroll</kbd></div>
+          <div class="guide-row"><span>Copy a block</span><kbd>Middle click</kbd></div>
+          <div class="guide-row"><span>Undo / redo</span><kbd>Ctrl Z / Ctrl ⇧ Z</kbd></div>
+        </section>
+        <section class="guide-group">
+          <h4>Friends &amp; world</h4>
+          <div class="guide-row"><span>Pet a friend</span><kbd>F</kbd></div>
+          <div class="guide-row"><span>Take a photo</span><kbd>P</kbd></div>
+          <div class="guide-row"><span>World sound</span><kbd>M</kbd></div>
+          <div class="guide-row"><span>World volume</span><kbd>[ ]</kbd></div>
+          <div class="guide-row"><span>Lock mouse</span><kbd>L</kbd></div>
+          <div class="guide-row"><span>Call Mayor</span><kbd>⌥ M</kbd></div>
+          <div class="guide-row"><span>Cycle companions</span><kbd>⌥ A</kbd></div>
+        </section>
+      </div>
+      <p class="touch-guide">
+        Touch: drag to look, use the on-screen movement and jump controls, and tap a material to
+        choose it.
+      </p>
+    </div>
+  </div>
+  <footer class="settings-footer">
+    <span><kbd>H</kbd> Close · Back to town</span
+    ><button type="button" data-a="reset">Reset world…</button>
+  </footer>
+</section>

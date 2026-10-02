@@ -1,3 +1,4 @@
+import { bundledBehaviorPackForCharacter } from "./character-packs";
 import type { CompiledBehaviorPack, StateFlowManifest } from "./flow-runtime";
 import type { CitizenState } from "./village";
 
@@ -9,6 +10,17 @@ export interface OrchestratorView {
   listening: boolean;
   working?: boolean;
   speaking?: boolean;
+}
+
+export function validOrchestratorView(view: OrchestratorView | null): OrchestratorView | null {
+  if (!view) return null;
+  try {
+    return view.petId && bundledBehaviorPackForCharacter(view.petId).orchestratorAnimations
+      ? view
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 export function applyOrchestratorCitizen(
@@ -28,7 +40,13 @@ export function applyOrchestratorCitizen(
     id,
     label: view.displayName,
     source: "orchestrator",
-    status: view.speaking ? "speaking" : view.listening ? "listening" : view.working ? "working" : "idle",
+    status: view.speaking
+      ? "speaking"
+      : view.listening
+        ? "listening"
+        : view.working
+          ? "working"
+          : "idle",
     sprite: view.petId,
     missedPolls: 0,
     retiring: false,

@@ -10,9 +10,12 @@ the bottom of your desktop.
   <a href="assets/pets-demo.mp4">MP4 (642 KB, 1280×832)</a> · GIF autoplays above (2.0 MB, 800×520, 12 fps) — full 13s clip at <code>1:17–1:30</code>
 </p>
 
-This is a **Tauri v2 application**, built from scratch with a Rust backend and a
-TypeScript/CSS web interface. It uses one lightweight window for the whole
-village—never one window per agent and never an arbitrary agent limit.
+The desktop is a **Tauri v2 application** with a Rust backend and a
+TypeScript/CSS interface. Its 2D strip uses one lightweight window for the whole
+village, with no arbitrary agent limit. **Open 3D Town** opens the editable
+Three.js world with the same live agents and Mayor. That world was reconstructed
+from the deployed Bloomvale/Pokopia reference; its [app guide](apps/pet-town-3d/README.md)
+records the source and provenance.
 
 ## Install
 
@@ -52,7 +55,7 @@ user permissions, so review their manifest and source before installing.
 - Keeps **Preferences…** in each pet's right-click menu; menu animation actions are retired.
 - Opens a native macOS Settings window when the installed app launches, from **Preferences…** in a pet menu, or from the Herdr plugin action, with direct **Show Town / Hide Town** controls, per-character controls, a **Pet Studio**, and an **Agents** tab for atomic, reversible setup of all six standalone harness integrations.
 - Lets users create or extend a pet by importing transparent looping APNGs in Settings and choosing an APNG and idle or walking action for each state. The Pets page shows those assignments.
-- Adds a user-named Mayor using the bundled Knight and one persistent Firstmate primary in Herdr. Live mode uses GPT-Live for speech; Standard mode uses transcription and generated speech.
+- Adds a user-named Mayor using the bundled Knight in the 2D strip and a crowned explorer in 3D, backed by one persistent Firstmate primary in Herdr. Live mode uses GPT-Live for speech; Standard mode uses transcription and generated speech.
 - Runs Firstmate with GPT-5.6 Luna at medium thinking by default, supports task interruption, and keeps Live voice transcripts ephemeral.
 - Keeps the assistant independent from Pet Studio: its bundled Knight walk animation is fixed and cannot be replaced by user pet creation or extensions.
 - Includes every character in random assignment by default, lets users deselect unwanted characters, and immediately replaces visible deselected pets after Apply while preserving allowed assignments.
@@ -63,13 +66,21 @@ user permissions, so review their manifest and source before installing.
   interactive.
 - Runs directly as a standalone app; the optional Herdr adapter can also start and stop it through plugin actions.
 
+The Three.js town retains its terrain, native animals, building tools, saved world,
+and original player. Its **Companions** roster follows broker state, with **Option+A**
+to cycle, **C** to control, **V** for first person, and **Escape** to leave a companion.
+Mayor controls reuse the desktop voice runtime. Ordinary browser play works, but
+live agents and Mayor require the desktop's **Open 3D Town**. See the
+[3D flow](docs/3d-game.md) for the implemented behavior and verification limits.
+
 ## Architecture
 
 ```text
 Standalone Tauri process
   ├─ Rust adapter broker: lifecycle records, Herdr discovery, and focus routes
   ├─ Rust orchestrator state: local wake bridge, GPT-Live session creation, and Firstmate lifecycle
-  ├─ WebView: village, Settings, and ephemeral WebRTC voice conversation
+  ├─ WebViews: 2D village, Settings, and ephemeral WebRTC voice conversation
+  ├─ town WebView: editable Three.js world, public snapshots and scoped actions
   └─ dedicated Herdr pane: trusted Firstmate checkout → selected Pi model
        ↑
 optional Herdr plugin adapter (herdr-plugin.toml + scripts/supervisor.sh)
@@ -112,33 +123,45 @@ added later; always-on-top behavior on Linux depends on the desktop compositor.
 
 ## Develop and build both towns
 
-From the repository root, with Godot 4 and the local 3D island assets installed:
+From the repository root:
 
 ```bash
-pnpm run dev    # refresh frontend/Godot state, preserve Rust cache, launch the app
-pnpm run build  # refresh frontend/Godot state, preserve Rust cache, build app + DMG
+pnpm run dev    # install dependencies, build frontend assets, launch native development
+pnpm run build  # build the complete desktop app and DMG with the Three.js world
 ```
 
-These are the only supported desktop run/build commands. They validate the local Godot install and required island assets, then stop Pet Town and Godot processes from this checkout, clear generated frontend/Vite/Turbo/Godot import state, and reimport the 3D project. They preserve Cargo's `apps/pet-town/src-tauri/target` directory so Rust builds can reuse compiled artifacts and rebuild only changed crates. Save work in those windows before running either command; other Godot projects are left alone. Dependencies, user preferences, purchased island sources, saved rendering meshes, baked navigation/collision, and the Rust build cache are preserved. **dev** launches Tauri with live watchers; **build** produces the complete native desktop app and DMG. The **Open 3D Town** menu opens the freshly imported Godot project. Godot is imported but not exported as a separate installer (this project has no Godot export preset). CI uses Turbo's workspace tasks internally; there is no separate frontend-only desktop build command.
+These desktop commands stop only this checkout's desktop and frontend processes,
+so save work in those windows first. They preserve Cargo's
+`apps/pet-town/src-tauri/target` cache. Development starts and waits for both Vite
+servers: desktop on port 1420 and Three.js on port 1422. **Open 3D Town** creates or
+focuses the native town window. No Godot installation, imported island assets or
+Godot export is part of the current dev/build path.
 
-The release executable is written to
-`apps/pet-town/src-tauri/target/<rust-target>/release/pet-town` and copied
-into the matching `bin/macos-*` plugin package directory for the optional Herdr
-adapter. The same build produces **Pet Town.app** and a standard drag-to-Applications
-DMG at `bin/macos-*/pet-town.dmg`. Tagged release builds upload those installers as
-GitHub Release assets, and the landing page links to the versioned release URLs rather
-than storing large installers in the website bundle. The build also downloads a pinned
-Node release and installs a pinned Pi package inside that architecture's application
-bundle.
+The desktop frontend build first builds `@pet-town/three-town`, then copies its
+output into `apps/pet-town/dist/town`. Packaged town windows load
+`town/index.html` from those local assets. The release executable is written to
+`apps/pet-town/src-tauri/target/<rust-target>/release/pet-town` and copied into the
+matching `bin/macos-*` plugin package directory. The same build produces
+**Pet Town.app** and a drag-to-Applications DMG at `bin/macos-*/pet-town.dmg`.
+Tagged release builds upload those installers as GitHub Release assets. The build
+also bundles a pinned Node release and Pi package for the existing voice runtime.
 
-The repository is a pnpm workspace orchestrated by Turborepo. The production
-Tauri desktop application lives in `apps/pet-town`, the Godot implementation
-lives in `apps/pet-town-godot-next`, and the public landing page lives in `apps/web`.
-Repository scripts, plugin metadata, documentation, and checked-in packages
+The pnpm/Turborepo workspace contains the Tauri desktop in `apps/pet-town`, the
+editable Three.js game (`@pet-town/three-town`) in `apps/pet-town-3d`, and the public
+landing page in `apps/web`. Repository scripts, plugin metadata and documentation
 remain at the root.
 
-For first-time development, use Corepack to select pnpm 10.28.2, then run `pnpm run dev`. That command installs dependencies and starts the Tauri desktop app after the clean Godot import. Changes made while development is running use the normal dev watchers; rerunning the command refreshes generated frontend/Godot state while retaining Cargo's incremental build cache. Start the landing page at `http://127.0.0.1:4173` with `pnpm run dev:web`. Type-check and lint commands still use Turbo. Godot development is
-documented in `apps/pet-town-godot-next/README.md`.
+For first-time development, use Corepack to select pnpm 10.28.2, then run
+`pnpm run dev`. Normal watchers handle subsequent source edits. To work only on
+the browser game, run `pnpm run dev:town`; `pnpm run dev:workshop` is an alias for
+that standalone server. Browser gameplay does not connect agents or Mayor; use
+**Open 3D Town** in the native desktop for that integration. Browser and native
+WebView saves are separate, even though both retain the legacy `bloomvale` storage
+keys. See the [Three.js guide](apps/pet-town-3d/README.md) and
+[extension APIs](apps/pet-town-3d/ARCHITECTURE.md).
+
+Start the landing page at `http://127.0.0.1:4173` with `pnpm run dev:web`.
+Type-check and lint commands still use Turbo.
 
 ## Link for local development
 

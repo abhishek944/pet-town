@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "nib-dragon-hatchling",
+  "packVersion": "3",
+  "clips": {
+    "toddle-hop": {
+      "asset": "walk.png",
+      "durationMs": 760,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "flame-puff": {
+      "asset": "work.png",
+      "durationMs": 760,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "toddle-hop",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "flame-puff",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "flame-puff",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "flame-puff",
+      "action": "idle"
+    }
+  }
+}

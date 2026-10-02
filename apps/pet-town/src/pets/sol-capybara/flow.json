@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "sol-capybara",
+  "packVersion": "3",
+  "clips": {
+    "slow-stroll": {
+      "asset": "walk.png",
+      "durationMs": 880,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "steam-soak": {
+      "asset": "work.png",
+      "durationMs": 1000,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "slow-stroll",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "steam-soak",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "steam-soak",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "steam-soak",
+      "action": "idle"
+    }
+  }
+}

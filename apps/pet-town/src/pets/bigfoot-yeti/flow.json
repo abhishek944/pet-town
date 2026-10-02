@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "bigfoot-yeti",
+  "packVersion": "3",
+  "clips": {
+    "lumbering-lope": {
+      "asset": "walk.png",
+      "durationMs": 920,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "snow-toss": {
+      "asset": "work.png",
+      "durationMs": 920,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "lumbering-lope",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "snow-toss",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "snow-toss",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "snow-toss",
+      "action": "idle"
+    }
+  }
+}

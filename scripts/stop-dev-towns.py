@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stop only this checkout's Pet Town and Godot processes before a clean build/run."""
+"""Stop only this checkout's Pet Town desktop and frontend processes before a clean build/run."""
 
 import contextlib
 import os
@@ -10,7 +10,6 @@ import time
 from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent
-project = root / "apps/pet-town-godot-next"
 target = root / "apps/pet-town/src-tauri/target"
 
 
@@ -33,25 +32,41 @@ def is_our_pet_town_binary(pid: int) -> bool:
     )
 
 
+def is_our_frontend_supervisor(pid: int) -> bool:
+    try:
+        output = subprocess.check_output(
+            ["lsof", "-a", "-p", str(pid), "-d", "cwd", "-Fn"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return False
+    return any(
+        line.startswith("n") and Path(line[1:]) in (root, root / "apps/pet-town")
+        for line in output.splitlines()
+    )
+
+
 def matches(pid: int, command: str) -> bool:
-    # Include this app's main executable and --town-bridge helper, whether ps
+    # Include this app's main executable and focus helper, whether ps
     # renders its executable path absolute or relative. Consult lsof only for
     # processes whose command could be this binary.
     executable = command.split(" --", 1)[0]
     if Path(executable).name == "pet-town" and is_our_pet_town_binary(pid):
         return True
-    # Stop only this checkout's Vite and Tauri CLI, not other Node/Godot
-    # development servers that may be using other projects or ports.
-    desktop = root / "apps/pet-town/node_modules"
-    if str(desktop) in command and "/vite/bin/vite.js" in command:
+    # Match explicit checkout paths; never stop servers just because they use our ports.
+    frontend_apps = ("pet-town", "pet-town-3d", "pokopia")
+    if "/vite/bin/vite.js" in command and any(
+        str(root / "apps" / name / "node_modules") in command for name in frontend_apps
+    ):
         return True
+    desktop = root / "apps/pet-town/node_modules"
     if str(desktop) in command and "/@tauri-apps/cli/tauri.js dev" in command:
         return True
-    if " --path " in command:
-        executable, args = command.split(" --path ", 1)
-        if Path(executable).name.lower() == "godot":
-            return args == str(project) or args.startswith(str(project) + " ")
-    return False
+    supervisor = str(root / "scripts/dev-town-frontends.py")
+    return supervisor in command or (
+        "dev-town-frontends.py" in command and is_our_frontend_supervisor(pid)
+    )
 
 
 def running() -> dict[int, str]:

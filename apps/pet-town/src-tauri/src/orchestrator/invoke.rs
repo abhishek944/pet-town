@@ -29,6 +29,7 @@ pub fn invoke_mayor(app: &AppHandle) -> Result<(), String> {
             starting = true;
             runtime.wake_activated = true;
             runtime.connecting = true;
+            runtime.degraded_note = None;
             runtime.wake_status = Some("Mayor called — connecting voice".into());
             runtime.mayor_speech.clear();
             runtime.mayor_speaking = false;

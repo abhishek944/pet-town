@@ -1,0 +1,20 @@
+.town-dock-open #hud,
+.town-dock-open .town-labels {
+  right: var(--town-dock-width);
+}
+.town-dock-open #hud {
+  --slot: clamp(24px, calc((var(--town-world-width) - 120px) / 12), 43px);
+}
+.town-dock-open #hud .pk-hotbar {
+  max-width: calc(var(--town-world-width) - 24px);
+  overflow-x: auto;
+}
+.town-dock-open .town-list-panel {
+  max-width: calc(var(--town-world-width) - 48px);
+}
+.town-dock-open #hud .pk-tr {
+  right: 24px;
+}
+.town-dock-open .pt-mayor-speech[data-fixed="true"] {
+  right: calc(var(--town-dock-width) + 20px);
+}

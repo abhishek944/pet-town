@@ -1,0 +1,378 @@
+#hud .town-settings {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 744px;
+  background: #fff6e4;
+  border: 2px solid #d4b489;
+  border-radius: 23px;
+  box-shadow:
+    0 6px 0 #987044,
+    0 25px 80px #10251c66;
+  overflow: hidden;
+}
+#hud .town-settings .settings-header {
+  padding: 18px 25px;
+  background: linear-gradient(#aa7748, #94633a);
+  color: #fff0d3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #dabb8c;
+}
+#hud .town-settings .settings-header h1 {
+  font:
+    700 27px Fraunces,
+    Georgia,
+    serif;
+  margin: 0;
+}
+#hud .town-settings .settings-header p {
+  font-size: 12px;
+  color: #f2dfbf;
+  margin: 4px 0 0;
+}
+#hud .town-settings .close {
+  font-size: 12px;
+  border: 1px solid #e1c299;
+  background: #f6e5c8;
+  color: #71522e;
+  border-radius: 9px;
+  padding: 9px 12px;
+  min-height: 38px;
+}
+#hud .town-settings .tabs {
+  display: flex;
+  padding: 16px 24px 0;
+  gap: 8px;
+  border-bottom: 1px solid #dfd0b7;
+}
+#hud .town-settings .tabs button {
+  padding: 10px 17px;
+  border: 0;
+  background: transparent;
+  color: #716449;
+  border-bottom: 3px solid transparent;
+  font-size: 13px;
+}
+#hud .town-settings .tabs button.active {
+  border-color: #426448;
+  color: #3f603f;
+}
+#hud .town-settings .settings-body {
+  padding: 22px 25px;
+}
+#hud .town-settings .profile {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 0 0 17px;
+  border-bottom: 1px solid #e1d4bc;
+}
+#hud .town-settings .profile .portrait {
+  width: 53px;
+  height: 53px;
+}
+#hud .town-settings .profile .portrait svg {
+  width: 45px;
+  height: 45px;
+}
+#hud .town-settings .profile h2 {
+  margin: 0;
+  font:
+    700 25px Fraunces,
+    Georgia,
+    serif;
+}
+#hud .town-settings .profile p {
+  margin: 5px 0 0;
+  color: #716449;
+  font-size: 12px;
+}
+#hud .town-settings .profile select {
+  margin-left: auto;
+  background: #fffaf0;
+  border: 1px solid #d8c5a3;
+  border-radius: 9px;
+  padding: 9px 13px;
+  font-size: 12px;
+}
+#hud .town-settings .control-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 18px 0;
+}
+#hud .town-settings .control-tile {
+  padding: 15px;
+  background: #f2e8d2;
+  border: 1px solid #dfccab;
+  border-radius: 13px;
+}
+#hud .town-settings .control-tile h3 {
+  font-size: 13px;
+  margin: 0 0 4px;
+}
+#hud .town-settings .control-tile p {
+  margin: 0 0 13px;
+  font-size: 12px;
+  color: #716449;
+}
+#hud .town-settings button.action {
+  background: #426448;
+  color: #fff7e3;
+  border: 1px solid #426448;
+  border-radius: 9px;
+  padding: 10px 13px;
+  min-height: 39px;
+  font-size: 13px;
+}
+#hud .town-settings kbd {
+  font:
+    800 11px Nunito,
+    sans-serif;
+  border: 1px solid #cfc09f;
+  border-radius: 5px;
+  background: #fff9e8;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+#hud .town-settings button.action kbd {
+  background: #ffffff20;
+  border-color: #ffffff40;
+  color: #fff;
+}
+#hud .town-settings .camera-choices {
+  display: flex;
+  gap: 5px;
+}
+#hud .town-settings .camera-choices button {
+  border: 1px solid #d8c39e;
+  border-radius: 8px;
+  background: #fff8e7;
+  padding: 10px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+#hud .town-settings .camera-choices .selected {
+  background: #e1e7bd;
+  color: #426448;
+  border-color: #93a777;
+}
+#hud .town-settings .profile-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+#hud .town-settings .profile-actions button {
+  border: 1px solid #d4bf9a;
+  background: #fff8e8;
+  padding: 9px 13px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+#hud .town-settings .profile-actions .leave {
+  background: transparent;
+  border-color: transparent;
+  color: #716449;
+}
+#hud .town-settings .note {
+  font-size: 12px;
+  color: #716449;
+  margin: 15px 0 0;
+  padding-top: 13px;
+  border-top: 1px solid #e5d7bd;
+}
+#hud .town-settings .settings-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 25px;
+  background: #f4e9d3;
+  border-top: 1px solid #deccac;
+  color: #716449;
+  font-size: 11px;
+}
+#hud .town-settings .settings-footer button {
+  border: 0;
+  background: none;
+  text-decoration: underline;
+  color: #9c6244;
+  font: inherit;
+  cursor: pointer;
+}
+#hud .town-settings .guide h3 {
+  font:
+    700 19px Fraunces,
+    Georgia,
+    serif;
+  margin: 0 0 11px;
+}
+#hud .town-settings .guide-group {
+  margin-top: 18px;
+}
+#hud .town-settings .guide-group h4 {
+  font-size: 10px;
+  color: #716449;
+  letter-spacing: 1.7px;
+  margin: 0 0 9px;
+  text-transform: uppercase;
+}
+#hud .town-settings .guide-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 12px;
+}
+#hud .town-settings .guide-row span {
+  color: #75664d;
+}
+#hud .town-settings .setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  margin: 17px 0;
+}
+#hud .town-settings .setting-row p {
+  font-size: 11px;
+  color: #716449;
+  margin: 3px 0;
+}
+#hud .town-settings .setting-row button {
+  background: #eee2c9;
+  border: 1px solid #d6c19b;
+  padding: 7px 12px;
+  border-radius: 9px;
+}
+#hud .town-settings {
+  z-index: 4;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  width: min(744px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+}
+#hud .town-settings .settings-header,
+#hud .town-settings .tabs,
+#hud .town-settings .settings-footer {
+  flex-shrink: 0;
+}
+#hud .town-settings .settings-body {
+  min-height: 293px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+#hud .town-settings .tabs button[aria-selected="true"] {
+  border-color: #426448;
+  color: #3f603f;
+}
+#hud .town-settings .profile-name {
+  min-width: 0;
+}
+#hud .town-settings .profile h2 {
+  overflow-wrap: anywhere;
+}
+#hud .town-settings .profile select {
+  max-width: 190px;
+  flex-shrink: 0;
+}
+#hud .town-settings .town-portrait {
+  width: 53px;
+  height: 53px;
+}
+#hud .town-settings .town-portrait svg {
+  width: 45px;
+  height: 45px;
+}
+#hud .town-settings .camera-choices button[aria-pressed="true"] {
+  background: #e1e7bd;
+  color: #426448;
+  border-color: #93a777;
+}
+#hud .town-settings .world-settings h2 {
+  font:
+    700 25px Fraunces,
+    Georgia,
+    serif;
+  margin: 0 0 15px;
+}
+#hud .town-settings .volume-label {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin: 28px 0;
+}
+#hud .town-settings .volume-label input {
+  flex: 1;
+  min-width: 0;
+  accent-color: #426448;
+}
+#hud .town-settings .volume-label output {
+  min-width: 38px;
+}
+#hud .town-settings .guide {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+#hud .town-settings .guide-group {
+  margin-top: 0;
+}
+#hud .town-settings .guide-row {
+  flex-wrap: wrap;
+}
+#hud .town-settings .settings-feedback {
+  padding: 9px;
+  background: #fae8df;
+  color: #883e2d;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+#hud .town-settings .touch-guide {
+  display: none;
+}
+#hud .pk-confirm {
+  z-index: 5;
+}
+@media (max-height: 650px) {
+  #hud .town-settings .settings-body {
+    min-height: 0;
+  }
+}
+@media (max-width: 700px) {
+  #hud .town-settings .settings-header {
+    padding: 16px;
+  }
+  #hud .town-settings .settings-body {
+    padding: 16px;
+  }
+  #hud .town-settings .control-grid {
+    grid-template-columns: 1fr;
+  }
+  #hud .town-settings .profile {
+    flex-wrap: wrap;
+  }
+  #hud .town-settings .profile select {
+    width: 100%;
+    max-width: none;
+  }
+  #hud .town-settings .guide {
+    grid-template-columns: 1fr;
+  }
+  #hud .town-settings .tabs {
+    padding: 8px 10px 0;
+    gap: 3px;
+  }
+  #hud .town-settings .tabs button {
+    padding: 10px;
+  }
+}
+@media (pointer: coarse) {
+  #hud .town-settings .touch-guide {
+    display: block;
+  }
+}

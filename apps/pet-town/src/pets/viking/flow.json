@@ -1,0 +1,77 @@
+{
+  "formatVersion": 1,
+  "id": "viking",
+  "packVersion": "5",
+  "clips": {
+    "march": {
+      "asset": "walk.png",
+      "durationMs": 630,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "forge": {
+      "asset": "hammer.png",
+      "durationMs": 1080,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.7,
+      "holdAsset": "done.png"
+    },
+    "ponder": {
+      "asset": "think.png",
+      "durationMs": 1800,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.2
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.7
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true,
+      "scale": 1.7
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "march",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "ponder",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "ponder",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "ponder",
+      "action": "idle"
+    }
+  }
+}

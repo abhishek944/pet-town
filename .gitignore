@@ -8,6 +8,7 @@ node_modules/
 .turbo/
 .wrangler/
 dist/
+dist-public/
 apps/web/.downloads/
 apps/*/.godot/
 apps/pet-town-godot/assets/nature-essentials/

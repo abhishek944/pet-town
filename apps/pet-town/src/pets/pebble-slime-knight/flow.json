@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "id": "pebble-slime-knight",
+  "packVersion": "3",
+  "clips": {
+    "wobbly-march": {
+      "asset": "walk.png",
+      "durationMs": 690,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "lid-block": {
+      "asset": "work.png",
+      "durationMs": 840,
+      "role": "locomotion",
+      "sourceFacing": "right",
+      "mirror": true,
+      "holdAsset": "done.png"
+    },
+    "sleep": {
+      "asset": "sleep.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    },
+    "wave": {
+      "asset": "wave.png",
+      "durationMs": 900,
+      "role": "stationary",
+      "sourceFacing": "right",
+      "mirror": true
+    }
+  },
+  "states": {
+    "idle": {
+      "action": "idle",
+      "visible": false
+    },
+    "working": {
+      "animation": "lid-block",
+      "action": "walking"
+    },
+    "blocked": {
+      "animation": "lid-block",
+      "action": "idle"
+    },
+    "done": {
+      "animation": "sleep",
+      "action": "idle"
+    },
+    "unknown": {
+      "action": "idle",
+      "visible": false
+    },
+    "listening": {
+      "animation": "lid-block",
+      "action": "idle"
+    },
+    "speaking": {
+      "animation": "lid-block",
+      "action": "idle"
+    }
+  }
+}

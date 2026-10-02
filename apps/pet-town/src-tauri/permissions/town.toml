@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-town-bridge"
+description = "Read the public town snapshot and invoke the whitelisted town actions."
+commands.allow = ["get_town_snapshot", "town_action", "town_terminal_open", "town_terminal_send", "town_terminal_close"]

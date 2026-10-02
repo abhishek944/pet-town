@@ -6,6 +6,7 @@ import { startSpeechMeter } from "./assistant-meter"; import { iceComplete, inst
 import { renderVoiceStatus } from "./assistant-status";
 import { LiveTranscripts } from "./assistant-live-transcripts";
 import { FirstmateVoice } from "./assistant-firstmate";
+import { createLiveStartup, reportLiveStartup } from "./assistant-live-startup";
 type LiveAnswer = { sessionId: string; sdp: string }; const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 let connection: RTCPeerConnection | null = null, channel: RTCDataChannel | null = null;
 let microphone: MediaStream | null = null, stopMeter = () => {};
@@ -51,13 +52,12 @@ async function connect(fromWake = false, wakeGeneration?: number): Promise<void>
   }
   if (connecting || connection) return;
   connecting = true; const attempt = ++connectionAttempt; error("");
+  const startup = createLiveStartup(() => attempt === connectionAttempt);
   $<HTMLButtonElement>("connect").disabled = true; $<HTMLButtonElement>("disconnect").disabled = false;
   try {
-  await invoke("report_orchestrator_diagnostic", { message: "requesting microphone" });
-  const stream = await navigator.mediaDevices.getUserMedia({
-    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-  });
-  await invoke("report_orchestrator_diagnostic", { message: "microphone ready" });
+  reportLiveStartup("requesting microphone");
+  const stream = await startup.microphone();
+  reportLiveStartup("microphone ready");
   if (attempt !== connectionAttempt) { stream.getTracks().forEach((track) => track.stop()); return; }
   microphone = stream; stream.getAudioTracks().forEach((track) => { track.enabled = fromWake; });
   const peer = new RTCPeerConnection(); connection = peer;
@@ -67,16 +67,17 @@ async function connect(fromWake = false, wakeGeneration?: number): Promise<void>
   const events = peer.createDataChannel("oai-events"); channel = events;
   events.addEventListener("message", (event) => handleEvent(String(event.data)));
   events.addEventListener("close", closeLocal);
-  const offer = await peer.createOffer();
-  await peer.setLocalDescription(offer); await iceComplete(peer);
+  const offer = await startup.connection(() => peer.createOffer(), "creating the offer");
+  await startup.connection(() => peer.setLocalDescription(offer), "preparing the connection");
+  await iceComplete(peer);
   if (attempt !== connectionAttempt) { disposeAttempt(peer, stream, events); return; }
-  await invoke("report_orchestrator_diagnostic", { message: "starting Firstmate and GPT-Live" });
+  reportLiveStartup("starting Firstmate and GPT-Live");
   const answer = await invoke<LiveAnswer>("start_orchestrator_session", {
     workspaceId: "", sdp: peer.localDescription?.sdp ?? "", wakeGeneration: wakeGeneration ?? null,
   });
-  await invoke("report_orchestrator_diagnostic", { message: "GPT-Live answer received" });
+  reportLiveStartup("GPT-Live answer received");
   if (attempt !== connectionAttempt) { disposeAttempt(peer, stream, events); return; }
-  await peer.setRemoteDescription({ type: "answer", sdp: answer.sdp });
+  await startup.connection(() => peer.setRemoteDescription({ type: "answer", sdp: answer.sdp }), "applying the server answer");
   if (attempt !== connectionAttempt) { disposeAttempt(peer, stream, events); return; }
   pushToTalk = !fromWake;
   $<HTMLButtonElement>("connect").textContent = pushToTalk ? "Hold to talk" : "Listening";
@@ -173,7 +174,6 @@ void listen("orchestrator-status-refresh", () => {
     })
     .catch(error);
 });
-void listen<string>("orchestrator-wake-status", (event) => { $("wake-status").textContent = event.payload; });
 void listen("orchestrator-mayor-invoked", () => {
   if (!connection || connecting) return;
   pushToTalk = false;
