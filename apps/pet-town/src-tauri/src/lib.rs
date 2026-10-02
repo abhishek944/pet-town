@@ -8,6 +8,7 @@ mod app_singleton;
 mod control;
 mod focus;
 mod focus_id;
+mod focus_route;
 mod focus_trace;
 #[cfg(target_os = "macos")]
 mod global_mayor_shortcut;
@@ -76,6 +77,7 @@ pub fn run() {
     let builder = builder.plugin(tauri_nspanel::init());
     builder
         .manage(app_lock)
+        .manage(pet_town_agent_broker::RemoteMonitor::start())
         .manage(window::HitRegions::default())
         .manage(village_visibility::VillageVisibility::default())
         .manage(preferences::PreferencesStore::load_default())
@@ -181,6 +183,7 @@ pub fn run() {
                 }
             }
             tauri::RunEvent::Exit => {
+                app.state::<pet_town_agent_broker::RemoteMonitor>().stop();
                 town_process::stop(app);
                 app.state::<pet_studio::PetStudioState>().cleanup();
             }

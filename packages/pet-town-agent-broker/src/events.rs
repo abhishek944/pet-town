@@ -186,6 +186,7 @@ pub(crate) fn snapshot() -> AdapterSnapshot {
                     status,
                     label: record.label,
                     source: record.source,
+                    ..AgentView::default()
                 },
                 focus_route,
             }
