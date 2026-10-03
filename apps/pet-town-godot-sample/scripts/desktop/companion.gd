@@ -8,6 +8,9 @@ var random := RandomNumberGenerator.new()
 var paused := false
 var presentation: Node
 var elapsed:=0.0
+var roam_search_pending := false
+var roam_attempts := 0
+var roam_retry_at := 0
 
 func _ready() -> void:
 	super._ready()
@@ -64,6 +67,7 @@ func set_pet(id: String) -> void:
 func _physics_process(delta: float) -> void:
 	elapsed+=delta
 	if controlled:
+		if roam_search_pending: _rest_roam()
 		super._physics_process(delta)
 	else:
 		enabled = false
@@ -74,12 +78,17 @@ func _physics_process(delta: float) -> void:
 			respawn()
 			spawn_pending = false
 		motion.step(self,delta)
-		var conversation: bool=entry.get("source","")=="mayor" and entry.get("conversationActive",false)
+		var conversation := _in_conversation()
 		roam_time -= delta
-		if not paused and not conversation and (roam_time <= 0 or position.distance_to(destination)<0.8): _choose_target()
+		if not paused and not conversation and not roam_search_pending and Time.get_ticks_msec() >= roam_retry_at and (roam_time <= 0 or position.distance_to(destination)<0.8):
+			roam_time=random.randf_range(3,7)
+			roam_attempts=24
+			roam_search_pending=true
+			destination=position
+			get_parent().roaming.request(self)
 		var direction := destination-position
 		direction.y = 0
-		if paused or conversation or direction.length()<0.7: direction = Vector3.ZERO
+		if paused or conversation or roam_search_pending or direction.length()<0.7: direction = Vector3.ZERO
 		else: direction = direction.normalized()
 		if conversation:
 			velocity.x=0
@@ -88,7 +97,7 @@ func _physics_process(delta: float) -> void:
 			visual.rotation.y=lerp_angle(visual.rotation.y,atan2(toward_camera.x,toward_camera.z),1-exp(-12*delta))
 		velocity.x = move_toward(velocity.x,direction.x*1.672,delta*8)
 		velocity.z = move_toward(velocity.z,direction.z*1.672,delta*8)
-		if test_move(global_transform,Vector3(velocity.x,0,velocity.z)*delta): roam_time=0
+		if direction.length_squared()>0 and test_move(global_transform,Vector3(velocity.x,0,velocity.z)*delta): _rest_roam()
 		move_and_slide()
 		if ocean: ocean.after_body_step(self)
 		if direction.length_squared()>0:
@@ -98,17 +107,37 @@ func _physics_process(delta: float) -> void:
 			animator.set_motion(Vector2(velocity.x,velocity.z).length(),is_on_floor(),velocity.y)
 		if position.y < -10 or not world.contains(position): respawn()
 
-func _choose_target() -> void:
-	roam_time=random.randf_range(3,7)
+func _choose_target() -> bool:
+	if paused or controlled or _in_conversation():
+		_rest_roam()
+		return true
+	roam_attempts-=1
+	var candidate := position+Vector3(random.randf_range(-5,5),0,random.randf_range(-5,5))
+	if not world.contains(candidate): return _reject_roam_candidate()
+	var height: float=world.ground_at(candidate)
+	if absf(height-position.y)>1.02 or world.water_at(candidate)>height+0.1: return _reject_roam_candidate()
+	candidate.y=height+0.05
+	var sweep := candidate-position
+	sweep.y=0
+	if test_move(global_transform,sweep): return _reject_roam_candidate()
+	destination=candidate
+	roam_search_pending=false
+	roam_retry_at=Time.get_ticks_msec()+int(random.randf_range(500,1500))
+	return true
+
+func _reject_roam_candidate() -> bool:
+	if roam_attempts>0: return false
+	_rest_roam()
+	return true
+
+func _rest_roam() -> void:
+	roam_search_pending=false
+	roam_attempts=0
+	roam_time=0
+	roam_retry_at=Time.get_ticks_msec()+int(random.randf_range(500,1500))
 	destination=position
-	for attempt in range(24):
-		var candidate := position+Vector3(random.randf_range(-5,5),0,random.randf_range(-5,5))
-		if not world.contains(candidate): continue
-		var height: float=world.ground_at(candidate)
-		if absf(height-position.y)>1.02 or world.water_at(candidate)>height+0.1: continue
-		candidate.y=height+0.05
-		var sweep := candidate-position
-		sweep.y=0
-		if test_move(global_transform,sweep): continue
-		destination=candidate
-		break
+	velocity.x=0
+	velocity.z=0
+
+func _in_conversation() -> bool:
+	return entry.get("source","")=="mayor" and entry.get("conversationActive",false)

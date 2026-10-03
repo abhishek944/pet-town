@@ -15,6 +15,7 @@ var photos: CanvasLayer
 var preferences := ConfigFile.new()
 var elapsed := 0.0
 var day_time := 0.41435
+var initialized := false
 
 func _ready() -> void:
 	preload("res://ui/dpi_scale.gd").apply(get_window())
@@ -107,9 +108,10 @@ func _ready() -> void:
 	hud.welcome.dismissed.connect(func():
 		if builder.store.write_blocked: hud.show_toast(builder.store.load_error))
 	hud.show_welcome()
+	initialized = true
 
 func _process(delta: float) -> void:
-	if not is_instance_valid(actor): return
+	if not initialized or not is_instance_valid(actor): return
 	elapsed+=delta
 	day_time=fposmod(0.41435+elapsed/960.0,1.0)
 	hud.update_clock((0.41435+elapsed/960.0)*86400)

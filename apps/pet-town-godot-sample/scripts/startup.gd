@@ -26,7 +26,7 @@ func launch() -> void:
 	var scene: PackedScene = ResourceLoader.load_threaded_get(WORLD)
 	var town := scene.instantiate()
 	get_tree().root.add_child(town)
-	if not is_instance_valid(town.get("actor")):
+	if not town.get("initialized") or not is_instance_valid(town.get("actor")):
 		town.queue_free()
 		welcome.set_loading(true, "The town could not load. Please reopen Pet Town.")
 		return

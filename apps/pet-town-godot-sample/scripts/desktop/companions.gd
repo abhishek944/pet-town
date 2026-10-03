@@ -13,6 +13,7 @@ var usage: Dictionary = {}
 var choices := ConfigFile.new()
 var focus_serial: Variant = null
 var updater := preload("updates.gd").new()
+var roaming := preload("roaming.gd").new()
 
 func setup(owner_node: Node3D) -> void:
 	town=owner_node
@@ -20,6 +21,7 @@ func setup(owner_node: Node3D) -> void:
 	choices.load("user://companion-pets.cfg")
 	actions.host=self
 	updater.host=self
+	add_child(roaming)
 	transport=preload("transport.gd").new()
 	add_child(transport)
 	transport.snapshot_received.connect(_snapshot)
