@@ -56,7 +56,7 @@ info.update({
     "CFBundleExecutable": "pet-town",
     "CFBundlePackageType": "APPL",
     "CFBundleIconFile": "icon.icns",
-    "CFBundleShortVersionString": "1.2.0",
+    "CFBundleShortVersionString": "1.2.1",
     "NSHighResolutionCapable": True,
 })
 with open(sys.argv[2], "wb") as destination:
