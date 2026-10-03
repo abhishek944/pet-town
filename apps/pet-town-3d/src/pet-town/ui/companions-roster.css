@@ -1,0 +1,144 @@
+.town-roster {
+  padding: 9px;
+  max-height: 336px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #c3a976 transparent;
+  scrollbar-width: thin;
+}
+.town-entry {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  padding: 8px 10px;
+  text-align: left;
+  min-height: 60px;
+  color: #504431;
+}
+.town-entry:hover {
+  background: #f0e8d2;
+}
+.town-entry[aria-pressed="true"] {
+  background: #e8edce;
+  border-color: #aebc8b;
+}
+.town-identity-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+.town-identity-row strong {
+  font:
+    800 14px/1.1 Nunito,
+    sans-serif;
+  overflow-wrap: anywhere;
+}
+.town-work-state {
+  font:
+    800 11px/1.1 Nunito,
+    sans-serif;
+  color: #6b6a50;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.town-work-state i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #638858;
+  flex: none;
+}
+.town-work-state[data-status="blocked"] i {
+  background: #af7345;
+}
+.town-work-state[data-status="done"] i {
+  background: #668386;
+}
+.town-work-state[data-status="idle"] i {
+  background: #a08443;
+}
+.town-following {
+  font-size: 10px;
+  color: #54703d;
+  text-align: right;
+  line-height: 1.2;
+  max-width: 53px;
+}
+.town-following b {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+.town-picker-foot {
+  font-size: 11px;
+  color: #79694c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 17px;
+  border-top: 1px solid #dfcfb0;
+  background: #f4e9d3;
+  gap: 12px;
+}
+.town-picker-foot kbd {
+  font:
+    800 11px Nunito,
+    sans-serif;
+  background: #fff7e4;
+  padding: 2px 5px;
+  border: 1px solid #d6c6a4;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.town-open-settings {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 11px !important;
+  white-space: nowrap;
+}
+.town-list-panel button:focus-visible {
+  outline-offset: -3px;
+}
+.town-empty {
+  padding: 26px 19px 31px;
+  text-align: center;
+  min-height: 165px;
+}
+.town-empty > span {
+  margin: 0 auto 12px;
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  background: #e6e9cd;
+  color: #6f8054;
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+}
+.town-empty h3 {
+  font:
+    700 20px Fraunces,
+    Georgia,
+    serif;
+  margin: 0 0 9px;
+}
+.town-empty p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #6a634d;
+  margin: 0;
+}
+.town-feedback {
+  max-width: 348px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff6e6;
+}

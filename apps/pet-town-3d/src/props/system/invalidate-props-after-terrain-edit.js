@@ -1,5 +1,6 @@
 /** Prop lifecycle, collision and interaction API, terrain reseating, static batches and animated prop effects. */
 import { propsState } from "../state.js";
+import { originalPropTouchesColumn } from "./original-prop-support.js";
 export function invalidatePropsAfterTerrainEdit(position) {
   let x2 = position?.x;
   let z2 = position?.z;
@@ -11,12 +12,12 @@ export function invalidatePropsAfterTerrainEdit(position) {
   let result2 = z2 + 0.5;
   let enabled = false;
   for (let position2 of propsState.propsRuntime.recs.values()) {
-    if (
-      position2.reseat &&
-      (position2.kind === `stone`
-        ? Math.max(Math.abs(position2.x - result), Math.abs(position2.z - result2)) - 0.9
-        : Math.hypot(position2.x - result, position2.z - result2) - (position2.foot + 0.75)) < 0
-    ) {
+    const touches = position2.it.terrainSupport
+      ? originalPropTouchesColumn(position2, result, result2)
+      : (position2.kind === `stone`
+          ? Math.max(Math.abs(position2.x - result), Math.abs(position2.z - result2)) - 0.9
+          : Math.hypot(position2.x - result, position2.z - result2) - (position2.foot + 0.75)) < 0;
+    if (position2.reseat && touches) {
       propsState.propsRuntime.dirty.add(position2);
       enabled = true;
     }

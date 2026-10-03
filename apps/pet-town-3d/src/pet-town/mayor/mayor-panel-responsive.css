@@ -1,0 +1,34 @@
+@media (max-height: 650px) {
+  .pt-mayor {
+    max-height: calc(100vh - 205px);
+  }
+}
+@media (max-width: 600px) {
+  .pt-mayor {
+    right: 16px;
+    bottom: 108px;
+    width: min(280px, calc(100vw - 32px));
+  }
+}
+@media (pointer: coarse) {
+  .pt-mayor__actions [data-control="settings"] {
+    width: 44px;
+  }
+}
+.pt-mayor__wave {
+  border: 0;
+  padding: 4px 0;
+  background: none;
+  min-width: 27px;
+  min-height: 28px;
+}
+.pt-mayor__wave[aria-expanded="false"] i {
+  display: none;
+}
+.pt-mayor__wave[aria-expanded="false"]::after {
+  content: "+";
+  font-size: 22px;
+}
+.pt-mayor[data-under-dialog="true"] {
+  z-index: 5;
+}

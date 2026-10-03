@@ -1,0 +1,95 @@
+#hud .town-settings .app-info h2 {
+  font:
+    700 25px Fraunces,
+    Georgia,
+    serif;
+  margin: 0 0 9px;
+}
+#hud .town-settings .app-info > p {
+  margin: 0 0 10px;
+  color: #716449;
+  font-size: 12px;
+}
+#hud .town-settings .updates-card {
+  margin-top: 22px;
+  padding: 17px;
+  border: 1px solid #dfccab;
+  border-radius: 13px;
+  background: #f2e8d2;
+}
+#hud .town-settings .updates-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+#hud .town-settings .updates-heading h2 {
+  margin: 0;
+  font:
+    700 20px Fraunces,
+    Georgia,
+    serif;
+}
+#hud .town-settings .updates-badge {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #dce8cc;
+  color: #426448;
+  font-size: 10px;
+}
+#hud .town-settings .updates-card h3 {
+  margin: 13px 0 6px;
+  font-size: 14px;
+}
+#hud .town-settings .updates-card > p {
+  margin: 0 0 16px;
+  color: #716449;
+  font-size: 12px;
+}
+#hud .town-settings .updates-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#hud .town-settings .updates-actions a {
+  margin-right: auto;
+  color: #426448;
+  font-size: 12px;
+}
+#hud .town-settings .updates-check {
+  padding: 10px 12px;
+  border: 1px solid #d8c39e;
+  border-radius: 9px;
+  background: #fff8e7;
+  font-size: 12px;
+}
+#hud .town-settings .updates-actions button.action {
+  min-height: 39px;
+  padding: 10px 13px;
+  font-size: 13px;
+}
+#hud .town-settings .updates-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -5px 0 12px;
+  color: #716449;
+  font-size: 11px;
+}
+#hud .town-settings .updates-progress progress {
+  flex: 1;
+  min-width: 0;
+  accent-color: #426448;
+}
+#hud .town-settings .updates-card [hidden] {
+  display: none !important;
+}
+@media (max-width: 700px) {
+  #hud .town-settings .updates-card {
+    padding: 13px;
+  }
+  #hud .town-settings .updates-actions {
+    flex-wrap: wrap;
+  }
+}

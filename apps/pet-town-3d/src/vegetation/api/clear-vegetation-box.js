@@ -3,19 +3,22 @@
 import { vegetationState } from "../state.js";
 import { removeVegetationTree } from "../terrain-updates/remove-vegetation-tree.js";
 import { hideVegetationItem } from "../terrain-updates/hide-vegetation-item.js";
-export function clearVegetationBox(value13, value14, value15, value16, value17 = 0.4) {
+export function clearVegetationBox(
+  value13,
+  value14,
+  value15,
+  value16,
+  value17 = 0.4,
+  { transient = false } = {},
+) {
   let text2 = `b:${value13},${value14},${value15},${value16},${value17}`;
-  if (
-    (vegetationState.vegetationRuntimeState.clearLog.has(text2) ||
-      vegetationState.vegetationRuntimeState.clearLog.set(text2, {
-        box: [value13, value14, value15, value16, value17],
-        trees: true,
-        small: true,
-      }),
-    !vegetationState.vegetationRuntimeState.built)
-  ) {
-    return 0;
-  }
+  if (!transient && !vegetationState.vegetationRuntimeState.clearLog.has(text2))
+    vegetationState.vegetationRuntimeState.clearLog.set(text2, {
+      box: [value13, value14, value15, value16, value17],
+      trees: true,
+      small: true,
+    });
+  if (!vegetationState.vegetationRuntimeState.built) return 0;
   let index2 = 0;
   let callback = (value18, value19, value20) =>
     value18 >= value13 - value20 &&

@@ -138,6 +138,7 @@
             <label class="row"><span>Hide after</span><select id="completed-hide-delay"><option value="1">1 minute</option><option value="5">5 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">60 minutes</option></select></label>
           </div>
           <h2>General</h2>
+          <div class="group"><div class="row"><span>Welcome &amp; setup<small>Resume setup or revisit the companion tips.</small></span><button id="welcome-setup" class="secondary" type="button">Open setup</button></div></div>
           <div class="group">
             <label class="row"><span>Appearance</span><select id="settings-appearance"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
             <div class="row"><span>Also start with Herdr<small>Optional when you use Herdr alongside the standalone app.</small></span><button id="open-with-herdr" class="switch" type="button" role="switch" aria-checked="false" aria-label="Also start Pet Town when Herdr starts"></button></div>
@@ -157,6 +158,20 @@
           <h1>About Pet Town</h1>
           <p class="about">A local desktop village for your live coding agents.</p>
           <p class="hint">Version <span id="app-version">—</span> · Preferences, imported APNGs, and user pets stay under <code>~/.pet-town/</code> on this Mac. Ordinary village monitoring never sends prompts, project paths, or output to OpenAI. Voice sends delegated task context to the selected Pi model.</p>
+          <section class="update-preview" aria-label="App updates">
+            <h2>App updates</h2>
+            <div class="group update-card">
+              <div class="row update-status">
+                <span><strong data-update-title>Checking for updates…</strong><small data-update-copy role="status" aria-live="polite" aria-atomic="true">Checking for updates…</small></span>
+                <span class="update-badge" data-update-badge hidden>New release</span>
+              </div>
+              <div class="row update-progress" data-update-progress-row hidden><progress data-update-progress aria-label="Update download progress"></progress><span data-update-progress-copy></span></div>
+              <div class="row update-actions">
+                <a data-update-news href="https://github.com/abhishek944/pet-town/releases/latest" target="_blank" rel="noreferrer" hidden>What’s new ↗</a>
+                <span><button class="secondary" data-update-check type="button">Check for updates</button><button class="primary" data-update-download type="button" hidden>Download update</button><button class="primary" data-update-install type="button" hidden>Install &amp; Restart</button></span>
+              </div>
+            </div>
+          </section>
           <a href="https://github.com/abhishek944/pet-town" target="_blank" rel="noreferrer">View project on GitHub</a>
         </section>
         <p id="message" class="message" role="status" aria-live="polite"></p>

@@ -1,5 +1,18 @@
+import { playerPropFootprint } from "./player-prop-footprint.js";
+import { playerState } from "../state.js";
 export function playerWorldPlatformHeight(x, z, maxHeight) {
   let result = -1 / 0;
+  for (const collider of this.colliders) {
+    const top = collider.y1 ?? collider.maxY;
+    if (
+      !collider.noTop &&
+      top <= maxHeight &&
+      top > result &&
+      playerPropFootprint(collider, x, z, playerState.playerMovementSettings.halfW)
+    ) {
+      result = top;
+    }
+  }
   let list2 = this.ctx.props?.list;
   if (Array.isArray(list2)) {
     for (let index = 0; index < list2.length; index++) {
@@ -7,6 +20,8 @@ export function playerWorldPlatformHeight(x, z, maxHeight) {
       if (!result2) {
         continue;
       }
+      const roof = result2.roofHeight?.(x, z, maxHeight);
+      if (roof <= maxHeight && roof > result) result = roof;
       let result3 = Array.isArray(result2.decks)
         ? result2.decks
         : result2.deck && typeof result2.deck.heightAt != `function`

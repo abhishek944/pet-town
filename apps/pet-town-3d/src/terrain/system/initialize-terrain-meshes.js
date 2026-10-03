@@ -45,8 +45,8 @@ export function initializeTerrainMeshes(state) {
   });
   state.group = new THREE.Group();
   state.group.name = `terrain`;
-  state.chunkMeshes = Array(64).fill(null);
-  state.lipMeshes = Array(64).fill(null);
+  state.chunkMeshes = Array(state.chunksPerAxis ** 2).fill(null);
+  state.lipMeshes = Array(state.chunksPerAxis ** 2).fill(null);
   state.createChunkGeometry = (posValue) => {
     let geometry2 = new THREE.BufferGeometry();
     geometry2.setAttribute(`position`, new THREE.BufferAttribute(posValue.pos, 3));
@@ -64,8 +64,8 @@ export function initializeTerrainMeshes(state) {
     verts: 0,
     tris: 0,
   };
-  for (let index10 = 0; index10 < 8; index10++) {
-    for (let index11 = 0; index11 < 8; index11++) {
+  for (let index10 = 0; index10 < state.chunksPerAxis; index10++) {
+    for (let index11 = 0; index11 < state.chunksPerAxis; index11++) {
       state.rebuildChunk(index11, index10);
     }
   }

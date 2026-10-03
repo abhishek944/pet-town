@@ -94,6 +94,7 @@ export function bindBuildingInput() {
       if (
         isBuildingInputBlocked() ||
         isGameInputCaptured(buildingState.buildingContext, event) ||
+        event.target?.closest?.("[data-town-ui]") ||
         event.ctrlKey ||
         !(alwaysCycle || event.shiftKey || event.altKey)
       ) {

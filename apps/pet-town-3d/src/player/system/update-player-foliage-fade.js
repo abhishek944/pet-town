@@ -1,5 +1,6 @@
 /** Player spawn, context API, fixed-step orchestration, effects, render interpolation and demo controls. */
 import { playerState } from "../state.js";
+import { isCameraVegetationOccluded } from "../camera-visibility/is-camera-vegetation-occluded.js";
 export function updatePlayerFoliageFade(vegetationValue, value) {
   let vegetation2 = vegetationValue.vegetation;
   let cam2 = playerState.playerRuntime.cam;
@@ -9,12 +10,14 @@ export function updatePlayerFoliageFade(vegetationValue, value) {
   }
   playerState.playerFoliageFadeTarget.copy(playerState.playerRuntime.renderPos);
   playerState.playerFoliageFadeTarget.y += 0.9;
-  let canopyOnSegmentResult = playerState.playerRuntime.world.canopyOnSegment(
+  let vegetationOccluded = isCameraVegetationOccluded(
+    vegetationValue,
+    playerState.playerRuntime.world,
     vegetationValue.camera.position,
     playerState.playerFoliageFadeTarget,
   );
   try {
-    if (canopyOnSegmentResult) {
+    if (vegetationOccluded) {
       result.call(
         vegetation2,
         vegetationValue.camera.position,

@@ -130,6 +130,10 @@ export function getPropMaterials() {
   };
   options2.lamp.userData.noShadow = true;
   options2.glass.userData.noShadow = false;
+  options2.collectionGlass = options2.glass.clone();
+  Object.assign(options2.collectionGlass, { transparent: true, opacity: 0.32, depthWrite: false });
+  options2.collectionGlass.userData.noShadow = true;
+  options2.collectionWater = callback({ roughness: 0.16, metalness: 0.18 });
   options2.bounce = [
     options2.plaster,
     options2.wood,

@@ -1,0 +1,37 @@
+.pt-mayor-speech {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 22;
+  width: min(280px, calc(100vw - 40px));
+  box-sizing: border-box;
+  padding: 12px 15px;
+  border: 1px solid rgba(108, 117, 79, 0.2);
+  border-radius: 17px;
+  color: #3c4332;
+  background: rgba(255, 254, 240, 0.97);
+  box-shadow: 0 5px 22px rgba(39, 59, 25, 0.15);
+  font:
+    13px/1.45 "Nunito",
+    ui-rounded,
+    system-ui,
+    sans-serif;
+  pointer-events: none;
+}
+.pt-mayor-speech[hidden] {
+  display: none;
+}
+.pt-mayor-speech p {
+  margin: 5px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.pt-mayor-speech strong {
+  color: #687c47;
+  font-size: 12px;
+}
+.pt-mayor-speech[data-fixed="true"] {
+  left: auto;
+  top: 115px;
+  right: 20px;
+}

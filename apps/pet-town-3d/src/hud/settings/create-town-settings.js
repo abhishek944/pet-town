@@ -1,5 +1,5 @@
-import markup from "./settings.html?raw";
-import styles from "./settings.css?raw";
+import markup from "./settings-markup.js";
+import styles from "./settings-styles.js";
 import { installGameStyles } from "../../core/install-game-styles.js";
 import { bindCompanionControls } from "./companion-controls.js";
 import { showWorldResetConfirmation } from "../modals/show-world-reset-confirmation.js";
@@ -17,10 +17,13 @@ export function createTownSettings(context, close) {
     : bindCompanionControls(root, context);
   const tabs = [...root.querySelectorAll("[role=tab]")];
   let active = isPublicTown ? "world" : "companion";
+  let updateGuard = { locked: false, setLocked() {}, sync() {}, keepOpen() {} };
   const control = (name) => root.querySelector(`[data-control="${name}"]`);
   const mute = control("mute");
   const volume = control("volume");
-  root.querySelector("[data-a=close]").onclick = close;
+  root.querySelector("[data-a=close]").onclick = () => {
+    if (!updateGuard.locked) close();
+  };
   function selectTab(name, focus = false) {
     active = name;
     for (const tab of tabs) {
@@ -66,6 +69,7 @@ export function createTownSettings(context, close) {
     const level = Math.round((context.audio?.volume ?? 0) * 100);
     if (document.activeElement !== volume) volume.value = level;
     root.querySelector("[data-field=volume]").textContent = `${level}%`;
+    updateGuard.sync();
   }
   root.addEventListener("keydown", (event) => {
     event.stopPropagation();
@@ -87,6 +91,15 @@ export function createTownSettings(context, close) {
   window.addEventListener(
     "keydown",
     (event) => {
+      if (
+        updateGuard.locked &&
+        (hudState.hudRuntime.confirm ||
+          !["Tab", "ArrowLeft", "ArrowRight", "Home", "End"].includes(event.code))
+      ) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+      }
       if (
         root.hidden ||
         hudState.hudRuntime.confirm ||
@@ -124,11 +137,28 @@ export function createTownSettings(context, close) {
     },
     true,
   );
+  if (!isPublicTown) {
+    void Promise.all([
+      import("./settings-updates.js"),
+      import("./update-interaction-guard.js"),
+    ]).then(([updates, guard]) => {
+      updateGuard = guard.createUpdateInteractionGuard(
+        root,
+        () => selectTab("about", true),
+        render,
+      );
+      updates.startTownSettingsUpdates(root, context, updateGuard.setLocked);
+    });
+  }
   return {
     root,
     render,
     setOpen(open) {
       if (open === !root.hidden) return;
+      if (!open && updateGuard.locked) {
+        updateGuard.keepOpen();
+        return;
+      }
       root.hidden = !open;
       companions.setVisible?.(open && active === "companion");
       if (open) {

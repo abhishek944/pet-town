@@ -1,0 +1,191 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  color: #f5f5f7;
+  background: #202227;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+.settings-loading {
+  visibility: hidden;
+}
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+body {
+  background: #202227;
+  color: #f5f5f7;
+  font-size: 12px;
+}
+.toolbar {
+  height: 58px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border-bottom: 1px solid #ffffff12;
+  background: #292b30;
+}
+.toolbar button {
+  min-width: 76px;
+  height: 46px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #aeb1ba;
+  padding: 4px 16px;
+  display: grid;
+  place-items: center;
+  font: 600 10px/12px inherit;
+}
+.toolbar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.toolbar button[data-tab="pet"] svg,
+.toolbar button[data-tab="app"] svg {
+  fill: currentColor;
+  stroke: none;
+}
+.toolbar-glyph {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 23px;
+  border-radius: 7px;
+  font:
+    600 17px/17px -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "Segoe UI",
+    sans-serif;
+}
+.toolbar button[data-tab="pet"] .toolbar-glyph {
+  color: #ff82ad;
+  background: #ff6b9d35;
+}
+.toolbar button[data-tab="pet"] .toolbar-glyph svg {
+  width: 19px;
+  height: 19px;
+  filter: drop-shadow(0 0 3px #ff6b9d55);
+}
+.toolbar button[data-tab="studio"] .toolbar-glyph {
+  color: #b58cff;
+  background: #9b6cff24;
+}
+.toolbar button[data-tab="assistant"] .toolbar-glyph {
+  color: #45d6d0;
+  background: #35c8c222;
+}
+.toolbar button[data-tab="app"] .toolbar-glyph {
+  color: #ffad55;
+  background: #ff9b3924;
+}
+.toolbar button[data-tab="agents"] .toolbar-glyph {
+  color: #65d889;
+  background: #4dcc7922;
+}
+.toolbar button[data-tab="about"] .toolbar-glyph {
+  color: #66a9ff;
+  background: #4b96f522;
+}
+.toolbar button.selected {
+  background: #ffffff13;
+  color: white;
+}
+.toolbar button:focus-visible,
+.primary:focus-visible,
+.secondary:focus-visible,
+.switch:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid #5aaeff;
+  outline-offset: 2px;
+}
+.settings-layout {
+  height: calc(100% - 58px);
+  display: grid;
+  grid-template-columns: 248px 1fr;
+}
+.settings-layout:not([data-tab="pet"]) {
+  grid-template-columns: 1fr;
+}
+.preview-stage {
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid #ffffff12;
+  background: radial-gradient(circle at 50% 64%, #252a33, #111419 67%);
+}
+.preview-stage:after {
+  content: "";
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 65px;
+  height: 1px;
+  background: #ffffff14;
+}
+.preview-stage .pet {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 55px;
+  width: var(--preview-size, 148px);
+  height: var(--preview-size, 148px);
+  object-fit: contain;
+  opacity: var(--preview-opacity, 1);
+  transform: translateX(-50%);
+}
+.preview-stage[data-locomotion="true"] .pet {
+  animation: preview-walk var(--preview-walk-duration, 4s) ease-in-out infinite alternate;
+}
+.preview-stage[data-pause-on-hover="true"] .pet:hover {
+  animation-play-state: paused;
+}
+.preview-stage canvas.pet {
+  pointer-events: none;
+}
+@keyframes preview-walk {
+  from {
+    transform: translateX(calc(-50% - 24px));
+  }
+  to {
+    transform: translateX(calc(-50% + 24px));
+  }
+}
+.preview-caption {
+  position: absolute;
+  right: 0;
+  bottom: 28px;
+  left: 0;
+  color: #999da7;
+  font-size: 10px;
+  text-align: center;
+}
+.inspector {
+  position: relative;
+  min-width: 0;
+  padding: 14px 18px 48px;
+  overflow: hidden;
+}
+.preview-selectors {
+  height: 30px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 9px;
+}
+.preview-selectors label,
+.preview-selectors select {
+  width: 100%;
+}

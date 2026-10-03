@@ -4,5 +4,5 @@
   "description": "Preserve native commands for the existing trusted local desktop windows",
   "local": true,
   "windows": ["main", "settings", "orchestrator"],
-  "permissions": ["allow-desktop-commands"]
+  "permissions": ["allow-desktop-commands", "allow-open-onboarding"]
 }

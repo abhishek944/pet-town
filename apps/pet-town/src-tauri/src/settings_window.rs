@@ -105,6 +105,8 @@ pub fn open_internal(
     pet_id: Option<String>,
     initial_tab: Option<String>,
 ) -> Result<(), String> {
+    let updates = app.state::<crate::app_updates::AppUpdates>();
+    let _opening = updates.window_opening()?;
     let context = app
         .state::<SettingsSession>()
         .begin(app, pet_id, initial_tab);

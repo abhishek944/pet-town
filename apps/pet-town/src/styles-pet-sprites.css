@@ -1,0 +1,66 @@
+.pet-stack {
+  position: absolute;
+  z-index: 2;
+  /* Offset the image box by its transparent bottom padding so visible feet share a baseline. */
+  bottom: calc(7px - var(--foot-offset-y, 0px));
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.pet {
+  display: block;
+  width: calc(var(--citizen-size) * var(--clip-scale, 1));
+  height: auto;
+  opacity: var(--citizen-opacity, 1);
+  pointer-events: auto;
+  filter: drop-shadow(0 2px 1px rgb(0 0 0 / 0.35));
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+.pet[hidden] {
+  display: none;
+}
+.pet-freeze-source {
+  visibility: hidden;
+}
+.pet-freeze {
+  pointer-events: none;
+}
+
+/* The original image keeps its flex slot so labels and double-click targets stay
+   stable. Overlay the frozen canvas instead of adding a second sprite row. */
+.pet-stack > .pet-freeze {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.direction-right .pet.clip-mirror-safe.clip-source-right,
+.direction-left .pet.clip-mirror-safe.clip-source-left,
+.pet.clip-fixed-facing.clip-source-right {
+  transform: scaleX(1);
+}
+
+.direction-left .pet.clip-mirror-safe.clip-source-right,
+.direction-right .pet.clip-mirror-safe.clip-source-left,
+.pet.clip-fixed-facing.clip-source-left {
+  transform: scaleX(-1);
+}
+
+.pet:hover {
+  filter: drop-shadow(0 3px 2px rgb(0 0 0 / 0.42)) brightness(1.08);
+}
+
+.pet {
+  cursor: grab;
+}
+.pet:active {
+  cursor: grabbing;
+}

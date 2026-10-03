@@ -1,0 +1,13 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://boanto4hj7wb3"
+path="res://.godot/imported/shafts.glsl-f2ea5f07c53e02abf806a519f46d5945.res"
+
+[deps]
+
+source_file="res://shaders/post/shafts.glsl"
+dest_files=["res://.godot/imported/shafts.glsl-f2ea5f07c53e02abf806a519f46d5945.res"]
+
+[params]

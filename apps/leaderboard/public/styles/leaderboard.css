@@ -1,0 +1,152 @@
+.board {
+  background: #fffdf8;
+  border: 1px solid #e9e6da;
+  border-radius: 24px;
+  padding: 32px 34px 22px;
+  box-shadow: 0 12px 35px #534f3920;
+}
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.section-heading h2 {
+  font-size: 48px;
+  margin: 5px 0 0;
+}
+.section-heading p {
+  font-size: 13px;
+  color: #98958b;
+  margin-bottom: 8px;
+}
+.filters {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+.filter-group {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  background: #f4f2eb;
+  border-radius: 12px;
+  padding: 5px;
+}
+.filter-group button {
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #716f67;
+  padding: 10px 13px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.filter-group button.selected {
+  background: #3c5d4d;
+  color: white;
+  box-shadow: 0 2px 4px #3c5d4d35;
+}
+.period-label {
+  font-size: 12px;
+  color: #858177;
+}
+.period-label select {
+  margin-left: 8px;
+  background: white;
+  border: 1px solid #e3dfd3;
+  border-radius: 9px;
+  padding: 9px 12px;
+  color: #393d35;
+}
+.metric-description {
+  font-size: 13px;
+  color: #87857c;
+  margin: 16px 0 20px;
+}
+.table-wrap {
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 540px;
+}
+th {
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: "DM Mono", monospace;
+  color: #9b998f;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 13px 15px;
+  border-bottom: 1px solid #e9e7de;
+}
+th:last-child {
+  text-align: right;
+}
+td {
+  padding: 16px 15px;
+  border-bottom: 1px solid #efede5;
+}
+tr:last-child td {
+  border-bottom: 0;
+}
+.rank {
+  color: #bd8950;
+  font:
+    500 14px "DM Mono",
+    monospace;
+  width: 72px;
+}
+.member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.member img {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #d8e2d6;
+}
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.identity small {
+  color: #aaa69c;
+  font-size: 11px;
+  font-weight: 400;
+}
+.messages {
+  color: #807e74;
+  font:
+    13px "DM Mono",
+    monospace;
+}
+.score {
+  text-align: right;
+  font:
+    500 16px "DM Mono",
+    monospace;
+  color: #3c5d4d;
+}
+.empty {
+  text-align: center;
+  color: #99958b;
+  padding: 50px 12px;
+}
+.board-footer {
+  font-size: 11px;
+  color: #a19d92;
+  line-height: 1.5;
+  margin: 20px 0 0;
+}

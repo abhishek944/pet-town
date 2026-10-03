@@ -17,11 +17,17 @@ import { buildVillageCrateStack } from "./build-village-crate-stack.js";
 /** Prop lifecycle, collision and interaction API, terrain reseating, static batches and animated prop effects. */
 import { buildBarrelProp } from "../street-furniture/build-barrel-prop.js";
 import { buildCrateProp } from "../street-furniture/build-crate-prop.js";
+import { buildWorldAsset } from "./build-world-asset.js";
+import { captureOriginalPropBuild } from "./capture-original-prop-build.js";
 export function buildVillageLayoutItems(build) {
   build.layout.items.forEach((placement, placementIndex) => {
-    let tag = `i` + placementIndex;
+    let tag = build.tag ?? `i` + placementIndex;
+    const finishRecord = captureOriginalPropBuild(build, tag);
     try {
       switch (placement.type) {
+        case `asset`:
+          buildWorldAsset(build, placement, tag);
+          break;
         case `cottage`:
           buildVillageCottage(build, placement, tag);
           break;
@@ -151,5 +157,6 @@ export function buildVillageLayoutItems(build) {
     } catch (result19) {
       console.warn(`[props] failed to build`, placement.type, result19);
     }
+    finishRecord();
   });
 }

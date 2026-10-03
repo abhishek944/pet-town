@@ -2,24 +2,24 @@
 /** Editable terrain lifecycle, chunks, water masks, raycasting, custom blocks, block icons and lighting updates. */
 import * as THREE from "three";
 export function initializeTerrainWaterMask(state) {
-  state.heightPixels = new Float32Array(16384);
+  state.heightPixels = new Float32Array(state.size * state.size);
   state.heightTexture = new THREE.DataTexture(
     state.heightPixels,
-    128,
-    128,
+    state.size,
+    state.size,
     THREE.RedFormat,
     THREE.FloatType,
   );
   state.heightTexture.magFilter = THREE.NearestFilter;
   state.heightTexture.minFilter = THREE.NearestFilter;
   (() => {
-    for (let index12 = 0; index12 < 16384; index12++) {
+    for (let index12 = 0; index12 < state.size * state.size; index12++) {
       state.heightPixels[index12] = state.columnTops[index12];
     }
     state.heightTexture.needsUpdate = true;
   })();
-  state.waterMaskPixels = new Uint8Array(16384);
-  for (let index13 = 0; index13 < 16384; index13++) {
+  state.waterMaskPixels = new Uint8Array(state.size * state.size);
+  for (let index13 = 0; index13 < state.size * state.size; index13++) {
     state.waterMaskPixels[index13] =
       state.columnTops[index13] < 7.62 &&
       (state.island.flags[index13] & 3 || state.island.landMask[index13] < 0.55)
@@ -28,8 +28,8 @@ export function initializeTerrainWaterMask(state) {
   }
   state.waterMaskTexture = new THREE.DataTexture(
     state.waterMaskPixels,
-    128,
-    128,
+    state.size,
+    state.size,
     THREE.RedFormat,
     THREE.UnsignedByteType,
   );
@@ -40,7 +40,7 @@ export function initializeTerrainWaterMask(state) {
     let values2 = [[value27, value28]];
     for (; values2.length;) {
       let [result47, result48] = values2.pop();
-      let result49 = result48 * 128 + result47;
+      let result49 = result48 * state.size + result47;
       if (!(state.waterMaskPixels[result49] || state.columnTops[result49] >= 7.62)) {
         state.waterMaskPixels[result49] = 255;
         for (let [result50, result51] of [
@@ -51,7 +51,7 @@ export function initializeTerrainWaterMask(state) {
         ]) {
           let result52 = result47 + result50;
           let result53 = result48 + result51;
-          if (result52 >= 0 && result53 >= 0 && result52 < 128 && result53 < 128) {
+          if (result52 >= 0 && result53 >= 0 && result52 < state.size && result53 < state.size) {
             values2.push([result52, result53]);
           }
         }
@@ -59,7 +59,7 @@ export function initializeTerrainWaterMask(state) {
     }
   };
   state.updateWaterMask = (value29, value30) => {
-    let result54 = value30 * 128 + value29;
+    let result54 = value30 * state.size + value29;
     if (state.columnTops[result54] >= 7.62) {
       if (state.waterMaskPixels[result54]) {
         state.waterMaskPixels[result54] = 0;
@@ -79,9 +79,9 @@ export function initializeTerrainWaterMask(state) {
       if (
         result57 >= 0 &&
         result58 >= 0 &&
-        result57 < 128 &&
-        result58 < 128 &&
-        state.waterMaskPixels[result58 * 128 + result57]
+        result57 < state.size &&
+        result58 < state.size &&
+        state.waterMaskPixels[result58 * state.size + result57]
       ) {
         enabled3 = true;
       }

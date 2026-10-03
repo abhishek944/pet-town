@@ -8,21 +8,21 @@ import { updateHudHotbar } from "../updates/update-hud-hotbar.js";
 import { updateInteractionPrompt } from "../updates/update-interaction-prompt.js";
 import { updateHudReticle } from "../updates/update-hud-reticle.js";
 export function updateHud(deltaTime, context) {
-  if (hudState.hudRuntime.splash) {
-    hudState.hudRuntime.splashT += deltaTime;
-    hudState.hudRuntime.frames++;
-    let clampHudUnitResult = clampHudUnit(
-      Math.min(hudState.hudRuntime.frames / 20, hudState.hudRuntime.splashT / 1.4),
-    );
-    hudState.hudElements.splashBar.style.width = (clampHudUnitResult * 100).toFixed(1) + `%`;
-    hudState.hudElements.splashBar.parentElement.setAttribute(
-      "aria-valuenow",
-      String(Math.round(clampHudUnitResult * 100)),
-    );
-    if (clampHudUnitResult >= 1 && !hudState.hudElements.splash.classList.contains(`ready`)) {
-      hudState.hudElements.splash.classList.add(`ready`);
-      hudState.hudElements.splashBar.parentElement.setAttribute("aria-hidden", "true");
-    }
+  const splash = hudState.hudElements.splash;
+  const persistence = context.building?.persistence;
+  if (
+    hudState.hudRuntime.splash &&
+    !splash.classList.contains("ready") &&
+    context.ready &&
+    context.hasRenderedFrame &&
+    (!persistence?.on || persistence.loaded)
+  ) {
+    splash.classList.add("ready");
+    splash.setAttribute("aria-busy", "false");
+    splash.querySelector(".town-loading").hidden = true;
+    splash.querySelector(".town-start").disabled = false;
+    splash.querySelector(".public-boot-links")?.remove();
+    dispatchEvent(new Event("pet-town:playable"));
   }
   if (hudState.hudRuntime.capture > 0 && --hudState.hudRuntime.capture === 0) {
     queueMicrotask(capturePhoto);

@@ -1,0 +1,67 @@
+.studio-review {
+  width: min(360px, 100%);
+  margin-top: 9px;
+}
+.studio-review > figure {
+  display: grid;
+  grid-template-rows: auto 240px;
+  margin: 0;
+}
+.studio-review > figure > figcaption {
+  margin-bottom: 4px;
+  color: #9296a0;
+  font-size: 9px;
+}
+.studio-review > figure > img,
+.studio-review-empty {
+  grid-area: 2 / 1;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #ffffff17;
+  border-radius: 8px;
+  background: repeating-conic-gradient(#ffffff08 0 25%, transparent 0 50%) 50%/12px 12px;
+}
+.studio-review > figure > img {
+  object-fit: contain;
+}
+.studio-review-empty {
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  color: #7f838d;
+  font-size: 10px;
+  text-align: center;
+}
+.studio-panel button[data-loading="true"]::before {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  content: "";
+  animation: studio-spin 700ms linear infinite;
+}
+.studio-review > figure > img:not([hidden]) ~ .studio-review-empty {
+  display: none;
+}
+.studio-mappings {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+.studio-mappings label {
+  display: block;
+}
+.studio-assign {
+  display: block;
+  margin: 12px 0;
+}
+.studio-assign input {
+  width: auto;
+  margin: 0 6px 0 0;
+}
+.studio-save {
+  display: block;
+  margin: 10px 0 0 auto;
+}

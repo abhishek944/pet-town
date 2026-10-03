@@ -65,5 +65,6 @@ export function updateAgentPresentation(record, context, dt, input, step) {
     onWater = true;
   }
   character.placeShadow(position.x, groundY, position.z, position.y, onWater);
+  if (body.diving && body.waterDepth > 1.1) character.shadow.visible = false;
   emitControlledAnimationEvents(record, events);
 }

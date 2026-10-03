@@ -16,6 +16,10 @@ export class PetStudio {
     window.addEventListener("hashchange", () => this.syncRoute()); window.addEventListener("pet-studio-create-assistant-pet", () => this.status(this.workflow.startAssistantPet(this.draftId, this.busy, () => this.wizard.reset())));
     bindStudioValidationClear(); this.workflow.sync(this.draftId); this.syncRoute(); this.syncControls();
   }
+  prepareInstallBlockReason(): string | null {
+    if (this.busy) return "Pet Studio is busy; wait for its current action to finish.";
+    return this.draftId ? "Save or cancel your Pet Studio draft before installing." : null;
+  }
   private syncRoute(): void {
     if (location.hash === "#studio-orchestrator") location.hash = "studio";
   }

@@ -1,0 +1,52 @@
+.shadow {
+  position: absolute;
+  z-index: 1;
+  bottom: 4px;
+  left: 50%;
+  width: var(--citizen-size);
+  height: 5px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: rgb(0 0 0 / 0.25);
+  filter: blur(1.5px);
+  transform: translateX(-50%) scaleX(0.68);
+}
+
+.project {
+  z-index: 4;
+  box-sizing: border-box;
+  max-width: 104px;
+  padding: 2px 6px;
+  overflow: hidden;
+  pointer-events: auto;
+  border: 1px solid rgb(255 255 255 / 0.24);
+  border-radius: 8px;
+  color: rgb(255 255 255 / 0.98);
+  background: rgb(18 23 32 / 0.82);
+  box-shadow: 0 2px 7px rgb(0 0 0 / 0.3);
+  font-size: calc(9px * var(--label-scale, 1));
+  font-weight: 650;
+  line-height: 13px;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.72);
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  transform: translateY(var(--label-offset-y, 0));
+}
+
+.citizen[data-label-visibility="hidden"] .project {
+  display: none;
+}
+.citizen[data-label-visibility="hover"] .project,
+.citizen[data-label-overlap-hidden="true"] .project {
+  opacity: 0;
+  pointer-events: none;
+}
+.citizen[data-label-visibility="hover"]:hover .project,
+.citizen[data-label-overlap-hidden="true"]:hover .project {
+  opacity: 1;
+  pointer-events: auto;
+}
+.retiring {
+  opacity: 0;
+}

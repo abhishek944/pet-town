@@ -5,7 +5,15 @@ import { terrainState } from "../state.js";
 import { createTerrainBlockIcon } from "../textures/icons/create-terrain-block-icon.js";
 export function exposeTerrainApi(state) {
   state.context.terrain = {
-    size: 128,
+    size: state.size,
+    expansion: state.island.expansion,
+    ocean: state.island.ocean,
+    bounds: {
+      minX: -state.half,
+      minZ: -state.half,
+      maxX: state.half,
+      maxZ: state.half,
+    },
     height: 40,
     chunkSize: 16,
     waterLevel: terrainState.terrainWaterLevel,
@@ -32,7 +40,7 @@ export function exposeTerrainApi(state) {
       let callback7Result8 = state.toGridCoordinate(value69);
       return (
         !state.isGridInBounds(callback7Result7, callback7Result8) ||
-        state.waterMaskPixels[callback7Result8 * 128 + callback7Result7] > 0
+        state.waterMaskPixels[callback7Result8 * state.size + callback7Result7] > 0
       );
     },
     isBelowWaterLevel: (value70, value71) =>

@@ -73,6 +73,15 @@ fn publish(
     let path = super::record_path(&directory, source, &session_key);
     fs::create_dir_all(&directory).map_err(|_| "could not create adapter registry".to_string())?;
     let tombstone = path.with_extension("ended");
+    let hosted_owner_key = super::herdr_host::owner_key(session_id);
+    if source == "codex" {
+        crate::codex_usage::register(
+            session_id,
+            &format!("codex:{session_key}"),
+            hosted_owner_key.as_deref(),
+            &payload,
+        );
+    }
     let Some(state) = super::lifecycle::state(source, event, &payload) else {
         super::write_private_atomic(&tombstone, b"ended")?;
         let _ = fs::remove_file(path);
@@ -91,7 +100,7 @@ fn publish(
         state: state.to_string(),
         label: super::safe_label(&payload, source, &super::opaque_key(session_id)),
         observed_at_seconds: super::current_time_seconds(),
-        hosted_owner_key: super::herdr_host::owner_key(session_id),
+        hosted_owner_key,
         focus_app: super::focus_hint::focus_application(source),
         codex_thread_id: (source == "codex")
             .then(|| super::focus_hint::validated_codex_thread(session_id))

@@ -1,0 +1,36 @@
+@media (max-height: 705px) {
+  .town-list-panel {
+    top: 145px;
+    bottom: 112px;
+    display: flex;
+    flex-direction: column;
+  }
+  .town-picker-head,
+  .town-picker-foot {
+    flex-shrink: 0;
+  }
+  .town-roster {
+    min-height: 0;
+    flex: 1;
+    max-height: none;
+  }
+  .town-empty {
+    min-height: 0;
+    overflow: auto;
+    padding: 13px 18px;
+  }
+  .town-empty > span {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  .town-dismiss {
+    width: 44px;
+  }
+  .town-picker-foot {
+    padding: 5px 12px;
+  }
+}
+.town-companions[data-under-dialog="true"] {
+  z-index: 5;
+}

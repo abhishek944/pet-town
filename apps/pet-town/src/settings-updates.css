@@ -1,0 +1,76 @@
+.update-preview {
+  margin-top: 20px;
+}
+.update-preview > h2 {
+  margin: 0 0 8px;
+  color: #a4a8b1;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+}
+.update-card .update-status {
+  min-height: 67px;
+  padding: 10px 11px;
+}
+.update-status strong {
+  display: block;
+  font-size: 13px;
+}
+.update-status small {
+  max-width: none;
+  margin-top: 5px;
+}
+.update-badge {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #173d2b;
+  color: #7ee2aa;
+  font-size: 10px;
+}
+.update-progress {
+  min-height: 36px;
+  gap: 10px;
+  color: #aeb1ba;
+  font-size: 10px;
+}
+.update-progress progress {
+  width: min(210px, 45%);
+  accent-color: #0a84ff;
+}
+.update-actions {
+  min-height: 49px;
+}
+.update-actions > a {
+  margin-right: auto;
+}
+.update-actions > span {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.update-actions .primary {
+  margin-left: 0;
+}
+.update-progress[hidden],
+.update-badge[hidden],
+.update-actions [hidden] {
+  display: none;
+}
+:root[data-theme="light"] .update-preview > h2 {
+  color: #50535a;
+}
+:root[data-theme="light"] .update-badge {
+  background: #dcf3e5;
+  color: #185c36;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .update-preview > h2 {
+    color: #50535a;
+  }
+  :root:not([data-theme="dark"]) .update-badge {
+    background: #dcf3e5;
+    color: #185c36;
+  }
+}

@@ -1,0 +1,41 @@
+<div
+  id="town-panel-about"
+  role="tabpanel"
+  aria-labelledby="town-tab-about"
+  data-panel="about"
+  hidden
+>
+  <div class="app-info">
+    <h2>About Pet Town</h2>
+    <p>Your desktop pets and 3D Town, updated together.</p>
+    <section class="updates-card" aria-label="App updates">
+      <div class="updates-heading">
+        <h2>App updates</h2>
+        <span class="updates-badge" data-update-badge hidden>New release</span>
+      </div>
+      <h3 data-update-title>Checking for updates…</h3>
+      <p data-update-copy role="status" aria-live="polite" aria-atomic="true">
+        Checking for updates…
+      </p>
+      <div class="updates-progress" data-update-progress-row hidden>
+        <progress data-update-progress aria-label="Update download progress"></progress>
+        <span data-update-progress-copy></span>
+      </div>
+      <div class="updates-actions">
+        <a
+          data-update-news
+          href="https://github.com/abhishek944/pet-town/releases/latest"
+          target="_blank"
+          rel="noreferrer"
+          hidden
+          >What’s new ↗</a
+        >
+        <button type="button" class="updates-check" data-update-check>Check for updates</button>
+        <button type="button" class="action" data-update-download hidden>Download update</button>
+        <button type="button" class="action" data-update-install hidden>
+          Install &amp; Restart
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

@@ -37,6 +37,14 @@ pub fn relay(source: &str, event: &str, install_epoch: Option<&str>) -> Result<(
             safe.insert(name.to_string(), Value::String(value.to_string()));
         }
     }
+    if source == "codex" {
+        // Private hook-worker fields only; ingestion validates before registration.
+        for name in ["model", "transcript_path"] {
+            if let Some(value) = super::payload_string(&payload, &[name]) {
+                safe.insert(name.to_string(), Value::String(value.to_string()));
+            }
+        }
+    }
     let bytes = serde_json::to_vec(&Value::Object(safe))
         .map_err(|_| "could not sanitize adapter event".to_string())?;
     let binary = std::env::current_exe()

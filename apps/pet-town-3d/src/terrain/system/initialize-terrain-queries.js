@@ -3,23 +3,27 @@
 
 import { terrainState } from "../state.js";
 export function initializeTerrainQueries(state) {
-  state.toGridCoordinate = (coordinate) => Math.floor(coordinate + 64);
-  state.isGridInBounds = (x, z) => x >= 0 && z >= 0 && x < 128 && z < 128;
+  state.toGridCoordinate = (coordinate) => Math.floor(coordinate + state.half);
+  state.isGridInBounds = (x, z) => x >= 0 && z >= 0 && x < state.size && z < state.size;
   state.gridBlockAt = (x, y, z) =>
-    y < 0 || y >= 40 || !state.isGridInBounds(x, z) ? 0 : state.blocks[(z * 128 + x) * 40 + y];
+    y < 0 || y >= 40 || !state.isGridInBounds(x, z)
+      ? 0
+      : state.blocks[(z * state.size + x) * 40 + y];
   state.blockAt = (x, y, z) =>
     state.gridBlockAt(state.toGridCoordinate(x), Math.floor(y), state.toGridCoordinate(z));
-  state.gridTopAt = (x, z) => (state.isGridInBounds(x, z) ? state.columnTops[z * 128 + x] : 0);
+  state.gridTopAt = (x, z) =>
+    state.isGridInBounds(x, z) ? state.columnTops[z * state.size + x] : 0;
   state.topY = (x, z) => state.gridTopAt(state.toGridCoordinate(x), state.toGridCoordinate(z));
   state.heightAt = (x, z) => {
-    let gridX = x + 64 - 0.5;
-    let gridZ = z + 64 - 0.5;
+    let gridX = x + state.half - 0.5;
+    let gridZ = z + state.half - 0.5;
     let cellX = Math.floor(gridX);
     let cellZ = Math.floor(gridZ);
     let blendX = gridX - cellX;
     let blendZ = gridZ - cellZ;
     let clampCell = (cell, size) => (cell < 0 ? 0 : cell > size - 1 ? size - 1 : cell);
-    let columnHeight = (x, z) => state.columnTops[clampCell(z, 128) * 128 + clampCell(x, 128)];
+    let columnHeight = (x, z) =>
+      state.columnTops[clampCell(z, state.size) * state.size + clampCell(x, state.size)];
     let height00 = columnHeight(cellX, cellZ);
     let height10 = columnHeight(cellX + 1, cellZ);
     let height01 = columnHeight(cellX, cellZ + 1);
@@ -38,7 +42,7 @@ export function initializeTerrainQueries(state) {
     let cellX = state.toGridCoordinate(x);
     let cellZ = state.toGridCoordinate(z);
     return state.isGridInBounds(cellX, cellZ)
-      ? terrainState.terrainBiomeNames[state.island.biome[cellZ * 128 + cellX]]
+      ? terrainState.terrainBiomeNames[state.island.biome[cellZ * state.size + cellX]]
       : `ocean`;
   };
   state.surfaceAt = (x, z) => {

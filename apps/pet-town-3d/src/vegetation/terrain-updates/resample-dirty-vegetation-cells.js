@@ -1,7 +1,6 @@
 /** Vegetation rebuilds, terrain subscriptions, dirty-cell resampling and item removal. */
 import { vegetationState } from "../state.js";
-import { removeVegetationTree } from "./remove-vegetation-tree.js";
-import { hideVegetationItem } from "./hide-vegetation-item.js";
+import { retainTerrainVegetation, restoreTerrainVegetation } from "./retain-terrain-vegetation.js";
 import { createVegetationClearingPredicate } from "../placement/create-vegetation-clearing-predicate.js";
 import { collectVegetationClearings } from "../placement/collect-vegetation-clearings.js";
 import { vegetationHash2d } from "../random/vegetation-hash2d.js";
@@ -35,19 +34,29 @@ export function resampleDirtyVegetationCells() {
         if (!result7.hidden) {
           if (result7.owner) {
             if (result7.owner.cell === result2) {
-              removeVegetationTree(result7.owner, true);
+              retainTerrainVegetation(result7, result2, {
+                h: result3,
+                water: result4,
+                top: result5,
+              });
             } else {
               if (result7.field.name === `blob`) {
-                result7.field.hide(result7);
+                retainTerrainVegetation(result7, result2, {
+                  h: result3,
+                  water: result4,
+                  top: result5,
+                });
               }
             }
           } else {
-            hideVegetationItem(result7);
+            retainTerrainVegetation(result7, result2, { h: result3, water: result4, top: result5 });
           }
         }
       }
     }
+    const restored = restoreTerrainVegetation(result2);
     if (
+      !restored &&
       vegetationState.vegetationRuntimeState.dyn &&
       ground2.valid[result2] &&
       Number.isNaN(ground2.water[result2]) &&

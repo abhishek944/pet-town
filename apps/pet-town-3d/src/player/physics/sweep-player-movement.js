@@ -34,7 +34,11 @@ export function sweepPlayerMovement(velocity, deltaTime, position) {
     if (this._sweep(result16, result17)) {
       let result19 = result17 - ((result16 === 0 ? position.x : position.z) - result18);
       if (canStep && Math.abs(result19) > 1e-5 && this._tryStep(result16, result19, stepHeight)) {
-        if (this.swimming || this.waterExitT > 0) {
+        if (
+          (this.swimming || this.waterExitT > 0) &&
+          (!Number.isFinite(this.waterY) ||
+            position.y >= this.waterY - playerState.playerMovementSettings.swimExit)
+        ) {
           this.swimming = false;
           velocity.y = Math.max(velocity.y, 0);
         }

@@ -1,0 +1,149 @@
+.step-5 .intro {
+  position: absolute;
+  top: 116px;
+  left: 100px;
+  right: 100px;
+  text-align: center;
+}
+.step-5 .intro h1 {
+  font-size: 36px;
+  letter-spacing: -1px;
+  max-width: none;
+}
+.step-5 .intro p {
+  font-size: 15px;
+  max-width: 510px;
+  margin: 16px auto;
+}
+.step-5 .proof {
+  position: absolute;
+  left: 164px;
+  top: 266px;
+  width: 552px;
+  min-height: 245px;
+  padding: 27px;
+  border: 1px solid #d3dfcc;
+  border-radius: 18px;
+  background: #fffaf1;
+  text-align: center;
+}
+.step-5 .proof img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+.step-5 .proof h2 {
+  font-size: 20px;
+  margin: 8px 0 0;
+  letter-spacing: -0.4px;
+}
+.step-5 .proof p {
+  font-size: 13px;
+  margin: 11px auto;
+  max-width: 420px;
+}
+.step-5 .proof .primary {
+  margin-top: 12px;
+}
+.step-5 .own {
+  position: absolute;
+  top: 553px;
+  left: 164px;
+  right: 164px;
+  text-align: center;
+  font-size: 12px;
+  color: #7a8d78;
+}
+.step-5 .own button {
+  color: #147d78;
+  font-weight: 600;
+}
+.step-5 .usage {
+  font-size: 10px !important;
+  color: #7c8e7b !important;
+  margin-top: 12px !important;
+}
+.step-5 .next {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  bottom: 61px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.step-5 .tworoutes {
+  display: none;
+}
+.step-5 .state-panel {
+  display: none;
+  position: absolute;
+  left: 173px;
+  top: 264px;
+  width: 534px;
+  min-height: 268px;
+  background: #fffaf1;
+  border: 1px solid #d2dec9;
+  border-radius: 18px;
+  padding: 24px;
+  text-align: center;
+}
+.step-5 .state-panel img {
+  width: 115px;
+  height: 115px;
+  object-fit: contain;
+}
+.step-5 .state-panel h2 {
+  font-size: 20px;
+  margin: 11px 0;
+}
+.step-5 .state-panel p {
+  font-size: 13px;
+  max-width: 420px;
+  margin: 12px auto;
+}
+.step-5 .tag {
+  display: inline-block;
+  font-size: 10px;
+  color: #647e6c;
+  border: 1px solid #d0ddc7;
+  border-radius: 6px;
+  padding: 5px 9px;
+}
+.step-5.state-mode .proof,
+.step-5.state-mode .own {
+  display: none;
+}
+.step-5.state-mode .state-panel {
+  display: block;
+}
+.step-5.state-mode .intro p {
+  max-width: 550px;
+}
+.step-5 .stage-extra {
+  font-size: 11px !important;
+}
+.step-5 .proof {
+  padding: 20px 25px;
+}
+.step-5 .proof img {
+  width: 64px;
+  height: 64px;
+}
+.step-5 .proof h2 {
+  margin-top: 5px;
+}
+.step-5 .proof p {
+  margin: 9px auto;
+  line-height: 1.45;
+}
+.step-5 .proof .primary {
+  margin-top: 6px;
+  padding: 12px 20px;
+}
+.step-5 .proof .usage {
+  margin-top: 10px !important;
+}
+.step-5 .own {
+  top: 558px;
+}

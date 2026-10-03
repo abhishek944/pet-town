@@ -3,5 +3,5 @@
   "identifier": "main-window",
   "description": "Minimal permissions for the local Herdr village window",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": ["core:default", "allow-onboarding-presence"]
 }

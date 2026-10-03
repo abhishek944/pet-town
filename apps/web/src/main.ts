@@ -1,4 +1,6 @@
 import { characters } from "./characters";
+import { initializeMotionPreviews } from "./motion-previews";
+import { initializeGameplayHero } from "./gameplay-hero";
 
 type NavigatorWithHints = Navigator & {
   userAgentData?: {
@@ -113,18 +115,20 @@ async function preferredMacDownload(): Promise<{ href: string; label: string; hi
   const intel = values?.architecture?.toLowerCase().includes("x86") ?? false;
   return intel
     ? {
-        href: "https://github.com/abhishek944/pet-town/releases/download/v1.2.0/Pet-Town-macOS-Intel.dmg",
+        href: "https://github.com/abhishek944/pet-town/releases/latest/download/Pet-Town-macOS-Intel.dmg",
         label: "Download for Intel Mac",
         hint: "Intel Mac detected · Apple Silicon option available",
       }
     : {
-        href: "https://github.com/abhishek944/pet-town/releases/download/v1.2.0/Pet-Town-macOS-Apple-Silicon.dmg",
+        href: "https://github.com/abhishek944/pet-town/releases/latest/download/Pet-Town-macOS-Apple-Silicon.dmg",
         label: "Download for macOS",
         hint: "Apple Silicon recommended · Intel option available",
       };
 }
 
 void initializeCharacters();
+initializeMotionPreviews();
+initializeGameplayHero();
 void preferredMacDownload().then(({ href, label, hint }) => {
   document.querySelectorAll<HTMLAnchorElement>(".js-primary-download").forEach((link) => {
     link.href = href;

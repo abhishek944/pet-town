@@ -1,4 +1,5 @@
 import { playerState } from "../state.js";
+import { sweepPlayerPropVertical } from "./sweep-player-prop-vertical.js";
 export function playerPhysicsSweep(axis, distance) {
   if (distance === 0) {
     return false;
@@ -21,8 +22,8 @@ export function playerPhysicsSweep(axis, distance) {
     values3[index] = Math.floor(result + playerState.playerCollisionEpsilon * 0.1);
     values4[index] = Math.floor(result2 - playerState.playerCollisionEpsilon * 0.1);
   }
-  let value2Value = distance;
-  let enabled = false;
+  let value2Value = axis === 1 ? sweepPlayerPropVertical(this, distance) : distance;
+  let enabled = value2Value !== distance;
   for (let result3 = values3[0]; result3 <= values4[0]; result3++) {
     for (let result4 = values3[1]; result4 <= values4[1]; result4++) {
       for (let result5 = values3[2]; result5 <= values4[2]; result5++) {

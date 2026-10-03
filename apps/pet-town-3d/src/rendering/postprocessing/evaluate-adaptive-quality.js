@@ -11,7 +11,9 @@ export function evaluateAdaptiveQuality(now, deltaTime) {
   let name2 = renderingState.postprocessingState.tier.name;
   if (
     ((renderingState.postprocessingState.slowTime =
-      frameEMA2 > 1 / 47
+      // Aim for smooth 60 Hz movement; the old threshold could leave the
+      // game indefinitely at 48-50 FPS without reducing render cost.
+      frameEMA2 > 1 / 55
         ? renderingState.postprocessingState.slowTime + result
         : Math.max(0, renderingState.postprocessingState.slowTime - result * 0.5)),
     renderingState.postprocessingState.warm > 2.5 &&
@@ -62,7 +64,7 @@ export function evaluateAdaptiveQuality(now, deltaTime) {
   }
   if (
     ((renderingState.postprocessingState.fastTime =
-      frameEMA2 < 1 / 55 ? renderingState.postprocessingState.fastTime + result : 0),
+      frameEMA2 < 1 / 59 ? renderingState.postprocessingState.fastTime + result : 0),
     name2 === renderingState.postprocessingState.maxTier)
   ) {
     return;

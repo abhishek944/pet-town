@@ -1,3 +1,4 @@
+import { animateBirdWing } from "../flight/animate-bird-wing.js";
 import { creaturesState } from "../state.js";
 import { emitNearbyCreatureParticles } from "../world/emit-nearby-creature-particles.js";
 export function animateCreatureAppendages(
@@ -69,6 +70,10 @@ export function animateCreatureAppendages(
   for (let result31 of parts.wings) {
     let obj3 = result31.obj;
     obj3.rotation.copy(result31.r0);
+    if (result31.bird && species.flight) {
+      animateBirdWing.call(this, result31, time, isFlying, species.flight, deltaTime);
+      continue;
+    }
     let side2 = result31.side;
     if (gait === `fly`) {
       if (this.flyH < 0.1 && !isFlying) {

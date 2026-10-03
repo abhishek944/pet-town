@@ -17,11 +17,15 @@ export function buildVillageCampfire(build, placement, tag) {
   let campfirePropResult = buildCampfireProp(build.builder, build.random);
   build.registerEntry(callback2Result5, `Campfire`, 1);
   build.registerMetadata(callback2Result5, campfirePropResult);
-  if (!propsState.propsRuntime.fires.length) {
+  {
     callback2Result5.fire = new CampfireEmitter(
       new THREE.Vector3(placement.x, placement.y + 0.08, placement.z),
-      propsState.propsRuntime.fireLight,
-      3,
+      Object.hasOwn(build, "fireLight")
+        ? build.fireLight
+        : propsState.propsRuntime.fires.length
+          ? null
+          : propsState.propsRuntime.fireLight,
+      3 + (build.fireIndex ?? propsState.propsRuntime.fires.length),
       propsState.propsRuntime.group,
     );
     propsState.propsRuntime.fires.push(callback2Result5.fire);

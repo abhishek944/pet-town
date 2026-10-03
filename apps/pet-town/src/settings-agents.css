@@ -1,0 +1,183 @@
+.settings-layout:not([data-tab="pet"]) .agents-panel {
+  top: 16px;
+  right: 28px;
+  bottom: 18px;
+  left: 28px;
+}
+.agents-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  overflow: hidden;
+}
+.agents-panel h1 {
+  font-size: 17px;
+  line-height: 20px;
+  margin-bottom: 4px;
+}
+.agents-intro {
+  margin: 0 0 19px;
+  color: #a4a8b1;
+  font-size: 10px;
+}
+.adapter-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 8px;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.adapter-card {
+  min-height: 84px;
+  border: 1px solid #ffffff16;
+  border-radius: 10px;
+  background: #ffffff07;
+  padding: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.adapter-card-open {
+  all: unset;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  color: inherit;
+  text-align: inherit;
+}
+.adapter-card-open:focus-visible {
+  border-radius: 7px;
+  outline: 2px solid #5aaeff;
+  outline-offset: 2px;
+}
+.adapter-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.adapter-logo {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 8px;
+  background: #363941;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+.adapter-identity {
+  min-width: 0;
+}
+.adapter-name {
+  display: block;
+  font-size: 11px;
+  font-weight: 650;
+}
+.adapter-mechanism {
+  display: block;
+  color: #9296a0;
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adapter-status {
+  margin-left: auto;
+  border-radius: 999px;
+  padding: 3px 7px;
+  background: #3a3030;
+  color: #f1aaa3;
+  font-size: 8px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.adapter-status[data-status="installed"] {
+  background: #173d2b;
+  color: #7ee2aa;
+}
+.adapter-status[data-status="verificationRequired"] {
+  background: #453820;
+  color: #e8c879;
+}
+.adapter-status[data-status="builtIn"] {
+  background: #263b55;
+  color: #8bc0ff;
+}
+.adapter-capabilities {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.adapter-capability {
+  border: 1px solid #ffffff14;
+  border-radius: 999px;
+  padding: 2px 6px;
+  color: #b8bbc4;
+  font-size: 8px;
+}
+.adapter-action {
+  align-self: flex-start;
+  padding: 6px 11px;
+  margin: 0;
+}
+.adapter-action:focus,
+.adapter-back:focus,
+.restored-focus {
+  outline: 2px solid #5aaeff;
+  outline-offset: 2px;
+}
+.adapter-cards[aria-busy="true"] {
+  opacity: 0.55;
+}
+.adapter-card-error {
+  grid-column: 1/-1;
+  color: #ff9b93;
+}
+.adapter-detail-view {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+.adapter-detail-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.panel .adapter-detail-heading h2 {
+  margin: 0;
+  color: inherit;
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.adapter-back {
+  margin: 0;
+}
+.adapter-detail-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #ffffff18;
+  border-radius: 9px;
+  background: #ffffff08;
+  padding: 11px;
+}
+.adapter-detail-row .adapter-status {
+  grid-column: 2;
+  margin: 0;
+  justify-self: end;
+}
+.adapter-detail-row .adapter-action {
+  grid-column: 2;
+}
+.adapter-detail-copy {
+  display: block;
+  margin-top: 3px;
+  color: #9296a0;
+  font-size: 9px;
+}

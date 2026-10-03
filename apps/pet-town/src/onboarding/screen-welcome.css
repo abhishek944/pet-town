@@ -1,0 +1,90 @@
+.step-0 .copy {
+  position: absolute;
+  top: 339px;
+  left: 170px;
+  width: 540px;
+  text-align: center;
+}
+.step-0 p {
+  margin-left: auto;
+  margin-right: auto;
+}
+.step-0 .actions {
+  justify-content: center;
+}
+.step-0 .companion {
+  left: 310px;
+  top: 66px;
+  width: 260px;
+  height: 242px;
+}
+.step-0 .scene {
+  top: 22px;
+  left: 150px;
+}
+.step-0 .desktop {
+  position: absolute;
+  left: 430px;
+  top: 135px;
+  width: 375px;
+  height: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #c8dad1;
+  background: #ecf5ee;
+  box-shadow: 0 20px 45px #0c686d12;
+}
+.step-0 .desktopbar {
+  height: 27px;
+  padding: 8px 13px;
+  display: flex;
+  gap: 5px;
+  background: #dce9df;
+}
+.step-0 .desktopbar i {
+  height: 6px;
+  width: 6px;
+  background: #adbbb3;
+  border-radius: 50%;
+}
+.step-0 .app-demo {
+  position: absolute;
+  top: 55px;
+  left: 25px;
+  right: 25px;
+  height: 160px;
+  border-radius: 10px;
+  background: #ffffffc9;
+  padding: 19px;
+  color: #415658;
+  font-size: 11px;
+}
+.step-0 .sample {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  color: #748981;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+.step-0 .line {
+  height: 6px;
+  border-radius: 3px;
+  background: #d5e5dc;
+  margin-top: 12px;
+  width: 86%;
+}
+.step-0 .line:nth-child(3) {
+  width: 66%;
+}
+.step-0 .work {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: #e5f1e7;
+  color: #49764f;
+  font-size: 10px;
+}

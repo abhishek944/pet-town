@@ -16,18 +16,24 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     {
-      name: "public-town-entry",
+      name: "town-welcome-entry",
       transformIndexHtml: {
         order: "pre",
         handler(html) {
+          const welcome = readFileSync(
+            new URL("./src/hud/splash/assets/welcome.html", import.meta.url),
+            "utf8",
+          );
+          html = html.replace("<!--town-welcome-->", welcome);
           return mode === "public"
             ? html
                 .replace("/src/main.js", "/src/public-town/start.js")
                 .replace(
-                  '<u aria-hidden="true"></u>',
-                  '<u aria-hidden="true"></u><div class="public-boot-links">' +
+                  '<div class="town-sound-note">',
+                  '<div class="public-boot-links">' +
                     '<a href="../">← Back to Pet Town</a></div>' +
-                    "<noscript>Enable JavaScript to play the town.</noscript>",
+                    "<noscript>Enable JavaScript to play the town.</noscript>" +
+                    '<div class="town-sound-note">',
                 )
                 .replace(
                   "<title>Pet Town</title>",

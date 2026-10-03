@@ -34,6 +34,10 @@ export function updatePlayerWaterAndJumpWindows(
   if (!this.swimming && wasSwimming) {
     this.waterExitT = 0.45;
   }
+  if (!this.swimming) {
+    this.diveTarget = null;
+    this.diving = false;
+  }
   this.waterExitT = Math.max(0, this.waterExitT - deltaTime);
   this.jumpBuf = Math.max(0, this.jumpBuf - deltaTime);
   if (this.onGround) {

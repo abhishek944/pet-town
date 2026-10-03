@@ -1,4 +1,5 @@
 /** Habitat-aware spawning, safe location selection and inspection lineups. */
+import { spawnBirdPopulation } from "./spawn-bird-population.js";
 import * as THREE from "three";
 import { creaturesState } from "../state.js";
 import { getCreatureWorldExtent } from "../world/get-creature-world-extent.js";
@@ -30,6 +31,7 @@ export function spawnCreaturePopulation() {
       (nearStartValue2.nearStart ?? 0) - (nearStartValue.nearStart ?? 0),
   );
   for (let result of sortResult) {
+    if (result.flight) continue;
     let position4 = null;
     for (let index2 = 0; index2 < 600 && !position4; index2++) {
       let result2;
@@ -115,4 +117,5 @@ export function spawnCreaturePopulation() {
       index++;
     }
   }
+  spawnBirdPopulation();
 }

@@ -59,13 +59,16 @@
     float sig = 5.0 / (1.0 + age * 1.5);
     float gauss = exp(-x * x * sig);
     const float K = 8.5;
-    float dh = 0.07 * env * (K * cos(K * x) - 2.0 * sig * x * sin(K * x)) * gauss;
+    // Small swimming wakes disturb the surface gently; impacts keep their stronger wave.
+    float impact = smoothstep(0.9, 1.3, r.w);
+    float dh = mix(0.025, 0.07, impact) * env * (K * cos(K * x) - 2.0 * sig * x * sin(K * x)) * gauss;
     g += (d / dist) * dh;
     float wob = 0.7 + 0.3 * sin(atan(d.y, d.x) * 7.0 + r.x * 3.0 + age * 2.0);
     float rw = 90.0 / (1.0 + age * 0.9);
     float fenv = min(r.w, 1.5) * pow(life, 1.3) / (1.0 + dist * 0.15);
     float x2 = x + 0.45;
-    ringFoam += fenv * wob * (exp(-x * x * rw) + 0.5 * exp(-x2 * x2 * rw * 1.3)) * smoothstep(0.0, 0.15, age);
+    // Foam belongs to splash impacts, not every paddle or floating swimmer.
+    ringFoam += impact * fenv * wob * (exp(-x * x * rw) + 0.5 * exp(-x2 * x2 * rw * 1.3)) * smoothstep(0.0, 0.15, age);
   }
   vec3 N = normalize(vec3(-g.x, 1.0, -g.y));
 

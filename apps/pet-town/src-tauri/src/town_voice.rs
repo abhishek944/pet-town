@@ -12,6 +12,7 @@ fn set_talk(app: &AppHandle, active: bool) -> Result<u64, String> {
     // Query the native window before locking: window queries may need the main
     // thread, whose focus event also releases this microphone ownership.
     let focused = !active
+        || crate::godot_bridge::focused(app)
         || app
             .get_webview_window(crate::town_process::TOWN_LABEL)
             .is_some_and(|window| window.is_focused().unwrap_or(false));

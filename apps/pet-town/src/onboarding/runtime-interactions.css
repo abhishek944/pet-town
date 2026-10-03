@@ -1,0 +1,26 @@
+.stop-sample {
+  position: absolute;
+  left: 350px;
+  right: 350px;
+  bottom: 110px;
+  text-align: center;
+}
+.stop-sample button {
+  color: #8a5542;
+}
+.step-7 .dialog-backdrop[open] {
+  display: grid;
+}
+.dialog-backdrop:not([open]) {
+  display: none;
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+button:focus-visible,
+a:focus-visible,
+select:focus-visible {
+  outline: 3px solid #ed8727;
+  outline-offset: 3px;
+}

@@ -1,0 +1,10 @@
+.ocean-ui { position: fixed; inset: 0 auto 0 0; z-index: 85; pointer-events: none; font-family: var(--town-font, "Nunito", sans-serif); color: #213f47; }
+.ocean-ui [hidden] { display: none !important; }
+.ocean-compass { position: absolute; top: 145px; left: 18px; pointer-events: auto; max-width: min(310px, calc(100% - 36px)); padding: 10px 14px; border-radius: 14px; background: #fffdf0ee; border: 1px solid #c4dedc; box-shadow: 0 4px 15px #203d3d0a; font-size: 12px; line-height: 1.6; }
+.ocean-compass strong { display: block; font-size: 13px; }
+.ocean-dive { pointer-events: auto; position: absolute; right: 22px; bottom: 130px; touch-action: none; font: inherit; color: inherit; cursor: pointer; border: 1px solid #c4dedc; border-radius: 14px; padding: 10px 15px; background: #d7f0ef; font-weight: 800; user-select: none; }
+.ocean-dive:hover { background: #c2e7e5; }
+.ocean-dive:focus-visible { outline: 3px solid #488d99; outline-offset: 3px; }
+.ocean-dive:active { background: #9fd4d7; }
+@media (max-width: 600px) { .ocean-compass { top: 138px; left: 12px; max-width: 180px; } }
+@media (max-height: 540px) { .ocean-compass { top: 100px; } }

@@ -5,6 +5,11 @@ import { getCreatureDisplayName } from "../petting/get-creature-display-name.js"
 import { getHudEntityPosition } from "../petting/get-hud-entity-position.js";
 export function updateInteractionPrompt(deltaTime) {
   hudState.hudRuntime.petCooldown = Math.max(0, hudState.hudRuntime.petCooldown - deltaTime);
+  if (hudState.hudContext.boats?.hasAction) {
+    hudState.hudRuntime.near = null;
+    hudState.hudElements.prompt.classList.remove("show");
+    return;
+  }
   hudState.hudRuntime.near =
     hudState.hudRuntime.splash ||
     hudState.hudRuntime.help ||

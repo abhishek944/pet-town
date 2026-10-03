@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-app-updates"
+description = "Check and download signed app updates, and explicitly prepare/install them through the native save guard."
+commands.allow = ["get_app_update_state", "check_app_updates", "download_app_update", "install_app_update", "respond_app_update_prepare"]

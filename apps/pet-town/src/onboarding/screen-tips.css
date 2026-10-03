@@ -1,0 +1,187 @@
+.step-6 .intro {
+  position: absolute;
+  top: 116px;
+  left: 90px;
+  right: 90px;
+  text-align: center;
+}
+.step-6 .intro h1 {
+  font-size: 34px;
+  max-width: none !important;
+  letter-spacing: -1px;
+}
+.step-6 .intro p {
+  font-size: 14px;
+  max-width: 520px;
+  margin: 14px auto 0;
+}
+.step-6 .tips {
+  position: absolute;
+  top: 258px;
+  left: 139px;
+  width: 602px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.step-6 .tip {
+  border: 1px solid #d5e0cf;
+  border-radius: 14px;
+  background: #fffaf1;
+  padding: 21px;
+  min-height: 134px;
+}
+.step-6 .tip-icon {
+  font-size: 21px;
+  color: #448b80;
+  display: block;
+  margin-bottom: 13px;
+}
+.step-6 .tip b {
+  font-size: 13px;
+}
+.step-6 .tip p {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 9px 0 0;
+  max-width: 250px;
+}
+.step-6 .next {
+  position: absolute;
+  bottom: 62px;
+  left: 80px;
+  right: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.step-6 .town-link {
+  position: absolute;
+  top: 573px;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+.step-6 .town-link button {
+  color: #147d78;
+  font-size: 12px;
+}
+.step-6 .desktop-guide {
+  position: absolute;
+  left: 100px;
+  right: 100px;
+  top: 270px;
+  height: 250px;
+  border: 1px solid #d2e0d0;
+  border-radius: 15px;
+  background: linear-gradient(120deg, #e7eeeb, #eef0df);
+  overflow: hidden;
+}
+.step-6 .desktop-top {
+  height: 25px;
+  background: #dce5dd;
+  padding: 7px 13px;
+  font-size: 10px;
+  color: #738376;
+  display: flex;
+  justify-content: space-between;
+}
+.step-6 .desktop-app {
+  position: absolute;
+  left: 113px;
+  right: 40px;
+  top: 57px;
+  height: 112px;
+  background: #fffdf599;
+  border-radius: 8px;
+  padding: 18px;
+  font-size: 11px;
+  color: #8f9e91;
+}
+.step-6 .desktop-pet {
+  position: absolute;
+  left: 91px;
+  bottom: 14px;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  cursor: pointer;
+  z-index: 5;
+}
+.step-6 .coach-card {
+  position: absolute;
+  top: 280px;
+  left: 166px;
+  width: 548px;
+  padding: 30px;
+  border: 1px solid #d1dfce;
+  border-radius: 15px;
+  background: #fffaf1;
+  display: flex;
+  align-items: center;
+  gap: 27px;
+}
+.step-6 .coach-card img {
+  width: 132px;
+  height: 132px;
+  object-fit: contain;
+}
+.step-6 .coach-card b {
+  font-size: 20px;
+}
+.step-6 .coach-card p {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 13px 0 0;
+  max-width: 292px;
+}
+.step-6 .coach-card button {
+  margin-top: 20px;
+  border: 1px solid #d1deca;
+  border-radius: 8px;
+  background: #fffdf7;
+  padding: 10px 13px;
+  color: #147d78;
+  font-size: 11px;
+  cursor: pointer;
+}
+.step-6 .practice-note {
+  position: absolute;
+  top: 555px;
+  left: 90px;
+  right: 90px;
+  text-align: center;
+  font-size: 11px;
+  color: #7d927f;
+}
+.step-6 .practice-menu {
+  position: absolute;
+  bottom: 37px;
+  left: 174px;
+  border: 1px solid #d0d9ca;
+  border-radius: 8px;
+  background: #fffdf5;
+  padding: 10px 15px;
+  font-size: 11px;
+  color: #5d776b;
+  box-shadow: 0 7px 20px #56734d18;
+  display: none;
+  z-index: 6;
+}
+.step-6 .practice-menu.show {
+  display: block;
+}
+.step-6 .guide-feedback {
+  position: absolute;
+  bottom: 15px;
+  right: 21px;
+  color: #7b927e;
+  font-size: 10px;
+}
+.step-6 .mock-line {
+  height: 5px;
+  width: 70%;
+  margin-top: 12px;
+  background: #d7e2d8;
+  border-radius: 3px;
+}

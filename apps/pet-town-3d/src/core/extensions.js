@@ -30,6 +30,11 @@ export function createExtensionRegistry(context) {
   return {
     add,
     remove,
+    beforePlayerUpdate(deltaTime) {
+      for (const system of [...systems.values()]) {
+        if (systems.get(system.id) === system) system.beforePlayerUpdate?.(deltaTime, context);
+      }
+    },
     afterPlayerUpdate(deltaTime) {
       for (const system of [...systems.values()]) {
         if (systems.get(system.id) === system) system.afterPlayerUpdate?.(deltaTime, context);

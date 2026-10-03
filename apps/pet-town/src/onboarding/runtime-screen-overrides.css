@@ -1,0 +1,41 @@
+.step-0 .content {
+  background: #fff8e8;
+}
+.step-1 .intro h1 {
+  max-width: none;
+}
+.step-1 .intro .demo-badge {
+  margin-bottom: 16px;
+}
+.step-1 .card p {
+  margin-left: auto;
+  margin-right: auto;
+}
+.step-3 .host[data-state="ready"] .status-dot {
+  background: #568a5c;
+}
+.step-3 .status-copy span {
+  overflow-wrap: anywhere;
+}
+.step-3 .status-row {
+  min-height: 80px;
+}
+.step-4 .ready-note {
+  max-width: 590px;
+  left: 145px;
+  right: 145px;
+  text-align: center;
+}
+.step-4 .tool[aria-pressed="true"] {
+  border-color: #479b87;
+  background: #e6f2e5;
+}
+.step-4 .tool small {
+  color: #4e6b5e;
+}
+.step-5 .state-panel img {
+  display: inline-block;
+}
+.step-5 .stage-extra {
+  color: #617b69;
+}

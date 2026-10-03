@@ -1,7 +1,7 @@
 mod events;
-mod input;
+pub(crate) mod input;
 mod lifecycle;
-mod session;
+pub(crate) mod session;
 mod stream;
 
 pub(crate) use events::TerminalEvent;

@@ -1,0 +1,63 @@
+[
+  {
+    "name": "town",
+    "sourceRoute": "http://127.0.0.1:4173/play/?nohud&nosplash&nointro",
+    "actions": "UI zoom and Q camera framing, actual idle world simulation",
+    "sourceSize": "1280x720",
+    "durationSeconds": 8.777,
+    "gifBytes": 2190956,
+    "mp4Bytes": 968896,
+    "recording": "real UI gameplay via timestamped browser screenshot sequence; no generated frames",
+    "gifSize": "544x306",
+    "videoSize": "960x540",
+    "gifFps": 8,
+    "videoFps": 12,
+    "noSound": true
+  },
+  {
+    "name": "wildlife",
+    "sourceRoute": "http://127.0.0.1:4173/play/?nohud&nosplash",
+    "actions": "F to pet nearby native creatures",
+    "sourceSize": "1280x720",
+    "durationSeconds": 7.53,
+    "gifBytes": 1391002,
+    "mp4Bytes": 552067,
+    "recording": "real UI gameplay via timestamped browser screenshot sequence; no generated frames",
+    "gifSize": "544x306",
+    "videoSize": "960x540",
+    "gifFps": 8,
+    "videoFps": 12,
+    "noSound": true
+  },
+  {
+    "name": "jump",
+    "sourceRoute": "http://127.0.0.1:4173/play/?nohud&nosplash",
+    "actions": "Shift+W run and Space jump",
+    "sourceSize": "1280x720",
+    "durationSeconds": 11,
+    "gifBytes": 3046226,
+    "mp4Bytes": 1162641,
+    "recording": "real UI gameplay via timestamped browser screenshot sequence; no generated frames",
+    "gifSize": "544x306",
+    "videoSize": "960x540",
+    "gifFps": 8,
+    "videoFps": 12,
+    "noSound": true
+  },
+  {
+    "name": "desktop",
+    "source": "Actual native Pet Town Debug strip",
+    "actions": "Live Ocean scenery, rowing companions and native labels; no agent was launched, stopped or focused",
+    "sourceSize": "3024x580",
+    "durationSeconds": 3.954,
+    "gifBytes": 804367,
+    "mp4Bytes": 68528,
+    "recording": "Actual native app capture with workspace label bubbles removed; no private workspace contents",
+    "noSound": true,
+    "gifSize": "1280x160",
+    "videoSize": "1512x190",
+    "gifFps": 10,
+    "videoFps": 12,
+    "crop": "200 pixels of empty space above the native strip removed before resizing"
+  }
+]

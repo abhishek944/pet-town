@@ -32,6 +32,13 @@ if [ "$mode" = build ]; then
 fi
 
 pnpm install --frozen-lockfile
+if [ "$(uname -s)" = Darwin ]; then
+  GODOT_APP=$(sh "$ROOT/scripts/prepare-godot-engine.sh")
+  export GODOT_BIN="$GODOT_APP/Contents/MacOS/Godot"
+  export PET_TOWN_GODOT_EXECUTABLE="$GODOT_BIN"
+  python3 "$ROOT/scripts/validate-godot-export.py"
+  "$GODOT_BIN" --headless --single-threaded-scene --path "$ROOT/apps/pet-town-godot-sample" --editor --import --quit
+fi
 # Tauri's compile-time context needs frontendDist even when dev uses Vite.
 pnpm --filter @pet-town/desktop run internal:build-frontend
 # The frontend hook starts and owns both Vite servers (1420 and 1422).

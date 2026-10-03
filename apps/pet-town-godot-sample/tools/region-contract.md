@@ -1,0 +1,27 @@
+# Original world region export contract
+
+Load `installRegionExport(context)` from `region-export.js` in the sample's export page, served by the original app's Vite server. Start the existing localhost receiver first. It writes only `region-*` files into the sample assets folder. The exporter never changes source world placement or source application files.
+
+`region-manifest.json` is the last file written, marking a successful complete export. It captures the current source scene and seed, including saved placements. Region coordinates stay in original Y-up world space. The region is a contiguous, spawn-centered, 16-unit-aligned square. Coverage counts all one-unit cell centers in the **entire current original terrain bounds** where `terrain.isWater(x,z)` is false. The smallest such square with at least 40% dry-land coverage is used. This is actual land-cell coverage, not a percentage of prop counts. Bounds are minimum inclusive / maximum exclusive.
+
+## Native geometry
+
+Terrain and vegetation use JSON files containing original indexed buffers, avoiding lossy glTF custom-attribute import. Every attribute descriptor has `type`, `itemSize`, `normalized`, `count`, `base64`. Decode little-endian base64 bytes into the named JavaScript typed-array type. Normalized integer attributes follow BufferAttribute semantics: unsigned values divide by 255/65535, signed divide by 127/32767 and clamp the lower end at -1. Three.js triangle indices use counterclockwise winding; reverse each triangle when creating Godot clockwise ArrayMesh surfaces.
+
+Terrain chunk JSON contains `{attributes,index,matrix}`. Positions/normals/index are exactly the existing beveled voxel geometry. `aUv` is normalized local face UV. `aData` contains unnormalized bytes `(tile,overlay,AO,packedDirection)`. Overlay 255 means none; AO divides by 255. Direction is `mod(packedDirection,8)`, parity X is `mod(floor(packedDirection/8),2)`, parity Y is `floor(packedDirection/16)`. Sample texture at `(parity+aUv)*0.5`. `aTint` is normalized RGBA, RGB multiplied by 2 provides tint and A is bevel. `aGrass` is unnormalized byte RGBA; RGB divides by 127.5, A stores grass edge flags. R also represents wall moss amount. Separate `lip` chunks use the original cutout fringe layer. PNG layer rows preserve the source DataArrayTexture byte order; do not add a flip.
+
+Vegetation prototype JSON contains `{attributes,index,material}` and retains `aSway`, `aTint`, `aCard`, and `aOrigin` when present. Original `color` is linear vertex RGB. Manifest fields list all source LOD prototype files and distances; the instance file contains packed Float32 matrices (16 floats, column-major) and colors (three linear RGB floats). Every selected source instance is retained; density reduction is metadata for runtime, not baked deletion. Build spatially chunked MultiMeshes for visibility and LOD. Material metadata contains source shader defines, uniforms, PNG map, linear color, cutout opacity and culling parameters. Source vegetation shaders are in `apps/pet-town-3d/src/vegetation/materials/assets/`.
+
+## Props, effects and voxels
+
+Props are glTF-compatible original tagged mesh ranges, including their texture maps and vertex colors. Their vertices already have full original world transforms baked in; do not translate the GLB by the metadata position again. Metadata includes original collider and walkable-surface records. Native physics may use actual mesh collision to make roofs/tabletops landable. Enable vertex color as albedo on imported Godot materials.
+
+Campfire metadata points to original plane geometry buffers and the plane's full world matrix, plus flame parameters. `region-flame.png` is the original flame texture. Water PNG has linear-data channels: R=depth/16, G=water mask, B=groundHeight/40, A=1; rows progress from minZ, columns from minX. Exact ground height samples also exist in `region-ground.json`. Sky/light metadata are the source snapshot, in linear RGB.
+
+Voxel JSON stores the source block IDs for the selected bounds, with byte offset `(localZ * width + localX) * height + y`. Block definitions include original top/side/bottom texture layer IDs, overlay IDs and tint semantics. This supports native editing without approximating the untouched source island as flat terrain.
+
+## Supplemental material and animated-prop export
+
+`region-prop-details.json` is produced by the main export and can also be refreshed independently with the second exporter button. `materials` is keyed by original material key (wood, shingle, glass, etc.); match imported GLB mesh names `props_<key>_<rangeIndex>`. All original material texture slots are separate PNGs with their flip, repeat, offset, wrap and color-space metadata; bump maps retain source height values and original `bumpScale`. Emissive maps, dynamic daytime/nighttime intensity, roughness, metalness, opacity and double-sided flags remain explicit rather than silently discarded by glTF.
+
+`windmills` contains the original rotating sail geometry, the original parent transform and local-Z angular velocity -0.42 radians/second. Instantiate each sail scene underneath a Node3D using `parentMatrix`, then animate the instantiated rotor locally. `smoke` contains exact original chimney origins and particle counts/phases; the smoke/glow texture files are source CanvasTextures. Lantern positions, ground light pools and static shade decals are also preserved. The metadata is an export contract; the native runtime must implement these effects to claim parity.

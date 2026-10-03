@@ -54,6 +54,8 @@ def matches(pid: int, command: str) -> bool:
     executable = command.split(" --", 1)[0]
     if Path(executable).name == "pet-town" and is_our_pet_town_binary(pid):
         return True
+    if is_our_native_town(executable, command):
+        return True
     # Match explicit checkout paths; never stop servers just because they use our ports.
     frontend_apps = ("pet-town", "pet-town-3d", "pokopia")
     if "/vite/bin/vite.js" in command and any(
@@ -67,6 +69,26 @@ def matches(pid: int, command: str) -> bool:
     return supervisor in command or (
         "dev-town-frontends.py" in command and is_our_frontend_supervisor(pid)
     )
+
+
+def is_our_native_town(executable: str, command: str) -> bool:
+    if any(flag in command for flag in ("--editor", "--script", "--headless")):
+        return False
+    runtimes = (
+        root / "var/godot-runtime/Godot.app/Contents/MacOS/Godot",
+        root / "apps/pet-town/src-tauri/resources/godot/Godot.app/Contents/MacOS/Godot",
+    )
+    if Path(executable).resolve() not in runtimes:
+        return False
+    for flag, expected in (
+        ("--path ", root / "apps/pet-town-godot-sample"),
+        ("--main-pack ", root / "apps/pet-town/src-tauri/resources/godot/world/PetTown.pck"),
+    ):
+        if flag in command:
+            argument = command.split(flag, 1)[1].split(" --", 1)[0]
+            if Path(argument).resolve() == expected:
+                return True
+    return False
 
 
 def running() -> dict[int, str]:

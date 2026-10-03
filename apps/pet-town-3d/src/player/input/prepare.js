@@ -8,6 +8,7 @@ export function preparePlayerInput() {
     right: [`KeyD`, `ArrowRight`],
     run: [`ShiftLeft`, `ShiftRight`],
     jump: [`Space`],
+    dive: [`ControlLeft`, `ControlRight`, `OceanDive`],
     rotL: [`KeyQ`],
     rotR: [`KeyE`],
   };

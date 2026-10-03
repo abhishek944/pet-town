@@ -8,9 +8,10 @@ export function prepareWaterShadersFragmentDeclarations() {
   waterState.waterSurfaceFragmentDeclarations =
     sourceAsset51 +
     String(waterState.waterSurfaceCommonShader) +
-    sourceAsset52 +
-    String(waterState.waterRippleLifetime.toFixed(3)) +
-    sourceAsset53 +
-    String(waterState.waterRippleSpeed.toFixed(3)) +
+    // Keep each macro value on its directive line, regardless of asset formatting.
+    sourceAsset52.trimEnd() +
+    ` ${waterState.waterRippleLifetime.toFixed(3)}` +
+    sourceAsset53.trimEnd() +
+    ` ${waterState.waterRippleSpeed.toFixed(3)}` +
     sourceAsset54;
 }

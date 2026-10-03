@@ -1,0 +1,83 @@
+<section class="hero-experience" aria-labelledby="hero-title">
+  <div class="hero-intro">
+    <div>
+      <div class="eyebrow">Your agents. Your Mayor. Your little world.</div>
+      <h1 id="hero-title">A little world.<br />A lot more <em>company.</em></h1>
+    </div>
+    <div class="hero-description">
+      <p>
+        Bring your coding agents to life, talk things through with Mayor, and take a little wander
+        in a world that’s always moving.
+      </p>
+      <div class="actions">
+        <a
+          class="button js-primary-download"
+          href="https://github.com/abhishek944/pet-town/releases/latest/download/Pet-Town-macOS-Apple-Silicon.dmg"
+          ><span class="js-download-label">Download for macOS ↓</span></a
+        >
+        <a class="button secondary" href="%BASE_URL%play/">Play the town →</a>
+      </div>
+      <p class="hint">Solo browser visit. No install or account needed.</p>
+    </div>
+  </div>
+  <div class="gameplay-stage" id="featured-preview">
+    <video
+      id="hero-gameplay"
+      data-motion-media
+      data-motion-src="%BASE_URL%media/gameplay/town.mp4"
+      poster="%BASE_URL%media/gameplay/town-poster.jpg"
+      width="960"
+      height="540"
+      muted
+      loop
+      playsinline
+      preload="none"
+      aria-label="Recorded solo Pet Town gameplay"
+    ></video>
+    <span class="recording-label"
+      ><i aria-hidden="true"></i>Recorded in Pet Town · Solo browser demo</span
+    >
+    <button
+      class="motion-toggle js-motion-toggle"
+      type="button"
+      aria-controls="hero-gameplay desktop-recording town-gif wildlife-gif jump-gif"
+    >
+      Play previews
+    </button>
+    <div class="gameplay-caption">
+      <strong id="clip-title">Take the scenic route.</strong
+      ><small id="clip-copy">A living little world, ready when you need a break.</small>
+    </div>
+    <p class="preview-status" role="status" aria-live="polite"></p>
+  </div>
+  <div class="clip-choices" role="group" aria-label="Choose a gameplay moment">
+    <button
+      type="button"
+      data-featured-clip="town"
+      aria-pressed="true"
+      aria-controls="featured-preview"
+    >
+      01 · A little wander
+    </button>
+    <button
+      type="button"
+      data-featured-clip="wildlife"
+      aria-pressed="false"
+      aria-controls="featured-preview"
+    >
+      02 · Meet the neighbours
+    </button>
+    <button
+      type="button"
+      data-featured-clip="jump"
+      aria-pressed="false"
+      aria-controls="featured-preview"
+    >
+      03 · Make room for play
+    </button>
+  </div>
+  <div class="hero-promises">
+    <span>Animated companions for your coding agents</span
+    ><span>Standard &amp; Live voice with Mayor</span><span>A world you can actually play</span>
+  </div>
+</section>

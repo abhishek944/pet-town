@@ -1,0 +1,63 @@
+#feedback {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 10px;
+  z-index: 30;
+  padding: 12px 17px;
+  max-width: 650px;
+  border: 1px solid #a7815e;
+  border-radius: 10px;
+  background: #fffdf5;
+  box-shadow: 0 4px 20px #08214915;
+  font-size: 12px;
+  color: #714b32;
+  line-height: 1.5;
+}
+.move-install {
+  padding: 140px 100px;
+  text-align: center;
+}
+.move-install h1 {
+  font-size: 34px;
+}
+.move-install p {
+  margin: 22px auto;
+}
+.move-install button {
+  margin-top: 30px;
+}
+.step-4 .check-panel {
+  display: none;
+}
+.step-5.state-mode .usage {
+  display: none;
+}
+.step-5 .state-panel {
+  min-height: 250px;
+}
+.step-7 .dialog h2 {
+  font-size: 24px;
+}
+.bottom {
+  color: #677661;
+}
+.detail,
+.footer-note,
+.usage,
+.optional,
+.details,
+.ready-note {
+  color: #60765e !important;
+}
+.preview-note {
+  position: absolute;
+  top: 82px;
+  left: 36px;
+  font-size: 10px;
+  color: #756855;
+}
+.tips button,
+.card button {
+  font: inherit;
+}

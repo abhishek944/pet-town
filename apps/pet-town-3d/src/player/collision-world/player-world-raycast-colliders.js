@@ -1,3 +1,5 @@
+import { raycastPlayerFenceSegment } from "./raycast-player-fence-segment.js";
+
 export function playerWorldRaycastColliders(x, y, z, dx, dy, dz, maxDistance) {
   let value7Value = maxDistance;
   if (Math.hypot(dx, dz) < 1e-6) {
@@ -5,6 +7,13 @@ export function playerWorldRaycastColliders(x, y, z, dx, dy, dz, maxDistance) {
   }
   let result = this.camOccluders.length ? this.colliders.concat(this.camOccluders) : this.colliders;
   for (let position of result) {
+    if (position.kind === `seg`) {
+      value7Value = Math.min(
+        value7Value,
+        raycastPlayerFenceSegment(position, x, y, z, dx, dy, dz, value7Value),
+      );
+      continue;
+    }
     if (position.kind === `sph`) {
       let result12 = x - position.x;
       let result13 = y - position.y;

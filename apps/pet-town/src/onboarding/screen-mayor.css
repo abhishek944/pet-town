@@ -1,0 +1,118 @@
+.step-7 .intro {
+  position: absolute;
+  top: 124px;
+  left: 90px;
+  right: 90px;
+  text-align: center;
+}
+.step-7 .intro h1 {
+  font-size: 39px;
+  max-width: none;
+}
+.step-7 .intro p {
+  font-size: 15px;
+  max-width: 500px;
+  margin: 16px auto;
+}
+.step-7 .celebrate {
+  position: absolute;
+  top: 230px;
+  left: 360px;
+  width: 160px;
+  height: 126px;
+  object-fit: contain;
+}
+.step-7 .invitation {
+  position: absolute;
+  left: 150px;
+  right: 150px;
+  top: 389px;
+  background: #fffaf1;
+  border: 1px solid #d3dfcb;
+  border-radius: 16px;
+  padding: 21px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.step-7 .invitation img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+.step-7 .invitation h2 {
+  font-size: 18px;
+  letter-spacing: -0.3px;
+  margin: 0 0 8px;
+}
+.step-7 .invitation p {
+  font-size: 12px;
+  max-width: 420px;
+  margin: 0;
+  line-height: 1.45;
+}
+.step-7 .invitation .secondary {
+  font-size: 12px;
+  color: #147d78;
+  font-weight: 650;
+  padding: 9px 0 0;
+}
+.step-7 .optional {
+  font-size: 10px;
+  color: #7e937c;
+  margin-bottom: 7px;
+  letter-spacing: 1px;
+}
+.step-7 .details {
+  font-size: 10px !important;
+  color: #82917c !important;
+  margin-top: 7px !important;
+}
+.step-7 .next {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  bottom: 62px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.step-7 .dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  background: #08214930;
+  display: none;
+  place-items: center;
+  z-index: 10;
+}
+.step-7 .dialog-backdrop[open] {
+  display: grid;
+}
+.step-7 .dialog {
+  width: 490px;
+  background: #fffaf1;
+  border-radius: 19px;
+  padding: 30px;
+  box-shadow: 0 20px 90px #08214925;
+}
+.step-7 .dialog h2 {
+  font-size: 24px;
+  margin: 0;
+}
+.step-7 .dialog p {
+  font-size: 13px;
+  margin-top: 15px;
+}
+.step-7 .dialog ul {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #5c736b;
+  padding-left: 20px;
+}
+.step-7 .dialog .secondary {
+  margin-left: 20px;
+}
+.step-7 .finish-note {
+  font-size: 11px;
+  color: #768b75;
+}

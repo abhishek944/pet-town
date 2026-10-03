@@ -7,9 +7,9 @@ export function createTerrainRaycaster(state) {
     let directionX = direction.x / directionLength;
     let directionY = direction.y / directionLength;
     let directionZ = direction.z / directionLength;
-    let originGridX = origin.x + 64;
+    let originGridX = origin.x + state.half;
     let originY = origin.y;
-    let originGridZ = origin.z + 64;
+    let originGridZ = origin.z + state.half;
     let cellX = Math.floor(originGridX);
     let cellY = Math.floor(originY);
     let cellZ = Math.floor(originGridZ);
@@ -45,15 +45,15 @@ export function createTerrainRaycaster(state) {
           ),
           normal: new THREE.Vector3(normalX, normalY, normalZ),
           block: {
-            x: cellX - 64,
+            x: cellX - state.half,
             y: cellY,
-            z: cellZ - 64,
+            z: cellZ - state.half,
             id: blockId,
           },
           place: {
-            x: cellX - 64 + normalX,
+            x: cellX - state.half + normalX,
             y: cellY + normalY,
-            z: cellZ - 64 + normalZ,
+            z: cellZ - state.half + normalZ,
           },
           distance: distance,
         };

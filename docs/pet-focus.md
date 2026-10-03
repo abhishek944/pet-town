@@ -21,6 +21,16 @@
 
 The two renderers share the focus function, but neither should perform adapter activation inside the 2D overlay's GUI process. The process boundary matters; sharing a function alone did not give them equivalent behavior.
 
+Native Godot **Open 3D Town** reopening uses a separate early CLI route,
+`--focus-native-town <PID> <parent-PID>`, owned by
+[godot_bridge/focus.rs](../apps/pet-town/src-tauri/src/godot_bridge/focus.rs).
+It verifies that the existing Godot process belongs to the launching desktop,
+then activates it from the helper's main thread while servicing `NSRunLoop`.
+This route does not change pet-to-agent `--focus-agent` dispatch. Successful
+helper completion and native focus-heartbeat probes pass; the final direct
+visible Godot transition still awaits user observation because Computer access
+to that window is unreliable.
+
 ## Preserve these together
 
 | Part                               | Owner                                                                                                    | Why it matters                                                                                                                                                                                                                                                                                                                                                                |

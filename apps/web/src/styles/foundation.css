@@ -1,0 +1,141 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #fbfaf6;
+  color: #201c18;
+  font:
+    16px "DM Sans",
+    sans-serif;
+}
+header {
+  height: 78px;
+  border-bottom: 1px solid #e4dfd7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 64px;
+}
+.brand {
+  font:
+    29px "Instrument Serif",
+    Georgia,
+    serif;
+}
+nav {
+  display: flex;
+  gap: 30px;
+  font-size: 13px;
+}
+.tag,
+.eyebrow,
+.caption {
+  font:
+    11px "DM Mono",
+    monospace;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.tag {
+  border: 1px solid #e4dfd7;
+  border-radius: 6px;
+  padding: 9px 12px;
+}
+.eyebrow {
+  color: #964c3f;
+}
+h1,
+h2 {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+h1 {
+  font-size: 78px;
+  line-height: 0.96;
+  margin: 22px 0;
+}
+h1 em {
+  font-weight: 400;
+}
+p {
+  line-height: 1.7;
+  color: #716b64;
+}
+.copy {
+  max-width: 500px;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 26px;
+}
+.button {
+  display: inline-flex;
+  padding: 15px 19px;
+  border-radius: 6px;
+  background: #964c3f;
+  color: white;
+  border: 1px solid #964c3f;
+  font-size: 13px;
+  text-decoration: none;
+}
+.secondary {
+  background: #fff;
+  color: #201c18;
+  border-color: #e4dfd7;
+}
+.hint {
+  font-size: 11px;
+  margin: 13px 0 0;
+}
+.scene {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #ddd5c9;
+  border-radius: 16px;
+  background: #e5ead9;
+  min-height: 320px;
+}
+.scene img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.scene .caption {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background: #fbfaf6ee;
+  border-radius: 5px;
+  padding: 10px 12px;
+  font-size: 9px;
+}
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 34px;
+  padding: 28px 0;
+  border-top: 1px solid #e4dfd7;
+}
+.features h2 {
+  font-size: 28px;
+  margin: 8px 0;
+}
+.features p {
+  font-size: 13px;
+  margin: 0;
+}
+.number {
+  font: 10px "DM Mono";
+  color: #964c3f;
+}
+.shell {
+  margin: 0 64px;
+}
+.note {
+  font: 10px "DM Mono";
+  color: #81776a;
+}

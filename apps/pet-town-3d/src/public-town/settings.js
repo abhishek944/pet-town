@@ -2,6 +2,8 @@
 export function configurePublicSettings(root) {
   root.querySelector('[data-tab="companion"]').remove();
   root.querySelector('[data-panel="companion"]').remove();
+  root.querySelector('[data-tab="about"]')?.remove();
+  root.querySelector('[data-panel="about"]')?.remove();
   root.querySelector(".settings-header p").textContent = "World sound, building and help.";
   root.querySelector(".setting-row p").textContent = "Music, ambience and effects.";
   for (const row of root.querySelectorAll(".guide-row")) {

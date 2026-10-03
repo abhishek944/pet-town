@@ -1,0 +1,44 @@
+.citizen {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  width: 104px;
+  height: 140px;
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 480ms ease;
+}
+
+.citizen[hidden] {
+  display: none;
+}
+
+/* Keep Standard pets at their original screen baseline; Ocean raises the boat
+   above the translucent water body in the taller transparent strip. */
+.village[data-strip-theme="ocean"] .citizen {
+  bottom: var(--ocean-citizen-bottom, 82px);
+}
+.village[data-strip-theme="ocean"] .shadow {
+  display: none;
+}
+
+.village[data-strip-theme="ocean"] .project {
+  padding: 4px 8px;
+  font-size: calc(11px * var(--label-scale, 1));
+  font-weight: 600;
+}
+
+/* Ocean art has a shared canvas scale, independent of Standard state clip scales. */
+.village[data-strip-theme="ocean"] .citizen[data-ocean-asset="true"] .pet {
+  width: var(--citizen-size);
+}
+
+.village[data-strip-theme="ocean"] .citizen[data-ocean-asset="true"] .project {
+  transform: translateY(calc(var(--label-offset-y, 0px) + var(--citizen-size) * 0.14));
+}
+
+/* Independent rotation preserves sprite facing, frozen canvases and upright labels. */
+.village[data-strip-theme="ocean"] .pet {
+  rotate: var(--ocean-pitch, 0deg);
+  transform-origin: 50% calc(100% - var(--foot-offset-y, 0px));
+}

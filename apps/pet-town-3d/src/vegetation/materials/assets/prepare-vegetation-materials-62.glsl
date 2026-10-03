@@ -1,12 +1,15 @@
 
 #ifdef VEG_FADE
 if (uFadeR > 0.0) {
-  // screen-door dither for fragments inside a capsule around the camera->player segment (never the last 10%
-  // near the player, so foliage behind the player stays solid)
+  // Dither only the local camera->subject capsule. Keep blockers at the subject
+  // endpoint faded; restore solid vegetation within 0.45 units beyond it.
   vec3 ab = uFadeB - uFadeA;
-  float t = clamp(dot(vFadeW - uFadeA, ab) / max(dot(ab, ab), 1e-4), 0.0, 1.0);
+  float segmentLength = length(ab);
+  float along = dot(vFadeW - uFadeA, ab) / max(segmentLength, 1e-4);
+  float t = clamp(along / max(segmentLength, 1e-4), 0.0, 1.0);
   float d = length(vFadeW - (uFadeA + ab * t));
-  float k = (1.0 - smoothstep(uFadeR * 0.55, uFadeR, d)) * (1.0 - smoothstep(0.82, 0.95, t));
+  float tail = 1.0 - smoothstep(segmentLength + 0.15, segmentLength + 0.45, along);
+  float k = (1.0 - smoothstep(uFadeR * 0.55, uFadeR, d)) * tail;
   vec2 pp = floor(mod(gl_FragCoord.xy, 4.0));
   float bayer = (mod(pp.x + 2.0 * pp.y, 4.0) * 4.0 + mod(pp.x * 3.0 + pp.y, 4.0)) / 16.0; // cheap ordered pattern
   if (k * 0.92 > bayer + 0.03) discard;

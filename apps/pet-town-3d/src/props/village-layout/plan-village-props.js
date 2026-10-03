@@ -13,6 +13,10 @@ import { placeVillageSignsAndMailboxes } from "./place-village-signs-and-mailbox
 import { decorateVillageWindmill } from "./decorate-village-windmill.js";
 import { decorateVillageCabin } from "./decorate-village-cabin.js";
 import { placeVillageRocks } from "./place-village-rocks.js";
+import { appendSunmeadowScenery } from "../../world-expansion/scenery.js";
+import { appendWillowmereScenery } from "../../world-expansion/scenery-willowmere.js";
+import { appendShellhavenScenery } from "../../world-expansion/scenery-shellhaven.js";
+import { applyWorldAssetEdits } from "../../world-assets/apply-edits.js";
 export function planVillageProps(context, terrain, seed = 20240) {
   const village = {
     context,
@@ -33,6 +37,10 @@ export function planVillageProps(context, terrain, seed = 20240) {
   decorateVillageWindmill(village);
   decorateVillageCabin(village);
   placeVillageRocks(village);
+  appendSunmeadowScenery(village);
+  appendWillowmereScenery(village);
+  appendShellhavenScenery(village);
+  applyWorldAssetEdits(village);
   return {
     P: village.plaza,
     items: village.items,
@@ -40,5 +48,6 @@ export function planVillageProps(context, terrain, seed = 20240) {
     occ: village.occupied,
     bridge: village.bridge,
     fronts: village.entrances,
+    pathSamples: village.pathSamples.flat(),
   };
 }

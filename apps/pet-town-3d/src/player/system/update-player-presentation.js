@@ -46,6 +46,7 @@ export function updatePlayerPresentation(
     renderPosition.y,
     enabled,
   );
+  if (body.diving && body.waterDepth > 1.1) character.shadow.visible = false;
   camera.update(deltaTime, getPlayerCameraFrame());
   updatePlayerFoliageFade(context, deltaTime);
   playerState.playerFadeUniform.value = camera.frozen ? 1 : camera.fade;

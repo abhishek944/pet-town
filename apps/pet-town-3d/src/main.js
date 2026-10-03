@@ -7,6 +7,7 @@ import { createExtensionRegistry } from "./core/extensions.js";
 import { createGameViewport } from "./core/viewport.js";
 import { isGameInputCaptured } from "./core/input-capture.js";
 import { renderPostprocessing } from "./rendering/postprocessing/render-postprocessing.js";
+import { initializeCameraQueries } from "./player/camera-query/create-camera-queries.js";
 prepareGameData();
 const canvas = document.getElementById("game");
 const params = new URLSearchParams(location.search);
@@ -48,6 +49,7 @@ export const context = {
 window.__ctx = context;
 window.petTownGame = context;
 createGameViewport(context);
+await initializeCameraQueries(context);
 const systems = createGameSystems();
 for (const system of systems) system.init?.(context);
 context.extensions = createExtensionRegistry(context);
@@ -70,6 +72,7 @@ function frame(now) {
   context.dt = deltaTime;
   context.time += deltaTime;
   for (const system of systems) {
+    if (system.id === "player") context.extensions.beforePlayerUpdate(deltaTime);
     system.update?.(deltaTime, context);
     if (system.id === "player") {
       context.extensions.afterPlayerUpdate(deltaTime);
@@ -78,6 +81,7 @@ function frame(now) {
   }
   context.extensions.update(deltaTime);
   renderPostprocessing(context);
+  context.hasRenderedFrame = true;
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

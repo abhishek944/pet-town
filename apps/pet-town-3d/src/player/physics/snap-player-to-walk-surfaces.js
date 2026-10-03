@@ -1,6 +1,6 @@
 import { playerState } from "../state.js";
 export function snapPlayerToWalkSurfaces(velocity, position, world) {
-  if ((this._collideProps(), velocity.y <= 0.01 && !this.swimming)) {
+  if (velocity.y <= 0.01 && !this.swimming) {
     let result30 = this.onGround || this.wasGround;
     let result31 = Math.max(position.y + (result30 ? 0.6 : 0.05), this.prev.y + 0.01);
     let platformHeightResult = world.platformHeight(position.x, position.z, result31);
@@ -18,6 +18,7 @@ export function snapPlayerToWalkSurfaces(velocity, position, world) {
       this.onGround = true;
     }
   }
+  this._collideProps();
   if (!this.onGround && this.wasGround && !this.jumping && velocity.y <= 0 && !this.swimming) {
     let y3 = position.y;
     if (this._sweep(1, -(playerState.playerMovementSettings.stepH + 0.05))) {

@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
+import { landingHtml } from "./scripts/landing-html";
 import { serveTown } from "./scripts/serve-town";
 
 export default defineConfig({
-  plugins: [serveTown()],
+  plugins: [landingHtml(), serveTown()],
   base: process.env.VITE_BASE_PATH ?? "/",
   server: {
     port: 4173,

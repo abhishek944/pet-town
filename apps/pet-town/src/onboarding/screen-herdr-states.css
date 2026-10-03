@@ -1,0 +1,105 @@
+.step-3 .explore {
+  position: absolute;
+  bottom: 55px;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+.step-3 .explore button {
+  font-size: 12px;
+}
+.step-3 .host[data-state="ready"] .status-dot {
+  background: #388f83;
+}
+.step-3 .host[data-state="error"] .status-dot {
+  background: #b86349;
+}
+.step-3 .host[data-state="installing"] .status-dot,
+.step-3 .host[data-state="checking"] .status-dot {
+  background: #8197a1;
+}
+.step-3 .primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.step-3 .progress {
+  height: 4px;
+  border-radius: 3px;
+  background: #dbe6da;
+  margin-top: 14px;
+  overflow: hidden;
+  display: none;
+}
+.step-3 .progress i {
+  display: block;
+  background: #388f83;
+  width: 40%;
+  height: 100%;
+}
+.step-3 .host[data-state="installing"] .progress {
+  display: block;
+}
+.step-3 .checks {
+  display: none;
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  border-top: 1px solid #e2e6d8;
+  font-size: 12px;
+  color: #78877b;
+}
+.step-3 .checks li {
+  padding: 10px 0;
+  display: flex;
+  gap: 10px;
+}
+.step-3 .checks i {
+  font-style: normal;
+  color: #388f83;
+}
+.step-3 .workspace-model {
+  position: absolute;
+  left: 557px;
+  top: 286px;
+  width: 225px;
+  height: 205px;
+  border: 1px solid #d1dfd0;
+  background: #eef4e9;
+  border-radius: 13px;
+  padding: 17px;
+}
+.step-3 .workspace-model b {
+  font-size: 11px;
+  color: #71887c;
+}
+.step-3 .desk-pane {
+  background: #fffdf5;
+  border: 1px solid #d8e2d2;
+  border-radius: 7px;
+  margin-top: 16px;
+  padding: 12px;
+  font-size: 11px;
+  color: #6d8276;
+}
+.step-3 .desk-pane div {
+  height: 5px;
+  background: #dce8dc;
+  width: 82%;
+  margin-top: 11px;
+}
+.step-3 .why {
+  border: 0;
+  background: transparent;
+  color: #147d78;
+  padding: 0;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.step-3 .footer-note {
+  position: absolute;
+  bottom: 27px;
+  left: 36px;
+  font-size: 10px;
+  color: #8b9689;
+}

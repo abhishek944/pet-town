@@ -6,25 +6,21 @@ import { hideVegetationItem } from "../terrain-updates/hide-vegetation-item.js";
 export function clearVegetationArea(
   position5,
   value9 = 2,
-  { trees: value11 = true, small: value12 = true, canopy: value10 } = {},
+  { trees: value11 = true, small: value12 = true, canopy: value10, transient = false } = {},
 ) {
   if (!position5) {
     return 0;
   }
   let text = `a:${position5.x.toFixed(2)},${position5.z.toFixed(2)},${value9},${value11},${value12},${value10}`;
-  if (
-    (vegetationState.vegetationRuntimeState.clearLog.has(text) ||
-      vegetationState.vegetationRuntimeState.clearLog.set(text, {
-        x: position5.x,
-        z: position5.z,
-        tr: value11 ? value9 : 0,
-        sr: value12 ? value9 : 0,
-        canopy: value10,
-      }),
-    !vegetationState.vegetationRuntimeState.built)
-  ) {
-    return 0;
-  }
+  if (!transient && !vegetationState.vegetationRuntimeState.clearLog.has(text))
+    vegetationState.vegetationRuntimeState.clearLog.set(text, {
+      x: position5.x,
+      z: position5.z,
+      tr: value11 ? value9 : 0,
+      sr: value12 ? value9 : 0,
+      canopy: value10,
+    });
+  if (!vegetationState.vegetationRuntimeState.built) return 0;
   let index = 0;
   if (value11) {
     for (let position6 of [...vegetationState.vegetationRuntimeState.trees]) {

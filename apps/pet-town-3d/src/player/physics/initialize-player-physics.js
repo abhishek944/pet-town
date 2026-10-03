@@ -17,6 +17,8 @@ export function initializePlayerPhysics(world) {
   this.holdT = 0;
   this.heldSinceJump = false;
   this.swimming = false;
+  this.diveTarget = null;
+  this.diving = false;
   this.waterDepth = 0;
   this.waterY = -1 / 0;
   this.waterExitT = 0;

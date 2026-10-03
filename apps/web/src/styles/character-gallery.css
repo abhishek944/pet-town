@@ -1,0 +1,93 @@
+.cast-gallery {
+  margin-top: 24px;
+}
+.cast-gallery summary {
+  font-size: 13px;
+  cursor: pointer;
+  width: max-content;
+  padding: 12px 0;
+}
+.cast-card {
+  max-width: 740px;
+  margin: 20px auto;
+  border: 1px solid #e4dfd7;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  background: #fff;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  color: #716b64;
+  font:
+    11px DM Mono,
+    monospace;
+}
+.featured-pet {
+  display: block;
+  width: 224px;
+  height: 226px;
+  object-fit: contain;
+  margin: 25px auto 10px;
+}
+.cast-card h3 {
+  font:
+    32px Instrument Serif,
+    Georgia;
+  margin: 0;
+}
+.cast-card p {
+  font-size: 13px;
+  min-height: 45px;
+}
+.cast-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+}
+.cast-thumbnails button {
+  border: 1px solid #e4dfd7;
+  background: #fbfaf6;
+  border-radius: 7px;
+  min-width: 0;
+  padding: 4px;
+  cursor: pointer;
+}
+.cast-thumbnails button[aria-pressed="true"] {
+  outline: 2px solid #964c3f;
+}
+.cast-thumbnails img {
+  width: 100%;
+  height: 64px;
+  object-fit: contain;
+}
+:focus-visible {
+  outline: 3px solid #964c3f;
+  outline-offset: 4px;
+}
+details p {
+  max-width: 650px;
+}
+@media (max-width: 780px) {
+  .cast-thumbnails {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  footer {
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  footer nav {
+    gap: 18px;
+  }
+  .site-header .mobile-menu {
+    display: block;
+  }
+  .cast-card {
+    padding: 16px;
+  }
+  .card-header {
+    gap: 10px;
+    font-size: 10px;
+  }
+}

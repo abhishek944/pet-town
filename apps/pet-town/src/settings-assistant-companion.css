@@ -1,0 +1,68 @@
+.assistant-wake {
+  align-items: center;
+  background: color-mix(in srgb, #7655ee 10%, var(--group-background, #28292e));
+  border-radius: 11px;
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+}
+
+.assistant-wake small {
+  color: var(--muted, #a4a8b1);
+  margin-top: 3px;
+}
+
+.assistant-pulse {
+  background: #7655ee;
+  border-radius: 50%;
+  box-shadow: 0 0 0 6px #7655ee24;
+  height: 11px;
+  width: 11px;
+}
+
+.assistant-wake .switch {
+  margin-left: auto;
+}
+
+.assistant-pet {
+  align-items: center;
+  background: linear-gradient(145deg, #f7dcd3, #e5dcff);
+  border-radius: 15px;
+  color: #251e32;
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
+  justify-content: center;
+  min-height: 190px;
+}
+
+.assistant-pet span {
+  font-size: 70px;
+  margin-bottom: 10px;
+}
+
+.assistant-pet img {
+  display: block;
+  height: 138px;
+  max-width: 72%;
+  object-fit: contain;
+}
+
+.assistant-pet img[hidden] {
+  display: none;
+}
+
+.assistant-pet b {
+  background: #fff;
+  border-radius: 999px;
+  padding: 7px 12px;
+}
+
+#assistant-create-pet {
+  margin-top: 10px;
+}
+
+#assistant-toggle.primary {
+  background: #7655ee;
+}

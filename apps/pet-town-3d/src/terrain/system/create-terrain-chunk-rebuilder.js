@@ -2,7 +2,7 @@
 import * as THREE from "three";
 export function createTerrainChunkRebuilder(state) {
   return function (value25, value26) {
-    let result44 = value26 * 8 + value25;
+    let result44 = value26 * state.chunksPerAxis + value25;
     let Result = state.mesher.build(value25 * 16, value26 * 16, 16);
     let result45 = state.chunkMeshes[result44];
     if (result45) {

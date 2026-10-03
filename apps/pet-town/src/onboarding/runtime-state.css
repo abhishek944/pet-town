@@ -1,0 +1,82 @@
+.check-again {
+  display: block;
+  margin: 12px auto 0;
+}
+.step-5.state-mode .proof,
+.step-5.state-mode .own {
+  display: none;
+}
+.step-5.state-mode .state-panel {
+  display: block;
+}
+.step-5:not(.state-mode) .state-panel {
+  display: none;
+}
+
+.step-4 .check-panel.show-check {
+  display: block;
+  top: 565px;
+  left: 145px;
+  right: 145px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  font-size: 11px;
+}
+.step-4 .check-panel.show-check p {
+  font-size: 11px;
+  margin: 5px 0;
+}
+.step-4 .ready-note {
+  display: none;
+}
+.sample-actions {
+  position: absolute;
+  bottom: 103px;
+  left: 80px;
+  right: 80px;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  font-size: 11px;
+}
+.step-5[data-sample-owned="true"] .state-panel {
+  padding: 20px 28px;
+}
+.step-5[data-sample-owned="true"] .state-panel img {
+  height: 90px;
+  width: 90px;
+}
+.step-5[data-sample-owned="true"] .state-panel h2 {
+  margin-top: 12px;
+}
+.step-5[data-sample-owned="true"] .state-panel p {
+  margin-top: 8px;
+  line-height: 1.4;
+}
+.step-5[data-sample-owned="true"] .stage-extra {
+  display: none;
+}
+.step-4 .check-panel.show-check {
+  top: 574px;
+  left: 145px;
+  right: 325px;
+  width: auto;
+  min-height: 0;
+  text-align: left;
+}
+.step-4 .check-panel.show-check b {
+  display: none;
+}
+.step-4 .check-panel.show-check p {
+  font-size: 11px;
+  line-height: 1.4;
+  margin: 0;
+}
+.step-4 .check-panel .secondary {
+  font-size: 11px;
+  padding: 4px 0;
+  margin-top: 3px;
+  color: #167b76;
+}

@@ -96,7 +96,9 @@
     spec += az * lowR * dash * 0.9 * uNight;
   }
   vec3 hl = uSunColor * (spec + glit) * sunVis * sunUp * (1.0 - clamp(foam, 0.0, 1.0));
-  col += min(hl, vec3(mix(2.5, 2.5, uNight)));
+  // Moonlit ripple normals must not turn into emissive white arcs and bloom around swimmers.
+  hl *= mix(1.0, 0.18, uNight);
+  col += min(hl, vec3(mix(2.5, 0.12, uNight)));
 
   // ---- far edge fade into whatever is behind (sky / fog) --------------------------------
   float fdist = length(wP.xz - cameraPosition.xz);

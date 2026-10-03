@@ -23,6 +23,6 @@ export function prepareTerrainSystem() {
       return updateTerrain;
     },
   };
-  terrainState.terrainWorldSize = 128;
+  terrainState.terrainWorldSize = 256;
   terrainState.terrainWorldHeight = 40;
 }

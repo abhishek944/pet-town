@@ -1,0 +1,100 @@
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: #24251f;
+  background: #f7f5ed;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+select {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+.site-header {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 max(5vw, 24px);
+  background: #fffdf7;
+  border-bottom: 1px solid #e9e6da;
+}
+.brand {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  background: #e8ad53;
+  color: #fff;
+  width: 29px;
+  height: 29px;
+  border-radius: 9px;
+  margin-right: 8px;
+}
+.brand-divider {
+  color: #c4c2b8;
+  font-weight: 400;
+  padding: 0 7px;
+}
+.account {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+}
+.account button {
+  background: none;
+  border: 0;
+  color: #777669;
+  text-decoration: underline;
+}
+main {
+  max-width: 1180px;
+  margin: auto;
+  padding: 0 24px;
+}
+.hero {
+  min-height: 480px;
+  display: grid;
+  grid-template-columns: 1fr 0.9fr;
+  align-items: center;
+  gap: 5%;
+  padding: 55px 0 45px;
+}
+.eyebrow {
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  font-weight: 500;
+  color: #a36c2b;
+}
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #83a883;
+  border-radius: 50%;
+  margin-right: 7px;
+}
+.hero h1,
+.join h2,
+.setup h2,
+.board h2 {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}

@@ -1,5 +1,9 @@
+import { createBoatsExtension } from "../boats/extension.js";
 import "./public-town.css";
 import { hudState } from "../hud/state.js";
+import { createWorldExpansionExtension } from "../world-expansion/extension.js";
+import { createWaterExploration } from "../water/exploration.js";
+import { createWorldAssetsExtension } from "../world-assets/extension.js";
 
 function createPublicTown() {
   let root;
@@ -60,4 +64,10 @@ function createPublicTown() {
   };
 }
 
-export const gameExtensions = [createPublicTown()];
+export const gameExtensions = [
+  createPublicTown(),
+  createWorldExpansionExtension(),
+  createWaterExploration(),
+  createBoatsExtension(),
+  createWorldAssetsExtension(),
+];

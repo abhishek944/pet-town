@@ -1,0 +1,13 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://b5quryeo5lhth"
+path="res://.godot/imported/scene_fog.glsl-f83506bb1bcf739e6ec702157b7cc909.res"
+
+[deps]
+
+source_file="res://shaders/post/scene_fog.glsl"
+dest_files=["res://.godot/imported/scene_fog.glsl-f83506bb1bcf739e6ec702157b7cc909.res"]
+
+[params]

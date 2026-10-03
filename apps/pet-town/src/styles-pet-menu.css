@@ -1,0 +1,67 @@
+.pet-menu-backdrop {
+  position: absolute;
+  z-index: 19;
+  inset: 0;
+  pointer-events: auto;
+}
+
+.pet-menu {
+  position: absolute;
+  z-index: 20;
+  min-width: 92px;
+  padding: 4px;
+  pointer-events: auto;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  border-radius: 9px;
+  background: rgb(18 23 32 / 0.94);
+  box-shadow: 0 5px 18px rgb(0 0 0 / 0.42);
+  backdrop-filter: blur(7px);
+}
+
+.pet-menu button {
+  width: 100%;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 6px;
+  color: white;
+  background: transparent;
+  font:
+    600 11px/15px -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pet-menu button svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pet-menu button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pet-menu-separator {
+  height: 1px;
+  margin: 3px 5px;
+  border: 0;
+  background: rgb(255 255 255 / 0.14);
+}
+
+.pet-menu button:hover,
+.pet-menu button:focus-visible {
+  outline: none;
+  background: rgb(255 255 255 / 0.14);
+}

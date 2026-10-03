@@ -5,6 +5,7 @@ pub fn install(app: &tauri::App) -> tauri::Result<()> {
     let preferences = MenuItemBuilder::with_id("preferences", "Settings…")
         .accelerator("CmdOrCtrl+,")
         .build(app)?;
+    let setup = MenuItemBuilder::with_id("onboarding", "Welcome & setup…").build(app)?;
     let open_3d_town = MenuItemBuilder::with_id("open-3d-town", "Open 3D Town").build(app)?;
     let show_town = MenuItemBuilder::with_id("show-town", "Show Pet Strip").build(app)?;
     let hide_town = MenuItemBuilder::with_id("hide-town", "Hide Pet Strip").build(app)?;
@@ -12,6 +13,7 @@ pub fn install(app: &tauri::App) -> tauri::Result<()> {
         .about(None)
         .separator()
         .item(&preferences)
+        .item(&setup)
         .item(&open_3d_town)
         .item(&show_town)
         .item(&hide_town)
@@ -27,12 +29,18 @@ pub fn install(app: &tauri::App) -> tauri::Result<()> {
         .paste()
         .select_all()
         .build()?;
+    let help_setup = MenuItemBuilder::with_id("help-onboarding", "Welcome & setup…").build(app)?;
+    let help_menu = SubmenuBuilder::new(app, "Help").item(&help_setup).build()?;
     let menu = MenuBuilder::new(app)
         .item(&app_menu)
         .item(&edit_menu)
+        .item(&help_menu)
         .build()?;
     app.set_menu(menu)?;
     app.on_menu_event(|handle, event| match event.id().as_ref() {
+        "onboarding" | "help-onboarding" => {
+            let _ = crate::onboarding::window::open(handle);
+        }
         "preferences" => {
             let _ = crate::settings_window::open_internal(handle, None, None);
         }
@@ -47,7 +55,7 @@ pub fn install(app: &tauri::App) -> tauri::Result<()> {
         }
         _ => {}
     });
-    let tray_settings = MenuItemBuilder::with_id("tray-settings", "Open Settings…").build(app)?;
+    let tray_settings = MenuItemBuilder::with_id("tray-settings", "Open Settings").build(app)?;
     let tray_open_3d = MenuItemBuilder::with_id("tray-open-3d-town", "Open 3D Town").build(app)?;
     let tray_show = MenuItemBuilder::with_id("tray-show-town", "Show Pet Strip").build(app)?;
     let tray_hide = MenuItemBuilder::with_id("tray-hide-town", "Hide Pet Strip").build(app)?;

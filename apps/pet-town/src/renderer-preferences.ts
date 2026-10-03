@@ -30,7 +30,7 @@ export function applyCitizenPreferences(
     preferences?.app.stripTheme === "ocean" &&
     effectivePetTheme(preferences, element.dataset.characterId ?? "") === "ocean";
   const preferredSize = ((ocean ? 86 : 44) * value.appearance.scalePercent) / 100;
-  element.style.setProperty("--citizen-size", `${Math.min(baseSize, preferredSize)}px`);
+  element.style.setProperty("--citizen-size", `${Math.min(baseSize, preferredSize) * (ocean ? 0.6 : 1)}px`);
   element.style.setProperty("--citizen-opacity", String(value.appearance.opacityPercent / 100));
   element.style.setProperty("--label-scale", String(value.labels.textScalePercent / 100));
   element.dataset.labelVisibility = value.labels.visibility;

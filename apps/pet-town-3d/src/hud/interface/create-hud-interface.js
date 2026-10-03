@@ -43,14 +43,10 @@ export function createHudInterface(context) {
     createSplashScreen(wrapper, title);
   }
   let bootScreen = document.getElementById(`boot`);
-  if (bootScreen) {
-    if (showSplash) {
-      requestAnimationFrame(() => bootScreen.remove());
-    } else {
-      bootScreen.style.transition = `opacity .4s`;
-      bootScreen.style.opacity = `0`;
-      setTimeout(() => bootScreen.remove(), 450);
-    }
+  if (bootScreen && !showSplash) {
+    bootScreen.style.transition = `opacity .4s`;
+    bootScreen.style.opacity = `0`;
+    setTimeout(() => bootScreen.remove(), 450);
   }
   if (query.has(`nohud`)) {
     hudState.hudRootElement.classList.add(`nohud`);

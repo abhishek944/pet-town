@@ -1,7 +1,11 @@
 export function playerWorldParse(collider, isTree, x, z, radius) {
-  if (!collider || typeof collider != `object`) {
-    return null;
+  if (collider?.boatInactive) return null;
+  if (collider?.kind === "obb") {
+    if (Math.hypot(collider.x - x, collider.z - z) > radius + Math.hypot(collider.hx, collider.hz))
+      return null;
+    return { ...collider };
   }
+  if (!collider || typeof collider != `object`) return null;
   try {
     if (
       typeof collider.x1 == `number` &&
@@ -59,6 +63,7 @@ export function playerWorldParse(collider, isTree, x, z, radius) {
             maxX: result.max.x,
             maxY: result.max.y,
             maxZ: result.max.z,
+            noTop: !!collider.noTop,
           };
     }
     if (collider.center && (collider.size || collider.half || collider.halfSize)) {
@@ -80,6 +85,7 @@ export function playerWorldParse(collider, isTree, x, z, radius) {
             maxX: center2.x + position2.x,
             maxY: center2.y + position2.y,
             maxZ: center2.z + position2.z,
+            noTop: !!collider.noTop,
           };
     }
     let result2;
@@ -127,6 +133,21 @@ export function playerWorldParse(collider, isTree, x, z, radius) {
         result15 = this.groundBelow(result2, 60, result4);
       }
       let result16 = collider.y1 ?? result15 + (collider.h ?? collider.height ?? 1.5);
+      if (collider.w && collider.d && collider.rot) {
+        return {
+          kind: "obb",
+          x: result2,
+          z: result4,
+          hx: collider.w / 2,
+          hz: collider.d / 2,
+          yaw: collider.rot,
+          y0: result15,
+          y1: result16,
+          noTop: result6,
+          roofHeight: collider.roofHeight,
+          ceilingHeight: collider.ceilingHeight,
+        };
+      }
       return {
         kind: `box`,
         minX: result2 - result13,
@@ -136,6 +157,8 @@ export function playerWorldParse(collider, isTree, x, z, radius) {
         maxY: result16,
         maxZ: result4 + result14,
         noTop: result6,
+        roofHeight: collider.roofHeight,
+        ceilingHeight: collider.ceilingHeight,
       };
     }
     if (Math.abs(result2 - x) > radius || Math.abs(result4 - z) > radius) {
@@ -163,6 +186,7 @@ export function playerWorldParse(collider, isTree, x, z, radius) {
       r: result7,
       y0: result8,
       y1: result9,
+      roofHeight: collider.roofHeight,
       noTop:
         result6 ||
         (isTree && collider.walkable !== true && collider.kind !== `log`) ||

@@ -25,6 +25,7 @@ __pycache__/
 apps/*/src-tauri/target/
 apps/*/src-tauri/resources/pet-town-pi-runtime/
 apps/*/src-tauri/resources/pet-town-pi-runtime.tar.gz
+apps/*/src-tauri/resources/godot/
 target/
 
 # Editors and operating systems

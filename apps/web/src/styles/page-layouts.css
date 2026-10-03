@@ -1,0 +1,155 @@
+.split {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 64px;
+  align-items: center;
+  padding: 64px 0;
+}
+.split .scene {
+  height: 510px;
+}
+.center {
+  text-align: center;
+  padding: 34px 0 0;
+}
+.center h1 {
+  font-size: 65px;
+  margin: 16px 0;
+}
+.center .copy {
+  max-width: 750px;
+  margin: auto;
+}
+.center .actions {
+  justify-content: center;
+  margin-top: 18px;
+}
+.center .scene {
+  height: 305px;
+  margin: 30px auto 26px;
+}
+.panorama {
+  height: 555px;
+  margin: 28px 0 25px;
+  position: relative;
+}
+.panorama .scene {
+  position: absolute;
+  inset: 0;
+}
+.panorama .scene:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #fbfaf6 2%, #fbfaf6ef 27%, #fbfaf600 65%);
+}
+.panorama .intro {
+  position: relative;
+  padding: 46px 36px;
+  width: 540px;
+}
+.panorama h1 {
+  font-size: 73px;
+}
+.panorama .caption {
+  left: auto;
+  right: 18px;
+  z-index: 2;
+}
+.portals {
+  padding: 38px 0;
+}
+.portals .intro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 40px;
+}
+.portals h1 {
+  font-size: 69px;
+  margin: 18px 0;
+}
+.portals .copy {
+  max-width: 470px;
+}
+.portals .cards {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 20px;
+  margin-top: 30px;
+}
+.portals .scene {
+  height: 356px;
+}
+.portal-card {
+  padding: 30px;
+  background: #f5f2ec;
+  border: 1px solid #e4dfd7;
+  border-radius: 16px;
+}
+.portal-card h2 {
+  font-size: 45px;
+  margin: 12px 0;
+}
+.portal-card p {
+  font-size: 15px;
+}
+.portal-card .voice {
+  padding: 17px;
+  border: 1px solid #ded6ca;
+  border-radius: 9px;
+  background: #fff;
+  margin-top: 21px;
+  font-size: 14px;
+}
+.editorial {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  gap: 36px;
+  padding: 43px 0;
+}
+.editorial aside {
+  border-right: 1px solid #e4dfd7;
+  padding-right: 28px;
+}
+.editorial aside h2 {
+  font-size: 39px;
+  line-height: 1.05;
+  margin: 24px 0;
+}
+.editorial aside p {
+  font-size: 13px;
+}
+.editorial .intro {
+  display: grid;
+  grid-template-columns: 1fr 335px;
+  gap: 28px;
+  align-items: center;
+}
+.editorial h1 {
+  font-size: 69px;
+}
+.editorial .copy {
+  font-size: 14px;
+}
+.editorial .actions {
+  margin-top: 18px;
+  gap: 8px;
+}
+.editorial .button {
+  font-size: 11px;
+  padding: 13px;
+}
+.editorial .scene {
+  height: 335px;
+  margin-top: 20px;
+}
+.editorial .features {
+  margin-top: 27px;
+}
+.editorial .features h2 {
+  font-size: 23px;
+}
+.editorial .features p {
+  font-size: 11px;
+}

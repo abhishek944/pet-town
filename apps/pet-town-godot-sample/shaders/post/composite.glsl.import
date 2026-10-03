@@ -1,0 +1,13 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://b6o0tiupfsoac"
+path="res://.godot/imported/composite.glsl-a4c0ed87c749122718ca97cffc813633.res"
+
+[deps]
+
+source_file="res://shaders/post/composite.glsl"
+dest_files=["res://.godot/imported/composite.glsl-a4c0ed87c749122718ca97cffc813633.res"]
+
+[params]

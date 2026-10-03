@@ -3,8 +3,49 @@
 
 fn main() {
     let arguments: Vec<String> = std::env::args().collect();
+    if arguments
+        .iter()
+        .any(|argument| argument == "--onboarding-herdr")
+    {
+        if let Err(message) = pet_town_lib::open_onboarding_herdr_from_cli() {
+            eprintln!("{message}");
+            std::process::exit(2);
+        }
+        println!("ok");
+        return;
+    }
+    if arguments
+        .iter()
+        .any(|argument| argument == "--usage-snapshot")
+    {
+        println!("{}", pet_town_lib::codex_usage_snapshot_from_cli());
+        return;
+    }
     if arguments.iter().any(|argument| argument == "--snapshot") {
         println!("{}", pet_town_lib::snapshot_json());
+        return;
+    }
+    if let Some(index) = arguments
+        .iter()
+        .position(|argument| argument == "--focus-native-town")
+    {
+        let result = arguments
+            .get(index + 1)
+            .zip(arguments.get(index + 2))
+            .ok_or_else(|| "--focus-native-town requires the town PID and desktop PID".to_string())
+            .and_then(|(pid, parent)| {
+                let pid = pid
+                    .parse::<u32>()
+                    .map_err(|_| "Invalid town PID".to_string())?;
+                let parent = parent
+                    .parse::<u32>()
+                    .map_err(|_| "Invalid desktop PID".to_string())?;
+                pet_town_lib::focus_native_town_from_cli(pid, parent)
+            });
+        if let Err(message) = result {
+            eprintln!("{message}");
+            std::process::exit(2);
+        }
         return;
     }
     if let Some(index) = arguments

@@ -27,6 +27,16 @@ pub(crate) async fn town_action(
     id: Option<String>,
 ) -> Result<(), String> {
     require_town(&window)?;
+    dispatch(app, action, active, mode, id).await
+}
+
+pub(crate) async fn dispatch(
+    app: AppHandle,
+    action: String,
+    active: Option<bool>,
+    mode: Option<String>,
+    id: Option<String>,
+) -> Result<(), String> {
     match action.as_str() {
         "invokeMayor" => orchestrator::invoke::invoke_mayor(&app),
         "mayorTalk" => {

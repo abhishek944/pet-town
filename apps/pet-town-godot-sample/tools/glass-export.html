@@ -1,0 +1,16 @@
+<!doctype html><html><body><button id="export">Export original glass faces</button><button id="shadow">Export original shadow mask</button><output id="status">Ready</output><script type="module">
+import { createVegetationBlobShadowMaterial } from '/src/vegetation/textures/create-vegetation-blob-shadow-material.js';
+document.getElementById('shadow').onclick=async()=>{ const material=createVegetationBlobShadowMaterial(); const blob=await new Promise(resolve=>material.alphaMap.image.toBlob(resolve,'image/png')); const response=await fetch('http://127.0.0.1:1427/asset/region-shadow-mask.png',{method:'POST',body:blob}); document.getElementById('status').textContent=response.ok?'Original shadow mask exported':'Export failed'; material.dispose(); };
+import { createBlockFaceCanvas } from '/src/building/icons/create-block-face-canvas.js';
+import { prepareBuildingIcons } from '/src/building/icons/prepare.js';
+import { prepareBuildingTexturePainters } from '/src/building/texture-painters/prepare.js';
+prepareBuildingIcons(); prepareBuildingTexturePainters();
+document.getElementById('export').onclick=async()=>{
+try { for (const face of ['top','side','bottom']) {
+const canvas=createBlockFaceCanvas('glass',face,128);
+const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+const response=await fetch('http://127.0.0.1:1427/asset/region-glass-'+face+'.png',{method:'POST',body:blob});
+if(!response.ok)throw new Error(response.status);
+} document.getElementById('status').textContent='Three original glass faces exported';
+}catch(error){document.getElementById('status').textContent=String(error);}
+};</script></body></html>

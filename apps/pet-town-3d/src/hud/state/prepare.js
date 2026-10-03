@@ -19,8 +19,6 @@ export function prepareHudState() {
     capture: 0,
     help: false,
     splash: false,
-    splashT: 0,
-    frames: 0,
     lastTime: ``,
     lastPeriod: ``,
     lastSel: -1,

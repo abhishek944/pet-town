@@ -6,6 +6,7 @@ export function creatureActorTryPlay(frame) {
     if (
       result4 === this ||
       result4.pose ||
+      result4.def.flight ||
       ![`idle`, `wander`, `look`, `graze`, `fly`].includes(result4.state) ||
       result4.flyer !== this.flyer
     ) {

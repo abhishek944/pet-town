@@ -1,0 +1,14 @@
+[[permission]]
+identifier = "allow-onboarding"
+description = "Local welcome setup, dependency installation and owned sample actions."
+commands.allow = ["get_onboarding_context", "save_onboarding", "set_onboarding_appearance", "check_onboarding", "install_onboarding_herdr", "run_onboarding_sample", "stop_onboarding_sample", "poll_onboarding_sample", "onboarding_handoff", "finish_onboarding"]
+
+[[permission]]
+identifier = "allow-onboarding-presence"
+description = "Report visible pet identities from the trusted local desktop strip."
+commands.allow = ["report_onboarding_pets"]
+
+[[permission]]
+identifier = "allow-open-onboarding"
+description = "Reopen local Welcome & setup from existing trusted desktop windows."
+commands.allow = ["open_onboarding"]

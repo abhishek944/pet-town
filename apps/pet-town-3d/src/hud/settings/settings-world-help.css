@@ -1,0 +1,64 @@
+#hud .town-settings .settings-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 25px;
+  background: #f4e9d3;
+  border-top: 1px solid #deccac;
+  color: #716449;
+  font-size: 11px;
+}
+#hud .town-settings .settings-footer button {
+  border: 0;
+  background: none;
+  text-decoration: underline;
+  color: #9c6244;
+  font: inherit;
+  cursor: pointer;
+}
+#hud .town-settings .guide h3 {
+  font:
+    700 19px Fraunces,
+    Georgia,
+    serif;
+  margin: 0 0 11px;
+}
+#hud .town-settings .guide-group {
+  margin-top: 18px;
+}
+#hud .town-settings .guide-group h4 {
+  font-size: 10px;
+  color: #716449;
+  letter-spacing: 1.7px;
+  margin: 0 0 9px;
+  text-transform: uppercase;
+}
+#hud .town-settings .guide-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 12px;
+}
+#hud .town-settings .guide-row span {
+  color: #75664d;
+}
+#hud .town-settings .setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  margin: 17px 0;
+}
+#hud .town-settings .setting-row p {
+  font-size: 11px;
+  color: #716449;
+  margin: 3px 0;
+}
+#hud .town-settings .setting-row button {
+  background: #eee2c9;
+  border: 1px solid #d6c19b;
+  padding: 7px 12px;
+  border-radius: 9px;
+}

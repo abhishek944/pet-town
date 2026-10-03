@@ -1,17 +1,18 @@
 /** Prop lifecycle, collision and interaction API, terrain reseating, static batches and animated prop effects. */
 import * as THREE from "three";
 import { propsState } from "../state.js";
+import { placementKey } from "../../world-assets/placement-key.js";
 export function configurePropRecords(build) {
   build.beginRecord = (value4, position2, kindValue = {}) => {
     let options3 = {
       tag: value4,
       it: position2,
-      x: position2.x,
-      z: position2.z,
+      x: position2.x ?? position2.mx,
+      z: position2.z ?? position2.mz,
       y: position2.y,
-      h0: build.terrain.h(position2.x, position2.z),
+      h0: build.terrain.h(position2.x ?? position2.mx, position2.z ?? position2.mz),
       kind: kindValue.kind ?? position2.type,
-      reseat: !!kindValue.reseat,
+      reseat: !!kindValue.reseat || !!position2.terrainSupport,
       foot: kindValue.foot ?? 0.3,
       mode: kindValue.mode,
       entry: null,
@@ -30,12 +31,14 @@ export function configurePropRecords(build) {
     let it2 = itValue.it;
     let options4 = {
       type: it2.type,
-      name: value5,
+      name: it2.name ?? value5,
       x: it2.x,
       y: it2.y,
       z: it2.z,
       rot: it2.rot || 0,
       radius: value6,
+      placementKey: placementKey(it2),
+      assetId: it2.opts?.assetId ?? null,
       pos: new THREE.Vector3(it2.x, it2.y, it2.z),
       ...value7,
     };

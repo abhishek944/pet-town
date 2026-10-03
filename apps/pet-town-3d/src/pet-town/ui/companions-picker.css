@@ -1,0 +1,77 @@
+.town-roster-toggle {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 39px;
+  padding: 8px 13px;
+  font-weight: 900 !important;
+  border: 2px solid #d8b788;
+  border-radius: 12px;
+  color: #fff1d2 !important;
+  background: linear-gradient(#ac794b, #946239);
+  box-shadow:
+    0 3px 0 #66472c,
+    0 8px 16px #3044292b;
+}
+.town-roster-toggle kbd {
+  font:
+    800 11px Nunito,
+    sans-serif;
+  color: #f0d8b4;
+}
+.town-list-panel {
+  position: fixed;
+  left: 24px;
+  top: 152px;
+  width: min(348px, calc(100vw - 48px));
+  background: #fff6e6;
+  color: #493f30;
+  border: 2px solid #d4b78c;
+  border-radius: 20px;
+  box-shadow:
+    0 5px 0 #a07a4f,
+    0 15px 38px #243b3040;
+  overflow: hidden;
+  pointer-events: auto;
+}
+.town-picker-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 18px 14px;
+  border-bottom: 1px solid #dfcfb0;
+  background: linear-gradient(#fbf2df, #f7ecd6);
+}
+.town-picker-head h2 {
+  font:
+    700 23px/1.1 Fraunces,
+    Georgia,
+    serif;
+  margin: 0;
+}
+.town-count {
+  font:
+    800 12px Nunito,
+    sans-serif;
+  border: 1px solid #d5c39f;
+  border-radius: 12px;
+  padding: 3px 8px;
+  margin-left: 5px;
+  vertical-align: 3px;
+}
+.town-picker-head p {
+  font-size: 12px;
+  color: #76694e;
+  margin: 6px 0 0;
+}
+.town-dismiss {
+  background: #f5e8d0;
+  border: 1px solid #d7c09a;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  flex: none;
+  font-size: 17px !important;
+  color: #745638 !important;
+}

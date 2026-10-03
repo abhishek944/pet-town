@@ -1,0 +1,55 @@
+// Original journal-experiences.js ocean cards, retained with the same copy and destinations.
+export const oceanExperiences = [
+  {
+    id: "lagoon",
+    art: "dolphin",
+    name: "Meet the dolphins",
+    note: "Swim beside three curious dolphins at Dolphin Lagoon. Watch for a leap above the waves.",
+    how: "Swim into the lagoon to earn its stamp.",
+  },
+  {
+    id: "reef",
+    art: "reef",
+    name: "Dive into Coral Garden",
+    note: "Little schools of fish weave through colourful coral and anemones.",
+    how: "Go underwater near the reef to discover it.",
+  },
+  {
+    id: "kelp",
+    art: "kelp",
+    name: "Wander the kelp forest",
+    note: "Find swaying green fronds, a school of fish and two sea turtles.",
+    how: "Dive into Swaying Kelp to earn its stamp.",
+  },
+  {
+    id: "wreck",
+    art: "wreck",
+    name: "Find the sunken sailboat",
+    note: "An old broken boat rests quietly on the seabed. Swim down and take a closer look.",
+    how: "Explore the wreck underwater to discover it.",
+  },
+  {
+    id: "island",
+    art: "island",
+    name: "Swim to Pearlrest Island",
+    note: "A beach beyond the horizon, with palms and a picnic spot. Approach its stepped eastern shore.",
+    how: "Step onto dry island ground to earn its stamp.",
+  },
+  {
+    id: "harbor-launch",
+    art: "ship",
+    name: "Take the harbor launch",
+    note: "A wooden boat waits west of Driftwood Camp. Climb aboard, walk the deck and take the helm for your own voyage.",
+    how: "F to board or take / leave the helm. WASD steers. Get off onto clear shore or swim from an open side. No stamp required.",
+    passive: true,
+  },
+  {
+    id: "reef",
+    art: "glow",
+    name: "Swim through night glow",
+    note: "Return after dusk to watch glowing plankton follow your swim through the sea.",
+    how: "Enjoy the glow at night; no stamp or timer.",
+    passive: true,
+    dusk: true,
+  },
+];

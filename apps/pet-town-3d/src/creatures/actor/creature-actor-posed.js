@@ -37,7 +37,10 @@ export function creatureActorPosed(deltaTime, frame) {
       }
     }
   }
-  if (this.flyer && state2 !== `sleep`) {
+  if (this.def.flight) {
+    this.flying = state2 !== `sleep` && state2 !== `rest`;
+    this.alt = this.flying ? 0.55 : 0;
+  } else if (this.flyer && state2 !== `sleep`) {
     this.flying = true;
     this.alt = 0.55;
   }

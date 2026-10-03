@@ -1,0 +1,27 @@
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+.frozen-art {
+  object-fit: contain;
+  display: inline-block;
+}
+.step-5 .state-panel .frozen-art {
+  width: 115px;
+  height: 115px;
+}
+.step-1 .card .frozen-art {
+  width: 160px;
+  height: 150px;
+}
+.step-2 .frozen-art {
+  position: absolute;
+  width: 104px;
+  height: 104px;
+  bottom: 0;
+  left: calc(50% - 52px);
+}

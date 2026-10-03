@@ -8,7 +8,11 @@ export function disposeBuiltProps() {
   }
   propsState.propsRuntime.statics = [];
   propsState.propsRuntime.smokes = [];
-  for (let result2 of propsState.propsRuntime.fires) {
+  const fires = new Set(propsState.propsRuntime.fires);
+  for (const record of propsState.propsRuntime.recs.values()) {
+    for (const fire of record.fires ?? []) fires.add(fire);
+  }
+  for (let result2 of fires) {
     disposePropEmitter(result2);
   }
   propsState.propsRuntime.fires = [];

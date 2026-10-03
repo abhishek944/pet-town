@@ -9,7 +9,9 @@ import { getBuildingBlockState } from "../terrain-adapter/get-building-block-sta
 import { animateBuildingBlockChange } from "./animate-building-block-change.js";
 import { emitBlockDebris } from "../meshes/emit-block-debris.js";
 import { setPlacementGhostScale } from "./set-placement-ghost-scale.js";
+import { isBuildingInputBlocked } from "../input/is-building-input-blocked.js";
 export function placeSelectedBlock() {
+  if (isBuildingInputBlocked()) return false;
   let place2 = buildingState.buildingRuntime.place;
   let result = buildingState.resolvedBuildingPalette[buildingState.buildingRuntime.selected];
   if (!buildingState.buildingRuntime.target || !place2) {

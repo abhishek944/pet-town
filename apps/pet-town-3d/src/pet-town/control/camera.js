@@ -3,18 +3,23 @@ import { playerFollowCamera } from "../../player/camera/player-follow-camera.js"
 import { playerCollisionWorld } from "../../player/collision-world/player-collision-world.js";
 import { getPlayerCameraFrame } from "../../player/system/get-player-camera-frame.js";
 import { createTownFoliageFade } from "./foliage.js";
+import { validatePlayerCameraPose } from "../../player/camera/validate-player-camera-pose.js";
+import { publishPlayerCameraDiagnostics } from "../../player/camera/publish-player-camera-diagnostics.js";
 
 function frame(record) {
   return {
     pos: record.position,
+    head: record.head,
     vel: record.body.vel,
     onGround: record.body.onGround,
     swimming: record.body.swimming,
+    diving: record.body.diving,
     gliding: record.body.gliding,
     lastGroundY: record.body.lastGroundY,
     runAmt: record.runAmt ?? 0,
     stepPhase: record.character.phase,
     moving: record.body.vel.lengthSq() > 0.01,
+    height: Math.max(0.6, (record.head.y - record.position.y) / 0.82),
   };
 }
 
@@ -62,6 +67,9 @@ export function createTownCamera(context, originalPlayer) {
     toggleFirstPerson() {
       if (!followed) return;
       firstPerson = !firstPerson;
+      camera.safePosition = null;
+      camera.visibilityWaypoint = null;
+      camera.comfortRecovery = false;
       followed.root.visible = !firstPerson;
       if (!firstPerson) camera.snap(frame(followed));
     },
@@ -80,18 +88,26 @@ export function createTownCamera(context, originalPlayer) {
       camera.world.refresh(deltaTime);
       camera.world.gatherColliders(position.x, position.y, position.z, camera.distT + 2);
       if (firstPerson) {
+        camera.solveStartedAt = performance.now();
+        camera.queryPrepareStart = context.cameraQueries.stats.prepareTotalMs;
         camera.yaw = camera.yawT;
         camera.pitch = camera.pitchT;
         camera.focus.copy(followed.head);
-        context.camera.position.copy(followed.head);
-        aim.set(-Math.sin(camera.yaw), -Math.tan(camera.pitch - 0.35), -Math.cos(camera.yaw));
-        context.camera.lookAt(aim.add(followed.head));
         if (context.camera.fov !== 65) {
           context.camera.fov = 65;
           context.camera.updateProjectionMatrix();
         }
+        context.cameraQueries.beginSolve();
+        try {
+          validatePlayerCameraPose.call(camera, followed.head, followed.head);
+        } finally {
+          context.cameraQueries.endSolve();
+        }
+        aim.set(-Math.sin(camera.yaw), -Math.tan(camera.pitch - 0.35), -Math.cos(camera.yaw));
+        context.camera.lookAt(aim.add(context.camera.position));
+        publishPlayerCameraDiagnostics.call(camera, frame(followed));
       } else camera.update(deltaTime, frame(followed));
-      foliage.update(camera.world, position, deltaTime);
+      foliage.update(camera.world, position, deltaTime, !firstPerson);
     },
     dispose() {
       if (followed) select(null);

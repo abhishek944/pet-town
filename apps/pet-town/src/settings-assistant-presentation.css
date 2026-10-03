@@ -1,0 +1,96 @@
+:root[data-theme="light"] .assistant-panel {
+  background: #fbf9f6;
+}
+
+:root[data-theme="light"] .assistant-card {
+  background: #fff;
+  border-color: #e8e5dd;
+  box-shadow: 0 1px 2px #0000000f;
+}
+
+:root[data-theme="light"] .assistant-card input,
+:root[data-theme="light"] .assistant-card select,
+:root[data-theme="light"] .assistant-card textarea {
+  background: #fff;
+  border-color: #e8e5dd;
+  color: #111;
+}
+
+:root[data-theme="light"] .assistant-wake {
+  background: #f1efff;
+}
+:root[data-theme="light"] .assistant-wake small {
+  color: #535866;
+}
+
+:root[data-theme="light"] .assistant-badge {
+  background: #e6f8ec;
+  color: #176b37;
+}
+:root[data-theme="light"] .assistant-badge[data-ready="true"],
+:root[data-theme="light"] .assistant-card .row b[data-ready="true"] {
+  color: #176b37;
+}
+
+:root[data-theme="light"] #assistant-toggle.secondary {
+  background: #f1efff;
+  color: #4b3f9c;
+}
+
+.assistant-panel .primary {
+  background: #0868c7;
+}
+
+.assistant-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.assistant-open {
+  margin-top: 14px;
+  width: 100%;
+}
+
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] .assistant-panel {
+    background: #fbf9f6;
+  }
+  :root[data-theme="system"] .assistant-card {
+    background: #fff;
+    border-color: #e8e5dd;
+    box-shadow: 0 1px 2px #0000000f;
+  }
+  :root[data-theme="system"] .assistant-card input,
+  :root[data-theme="system"] .assistant-card select,
+  :root[data-theme="system"] .assistant-card textarea {
+    background: #fff;
+    border-color: #e8e5dd;
+    color: #111;
+  }
+  :root[data-theme="system"] .assistant-wake {
+    background: #f1efff;
+  }
+  :root[data-theme="system"] .assistant-wake small {
+    color: #535866;
+  }
+  :root[data-theme="system"] .assistant-badge {
+    background: #e6f8ec;
+    color: #176b37;
+  }
+  :root[data-theme="system"] .assistant-badge[data-ready="true"],
+  :root[data-theme="system"] .assistant-card .row b[data-ready="true"] {
+    color: #176b37;
+  }
+  :root[data-theme="system"] #assistant-toggle.secondary {
+    background: #f1efff;
+    color: #4b3f9c;
+  }
+}
+
+@media (max-width: 760px) {
+  .assistant-grid,
+  .assistant-fields {
+    grid-template-columns: 1fr;
+  }
+}

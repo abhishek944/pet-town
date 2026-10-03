@@ -28,6 +28,8 @@ import {
   type OrchestratorView,
 } from "./orchestrator-pet";
 
+import { installOnboardingPresence } from "./onboarding/presence";
+
 const POLL_INTERVAL_MS = 1_000;
 const RETIRE_ANIMATION_MS = 520;
 const villageElement = document.querySelector<HTMLElement>("#village");
@@ -150,6 +152,7 @@ async function reloadUserPacks(): Promise<void> {
 }
 
 async function start(): Promise<void> {
+  await installOnboardingPresence(village);
   await listen("user-packs-changed", () => {
     void reloadUserPacks();
   });

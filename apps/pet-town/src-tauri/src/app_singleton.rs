@@ -7,6 +7,12 @@ pub(crate) struct AppLock {
     _file: File,
 }
 
+impl AppLock {
+    pub(crate) fn release_for_restart(&self) -> Result<(), String> {
+        fs2::FileExt::unlock(&self._file).map_err(|error| error.to_string())
+    }
+}
+
 pub(crate) fn lock_path() -> PathBuf {
     std::env::var_os("HOME")
         .map(PathBuf::from)

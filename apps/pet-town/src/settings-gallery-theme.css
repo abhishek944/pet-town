@@ -1,0 +1,32 @@
+:root[data-theme="light"] .gallery {
+  --gallery-muted: #50535a;
+  --gallery-count: #50535a;
+  --gallery-count-border: #00000020;
+  --gallery-card: #ffffff9c;
+  --gallery-border: #0000001c;
+  --gallery-veil: #eeeeef65;
+  --gallery-badge: #f7f7f9ef;
+  --gallery-badge-text: #333;
+  --gallery-badge-border: #00000030;
+  --gallery-system-tag: #e8f3ff;
+  --gallery-system-tag-text: #174f7a;
+  --gallery-system-tag-border: #377baa80;
+  --gallery-system-tag-shadow: #0003;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]):not([data-theme="light"]) .gallery {
+    --gallery-muted: #50535a;
+    --gallery-count: #50535a;
+    --gallery-count-border: #00000020;
+    --gallery-card: #ffffff9c;
+    --gallery-border: #0000001c;
+    --gallery-veil: #eeeeef65;
+    --gallery-badge: #f7f7f9ef;
+    --gallery-badge-text: #333;
+    --gallery-badge-border: #00000030;
+    --gallery-system-tag: #e8f3ff;
+    --gallery-system-tag-text: #174f7a;
+    --gallery-system-tag-border: #377baa80;
+    --gallery-system-tag-shadow: #0003;
+  }
+}

@@ -2,7 +2,7 @@
 
 **User goal:** Start an agent in a coding tool and see one pet that reflects its current activity until the session ends.
 
-Pet Town observes ordinary agent sessions; it does not create or resume them. The user starts an agent in Herdr, Claude Code, Codex, OpenCode, Pi, Factory Droid, or Cursor. The voice assistant is a separate path that can launch its own Pi agent; see the [orchestrator flow](orchestrator.md).
+Pet Town observes ordinary agent sessions; the user normally starts them in Herdr, Claude Code, Codex, OpenCode, Pi, Factory Droid, or Cursor. The explicit [onboarding Test](onboarding.md) is a narrow exception: it can create one app-owned sample session in a temporary demo folder, preserving the tool's approvals. It never creates an agent simply by opening onboarding. The voice assistant is a separate path that can launch its own Pi agent; see the [orchestrator flow](orchestrator.md).
 
 ```text
 User starts an agent in Herdr or a connected tool

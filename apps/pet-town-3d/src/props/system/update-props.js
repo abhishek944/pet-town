@@ -14,6 +14,7 @@ export function updateProps(value, cameraValue) {
     propsState.propsRuntime.mats)
   ) {
     propsState.propsRuntime.mats.glass.emissiveIntensity = propsNightFactorResult * 1.35;
+    propsState.propsRuntime.mats.collectionGlass.emissiveIntensity = propsNightFactorResult * 1.35;
     propsState.propsRuntime.mats.lamp.emissiveIntensity = 0.1 + propsNightFactorResult * 2.4;
     for (let result of propsState.propsRuntime.mats.bounce ?? []) {
       result.emissiveIntensity = 0.15 * (1 - 0.85 * propsNightFactorResult);

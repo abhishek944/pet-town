@@ -1,9 +1,30 @@
 /** Prop lifecycle, collision and interaction API, terrain reseating, static batches and animated prop effects. */
 import { samplePropFoundationHeight } from "./sample-prop-foundation-height.js";
+import { placedAsset } from "../../world-assets/placed-asset.js";
+import { setPropRecordVisible } from "./set-prop-record-visible.js";
 import { propsState } from "../state.js";
+import { rebuildOriginalProp } from "./rebuild-original-prop.js";
 export function reseatPropRecord(position2, hValue) {
+  if (position2.it.terrainSupport) return rebuildOriginalProp(position2, hValue);
+  let visibilityChanged = false;
+  let support;
+  if (position2.kind === "asset") {
+    support = placedAsset(
+      hValue,
+      {
+        ...position2.it,
+        assetId: position2.it.opts?.assetId,
+      },
+      position2.it.assetKey,
+    );
+    visibilityChanged = setPropRecordVisible(position2, Boolean(support));
+    position2.h0 = hValue.h(position2.x, position2.z);
+    if (!support) return visibilityChanged;
+    position2.it.stats = support.stats;
+  }
   let result =
-    position2.kind === `stone` || position2.kind === `campfire`
+    support?.y ??
+    (position2.kind === `stone` || position2.kind === `campfire`
       ? hValue.h(position2.x, position2.z)
       : samplePropFoundationHeight(
           hValue,
@@ -11,11 +32,11 @@ export function reseatPropRecord(position2, hValue) {
           position2.z,
           position2.foot,
           position2.mode,
-        );
+        ));
   position2.h0 = hValue.h(position2.x, position2.z);
   let result2 = result - position2.y;
   if (Math.abs(result2) < 1e-4) {
-    return false;
+    return visibilityChanged;
   }
   position2.y = result;
   if (position2.it) {
@@ -24,15 +45,26 @@ export function reseatPropRecord(position2, hValue) {
   for (let result3 of propsState.propsRuntime.ranges?.get(position2.tag) ?? []) {
     let position3 = result3.mesh.geometry.attributes.position;
     let array2 = position3.array;
+    let minimumY = Infinity;
+    let maximumY = -Infinity;
     for (
       let start2 = result3.start, result4 = result3.start + result3.count;
       start2 < result4;
       start2++
     ) {
       array2[start2 * 3 + 1] += result2;
+      minimumY = Math.min(minimumY, array2[start2 * 3 + 1]);
+      maximumY = Math.max(maximumY, array2[start2 * 3 + 1]);
     }
+    // Unchanged ranges remain inside the previous bounds. Expand only for this
+    // moved record instead of scanning every vertex of the shared material batch.
+    const geometry = result3.mesh.geometry;
+    geometry.boundingBox.min.y = Math.min(geometry.boundingBox.min.y, minimumY);
+    geometry.boundingBox.max.y = Math.max(geometry.boundingBox.max.y, maximumY);
+    geometry.boundingBox.getBoundingSphere(geometry.boundingSphere);
     position3.addUpdateRange(result3.start * 3, result3.count * 3);
     position3.needsUpdate = true;
+    result3.version = (result3.version ?? 0) + 1;
   }
   if (position2.entry) {
     position2.entry.y += result2;

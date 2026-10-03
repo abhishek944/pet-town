@@ -1,5 +1,5 @@
 import markup from "./pet-gallery.html?raw";
-import styles from "./pet-gallery.css?raw";
+import styles from "./pet-gallery-styles.js";
 import { installGameStyles } from "../../core/install-game-styles.js";
 import { PET_CATALOG, getPetDefinition } from "../../pet-town/pets/catalog.js";
 import { createPetPreview, createPetPortrait } from "../../pet-town/pets/preview.js";

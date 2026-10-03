@@ -5,5 +5,5 @@
   "windows": ["town"],
   "local": true,
   "remote": { "urls": ["http://127.0.0.1:1422/"] },
-  "permissions": ["core:default", "allow-town-bridge"]
+  "permissions": ["core:default", "allow-town-bridge", "allow-app-updates"]
 }

@@ -29,6 +29,7 @@ export function updatePlayerControlsAndPhysics(input, deltaTime, camera, body, w
     mz: movement.z,
     run: running,
     jumpHeld: controls.jumpHeld,
+    diveHeld: controls.diveHeld,
   };
   for (; playerState.playerRuntime.acc >= playerState.playerPhysicsTimeStep;) {
     body.step(playerState.playerPhysicsTimeStep, physicsInput);

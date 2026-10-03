@@ -1,46 +1,57 @@
-/** Editable terrain lifecycle, chunks, water masks, raycasting, custom blocks, block icons and lighting updates. */
-
+/** Keep the two 3×3 wall filters current without scanning the world for each edit. */
 export function createWallHeightRebuilder(state) {
-  return () => {
-    let floatBuffer4 = new Float32Array(16384);
-    let floatBuffer5 = new Float32Array(16384);
-    let callback18 = (value3, value4) => (value3 < 0 ? 0 : value3 >= value4 ? value4 - 1 : value3);
-    for (let index4 = 0; index4 < 128; index4++) {
-      for (let index5 = 0; index5 < 128; index5++) {
-        let result11 = -1e9;
-        let result12 = 1e9;
-        for (let result13 = -1; result13 <= 1; result13++) {
-          for (let result14 = -1; result14 <= 1; result14++) {
-            let result15 =
-              state.columnTops[
-                callback18(index4 + result13, 128) * 128 + callback18(index5 + result14, 128)
-              ];
-            if (result15 > result11) {
-              result11 = result15;
-            }
-            if (result15 < result12) {
-              result12 = result15;
-            }
-          }
-        }
-        floatBuffer4[index4 * 128 + index5] = result11;
-        floatBuffer5[index4 * 128 + index5] = result12;
+  let maximums;
+  let minimums;
+  const clamp = (value) => Math.max(0, Math.min(state.size - 1, value));
+  function extremaAt(x, z) {
+    let maximum = -Infinity;
+    let minimum = Infinity;
+    for (let dz = -1; dz <= 1; dz++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const height = state.columnTops[clamp(z + dz) * state.size + clamp(x + dx)];
+        maximum = Math.max(maximum, height);
+        minimum = Math.min(minimum, height);
       }
     }
-    for (let index6 = 0; index6 < 128; index6++) {
-      for (let index7 = 0; index7 < 128; index7++) {
-        let index8 = 0;
-        let index9 = 0;
-        for (let result16 = -1; result16 <= 1; result16++) {
-          for (let result17 = -1; result17 <= 1; result17++) {
-            let result18 =
-              callback18(index6 + result16, 128) * 128 + callback18(index7 + result17, 128);
-            index8 += floatBuffer4[result18];
-            index9 += floatBuffer5[result18];
-          }
-        }
-        state.wallMaximums[index6 * 128 + index7] = index8 / 9;
-        state.wallMinimums[index6 * 128 + index7] = index9 / 9;
+    maximums[z * state.size + x] = maximum;
+    minimums[z * state.size + x] = minimum;
+  }
+  function smoothAt(x, z) {
+    let maximum = 0;
+    let minimum = 0;
+    for (let dz = -1; dz <= 1; dz++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const index = clamp(z + dz) * state.size + clamp(x + dx);
+        maximum += maximums[index];
+        minimum += minimums[index];
+      }
+    }
+    state.wallMaximums[z * state.size + x] = maximum / 9;
+    state.wallMinimums[z * state.size + x] = minimum / 9;
+  }
+  return (x, z) => {
+    const full = !maximums || !Number.isFinite(x) || !Number.isFinite(z);
+    if (!maximums) {
+      maximums = new Float32Array(state.size * state.size);
+      minimums = new Float32Array(state.size * state.size);
+    }
+    const radius = full ? state.size : 1;
+    const centerX = full ? 0 : x;
+    const centerZ = full ? 0 : z;
+    for (let row = clamp(centerZ - radius); row <= clamp(centerZ + radius); row++) {
+      for (let column = clamp(centerX - radius); column <= clamp(centerX + radius); column++) {
+        extremaAt(column, row);
+      }
+    }
+    // One changed column reaches one cell through each of the two filters.
+    const smoothRadius = full ? state.size : 2;
+    for (let row = clamp(centerZ - smoothRadius); row <= clamp(centerZ + smoothRadius); row++) {
+      for (
+        let column = clamp(centerX - smoothRadius);
+        column <= clamp(centerX + smoothRadius);
+        column++
+      ) {
+        smoothAt(column, row);
       }
     }
     state.wallHeightsDirty = false;

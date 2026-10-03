@@ -41,6 +41,7 @@ export function playerWorldGatherCamOccluders(x, z, radius) {
   for (let position2 of list2) {
     if (
       position2 &&
+      position2.type !== `garden` &&
       playerState.playerGardenOccluderPattern.test(String(position2.type ?? ``)) &&
       Math.abs(position2.x - x) < result + position2.radius &&
       Math.abs(position2.z - z) < result + position2.radius

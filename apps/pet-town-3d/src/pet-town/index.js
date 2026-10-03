@@ -6,6 +6,7 @@ import { createCompanionPanel } from "./ui/companions.js";
 import { createTerminalDock } from "./terminal/index.js";
 import { createDockViewport } from "./dock-viewport.js";
 import { createCompanionLabels } from "./ui/labels.js";
+import { createTownUsage } from "./usage/index.js";
 
 export function createPetTownExtension() {
   let runtime;
@@ -15,6 +16,7 @@ export function createPetTownExtension() {
       const agents = createTownAgents(context);
       let panel;
       let mayor;
+      let usage;
       let focusSerial = null;
       const controller = createTownController(context, agents.records, () => panel?.render());
       const bridge = createTownBridge({
@@ -22,6 +24,7 @@ export function createPetTownExtension() {
           agents.reconcile(snapshot);
           controller.reconcileSelection();
           mayor?.setSnapshot(snapshot);
+          usage?.setSnapshot(snapshot);
           panel?.render();
           const serial = snapshot.mayor?.focusSerial;
           if (focusSerial !== null && serial > 0 && serial !== focusSerial) {
@@ -32,6 +35,7 @@ export function createPetTownExtension() {
         onConnection(connection) {
           panel?.setConnection(connection);
           mayor?.setConnection(connection);
+          usage?.setConnection(connection);
           if (!connection.connected) {
             controller.select(null);
             agents.reconcile({
@@ -46,6 +50,7 @@ export function createPetTownExtension() {
         },
       });
       panel = createCompanionPanel(controller, agents.records, bridge, context);
+      usage = createTownUsage(controller);
       mayor = createMayorPanel({
         bridge,
         onFollowMayor: () => controller.followMayor(),
@@ -58,7 +63,7 @@ export function createPetTownExtension() {
         bridge,
         onVisibility: (visible) => viewport.setVisible(visible),
       });
-      runtime = { agents, controller, bridge, panel, mayor, labels, terminal, viewport };
+      runtime = { agents, controller, bridge, panel, mayor, labels, terminal, viewport, usage };
       context.petTown = runtime;
       panel.render();
       bridge.start();
@@ -76,6 +81,7 @@ export function createPetTownExtension() {
       terminal.update(controller.selected, context);
       labels.update(deltaTime);
       panel.update(context);
+      runtime.usage.update(context);
       mayor.update(deltaTime, context, agents.records.get("pet-town-mayor"));
     },
     dispose(context) {
@@ -88,6 +94,7 @@ export function createPetTownExtension() {
       runtime.agents.dispose();
       runtime.panel.dispose();
       runtime.labels.dispose();
+      runtime.usage.dispose();
       delete context.petTown;
       runtime = null;
     },

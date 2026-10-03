@@ -1,0 +1,128 @@
+#hud .town-settings {
+  z-index: 4;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  width: min(744px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+}
+#hud .town-settings .settings-header,
+#hud .town-settings .tabs,
+#hud .town-settings .settings-footer {
+  flex-shrink: 0;
+}
+#hud .town-settings .settings-body {
+  min-height: 293px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+#hud .town-settings .tabs button[aria-selected="true"] {
+  border-color: #426448;
+  color: #3f603f;
+}
+#hud .town-settings .profile-name {
+  min-width: 0;
+}
+#hud .town-settings .profile h2 {
+  overflow-wrap: anywhere;
+}
+#hud .town-settings .profile select {
+  max-width: 190px;
+  flex-shrink: 0;
+}
+#hud .town-settings .town-portrait {
+  width: 53px;
+  height: 53px;
+}
+#hud .town-settings .town-portrait svg {
+  width: 45px;
+  height: 45px;
+}
+#hud .town-settings .camera-choices button[aria-pressed="true"] {
+  background: #e1e7bd;
+  color: #426448;
+  border-color: #93a777;
+}
+#hud .town-settings .world-settings h2 {
+  font:
+    700 25px Fraunces,
+    Georgia,
+    serif;
+  margin: 0 0 15px;
+}
+#hud .town-settings .volume-label {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin: 28px 0;
+}
+#hud .town-settings .volume-label input {
+  flex: 1;
+  min-width: 0;
+  accent-color: #426448;
+}
+#hud .town-settings .volume-label output {
+  min-width: 38px;
+}
+#hud .town-settings .guide {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+#hud .town-settings .guide-group {
+  margin-top: 0;
+}
+#hud .town-settings .guide-row {
+  flex-wrap: wrap;
+}
+#hud .town-settings .settings-feedback {
+  padding: 9px;
+  background: #fae8df;
+  color: #883e2d;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+#hud .town-settings .touch-guide {
+  display: none;
+}
+#hud .pk-confirm {
+  z-index: 5;
+}
+@media (max-height: 650px) {
+  #hud .town-settings .settings-body {
+    min-height: 0;
+  }
+}
+@media (max-width: 700px) {
+  #hud .town-settings .settings-header {
+    padding: 16px;
+  }
+  #hud .town-settings .settings-body {
+    padding: 16px;
+  }
+  #hud .town-settings .control-grid {
+    grid-template-columns: 1fr;
+  }
+  #hud .town-settings .profile {
+    flex-wrap: wrap;
+  }
+  #hud .town-settings .profile select {
+    width: 100%;
+    max-width: none;
+  }
+  #hud .town-settings .guide {
+    grid-template-columns: 1fr;
+  }
+  #hud .town-settings .tabs {
+    padding: 8px 10px 0;
+    gap: 3px;
+  }
+  #hud .town-settings .tabs button {
+    padding: 10px;
+  }
+}
+@media (pointer: coarse) {
+  #hud .town-settings .touch-guide {
+    display: block;
+  }
+}

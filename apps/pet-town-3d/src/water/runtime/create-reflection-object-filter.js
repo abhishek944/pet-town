@@ -25,6 +25,7 @@ export function createReflectionObjectFilter(state) {
         state.context.sky?.group,
         state.context.vegetation?.group,
         state.context.props?.group,
+        state.context.boats?.group,
       ].filter(Boolean),
     );
     state.reflectionHiddenObjects = [state.mesh];

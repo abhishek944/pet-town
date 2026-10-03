@@ -38,7 +38,9 @@ export function vegetationClearVegetationAroundProps(propsValue) {
               ? result2
               : null;
         if (result3) {
-          vegetation2.clearBox(result3.min.x, result3.min.z, result3.max.x, result3.max.z, 0.35);
+          vegetation2.clearBox(result3.min.x, result3.min.z, result3.max.x, result3.max.z, 0.35, {
+            transient: true,
+          });
           continue;
         }
         if (result2.center && (result2.size || result2.half || result2.halfSize)) {
@@ -53,6 +55,7 @@ export function vegetationClearVegetationAroundProps(propsValue) {
             result2.center.x + position3.x,
             result2.center.z + position3.z,
             0.35,
+            { transient: true },
           );
           continue;
         }
@@ -64,7 +67,7 @@ export function vegetationClearVegetationAroundProps(propsValue) {
           Number.isFinite(position2.z) &&
           Number.isFinite(result4)
         ) {
-          vegetation2.clearArea(position2, result4 + 0.3);
+          vegetation2.clearArea(position2, result4 + 0.3, { transient: true });
         }
       } catch {}
     }

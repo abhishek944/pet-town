@@ -33,8 +33,13 @@ export function initializeTerrain(context) {
         }
         let result73 = result67 + result72;
         let result74 = result68 + result71;
-        if (result73 >= 0 && result74 >= 0 && result73 < 8 && result74 < 8) {
-          state.dirtyChunks.add(result74 * 8 + result73);
+        if (
+          result73 >= 0 &&
+          result74 >= 0 &&
+          result73 < state.chunksPerAxis &&
+          result74 < state.chunksPerAxis
+        ) {
+          state.dirtyChunks.add(result74 * state.chunksPerAxis + result73);
         }
       }
     }
@@ -43,7 +48,10 @@ export function initializeTerrain(context) {
   state.flush = function () {
     state.flushAtlas?.();
     for (let result80 of state.dirtyChunks) {
-      state.rebuildChunk(result80 % 8, Math.floor(result80 / 8));
+      state.rebuildChunk(
+        result80 % state.chunksPerAxis,
+        Math.floor(result80 / state.chunksPerAxis),
+      );
     }
     state.dirtyChunks.clear();
   };

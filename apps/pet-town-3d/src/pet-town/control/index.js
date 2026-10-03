@@ -15,12 +15,19 @@ export function createTownController(context, records, onChange) {
   function release(record) {
     if (!record) return;
     record.controlled = false;
-    Object.assign(record.input, { mx: 0, mz: 0, run: false, jumpHeld: false, jumpPressed: false });
+    Object.assign(record.input, {
+      mx: 0,
+      mz: 0,
+      run: false,
+      jumpHeld: false,
+      jumpPressed: false,
+      diveHeld: false,
+    });
   }
   function select(id) {
     const next = records.get(id) ?? null;
     if (!next && selectedId === null) return;
-    if (next && next.id === selectedId) return;
+    if (next && next.id === selectedId) return context.petTown?.terminal?.reopen();
     release(selected());
     selectedId = next?.id ?? null;
     input.clear();
@@ -78,7 +85,13 @@ export function createTownController(context, records, onChange) {
       input.clear();
       const record = selected();
       if (record)
-        Object.assign(record.input, { mx: 0, mz: 0, jumpHeld: false, jumpPressed: false });
+        Object.assign(record.input, {
+          mx: 0,
+          mz: 0,
+          jumpHeld: false,
+          jumpPressed: false,
+          diveHeld: false,
+        });
     },
     { signal: listeners.signal },
   );
@@ -109,6 +122,7 @@ export function createTownController(context, records, onChange) {
         Object.assign(record.input, movement, {
           run: !!sample.run,
           jumpHeld: !!sample.jumpHeld,
+          diveHeld: !!sample.diveHeld,
           jumpPressed: !!sample.jumpPressed,
         });
     },

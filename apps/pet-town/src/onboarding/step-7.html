@@ -1,0 +1,45 @@
+<main class="content">
+  <div class="top">
+    <div class="brand"><img src="/onboarding/app.png" alt="" />Pet Town</div>
+    <span>You’re home</span>
+  </div>
+  <header class="intro">
+    <h1>Your town is ready.</h1>
+    <p>Keep Pet Town beside your work. Come back to Settings whenever you want to make it yours.</p>
+  </header>
+  <img class="celebrate" src="/onboarding/companions.png" alt="Pet Town companions" />
+  <section class="invitation">
+    <img src="/onboarding/nib-wave.png" alt="Illustrative Mayor companion" />
+    <div>
+      <div class="optional">OPTIONAL · MAYOR</div>
+      <h2>Want to talk to your town?</h2>
+      <p>Your Mayor can listen, reply, and help with work through Firstmate.</p>
+      <p class="details">
+        Needs a voice key, microphone access, and Firstmate setup.<br />Speech uses paid OpenAI
+        APIs.
+      </p>
+      <button class="secondary" data-mayor>Set up Mayor →</button>
+    </div>
+  </section>
+  <div class="next">
+    <button class="secondary">‹ Back</button><button class="primary">Start using Pet Town →</button>
+  </div>
+  <footer class="bottom">
+    <span>Skipped a step? You can finish it in Settings.</span><span>No voice setup required.</span>
+  </footer>
+  <div class="dialog-backdrop" data-dialog>
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="mayor-title">
+      <h2 id="mayor-title">Mayor setup is optional.</h2>
+      <p>You can keep using Pet Town while you set this up later.</p>
+      <ul>
+        <li>An OpenAI voice API key, saved in Keychain</li>
+        <li>A Firstmate folder you choose and trust</li>
+        <li>Microphone permission when you’re ready to talk</li>
+      </ul>
+      <p>Speech sends audio to OpenAI and uses paid APIs.</p>
+      <p class="finish-note">You can finish Mayor setup in Settings whenever you’re ready.</p>
+      <button class="primary" data-close>Got it</button
+      ><button class="secondary" data-close>Do this later</button>
+    </section>
+  </div>
+</main>

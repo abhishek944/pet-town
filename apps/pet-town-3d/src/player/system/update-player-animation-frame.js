@@ -113,14 +113,6 @@ export function updatePlayerAnimationFrame(
       }
     }
   }
-  if (swimming && !playerState.playerRuntime.anim && speed < 0.4) {
-    playerState.playerRuntime.floatRippleT =
-      (playerState.playerRuntime.floatRippleT ?? 0) - deltaTime;
-    if (playerState.playerRuntime.floatRippleT <= 0) {
-      playerState.playerRuntime.floatRippleT = 1.3;
-      emitPlayerWaterEffect(`ripple`, renderPosition.clone().setY(body.waterY), 0.25);
-    }
-  }
   return {
     swimming,
   };

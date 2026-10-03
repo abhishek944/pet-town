@@ -14,6 +14,7 @@ export function propsClearVegetationAroundProps() {
             },
             position.radius,
             {
+              transient: true,
               trees: true,
               small: false,
             },
@@ -28,6 +29,7 @@ export function propsClearVegetationAroundProps() {
             },
             position.small,
             {
+              transient: true,
               trees: false,
               small: true,
             },
@@ -44,6 +46,7 @@ export function propsClearVegetationAroundProps() {
             },
             (position2.hx == null ? position2.radius : Math.max(position2.hx, position2.hz)) + 0.25,
             {
+              transient: true,
               trees: false,
               small: true,
             },

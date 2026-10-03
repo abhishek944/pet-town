@@ -1,0 +1,87 @@
+.sunmeadow-ui { container: island-journal / inline-size; position: fixed; inset: 0 auto 0 0; width: 100%; z-index: 45; pointer-events: none; font: 600 14px/1.5 Nunito, ui-rounded, sans-serif; color: #526054; }
+.sunmeadow-ui, .sunmeadow-ui * { box-sizing: border-box; }
+.sunmeadow-ui[hidden], .sunmeadow-ui [hidden] { display: none !important; }
+.sunmeadow-ui button { font: inherit; cursor: pointer; color: inherit; border: 1px solid #d5ddc4; border-radius: 12px; padding: 8px 12px; background: #fffdf2; }
+.sunmeadow-ui button:hover { background: #edf3df; }
+.sunmeadow-ui button:disabled { cursor: default; opacity: .5; }
+.sunmeadow-ui button:focus-visible { outline: 3px solid #77a570; outline-offset: 3px; }
+.sunmeadow-toggle { position: absolute; right: 20px; top: 96px; pointer-events: auto; box-shadow: 0 4px 16px #223b292a; }
+.sunmeadow-toggle kbd { margin-left: 10px; border: 1px solid #d5ddc4; border-radius: 5px; padding: 0 5px; font: inherit; font-size: 11px; }
+.sunmeadow-overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; background: #263f3263; backdrop-filter: blur(5px); pointer-events: auto; }
+.sunmeadow-journal { width: min(860px, 100%); max-height: calc(100% - 12px); overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #bfcaaf #f8f4e8; padding: 28px 30px 22px; border: 1px solid #fffcf0; border-radius: 23px; background: #faf7ec; box-shadow: 0 22px 80px #1d352c55, inset 0 0 0 5px #fffaf080; }
+.sunmeadow-journal header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.sunmeadow-journal h2 { margin: 4px 0 0; font: 600 31px/1.12 Fraunces, Georgia, serif; letter-spacing: -.035em; color: #3e5d4d; }
+.sunmeadow-journal p { margin: 9px 0; }
+.sunmeadow-eyebrow { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: #7d8859; }
+.sunmeadow-close { flex: none; }
+.sunmeadow-summary { margin: 18px 0 12px; padding: 12px 15px; border-radius: 14px; background: #eaf0d9; }
+.sunmeadow-summary progress { width: 100%; height: 6px; accent-color: #70975e; display: block; margin-top: 7px; }
+.sunmeadow-places { display: grid; gap: 8px; }
+.sunmeadow-place { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e3dfcc; padding: 9px 0; }
+.sunmeadow-stamp { flex: none; width: 34px; height: 34px; display: grid; place-items: center; border: 1px dashed #b8b995; border-radius: 50%; color: #9d9b79; font-size: 21px; }
+.sunmeadow-place[data-visited=true] .sunmeadow-stamp { background: #dceac8; color: #487143; border: 1px solid #87a76c; }
+.sunmeadow-place-copy { flex: 1; min-width: 0; }
+.sunmeadow-place small { display: block; font-size: 11px; color: #7e806a; }
+.sunmeadow-place button { flex: none; font-size: 12px; padding: 7px 10px; }
+.sunmeadow-activity { min-width: 0; padding: 17px; margin-top: 14px; border: 1px solid #e3e2d2; border-radius: 16px; background: #fffdf6; }
+.sunmeadow-activity h3 { margin: 0; color: #516d56; font: 600 18px/1.3 Fraunces, Georgia, serif; }
+.sunmeadow-activity p { font-size: 12px; font-weight: 600; line-height: 1.55; color: #74806c; }
+.sunmeadow-action { background: #e4edcf !important; }
+.sunmeadow-note { font-size: 11px; color: #777b64; }
+.sunmeadow-error { background: #fae6dc; color: #865244; padding: 10px; border-radius: 10px; font-size: 12px; }
+.sunmeadow-wish-buttons { display: flex; flex-wrap: wrap; gap: 7px; }
+.sunmeadow-activity[data-nibble=true] { border-color: #b8a458; background: #fff3c7; }
+.sunmeadow-activity[data-nibble=true] [data-fishing] { background: #f4d982 !important; }
+@media (max-height: 650px) { .sunmeadow-overlay { padding: 10px; }.sunmeadow-journal { padding: 17px; }.sunmeadow-journal h2 { font-size: 22px; }.sunmeadow-place { padding: 4px 0; }.sunmeadow-activity { margin-top: 9px; padding: 10px; } }
+@container island-journal (max-width: 600px) { .sunmeadow-toggle { right: 12px; top: 96px; font-size: 12px; }.sunmeadow-journal { padding: 16px; }.sunmeadow-place { gap: 8px; } }
+
+/* One field book, with illustrated experiences, destinations and keepsakes. */
+.sunmeadow-close { width: 35px; height: 35px; display: grid; place-items: center; padding: 0 !important; border-radius: 50% !important; background: transparent !important; }
+.sunmeadow-summary { display: grid; gap: 5px; margin: 16px 0 18px; padding: 12px 16px; border: 1px solid #dce4d1; background: #eef2e2; color: #547052; font-size: 12px; }
+.sunmeadow-summary progress { height: 5px; margin-top: 0; border: 0; border-radius: 5px; overflow: hidden; }
+.sunmeadow-summary progress::-webkit-progress-bar { background: #dfe6d3; border-radius: 5px; }
+.sunmeadow-summary progress::-webkit-progress-value { background: #799c69; border-radius: 5px; }
+.journal-tabs { position: sticky; top: 0; z-index: 1; display: flex; gap: 5px; margin: 0 0 22px; padding: 5px; border: 1px solid #e3e0d0; border-radius: 13px; background: #f1eedf; }
+.journal-tabs [role=tab] { flex: 1; min-width: 0; border-color: transparent; background: transparent; font-size: 13px; font-weight: 800; padding: 10px 8px; }
+.journal-tabs [role=tab][aria-selected=true] { border-color: #cbd8c1; background: #fffef6; color: #426c50; box-shadow: 0 2px 5px #3c54300b; }
+.journal-page { animation: journal-page-in .18s ease-out; }
+.journal-section-title { margin: 20px 0 10px; font: 600 19px/1.3 Fraunces, Georgia, serif; color: #4e6554; }
+.journal-page > .journal-section-title:first-child { margin-top: 0; }
+.journal-meta, .sunmeadow-activity .journal-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 11px; color: #899078; font-size: 11px; font-weight: 700; }
+.journal-meta span { padding: 3px 8px; border-radius: 6px; background: #eeeedd; }
+.journal-experiences { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+.journal-experiences > [data-willowmere-activities], .journal-experiences > [data-shellhaven-activities], .journal-experiences > [data-ocean-activities], .journal-experiences > [data-extra-experiences], .journal-activity-host { display: contents; }
+.journal-experiences .sunmeadow-activity { margin-top: 0; }
+.sunmeadow-activity > button { margin-top: 5px; font-size: 12px; font-weight: 800; }
+.journal-art { display: block; width: 100%; height: 108px; margin: -4px 0 10px; overflow: visible; }
+.journal-controls { grid-column: 1 / -1; margin: 0; padding: 13px 16px; border: 1px solid #d1e3dd; border-radius: 12px; background: #eaf2ec; color: #557467; font-size: 12px; line-height: 1.7; }
+.journal-controls h3 { margin: 0 0 5px; font: 700 13px/1.4 Nunito, ui-rounded, sans-serif; color: #496c5d; }
+.journal-controls p { margin: 4px 0; }
+.journal-controls strong { color: #3b6454; }
+.journal-controls kbd { display: inline-block; padding: 1px 5px; border: 1px solid #c4d4c7; border-bottom-width: 2px; border-radius: 4px; background: #fbfdf5; font: 700 10px/1.4 Nunito, ui-rounded, sans-serif; color: #52735c; }
+.sunmeadow-action { background: #e7efd8 !important; border-color: #d0ddbd !important; color: #496642 !important; }
+.sunmeadow-journal > .sunmeadow-note:last-child { border-top: 1px solid #e4e2d2; margin-top: 22px; padding-top: 13px; }
+.sunmeadow-wish-buttons { margin-top: 12px; }
+.sunmeadow-wish-buttons button { font-size: 12px; padding: 7px 10px; }
+.journal-destinations { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.journal-destinations > section, .journal-destination-group { min-width: 0; padding: 16px; border: 1px solid #e1e3d1; border-radius: 15px; background: #fffdf4; }
+.journal-destinations .journal-section-title { margin-top: 0; font-size: 18px; }
+.journal-destinations .sunmeadow-place { padding: 12px 0; }
+.sunmeadow-place:last-child { border-bottom: 0; }
+.sunmeadow-place strong { display: block; font-size: 12px; line-height: 1.35; color: #56674c; }
+.sunmeadow-place small { margin-top: 3px; font-size: 10px; line-height: 1.4; color: #90917a; }
+.journal-destinations .sunmeadow-place button { font-size: 10px; font-weight: 800; padding: 6px 8px; }
+.journal-collection-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.journal-keepsake { min-width: 0; position: relative; padding: 13px 14px; border: 1px dashed #d9d7c2; border-radius: 14px; background: #f3f1e6; color: #8b907c; }
+.journal-keepsake .journal-art { height: 80px; margin: 0 0 8px; opacity: .5; filter: saturate(.55); }
+.journal-keepsake h3 { margin: 0; font: 600 15px/1.3 Fraunces, Georgia, serif; }
+.journal-keepsake p, .journal-keepsake small { display: block; margin: 5px 0 0; font-size: 11px; line-height: 1.5; }
+.journal-keepsake[data-found=true] { border: 1px solid #cbd9bd; background: #fffef5; color: #5b7454; }
+.journal-keepsake[data-found=true] .journal-art { opacity: 1; filter: none; }
+.journal-keepsake[data-found=true]::after { content: "✓"; position: absolute; right: 10px; top: 10px; width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid #b5cba4; border-radius: 50%; background: #edf4df; font-size: 12px; color: #6b8d54; }
+@keyframes journal-page-in { from { opacity: .5; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .journal-page { animation: none; }.sunmeadow-ui button { transition: none; } }
+@media (max-height: 650px) { .sunmeadow-overlay { padding: 12px; }.sunmeadow-journal { padding: 19px 24px; }.sunmeadow-journal h2 { font-size: 26px; }.sunmeadow-summary { margin: 10px 0 12px; padding: 9px 13px; }.journal-tabs { margin-bottom: 15px; }.journal-art { height: 88px; } }
+@container island-journal (max-width: 700px) { .journal-collection-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.journal-destinations { grid-template-columns: 1fr; } }
+@container island-journal (max-width: 540px) { .sunmeadow-journal { padding: 19px 16px; border-radius: 18px; }.sunmeadow-journal h2 { font-size: 27px; }.journal-experiences { grid-template-columns: 1fr; gap: 12px; }.journal-tabs [role=tab] { font-size: 12px; padding: 9px 5px; }.journal-art { height: 100px; }.journal-keepsake { padding: 10px; } }
+@container island-journal (max-width: 360px) { .journal-collection-grid { grid-template-columns: 1fr; }.sunmeadow-place { flex-wrap: wrap; }.sunmeadow-place-copy { min-width: 110px; }.sunmeadow-place button { margin-left: 40px; }.sunmeadow-eyebrow { font-size: 9px; letter-spacing: .11em; } }

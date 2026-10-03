@@ -1,3 +1,6 @@
+import { createHushDefinition } from "./create-hush-definition.js";
+import { createDriftDefinition } from "./create-drift-definition.js";
+import { createSkimDefinition } from "./create-skim-definition.js";
 import { createTuftletDefinition } from "./create-tuftlet-definition.js";
 import { createJellopDefinition } from "./create-jellop-definition.js";
 import { createPebbugDefinition } from "./create-pebbug-definition.js";
@@ -16,5 +19,8 @@ export function prepareCreaturesSpeciesCatalog() {
     createPebbugDefinition(),
     createJellopDefinition(),
     createTuftletDefinition(),
+    createSkimDefinition(),
+    createDriftDefinition(),
+    createHushDefinition(),
   ];
 }

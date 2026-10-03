@@ -1,3 +1,3 @@
-export function playerCameraKick(impact) {
-  this.dipV -= Math.min(impact, 25) * 0.05;
+export function playerCameraKick() {
+  // Landing effects belong to the actor; keep the viewer's horizon steady.
 }

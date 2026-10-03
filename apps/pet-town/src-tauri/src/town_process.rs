@@ -28,6 +28,13 @@ pub(crate) fn allowed_url(url: &tauri::Url) -> bool {
 }
 
 pub(crate) fn open(app: &AppHandle) -> Result<(), String> {
+    crate::godot_bridge::open(app)
+}
+
+#[allow(dead_code)]
+fn open_three_town(app: &AppHandle) -> Result<(), String> {
+    let updates = app.state::<crate::app_updates::AppUpdates>();
+    let _update_opening = updates.window_opening()?;
     let state = app.state::<TownWindowState>();
     let _opening = state
         .opening
@@ -79,7 +86,7 @@ pub(crate) async fn open_3d_town(app: AppHandle) -> Result<(), String> {
         .map_err(|_| "The 3D town window could not be opened.".to_string())?
 }
 
-fn set_active(app: &AppHandle, active: bool) {
+pub(crate) fn set_active(app: &AppHandle, active: bool) {
     let state = app.state::<TownWindowState>();
     let changed = state.active.swap(active, Ordering::SeqCst) != active;
     if !active {
@@ -106,7 +113,9 @@ pub(crate) fn window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 
 // Retain the control-loop hook as a fallback if a platform misses the close event.
 pub(crate) fn reap(app: &AppHandle) {
-    if app.state::<TownWindowState>().active.load(Ordering::SeqCst)
+    crate::godot_bridge::reap(app);
+    if !crate::godot_bridge::running(app)
+        && app.state::<TownWindowState>().active.load(Ordering::SeqCst)
         && app.get_webview_window(TOWN_LABEL).is_none()
     {
         set_active(app, false);
@@ -114,6 +123,7 @@ pub(crate) fn reap(app: &AppHandle) {
 }
 
 pub(crate) fn stop(app: &AppHandle) {
+    crate::godot_bridge::stop(app);
     set_active(app, false);
     if let Some(window) = app.get_webview_window(TOWN_LABEL) {
         let _ = window.destroy();
@@ -121,7 +131,7 @@ pub(crate) fn stop(app: &AppHandle) {
 }
 
 pub(crate) fn reopen(app: &AppHandle) {
-    if app.get_webview_window(TOWN_LABEL).is_some() {
+    if crate::godot_bridge::running(app) || app.get_webview_window(TOWN_LABEL).is_some() {
         let _ = open(app);
     } else {
         let _ = crate::settings_window::open_internal(app, None, Some("app".into()));

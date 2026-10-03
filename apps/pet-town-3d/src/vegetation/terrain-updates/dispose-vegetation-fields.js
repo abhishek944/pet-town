@@ -7,6 +7,7 @@ export function disposeVegetationFields() {
     }
   }
   vegetationState.vegetationRuntimeState.fields = null;
+  vegetationState.vegetationRuntimeState.terrainHiddenCells = new Map();
   vegetationState.vegetationRuntimeState.registry = new Map();
   vegetationState.vegetationRuntimeState.trees = [];
   vegetationState.vegetationRuntimeState.colliders = [];

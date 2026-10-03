@@ -1,8 +1,7 @@
 /** HUD stylesheet. */
-import sourceAsset74 from "./assets/prepare-hud-styles-section-1-74.css?raw";
+import sourceAsset74 from "./assets/prepare-hud-styles-section-1-74.js";
 import sourceAsset75 from "./assets/prepare-hud-styles-section-2-75.css?raw";
 import townHudStyles from "./assets/town-hud.css?raw";
-import welcomeStyles from "./assets/welcome.css?raw";
 import { hudState } from "../state.js";
 export function prepareHudStyles() {
   hudState.hudStyles =
@@ -19,6 +18,5 @@ export function prepareHudStyles() {
       ).join(`,`),
     ) +
     sourceAsset75 +
-    townHudStyles +
-    welcomeStyles;
+    townHudStyles;
 }

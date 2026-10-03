@@ -1,0 +1,47 @@
+@media (max-width: 760px) {
+  .site-header {
+    height: 65px;
+  }
+  .hero {
+    grid-template-columns: 1fr;
+    padding-top: 50px;
+  }
+  .hero-art {
+    height: 230px;
+    grid-row: 1;
+  }
+  .hero h1 {
+    font-size: 68px;
+  }
+  .hero-copy {
+    padding-bottom: 20px;
+  }
+  .board {
+    padding: 23px 17px;
+  }
+  .section-heading h2 {
+    font-size: 41px;
+  }
+  .filters {
+    align-items: start;
+  }
+  .filter-group {
+    width: 100%;
+  }
+  .filter-group button {
+    padding: 9px 10px;
+  }
+  .join {
+    display: block;
+    padding: 28px;
+  }
+  .join h2 {
+    font-size: 34px;
+  }
+  .join #join-action {
+    margin-top: 20px;
+  }
+  .setup {
+    padding: 25px;
+  }
+}

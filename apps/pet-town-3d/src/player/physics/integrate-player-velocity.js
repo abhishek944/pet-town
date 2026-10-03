@@ -1,4 +1,5 @@
 import { playerState } from "../state.js";
+import { integrateWaterSwimming } from "../../water/swimming/integrate-water-swimming.js";
 export function integratePlayerVelocity(input, deltaTime, velocity, waterY, position, world) {
   let inputMagnitude = Math.min(1, Math.hypot(input.mx, input.mz));
   let movementSpeed;
@@ -34,6 +35,8 @@ export function integratePlayerVelocity(input, deltaTime, velocity, waterY, posi
     ((velocity.x += (targetVelocityX - velocity.x) * accelerationBlend),
     (velocity.z += (targetVelocityZ - velocity.z) * accelerationBlend),
     this.jumpBuf > 0 &&
+      !input.diveHeld &&
+      this.diveTarget === null &&
       (this.swimming && this.waterDepth < playerState.playerMovementSettings.swimFloat + 0.35
         ? ((velocity.y = playerState.playerMovementSettings.swimJumpV),
           (this.swimming = false),
@@ -62,10 +65,15 @@ export function integratePlayerVelocity(input, deltaTime, velocity, waterY, posi
     input.jumpHeld || (this.heldSinceJump = false),
     this.swimming)
   ) {
-    let result15 =
-      waterY - playerState.playerMovementSettings.swimFloat + Math.sin(this.time * 2.2) * 0.035;
-    velocity.y += ((result15 - position.y) * 55 - velocity.y * 9) * deltaTime;
-    this.gliding = false;
+    integrateWaterSwimming(
+      this,
+      input,
+      deltaTime,
+      waterY,
+      position,
+      velocity,
+      playerState.playerMovementSettings,
+    );
   } else {
     if (
       (!this.gliding &&

@@ -23,6 +23,16 @@ export class SettingsDraft {
     private readonly selectPreviewAnimations: () => void,
   ) {}
 
+  prepareInstallBlockReason(): string | null {
+    if (!this.snapshot || !this.preferences)
+      return "Settings are still loading; wait before installing.";
+    if (this.applying) return "Pet Town is applying preferences; wait for Apply to finish.";
+    if (!preferencesEqual(this.preferences, this.snapshot.preferences)) {
+      return "Apply your unapplied Settings changes before installing.";
+    }
+    return null;
+  }
+
   installSnapshot(next: PreferencesSnapshot, preserveDraft: boolean): boolean {
     if (this.snapshot && next.revision < this.snapshot.revision) return false;
     if (!next.petIds.length) throw new Error("No pets are available in this version.");

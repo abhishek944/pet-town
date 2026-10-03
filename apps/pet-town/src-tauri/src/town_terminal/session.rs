@@ -7,7 +7,7 @@ use std::sync::{
 };
 use tauri::ipc::Channel;
 
-pub(super) struct Session {
+pub(crate) struct Session {
     pub token: String,
     pub target: TerminalTarget,
     pub channel: Channel<TerminalEvent>,

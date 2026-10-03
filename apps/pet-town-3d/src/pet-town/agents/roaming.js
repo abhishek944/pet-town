@@ -62,6 +62,10 @@ export function roamingInput(record, dt) {
 }
 
 export function movementInput(record, dt) {
+  if (record.world.ctx.boats?.passengers.pilot === record.body) {
+    record.facing = record.world.ctx.boats.boat.pose.yaw;
+    return NEUTRAL;
+  }
   if (!record.controlled) {
     record.input.jumpPressed = false;
     return roamingInput(record, dt);
@@ -75,5 +79,6 @@ export function movementInput(record, dt) {
     mz: mz / magnitude,
     run: !!record.input.run,
     jumpHeld: !!record.input.jumpHeld,
+    diveHeld: !!record.input.diveHeld,
   };
 }

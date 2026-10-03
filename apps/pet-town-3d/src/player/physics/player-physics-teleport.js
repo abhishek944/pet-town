@@ -5,4 +5,8 @@ export function playerPhysicsTeleport(x, y, z) {
   this.visualOffsetY = 0;
   this.lastGroundY = y;
   this.onGround = false;
+  this.diveTarget = null;
+  this.diving = false;
+  this.swimming = false;
+  this.jumpBuf = 0;
 }

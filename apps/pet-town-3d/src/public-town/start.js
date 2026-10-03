@@ -42,11 +42,18 @@ canvas.addEventListener("webglcontextlost", (event) => {
   );
 });
 const timeout = setTimeout(() => {
-  const label = boot.querySelector("span");
+  const label = boot.querySelector(".town-loading");
   if (boot.isConnected && label)
     label.textContent = "Still loading. You can retry or return to Pet Town.";
 }, 20000);
-addEventListener("pet-town:ready", () => clearTimeout(timeout), { once: true });
+addEventListener("pet-town:playable", () => clearTimeout(timeout), { once: true });
+addEventListener(
+  "pet-town:ready",
+  () => {
+    if (!boot.isConnected) clearTimeout(timeout);
+  },
+  { once: true },
+);
 import("../main.js").catch((error) => {
   clearTimeout(timeout);
   console.error("Public town could not start:", error);

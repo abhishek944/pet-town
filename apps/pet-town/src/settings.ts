@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { characterDisplayName } from "./character-packs";
 import { clonePreferences, friendlyPetName, type PreferencesSnapshot } from "./preferences-types";
 import { AdapterSettings } from "./settings-adapters";
@@ -8,6 +9,7 @@ import type { PetStudio } from "./settings-studio";
 import { VillageVisibilitySettings } from "./settings-village";
 import { bindAppControls } from "./settings/app-controls";
 import { SettingsDraft } from "./settings/draft";
+import { SettingsUpdates } from "./settings-updates";
 import { bindPetControls } from "./settings/pet-controls";
 import { SettingsPetPreview } from "./settings/pet-preview";
 import { renderPetControls } from "./settings/pet-view";
@@ -46,6 +48,26 @@ const petPreview = new SettingsPetPreview(
     studio?.importApngForState(petId, petState, file);
   },
 );
+const settingsUpdates = new SettingsUpdates(
+  () => {
+    const blockers = [state.prepareInstallBlockReason()];
+    blockers.push(
+      studio
+        ? studio.prepareInstallBlockReason()
+        : "Pet Studio is still loading; wait before installing.",
+    );
+    return blockers.filter((reason): reason is string => Boolean(reason)).join(" ") || null;
+  },
+  (message) => {
+    state.message = message;
+    state.messageTone = "error";
+    if (state.snapshot) render();
+  },
+  () => {
+    if (state.snapshot) render();
+  },
+);
+settingsUpdates.start();
 
 function selectPreviewAnimations(): void {
   petPreview.selectAnimations();
@@ -64,9 +86,13 @@ function render(): void {
   assistantSettings.render();
   scenePreviews.render(draft, snapshot.readOnly);
   state.renderActions();
+  settingsUpdates?.syncInteractionLock();
 }
 
 function bindControls(): void {
+  byId<HTMLButtonElement>("welcome-setup").addEventListener("click", () => {
+    void invoke("open_onboarding").catch((error) => { state.message = String(error); render(); });
+  });
   bindPetControls(
     () => state.preferences.pets[selectedPetId],
     (id) => {

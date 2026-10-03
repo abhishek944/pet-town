@@ -1,0 +1,12 @@
+.studio-state-row {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr 0.8fr;
+  gap: 8px;
+  align-items: end;
+  padding: 7px 0;
+  border-bottom: 1px solid #ffffff12;
+}
+.studio-state-row strong {
+  align-self: center;
+  font-size: 10px;
+}

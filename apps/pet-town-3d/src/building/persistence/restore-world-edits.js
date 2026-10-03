@@ -5,6 +5,7 @@ import { flushPendingBlockPlacements } from "../meshes/flush-pending-block-place
 import { deserializeBuildingBlockState } from "./deserialize-building-block-state.js";
 import { applyBuildingBlockState } from "../block-edits/apply-building-block-state.js";
 import { blockCoordinateKey } from "../state/block-coordinate-key.js";
+import { isCompatibleWorldTerrainSignature } from "./get-world-terrain-signature.js";
 export async function restoreWorldEdits() {
   const generation = buildingState.worldPersistenceState.restoreGeneration;
   let savedWorld;
@@ -20,7 +21,7 @@ export async function restoreWorldEdits() {
     ((buildingState.worldPersistenceState.loaded = true),
     savedWorld &&
       savedWorld.v === 1 &&
-      savedWorld.sig === buildingState.worldPersistenceState.sig &&
+      isCompatibleWorldTerrainSignature(savedWorld.sig) &&
       Array.isArray(savedWorld.edits))
   ) {
     flushPendingBlockPlacements();

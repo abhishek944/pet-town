@@ -6,6 +6,7 @@ export function playerInputPoll(deltaTime) {
     run: false,
     jumpHeld: false,
     jumpPressed: false,
+    diveHeld: false,
     orbitX: this.orbitX,
     orbitY: this.orbitY,
     zoom: this.zoom,
@@ -28,6 +29,12 @@ export function playerInputPoll(deltaTime) {
     position.run = this.any(playerState.playerKeyBindings.run);
     position.jumpHeld = this.any(playerState.playerKeyBindings.jump);
     position.jumpPressed = this.anyPressed(playerState.playerKeyBindings.jump);
+    position.diveHeld =
+      this.any(playerState.playerKeyBindings.dive) &&
+      !this.held.has("AltLeft") &&
+      !this.held.has("AltRight") &&
+      !this.held.has("MetaLeft") &&
+      !this.held.has("MetaRight");
     position.rotate =
       +!!this.any(playerState.playerKeyBindings.rotR) -
       !!this.any(playerState.playerKeyBindings.rotL);
@@ -75,6 +82,7 @@ export function playerInputPoll(deltaTime) {
         }
         position.run = position.run || callback2(1) || callback2(7) || callback2(10);
         position.jumpHeld = position.jumpHeld || callback2Result;
+        position.diveHeld = position.diveHeld || callback2(2);
         if (result2) {
           position.jumpPressed = true;
         }

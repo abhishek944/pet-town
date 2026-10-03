@@ -4,28 +4,21 @@ import { hudState } from "../state.js";
 import { synchronizeHudInputBlocking } from "../modals/synchronize-hud-input-blocking.js";
 import { createHudElement } from "../state/create-hud-element.js";
 import { shouldShowTouchControls } from "../touch-controls/should-show-touch-controls.js";
-import { createBlockIconCanvas } from "../../building/icons/create-block-icon-canvas.js";
 import { dismissSplashScreen } from "./dismiss-splash-screen.js";
 export function createSplashScreen(parent, title) {
   hudState.hudRuntime.splash = true;
-  hudState.hudRuntime.splashT = 0;
   hudState.hudRuntime.orbitA = null;
   synchronizeHudInputBlocking();
-  hudState.hudElements.splash = createHudElement(welcomeMarkup);
+  hudState.hudElements.splash = document.getElementById("boot") ?? createHudElement(welcomeMarkup);
   hudState.hudElements.splash.querySelector(".town-wordmark").textContent = title;
   if (shouldShowTouchControls()) {
     hudState.hudElements.splash.querySelector(".town-start span").textContent =
       "Tap anywhere to begin";
   }
-  for (let result of [`grass`, `flower`, `planks`]) {
-    hudState.hudElements.splash
-      .querySelector(`.pk-loader`)
-      .append(createBlockIconCanvas(result, 120));
-  }
-  hudState.hudElements.splashBar = hudState.hudElements.splash.querySelector(`.pk-bar i`);
   parent.append(hudState.hudElements.splash);
   hudState.hudRootElement.classList.add(`off`);
-  let callback = () => {
+  let callback = (event) => {
+    if (event.target?.closest?.("a, .public-town-tools")) return;
     if (hudState.hudElements.splash?.classList.contains(`ready`)) {
       removeEventListener(`pointerdown`, callback, true);
       removeEventListener(`keydown`, callback, true);

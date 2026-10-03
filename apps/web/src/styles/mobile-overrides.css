@@ -1,0 +1,117 @@
+@media (max-width: 780px) {
+  header {
+    padding: 0 20px;
+  }
+  header nav,
+  header .tag {
+    display: none;
+  }
+  .shell {
+    margin: 0 22px;
+  }
+  .split,
+  .section-intro,
+  .world-section,
+  .mode-grid,
+  .faq {
+    display: block;
+  }
+  .split {
+    padding: 40px 0;
+  }
+  .split h1 {
+    font-size: 56px;
+  }
+  .split .scene {
+    height: 290px;
+    margin-top: 30px;
+  }
+  .actions {
+    flex-wrap: wrap;
+  }
+  .features {
+    display: block;
+    padding-bottom: 0;
+  }
+  .features article {
+    padding: 20px 0;
+  }
+  .section {
+    padding: 55px 0;
+  }
+  .section h2 {
+    font-size: 45px;
+  }
+  .mode-card {
+    margin-top: 18px;
+    padding: 24px;
+  }
+  .world-section .scene {
+    height: 280px;
+    margin-bottom: 30px;
+  }
+  .large-pets img {
+    width: 23%;
+    height: 140px;
+  }
+  .large-pets {
+    padding: 0;
+  }
+  .support {
+    gap: 15px;
+  }
+  .pet-preview img {
+    width: 66px;
+  }
+  .brand {
+    font-size: 25px;
+  }
+}
+.mobile-menu {
+  display: none;
+}
+@media (max-width: 780px) {
+  .mobile-menu {
+    display: block;
+    position: relative;
+  }
+  .mobile-menu summary {
+    font-size: 12px;
+    border: 1px solid #e4dfd7;
+    padding: 9px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .mobile-menu > div {
+    position: absolute;
+    right: 0;
+    top: 44px;
+    width: 190px;
+    background: #fbfaf6;
+    border: 1px solid #e4dfd7;
+    padding: 10px;
+    z-index: 3;
+    border-radius: 8px;
+  }
+  .mobile-menu a {
+    display: block;
+    color: #201c18;
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+.brand,
+nav a {
+  color: inherit;
+  text-decoration: none;
+}
+.button:hover {
+  filter: brightness(0.96);
+}
+.architecture-links {
+  font-size: 12px;
+}
+.architecture-links a {
+  color: inherit;
+  text-underline-offset: 3px;
+}

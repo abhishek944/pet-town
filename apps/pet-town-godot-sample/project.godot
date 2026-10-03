@@ -1,0 +1,53 @@
+; Native desktop town. Three.js remains the source and public browser reference.
+config_version=5
+
+[application]
+config/name="Pet Town"
+config/icon="res://ui/icons/pet-town.png"
+config/macos_native_icon="res://ui/icons/pet-town.icns"
+boot_splash/show_image=true
+boot_splash/image="res://ui/icons/boot-welcome.png"
+boot_splash/stretch_mode=1
+boot_splash/bg_color=Color(0.624, 0.847, 1, 1)
+run/main_scene="res://scenes/startup.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+config/use_custom_user_dir=true
+config/custom_user_dir_name="Pet Town Godot Sample"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="disabled"
+
+[rendering]
+renderer/rendering_method.macos="forward_plus"
+rendering_device/driver.macos="metal"
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="mobile"
+textures/default_filters/use_nearest_mipmap_filter=false
+anti_aliasing/quality/msaa_3d=0
+anti_aliasing/quality/screen_space_aa=1
+lights_and_shadows/directional_shadow/size=1024
+environment/defaults/default_clear_color=Color(0.64,0.83,0.92,1)
+
+[physics]
+3d/physics_engine="Jolt Physics"
+common/physics_ticks_per_second=60
+common/physics_interpolation=true
+
+
+[shader_globals]
+source_hemi_sky={
+"type": "vec3",
+"value": Vector3(0.397, 0.578, 1)
+}
+source_hemi_ground={
+"type": "vec3",
+"value": Vector3(0.352, 0.254, 0.122)
+}
+source_hemi_energy={
+"type": "float",
+"value": 0.3
+}

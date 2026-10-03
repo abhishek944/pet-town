@@ -1,4 +1,12 @@
-#hud .town-welcome { display: block; font-family: Nunito, ui-rounded, sans-serif; }
+#hud .town-welcome { position: absolute; inset: 0; display: block; font-family: Nunito, ui-rounded, sans-serif; isolation: isolate; overflow: hidden; pointer-events: auto; transition: opacity .9s ease; }
+#hud .town-welcome * { box-sizing: border-box; }
+#hud .town-welcome::before, #hud .town-welcome::after { content: ""; position: absolute; inset: 0; z-index: -1; transition: opacity .9s ease; }
+#hud .town-welcome::before { background: radial-gradient(ellipse at 50% 120%,#fff4d6 0%,#fff4d600 55%),linear-gradient(#9fd8ff,#c6e9ff 45%,#ffe8f0); }
+#hud .town-welcome::after { opacity: 0; }
+#hud .town-welcome.live::before { opacity: 0; }
+#hud .town-welcome.live::after { opacity: 1; }
+#hud .town-welcome.out { opacity: 0; transition: opacity .6s ease; }
+#hud .town-welcome [hidden] { display: none; }
 #hud .town-welcome::after { background: radial-gradient(ellipse at 50% 40%,#f9e7b83b,transparent 66%),linear-gradient(#fff5dc1a,#25352615); }
 .town-identity { position: absolute; left: 50%; top: 126px; transform: translateX(-50%); width: 920px; height: 210px; display: flex; align-items: center; justify-content: center; }
 .town-sign { position: absolute; width: 736px; height: 187px; transform: rotate(-2deg); border-radius: 34px 45px 29px 37px; background: linear-gradient(180deg,#ab7645 0%,#a66f40 47%,#895c37 49%,#a56e40 52%,#9a643c 100%); border: 5px solid #dcb481; box-shadow: 0 8px 0 #63462b,0 20px 30px #172e294f; }
@@ -11,11 +19,15 @@
 .town-start { position: absolute; left: 50%; top: 524px; transform: translateX(-50%); background: #fffdf4; color: #4e4636; border: 3px solid #fff; border-radius: 32px; padding: 11px 24px; font: 900 19px Nunito,ui-rounded,sans-serif; box-shadow: 0 5px 0 #dbc8a6; cursor: pointer; display: flex; align-items: center; gap: 14px; white-space: nowrap; opacity: 0; pointer-events: none; }
 .town-start svg { width: 24px; height: 28px; stroke: #716044; fill: none; stroke-width: 1.8; }
 .town-start:focus-visible { outline: 4px solid #23583a; outline-offset: 6px; }
-.ready .town-start { opacity: 1; pointer-events: auto; }
+.town-welcome.ready .town-start { opacity: 1; pointer-events: auto; }
 .town-sound-note { position: absolute; bottom: 29px; width: 100%; text-align: center; font-size: 12px; color: #fff9e7; text-shadow: 0 1px 3px #314c30; }
-#hud .town-welcome .pk-loader { position: absolute; top: 413px; left: 50%; transform: translateX(-50%); margin: 0; }
-#hud .town-welcome .pk-bar { position: absolute; top: 500px; left: 50%; transform: translateX(-50%); margin: 0; }
-@media (max-height: 650px), (max-width: 1000px) { .town-identity { top: 65px; transform: translateX(-50%) scale(.82); }.town-tagline { top: 280px; font-size: 17px; }.town-start { top: auto; bottom: 97px; } #hud .town-welcome .pk-loader { top: 320px; } #hud .town-welcome .pk-bar { top: 393px; } }
+.town-loading { position: absolute; top: 524px; left: 50%; transform: translateX(-50%); margin: 0; color: #624626; background: #fffdf4; border-radius: 32px; padding: 14px 24px; font-size: 16px; width: max-content; max-width: calc(100% - 32px); text-align: center; }
+.town-loading::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 12px; border: 2px solid #d4b489; border-top-color: #426448; border-radius: 50%; vertical-align: -2px; animation: town-loading-spin 1s linear infinite; }
+@keyframes town-loading-spin { to { rotate: 360deg; } }
+.town-welcome .public-boot-links { position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%); pointer-events: auto; }
+.town-welcome noscript { position: absolute; bottom: 120px; width: 100%; text-align: center; color: #624626; }
+@media (prefers-reduced-motion: reduce) { #hud .town-welcome, #hud .town-welcome::before, #hud .town-welcome::after { transition: none; } .town-loading::before { animation: none; } }
+@media (max-height: 650px), (max-width: 1000px) { .town-identity { top: 65px; transform: translateX(-50%) scale(.82); }.town-tagline { top: 280px; font-size: 17px; }.town-start, .town-loading { top: auto; bottom: 97px; } }
 @media (max-width: 700px) { .town-identity { top: 70px; transform: translateX(-50%) scale(.55); }.town-tagline { top: 260px; font-size: 15px; }.town-start { font-size: 15px; padding: 11px 18px; } }
 @media (max-width: 430px) { .town-identity { transform: translateX(-50%) scale(.43); } }
-@media (max-height: 440px) { .town-identity { top: 4px; transform: translateX(-50%) scale(.55); }.town-tagline { top: 196px; }.town-start { bottom: 47px; }.town-sound-note { bottom: 12px; } }
+@media (max-height: 440px) { .town-identity { top: 4px; transform: translateX(-50%) scale(.55); }.town-tagline { top: 196px; }.town-start, .town-loading { bottom: 47px; }.town-sound-note { bottom: 12px; } }

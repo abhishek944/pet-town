@@ -1,0 +1,42 @@
+.town-labels {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  overflow: hidden;
+}
+.town-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 2px solid #fff8;
+  border-radius: 30px;
+  padding: 3px 9px;
+  color: #51463d;
+  background: #fffbf1e8;
+  font:
+    700 11px ui-rounded,
+    system-ui,
+    sans-serif;
+  box-shadow: 0 2px 5px #3b302423;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.town-label[data-selected="true"] {
+  background: #ddf3d8;
+  border-color: #a1c995;
+}
+.town-companions {
+  position: fixed;
+  top: 100px;
+  left: 24px;
+  z-index: 24;
+  pointer-events: none;
+}
+.town-companions button {
+  pointer-events: auto;
+}

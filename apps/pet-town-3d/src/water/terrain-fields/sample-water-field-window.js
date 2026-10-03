@@ -1,5 +1,6 @@
 /** Terrain-aware bed, coastal distance, openness and river current textures with incremental rebaking. */
 /** Terrain-aware bed, coastal distance, openness and river current textures with incremental rebaking. */
+import { computeOceanVoidWeight } from "./compute-ocean-void-weight.js";
 
 export function sampleWaterFieldWindow(region, state) {
   region.surfaceY = state.getSurfaceY();
@@ -35,9 +36,12 @@ export function sampleWaterFieldWindow(region, state) {
           ? state.sampleSolidBed(result54, result55, result60, region.surfaceY)
           : NaN),
         (region.bedHeights[result56] = result60),
-        (region.voidWeights[result56] = result57
-          ? 0
-          : Math.min(1, Math.hypot(result58, result59) / 3)),
+        (region.voidWeights[result56] = computeOceanVoidWeight(
+          region.terrain,
+          result54,
+          result55,
+          result57 ? 0 : Math.min(1, Math.hypot(result58, result59) / 3),
+        )),
         (region.landMask[result56] =
           Number.isFinite(result60) && result60 > region.surfaceY ? 1 : 0),
         region.biomeAt && result57 && !region.landMask[result56])

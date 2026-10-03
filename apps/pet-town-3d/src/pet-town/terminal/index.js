@@ -15,7 +15,8 @@ export function createTerminalDock({ context, controller, bridge, onVisibility }
     renderer = null,
     focused = false;
   let ownsControl = false,
-    requestedControl = true;
+    requestedControl = false,
+    terminalMode = false;
   function clearFocus() {
     focused = false;
     controller.clearInput?.();
@@ -66,19 +67,27 @@ export function createTerminalDock({ context, controller, bridge, onVisibility }
     });
   }
   function attach(control = requestedControl, takeover = false) {
-    if (!record || disposed || suspended) return;
+    if (!record || record.source !== "herdr" || disposed || suspended) return;
+    terminalMode = true;
+    view.showTerminal(true);
     requestedControl = control;
     view.error("");
     clearFocus();
     makeRenderer();
     void session.attach(record.id, renderer.dimensions(), control, takeover);
   }
-  function close() {
-    if (record) suppressed = record.id;
+  function back() {
     session.close();
     clearFocus();
     renderer?.dispose();
     renderer = null;
+    ownsControl = terminalMode = suspended = false;
+    view.showTerminal(false);
+    view.error("");
+  }
+  function close() {
+    if (record) suppressed = record.id;
+    back();
     record = null;
     setVisible(false);
     status("closed", false, "Terminal view closed");
@@ -92,7 +101,7 @@ export function createTerminalDock({ context, controller, bridge, onVisibility }
     }
   }
   function release() {
-    if (!record || disposed) return;
+    if (!record || disposed || !terminalMode) return;
     session.close();
     clearFocus();
     status("disconnected", false, "Terminal view paused. Reconnect to resume.");
@@ -111,6 +120,8 @@ export function createTerminalDock({ context, controller, bridge, onVisibility }
       close,
       external,
       release,
+      back,
+      controller,
     },
     listeners.signal,
   );
@@ -124,25 +135,21 @@ export function createTerminalDock({ context, controller, bridge, onVisibility }
     update(next, currentContext = context) {
       if (disposed) return;
       context = currentContext;
-      const eligible = next?.source === "herdr" && !next.isMayor;
+      const eligible = next && !next.isMayor;
       const id = eligible ? next.id : null;
       if (id !== selectedId) {
         selectedId = id;
         suppressed = null;
-        session.close();
-        clearFocus();
-        renderer?.dispose();
-        renderer = null;
+        back();
         record = null;
-        requestedControl = true;
+        requestedControl = false;
       }
       if (!eligible || suppressed === id) {
         setVisible(false);
         return;
       }
-      const first = !record;
       record = next;
-      view.identity(next);
+      view.identity(next, controller);
       const hidden = Boolean(
         document.hidden ||
         context.hud?.blocking ||
@@ -153,15 +160,19 @@ export function createTerminalDock({ context, controller, bridge, onVisibility }
       view.root.inert = hidden;
       view.root.dataset.suspended = String(hidden);
       setVisible(!hidden);
-      if (hidden && !suspended) {
+      if (terminalMode && hidden && !suspended) {
         suspended = true;
         release();
-      } else if (!hidden && suspended) {
+      } else if (terminalMode && !hidden && suspended) {
         suspended = false;
         attach(false);
-      } else if (first && !hidden) attach(true);
+      }
     },
     close,
+    reopen() {
+      suppressed = null;
+      back();
+    },
     blur: clearFocus,
     dispose() {
       if (disposed) return;

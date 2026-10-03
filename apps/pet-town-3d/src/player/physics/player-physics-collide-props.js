@@ -1,3 +1,5 @@
+import { collideOrientedBox } from "./collide-oriented-box.js";
+import { samplePlayerPropCeiling } from "./sample-player-prop-ceiling.js";
 import { playerState } from "../state.js";
 export function playerPhysicsCollideProps() {
   let colliders2 = this.world.colliders;
@@ -8,6 +10,16 @@ export function playerPhysicsCollideProps() {
   let vel2 = this.vel;
   let result = playerState.playerMovementSettings.halfW + 0.04;
   for (let position of colliders2) {
+    const roof = position.roofHeight?.(pos2.x, pos2.z);
+    if (Number.isFinite(roof) && pos2.y >= roof - 0.015) continue;
+    if (position.ceilingHeight) {
+      const ceiling = samplePlayerPropCeiling(position, pos2.x, pos2.z);
+      position = { ...position, y0: ceiling, minY: ceiling };
+    }
+    if (position.kind === "obb") {
+      collideOrientedBox(this, position);
+      continue;
+    }
     if (position.kind === `cyl` || position.kind === `seg`) {
       if (
         pos2.y >= position.y1 - 0.001 ||
@@ -41,7 +53,7 @@ export function playerPhysicsCollideProps() {
       if (result4 >= result5 * result5) {
         continue;
       }
-      if (!position.noTop && vel2.y <= 0 && pos2.y > position.y1 - 0.3 && position.r > 0.25) {
+      if (!position.noTop && vel2.y <= 0 && this.prev.y >= position.y1 - 0.01) {
         pos2.y = position.y1;
         vel2.y = 0;
         this._land();
@@ -103,7 +115,7 @@ export function playerPhysicsCollideProps() {
       if (result19 <= 0 || result20 <= 0 || result21 <= 0 || result22 <= 0) {
         continue;
       }
-      if (!position.noTop && result21 < 0.3 && vel2.y <= 0.1) {
+      if (!position.noTop && this.prev.y >= position.maxY - 0.01 && vel2.y <= 0.1) {
         pos2.y = position.maxY;
         vel2.y = 0;
         this._land();

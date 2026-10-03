@@ -5,6 +5,7 @@ import { resolvePlayerLedgeSupport } from "./resolve-player-ledge-support.js";
 import { snapPlayerToWalkSurfaces } from "./snap-player-to-walk-surfaces.js";
 import { finishPlayerPhysicsStep } from "./finish-player-physics-step.js";
 export function playerPhysicsStep(deltaTime, input) {
+  input = this.world.ctx.boats?.beforeBodyStep(this, input) ?? input;
   this.time += deltaTime;
   let position = this.pos;
   let velocity = this.vel;
@@ -29,7 +30,7 @@ export function playerPhysicsStep(deltaTime, input) {
   sweepPlayerMovement.call(this, velocity, deltaTime, position);
   resolvePlayerLedgeSupport.call(this, deltaTime, world, position, velocity);
   snapPlayerToWalkSurfaces.call(this, velocity, position, world);
-  return finishPlayerPhysicsStep.call(
+  const result = finishPlayerPhysicsStep.call(
     this,
     world,
     position,
@@ -37,4 +38,6 @@ export function playerPhysicsStep(deltaTime, input) {
     previousVerticalSpeed,
     deltaTime,
   );
+  this.world.ctx.boats?.afterBodyStep(this);
+  return result;
 }

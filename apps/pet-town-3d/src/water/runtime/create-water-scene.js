@@ -26,7 +26,8 @@ export function createWaterScene(state) {
   state.centerX = (state.bounds.x0 + state.bounds.x1) / 2;
   state.centerZ = (state.bounds.z0 + state.bounds.z1) / 2;
   state.terrainRadius =
-    Math.max(state.bounds.x1 - state.bounds.x0, state.bounds.z1 - state.bounds.z0) / 2;
+    (state.context.terrain?.ocean?.baselineSize ??
+      Math.max(state.bounds.x1 - state.bounds.x0, state.bounds.z1 - state.bounds.z0)) / 2;
   state.mesh = new THREE.Mesh(
     createAdaptiveWaterGrid(
       state.centerX,

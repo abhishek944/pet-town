@@ -1,8 +1,10 @@
+import { moveBirdActor } from "../flight/move-bird-actor.js";
 import { advanceCreatureTowardGoal } from "./advance-creature-toward-goal.js";
 import { resolveCreatureSeparation } from "./resolve-creature-separation.js";
 import { updateCreatureHeightAndShadow } from "./update-creature-height-and-shadow.js";
 import { getCreatureWaterLevel } from "../world/get-creature-water-level.js";
 export function creatureActorMove(deltaTime, frame) {
+  if (this.def.flight && !this.pose) return moveBirdActor.call(this, deltaTime, frame);
   let position = this.position;
   let waterLevel = getCreatureWaterLevel();
   let supportY;

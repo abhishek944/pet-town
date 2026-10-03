@@ -8,22 +8,25 @@ export function createBlockSetter(state) {
     if (!state.isGridInBounds(gridX, gridZ) || gridY < 0 || gridY >= 40) {
       return false;
     }
-    let voxelIndex = (gridZ * 128 + gridX) * 40 + gridY;
+    let voxelIndex = (gridZ * state.size + gridX) * 40 + gridY;
     let previousBlockId = state.blocks[voxelIndex];
     if (previousBlockId === blockId) {
       return false;
     }
+    const previousTop = state.columnTops[gridZ * state.size + gridX];
     state.blocks[voxelIndex] = blockId;
     state.updateColumnTop(gridX, gridZ);
-    state.wallHeightsDirty = true;
-    state.heightPixels[gridZ * 128 + gridX] = state.columnTops[gridZ * 128 + gridX];
+    if (previousTop !== state.columnTops[gridZ * state.size + gridX]) {
+      state.rebuildWallHeights(gridX, gridZ);
+    }
+    state.heightPixels[gridZ * state.size + gridX] = state.columnTops[gridZ * state.size + gridX];
     state.heightTexture.needsUpdate = true;
     state.updateWaterMask(gridX, gridZ);
     state.markChunksDirty(gridX, gridZ);
     let change = {
-      x: gridX - 64,
+      x: gridX - state.half,
       y: gridY,
-      z: gridZ - 64,
+      z: gridZ - state.half,
       id: blockId,
       prev: previousBlockId,
     };

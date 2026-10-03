@@ -1,3 +1,4 @@
+import { updateBirdIntent } from "../flight/update-bird-intent.js";
 import { updateCreatureIntent } from "./update-creature-intent.js";
 export function creatureActorThink(deltaTime, frame) {
   this.t += deltaTime;
@@ -12,6 +13,7 @@ export function creatureActorThink(deltaTime, frame) {
   if (this.pose) {
     return this.posed(deltaTime, frame);
   }
+  if (this.def.flight) return updateBirdIntent.call(this, deltaTime, frame);
   if (this.state === `sleep`) {
     this.goal = null;
     if (!wantsSleep && this.t > 2 + this.sleepBias * 20) {

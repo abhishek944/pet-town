@@ -13,9 +13,11 @@ the bottom of your desktop.
 The desktop is a **Tauri v2 application** with a Rust backend and a
 TypeScript/CSS interface. Its 2D strip uses one lightweight window for the whole
 village, with no arbitrary agent limit. **Open 3D Town** opens the editable
-Three.js world with the same live agents and Mayor. That world was reconstructed
-from the deployed Bloomvale/Pokopia reference; its [app guide](apps/pet-town-3d/README.md)
-records the source and provenance.
+native Godot world with the same live agents and Mayor. Its terrain, scenery and
+characters are exported from the original Three.js town, retaining all 27,037
+source dry-land cells. The [Godot guide](apps/pet-town-godot-sample/README.md)
+describes native gameplay; the [Three.js guide](apps/pet-town-3d/README.md)
+retains browser instructions and source provenance.
 
 ## Install
 
@@ -66,11 +68,13 @@ user permissions, so review their manifest and source before installing.
   interactive.
 - Runs directly as a standalone app; the optional Herdr adapter can also start and stop it through plugin actions.
 
-The Three.js town retains its terrain, native animals, building tools, saved world,
-and original player. Its **Companions** roster follows broker state, with **Option+A**
+The Godot town includes the full source world, native animals, building tools,
+26 library designs, 15 land destinations and six ocean places. Its **Companions** roster follows broker state, with **Option+A**
 to cycle, **C** to control, **V** for first person, and **Escape** to leave a companion.
-Mayor controls reuse the desktop voice runtime. Ordinary browser play works, but
-live agents and Mayor require the desktop's **Open 3D Town**. See the
+Mayor controls reuse the desktop voice runtime through an authenticated local
+bridge. Native Godot saves remain separate from Three.js browser saves. Public
+browser play remains available. Full native visual and voice acceptance remains
+pending; see the
 [3D flow](docs/3d-game.md) for the implemented behavior and verification limits.
 
 ## Architecture
@@ -80,7 +84,7 @@ Standalone Tauri process
   ├─ Rust adapter broker: lifecycle records, Herdr discovery, and focus routes
   ├─ Rust orchestrator state: local wake bridge, GPT-Live session creation, and Firstmate lifecycle
   ├─ WebViews: 2D village, Settings, and ephemeral WebRTC voice conversation
-  ├─ town WebView: editable Three.js world, public snapshots and scoped actions
+  ├─ native Godot process: source world, public snapshots and scoped actions over authenticated loopback TCP
   └─ dedicated Herdr pane: trusted Firstmate checkout → selected Pi model
        ↑
 optional Herdr plugin adapter (herdr-plugin.toml + scripts/supervisor.sh)
@@ -115,6 +119,7 @@ change to the bundled renderer), additionally need:
 - pnpm 10.28.2 (Corepack can install the version declared in `package.json`)
 - Rust 1.88 or newer
 - Xcode Command Line Tools
+- Godot 4.7+ universal macOS app for native world packaging (`GODOT_APP` can select it)
 - Ruff, ShellCheck, shfmt, actionlint, and Taplo (`brew install ruff shellcheck shfmt actionlint taplo`)
 
 The window uses Tauri's macOS private API for transparency. That is suitable for
@@ -123,89 +128,19 @@ added later; always-on-top behavior on Linux depends on the desktop compositor.
 
 ## Develop and build both towns
 
-From the repository root:
-
-```bash
-pnpm run dev    # install dependencies, build frontend assets, launch native development
-pnpm run build  # build the complete desktop app and DMG with the Three.js world
-```
-
-These desktop commands stop only this checkout's desktop and frontend processes,
-so save work in those windows first. They preserve Cargo's
-`apps/pet-town/src-tauri/target` cache. Development starts and waits for both Vite
-servers: desktop on port 1420 and Three.js on port 1422. **Open 3D Town** creates or
-focuses the native town window. No Godot installation, imported island assets or
-Godot export is part of the current dev/build path.
-
-The desktop frontend build first builds `@pet-town/three-town`, then copies its
-output into `apps/pet-town/dist/town`. Packaged town windows load
-`town/index.html` from those local assets. The release executable is written to
-`apps/pet-town/src-tauri/target/<rust-target>/release/pet-town` and copied into the
-matching `bin/macos-*` plugin package directory. The same build produces
-**Pet Town.app** and a drag-to-Applications DMG at `bin/macos-*/pet-town.dmg`.
-Tagged release builds upload those installers as GitHub Release assets. The build
-also bundles a pinned Node release and Pi package for the existing voice runtime.
-
-The pnpm/Turborepo workspace contains the Tauri desktop in `apps/pet-town`, the
-editable Three.js game (`@pet-town/three-town`) in `apps/pet-town-3d`, and the public
-landing page in `apps/web`. Repository scripts, plugin metadata and documentation
-remain at the root.
-
-For first-time development, use Corepack to select pnpm 10.28.2, then run
-`pnpm run dev`. Normal watchers handle subsequent source edits. To work only on
-the browser game, run `pnpm run dev:town`; `pnpm run dev:workshop` is an alias for
-that standalone server. Browser gameplay does not connect agents or Mayor; use
-**Open 3D Town** in the native desktop for that integration. Browser and native
-WebView saves are separate, even though both retain the legacy `bloomvale` storage
-keys. See the [Three.js guide](apps/pet-town-3d/README.md) and
-[extension APIs](apps/pet-town-3d/ARCHITECTURE.md).
-
-Start the landing page at `http://127.0.0.1:4173` with `pnpm run dev:web`.
-Type-check and lint commands still use Turbo.
+See [development, packaging, and browser workflows](docs/development.md#develop-and-build-both-towns).
 
 ## Link for local development
 
-While working on this repository, link the working tree instead of installing
-from GitHub:
-
-```bash
-herdr plugin link "$PWD"
-```
-
-Linking does not run build commands and does not register against GitHub. The
-startup hook runs when the Herdr server starts or hands off. Herdr stores the
-renderer PID, exact executable path, process start time, and
-session registry in its plugin state directory. The supervisor verifies all
-process identity fields immediately before signaling and uses macOS `lockf` for
-race-free control operations. Renderer output is discarded so it cannot grow an
-unbounded background log.
+See [linking this checkout with Herdr](docs/development.md#link-for-local-development).
 
 ## Checks
 
-```bash
-./scripts/check.sh
-```
-
-The checks cover declarative flow validation, deterministic choices, safe state interruption, edge-only direction changes, TypeScript and production frontend builds, and packaged arm64/x86_64 binaries. They also run ESLint and Prettier for web files, Clippy and rustfmt for Rust, Ruff for Python, ShellCheck and shfmt for shell scripts, actionlint for GitHub Actions, and Taplo for TOML. The repository intentionally uses non-unit validation scripts instead of checked-in unit tests or a Vitest dependency.
-
-Use `pnpm run check:quality` for only formatting, linting, and type checks. Use `pnpm run format` to apply all configured formatters. GitHub Actions installs the non-Node quality tools and builds both macOS targets with the declared Rust 1.88 minimum.
+See [quality and build checks](docs/development.md#checks).
 
 ## Manual visual check
 
-1. Run `./scripts/build.sh` and link the plugin.
-2. Invoke `pet-town.village-on` while at least two Herdr agents exist.
-3. Confirm citizens appear centered just above the Dock, empty window space passes clicks through, and clicking a pet focuses its exact Herdr agent pane.
-4. Confirm each pet moves to a screen edge, turns only there, and continues in the direction it faces with its project name following above.
-5. Change agents between working, blocked, done, idle, and unknown; confirm Idle and Unknown hide the complete pet, Running walks, and Blocked and Completed stay in place.
-6. Confirm the Assets gallery contains exactly the six KayKit Adventurers and four KayKit Skeletons, and each character uses only its normal walk APNG.
-7. Complete an agent and confirm its character remains visible with the same walk animation until its state changes or the completed-pet delay hides it.
-8. Drag a pet horizontally, release it, and confirm it resumes movement from the drop point without focusing the agent.
-9. Right-click several bundled characters and confirm no animation actions are offered.
-10. Right-click a pet and choose **Preferences…**. Confirm one native Settings window opens for that character, every visible pet freezes, and the Pets page lists each state with its APNG and action. Select a state to preview it, including whether it walks or stays in place. Deselect that character from the random cast, Apply, close Settings, and confirm any visible copy is replaced while allowed pets keep their assignments.
-11. Enable **Hide completed pets**, select a delay, and Apply. Confirm completed pets disappear after that delay, no longer affect crowd sizing or clicks, and return immediately if they begin working or become blocked.
-12. Confirm reduced movement or hover pauses only horizontal travel while the pet keeps animating; also confirm closing Settings discards any unapplied draft and resumes current Herdr states.
-13. Edit `~/.pet-town/preferences.json`, invoke `pet-town.reload-preferences`, and confirm valid changes load while invalid JSON is preserved and rejected.
-14. Invoke `pet-town.village-off` and confirm the strip disappears.
+See the [user-owned visual checklist](docs/development.md#manual-visual-check).
 
 ## Privacy
 

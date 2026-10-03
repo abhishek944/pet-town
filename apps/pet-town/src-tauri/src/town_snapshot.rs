@@ -17,6 +17,7 @@ pub(crate) struct TownRosterCache {
     observed_at: Option<Instant>,
     available: bool,
     agents: Vec<crate::AgentView>,
+    usage: crate::codex_usage::Snapshot,
 }
 
 #[tauri::command]
@@ -25,7 +26,11 @@ pub(crate) async fn get_town_snapshot(
     window: WebviewWindow,
 ) -> Result<Value, String> {
     crate::town_commands::require_town(&window)?;
-    let agents = cached_roster(&app);
+    Ok(snapshot(&app))
+}
+
+pub(crate) fn snapshot(app: &AppHandle) -> Value {
+    let (agents, usage) = cached_roster(app);
     let mode = app
         .state::<PreferencesStore>()
         .snapshot()
@@ -33,13 +38,14 @@ pub(crate) async fn get_town_snapshot(
         .app
         .orchestrator
         .mode;
-    Ok(json!({
+    json!({
         "v": 1, "type": "snapshot", "available": agents.available,
-        "agents": agents.agents, "mayor": mayor_snapshot(&app, &mode), "mode": mode,
-    }))
+        "agents": agents.agents, "mayor": mayor_snapshot(app, &mode), "mode": mode,
+        "usage": usage,
+    })
 }
 
-fn cached_roster(app: &AppHandle) -> crate::AgentSnapshot {
+fn cached_roster(app: &AppHandle) -> (crate::AgentSnapshot, crate::codex_usage::Snapshot) {
     let state = app.state::<crate::town_process::TownWindowState>();
     let mut cache = state
         .roster
@@ -53,34 +59,45 @@ fn cached_roster(app: &AppHandle) -> crate::AgentSnapshot {
     {
         cache.collecting = true;
         cache.started_at = Some(now);
-        refresh_roster(app.clone(), now);
+        refresh_roster(app.clone());
     }
     let fresh = cache
         .observed_at
         .is_some_and(|time| now.duration_since(time) <= ROSTER_MAX_AGE);
     let available = fresh && cache.available;
-    crate::AgentSnapshot {
-        available,
-        agents: if available {
-            cache.agents.clone()
-        } else {
-            Vec::new()
+    let mut usage = cache.usage.clone();
+    usage.available &= fresh;
+    (
+        crate::AgentSnapshot {
+            available,
+            agents: if available {
+                cache.agents.clone()
+            } else {
+                Vec::new()
+            },
         },
-    }
+        usage,
+    )
 }
 
-fn refresh_roster(app: AppHandle, started_at: Instant) {
+fn refresh_roster(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
-        let result = tauri::async_runtime::spawn_blocking(crate::sessions::collect_visible).await;
+        let result = tauri::async_runtime::spawn_blocking(|| {
+            let collected = crate::sessions::collect_visible();
+            let usage = crate::codex_usage::refresh();
+            (collected, usage)
+        })
+        .await;
         let state = app.state::<crate::town_process::TownWindowState>();
         let mut cache = state
             .roster
             .lock()
             .unwrap_or_else(|error| error.into_inner());
         cache.collecting = false;
-        cache.observed_at = Some(started_at);
+        cache.observed_at = Some(Instant::now());
         match result {
-            Ok(collected) => {
+            Ok((collected, usage)) => {
+                cache.usage = usage;
                 cache.available = collected.snapshot.available;
                 cache.agents = collected
                     .snapshot

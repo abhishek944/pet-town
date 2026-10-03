@@ -1,0 +1,102 @@
+.step-3 .intro {
+  position: absolute;
+  top: 119px;
+  left: 95px;
+  right: 95px;
+  text-align: center;
+}
+.step-3 .intro h1 {
+  font-size: 34px;
+  max-width: none !important;
+  letter-spacing: -1.2px;
+}
+.step-3 .intro p {
+  font-size: 14px;
+  max-width: 520px;
+  margin: 14px auto 0;
+}
+.step-3 .host {
+  position: absolute;
+  top: 258px;
+  left: 193px;
+  width: 494px;
+  min-height: 205px;
+  padding: 28px;
+  border: 1px solid #d6dfd0;
+  background: #fffdf5;
+  border-radius: 18px;
+  box-shadow: 0 12px 35px #32654308;
+}
+.step-3 .host-head {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.step-3 .host-logo {
+  width: 57px;
+  height: 57px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: #082149;
+  color: #fff4da;
+  font-size: 28px;
+  font-weight: 650;
+  flex: none;
+}
+.step-3 .host b {
+  display: block;
+  font-size: 18px;
+}
+.step-3 .host small {
+  display: block;
+  font-size: 12px;
+  color: #78877b;
+  margin-top: 6px;
+}
+.step-3 .status-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  border-top: 1px solid #0821490e;
+  margin-top: 22px;
+  padding-top: 18px;
+  font-size: 12px;
+  color: #947845;
+}
+.step-3 .status-dot {
+  height: 7px;
+  width: 7px;
+  border-radius: 50%;
+  background: #d1a765;
+  margin-top: 4px;
+  flex: none;
+}
+.step-3 .status-copy b {
+  font-size: 12px;
+  color: #5d6d63;
+  margin: 0 0 6px;
+}
+.step-3 .status-copy span {
+  font-size: 11px;
+  color: #899387;
+}
+.step-3 .detail {
+  position: absolute;
+  top: 491px;
+  left: 193px;
+  right: 193px;
+  font-size: 12px;
+  color: #77877a;
+  line-height: 1.6;
+  text-align: center;
+}
+.step-3 .next {
+  position: absolute;
+  bottom: 98px;
+  left: 80px;
+  right: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

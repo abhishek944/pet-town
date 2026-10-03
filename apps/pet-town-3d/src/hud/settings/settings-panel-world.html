@@ -1,0 +1,31 @@
+<div
+  id="town-panel-world"
+  role="tabpanel"
+  aria-labelledby="town-tab-world"
+  data-panel="world"
+  hidden
+>
+  <div class="world-settings">
+    <h2>World sound</h2>
+    <div class="setting-row">
+      <div>
+        Music &amp; town sounds
+        <p>Mayor voice has its own controls.</p>
+      </div>
+      <button type="button" data-control="mute"><span>Muted</span> <kbd>M</kbd></button>
+    </div>
+    <label class="volume-label"
+      >World volume
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        data-control="volume"
+        aria-label="World volume" /><output data-field="volume"></output
+    ></label>
+    <p class="note">
+      Your builds are saved on this device. Reset world opens a separate confirmation.
+    </p>
+  </div>
+</div>

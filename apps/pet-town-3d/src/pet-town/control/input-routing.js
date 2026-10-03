@@ -1,7 +1,7 @@
 /** Route the game's existing keyboard, touch and gamepad sample to one avatar. */
+import { addPlayerInputFilter } from "../../player/input/poll-filters.js";
 export function routeTownInput(context, getSelected) {
   const input = context.player.input;
-  const originalPoll = input.poll;
   let sample = {};
   let focused = document.hasFocus() && !document.hidden;
   const listeners = new AbortController();
@@ -34,6 +34,7 @@ export function routeTownInput(context, getSelected) {
         run: false,
         jumpHeld: false,
         jumpPressed: false,
+        diveHeld: false,
       });
     input.orbitX = input.orbitY = input.zoom = 0;
   }
@@ -45,8 +46,7 @@ export function routeTownInput(context, getSelected) {
       },
       { signal: listeners.signal },
     );
-  input.poll = function (deltaTime) {
-    const controls = originalPoll.call(this, deltaTime);
+  const removeInput = addPlayerInputFilter(input, function (controls) {
     const pickerOpen = context.petTown?.panel?.open;
     const captured = context.petTown?.terminal?.inputActive;
     sample =
@@ -59,12 +59,13 @@ export function routeTownInput(context, getSelected) {
       run: false,
       jumpHeld: false,
       jumpPressed: false,
+      diveHeld: false,
       orbitX: 0,
       orbitY: 0,
       zoom: 0,
       rotate: 0,
     };
-  };
+  });
   return {
     get sample() {
       return sample;
@@ -72,7 +73,7 @@ export function routeTownInput(context, getSelected) {
     clear,
     dispose() {
       listeners.abort();
-      input.poll = originalPoll;
+      removeInput();
     },
   };
 }

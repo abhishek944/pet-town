@@ -1,0 +1,23 @@
+<!doctype html><html><body><canvas id="game"></canvas><button id="details" style="position:fixed;left:20px;top:20px;z-index:999999">Export original vegetation ranks and shadow mask</button><output id="result" style="position:fixed;left:20px;top:70px;z-index:999999;background:white">Loading original world</output><script type="module">
+const nativeFrame=window.requestAnimationFrame.bind(window); let paused=false;
+window.requestAnimationFrame=fn=>nativeFrame(t=>{if(!paused)fn(t)});
+const {context}=await import('/src/main.js');
+const {vegetationState}=await import('/src/vegetation/state.js');
+const result=document.getElementById('result'); result.textContent='Ready to export exact source instance ranks';
+document.getElementById('details').onclick=async()=>{
+try {
+const runtime=vegetationState.vegetationRuntimeState;
+const fields=[];
+for(const field of Object.values(runtime.fields)){
+ const groups=new Map();
+ for(const item of field.items??[]){if(item.hidden||item.x< -64||item.x>=64||item.z< -64||item.z>=64)continue; const v=item.v??0;if(!groups.has(v))groups.set(v,[]);groups.get(v).push([item.x,item.y,item.z,item.rank]);}
+ for(const [variant,items] of groups)fields.push({name:field.name,variant,items,density:field.o.dens??false});
+}
+const send=async(name,body)=>{const r=await fetch('http://127.0.0.1:1427/asset/'+name,{method:'POST',body});if(!r.ok)throw new Error(name+':'+r.status)};
+await send('region-vegetation-ranks.json',JSON.stringify({fields,tier:vegetationState.vegetationQualityTiers[runtime.tierName],tierName:runtime.tierName}));
+const canvas=runtime.materials.blob.alphaMap.image;
+await send('region-shadow-mask.png',await new Promise(resolve=>canvas.toBlob(resolve,'image/png')));
+result.textContent='Vegetation ranks and original shadow mask exported';paused=true;
+}catch(error){result.textContent=String(error.stack||error)}
+};
+</script></body></html>

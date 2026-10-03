@@ -1,6 +1,7 @@
 import { Vector3 } from "three";
+import { isCameraVegetationOccluded } from "../../player/camera-visibility/is-camera-vegetation-occluded.js";
 
-/** Continue the world's existing canopy transparency around the followed companion. */
+/** Fade only the local viewing corridor around the followed companion. */
 export function createTownFoliageFade(context) {
   const target = new Vector3();
   const vegetation = context.vegetation;
@@ -11,11 +12,15 @@ export function createTownFoliageFade(context) {
     get active() {
       return active;
     },
-    update(world, position, deltaTime) {
+    update(world, position, deltaTime, enabled = true) {
       if (!fade) return;
+      if (!enabled) {
+        if (active) this.reset();
+        return;
+      }
       target.copy(position);
       target.y += 0.9;
-      if (world.canopyOnSegment(context.camera.position, target)) hold = 0.5;
+      if (isCameraVegetationOccluded(context, world, context.camera.position, target)) hold = 0.5;
       else hold = Math.max(0, hold - deltaTime);
       active = hold > 0;
       fade.call(

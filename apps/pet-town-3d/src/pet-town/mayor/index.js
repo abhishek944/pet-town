@@ -53,6 +53,7 @@ export function createMayorPanel({ bridge, onFollowMayor }) {
     void run("Calling Mayor…", () => bridge.action("invokeMayor"));
   }
   function onShortcut(event) {
+    if (document.querySelector(".asset-library-overlay:not([hidden])")) return;
     if (event.target?.closest?.('[data-town-ui="terminal"]')) return;
     if (event.code !== "KeyM" || !event.altKey || event.ctrlKey || event.metaKey) return;
     event.preventDefault();
@@ -128,7 +129,7 @@ export function createMayorPanel({ bridge, onFollowMayor }) {
       render();
     },
     update(deltaTime, context, mayorRecord) {
-      const underDialog = Boolean(context.hud?.helpOpen);
+      const underDialog = Boolean(context.hud?.helpOpen || context.worldAssets?.libraryOpen);
       view.root.inert = underDialog;
       view.root.dataset.underDialog = String(underDialog);
       const uiHidden = Boolean(
