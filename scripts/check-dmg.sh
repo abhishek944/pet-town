@@ -40,8 +40,11 @@ cmp "$runtime" "$package_dir/pet-town-pi-runtime.tar.gz"
 [ "$(plutil -extract CFBundleShortVersionString raw "$app/Contents/Info.plist")" = "$expected_version" ]
 [ -f "$mount/.background.png" ]
 cmp "$mount/.background.png" "$ROOT/apps/pet-town/src-tauri/dmg-background.png"
-[ "$(sips -g pixelWidth "$mount/.background.png" | awk '/pixelWidth/ {print $2}')" = 1200 ]
-[ "$(sips -g pixelHeight "$mount/.background.png" | awk '/pixelHeight/ {print $2}')" = 800 ]
+background_size=$(sips -g pixelWidth -g pixelHeight "$mount/.background.png" | awk '/pixelWidth|pixelHeight/ {print $2}')
+[ "$background_size" = "$(printf '660\n400')" ] || {
+  echo "Installer background must match the 660x400 Finder window; found: $background_size" >&2
+  exit 1
+}
 [ -f "$mount/.DS_Store" ]
 if [ "${REQUIRE_SIGNED:-0}" = "1" ]; then
   [ -n "${EXPECTED_SIGNING_IDENTITY:-}" ]
