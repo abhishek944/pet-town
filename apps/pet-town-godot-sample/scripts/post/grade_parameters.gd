@@ -5,13 +5,11 @@ const PRESETS := [
 	[[1,1,1],[.045,.04,.065],[1.1,1.07,1.04],[1.01,1,.995],[-.02,0,.03],[.035,.018,-.01],[.72,.6,.72],1.04,.12,.12,.38],
 	[[.9,.96,1.08],[.03,.045,.085],[.98,1,1.04],[.97,1,1.03],[-.01,.01,.035],[0,.01,.02],[.55,.6,.78],.82,.1,.08,.5]
 ]
-var under_grade := 0.0
 var clock := 0.0
 
-func sample(elevation: float, exposure: float, delta: float, underwater: bool) -> PackedFloat32Array:
+func sample(elevation: float, exposure: float, delta: float, _underwater: bool) -> PackedFloat32Array:
 	var dt := clampf(delta, 0, .1)
 	clock += dt
-	under_grade = lerpf(under_grade, float(underwater), 1-exp(-dt*10))
 	var day := smoothstep(.1, .45, elevation)
 	var night := 1-smoothstep(-.28, 0, elevation)
 	var weights := Vector3(day, maxf(0, 1-day-night), night)
@@ -25,11 +23,7 @@ func sample(elevation: float, exposure: float, delta: float, underwater: bool) -
 	var scalars := PackedFloat32Array()
 	for i in range(7,11):
 		scalars.append(PRESETS[0][i]*weights.x+PRESETS[1][i]*weights.y+PRESETS[2][i]*weights.z)
-	if under_grade > .01:
-		vectors[0] = vectors[0].lerp(Vector3(.8,1,1.08),under_grade*.6)
-		vectors[1] = vectors[1].lerp(Vector3(.03,.08,.1),under_grade*.7)
-		scalars[0] *= 1-.1*under_grade
-	var fourth := [exposure,scalars[0],scalars[1],scalars[2],scalars[3]*(1+.6*float(underwater)),.25*weights.y+.1*weights.z,1.0]
+	var fourth := [exposure,scalars[0],scalars[1],scalars[2],scalars[3],.25*weights.y+.1*weights.z,1.0]
 	var result := PackedFloat32Array()
 	for i in 7:
 		result.append_array(PackedFloat32Array([vectors[i].x,vectors[i].y,vectors[i].z,fourth[i]]))

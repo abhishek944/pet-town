@@ -2,6 +2,15 @@ extends RefCounted
 
 const Style = preload("res://ui/hud_style.gd")
 
+## Create the presentation-only B7 toolbar. Connect action_requested to the existing
+## native companion action owner; set_terminal_mode hides/restores it without reserving world width.
+static func profile_toolbar(record: Dictionary) -> Control:
+	if record.is_empty() or bool(record.get("isMayor", false)) or str(record.get("source", "")).to_lower() == "mayor" or str(record.get("id", "")) == "pet-town-mayor":
+		return null
+	var toolbar = preload("res://ui/companion_profile_toolbar.gd").new()
+	toolbar.set_record(record)
+	return toolbar
+
 static func profile(body: VBoxContainer, host: Control) -> void:
 	var record: Dictionary = {}
 	for entry in host.companions:

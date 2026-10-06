@@ -1,3 +1,5 @@
+global.__testGlob = () => ({});
+
 const { applyCitizenPreferences, travelDistanceFor } = require("./renderer-preferences.cjs");
 function assert(value, message) {
   if (!value) throw new Error(message);

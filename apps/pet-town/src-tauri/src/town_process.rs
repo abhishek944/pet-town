@@ -2,13 +2,12 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
     Mutex,
 };
-use tauri::{webview::PageLoadEvent, AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager};
 
 pub(crate) const TOWN_LABEL: &str = "town";
 
 #[derive(Default)]
 pub(crate) struct TownWindowState {
-    opening: Mutex<()>,
     pub(crate) active: AtomicBool,
     pub(crate) talking: Mutex<crate::town_voice::TownTalkState>,
     pub(crate) roster: Mutex<crate::town_snapshot::TownRosterCache>,
@@ -31,59 +30,11 @@ pub(crate) fn open(app: &AppHandle) -> Result<(), String> {
     crate::godot_bridge::open(app)
 }
 
-#[allow(dead_code)]
-fn open_three_town(app: &AppHandle) -> Result<(), String> {
-    let updates = app.state::<crate::app_updates::AppUpdates>();
-    let _update_opening = updates.window_opening()?;
-    let state = app.state::<TownWindowState>();
-    let _opening = state
-        .opening
-        .try_lock()
-        .map_err(|_| "The town window is already opening.")?;
-    let window = if let Some(window) = app.get_webview_window(TOWN_LABEL) {
-        window
-    } else {
-        #[cfg(debug_assertions)]
-        let url = WebviewUrl::External("http://127.0.0.1:1422/".parse().unwrap());
-        #[cfg(not(debug_assertions))]
-        let url = WebviewUrl::App("town/index.html".into());
-        WebviewWindowBuilder::new(app, TOWN_LABEL, url)
-            .title("Pet Town")
-            .inner_size(1280.0, 820.0)
-            .min_inner_size(800.0, 560.0)
-            .resizable(true)
-            .fullscreen(true)
-            .decorations(true)
-            .transparent(false)
-            .focusable(true)
-            .focused(true)
-            .visible(true)
-            .center()
-            .on_navigation(allowed_url)
-            .on_page_load(|window, payload| {
-                if matches!(payload.event(), PageLoadEvent::Started) {
-                    crate::town_voice::release_talk(window.app_handle());
-                    crate::town_terminal::release(window.app_handle());
-                }
-            })
-            .build()
-            .map_err(|error| format!("The 3D town could not open: {error}"))?
-    };
-    window
-        .unminimize()
-        .and_then(|_| window.show())
-        .and_then(|_| window.set_fullscreen(true))
-        .and_then(|_| window.set_focus())
-        .map_err(|error| error.to_string())?;
-    set_active(app, window.is_focused().unwrap_or(false));
-    Ok(())
-}
-
 #[tauri::command]
 pub(crate) async fn open_3d_town(app: AppHandle) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || open(&app))
         .await
-        .map_err(|_| "The 3D town window could not be opened.".to_string())?
+        .map_err(|_| "Pet Town window could not be opened.".to_string())?
 }
 
 pub(crate) fn set_active(app: &AppHandle, active: bool) {

@@ -4,7 +4,9 @@ import { playerCharacterOnLand } from "../../player/character/player-character-o
 import { playerCharacterOnGlide } from "../../player/character/player-character-on-glide.js";
 import { playerCharacterOnStepUp } from "../../player/character/player-character-on-step-up.js";
 import { playerCharacterOnBonk } from "../../player/character/player-character-on-bonk.js";
-import { Group } from "three";
+import { DoubleSide, Group } from "three";
+import { buildPlayerGlider } from "../../player/character/build-player-glider.js";
+import { playerState } from "../../player/state.js";
 import { fox } from "./fox.js";
 import { rabbit } from "./rabbit.js";
 import { cat } from "./cat.js";
@@ -47,6 +49,17 @@ export function createPetCharacter(petId, { isMayor = false } = {}) {
   const build = builders[petId];
   const model = build();
   const rig = rigPetModel(model, speakingMouth[petId]);
+  const leaf = petMaterial("#ffffff");
+  leaf.side = DoubleSide;
+  leaf.vertexColors = true;
+  // The longer stem keeps the shared leaf above tall ears and antlers.
+  buildPlayerGlider.call(
+    rig,
+    rig.breath,
+    { leaf, stem: petMaterial(playerState.playerPalette.stem) },
+    null,
+    2.3,
+  );
   model.scale.setScalar(0.64);
   const root = new Group();
   root.name = `pet-${petId}`;

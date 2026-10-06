@@ -8,6 +8,8 @@ pub struct AgentView {
     pub status: String,
     pub label: String,
     pub source: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token_activity: Option<crate::TokenActivity>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -84,6 +86,7 @@ pub(crate) fn parse_agent_list(text: &str) -> Result<Vec<ParsedAgent>, serde_jso
                     status: normalized_status(&agent.agent_status),
                     label: safe_project_name(project_path),
                     source: "unknown".to_string(),
+                    token_activity: None,
                 },
                 tab_id: agent.tab_id,
                 workspace_id: agent.workspace_id,

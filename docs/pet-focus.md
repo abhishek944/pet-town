@@ -21,7 +21,7 @@
 
 The two renderers share the focus function, but neither should perform adapter activation inside the 2D overlay's GUI process. The process boundary matters; sharing a function alone did not give them equivalent behavior.
 
-Native Godot **Open 3D Town** reopening uses a separate early CLI route,
+Native Godot **Open Pet Town** reopening uses a separate early CLI route,
 `--focus-native-town <PID> <parent-PID>`, owned by
 [godot_bridge/focus.rs](../apps/pet-town/src-tauri/src/godot_bridge/focus.rs).
 It verifies that the existing Godot process belongs to the launching desktop,
@@ -37,12 +37,27 @@ to that window is unreliable.
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Nonactivating overlay              | [window.rs](../apps/pet-town/src-tauri/src/window.rs)                                                    | The window is converted from `NSWindow` to `NSPanel`. In addition to the nonactivating style mask, the guarded, typed `_setPreventsActivation: true` call synchronizes WindowServer's activation state. Without it, a pet click can activate Pet Town's desktop before reaching the adapter. Run configuration on the main thread and retain the selector-availability guard. |
 | Separate focus helper              | [focus.rs](../apps/pet-town/src-tauri/src/focus.rs), [main.rs](../apps/pet-town/src-tauri/src/main.rs)   | The 2D command launches the current executable with an opaque ID as an argument, without a shell. The helper handles focus before starting a GUI or taking the application singleton lock. Keep this isolation instead of calling `focus_current_agent` directly inside the overlay command.                                                                                  |
-| Main event loop during activation  | [macos_activation.rs](../apps/pet-town/src-tauri/src/macos_activation.rs)                                | `NSRunningApplication.isActive` is cached until the main run loop advances. The helper must service `NSRunLoop` during its bounded wait; sleeping and polling alone falsely timed out for three seconds even when Herdr became visible. Both 2D and Three.js town focus enter this code on the isolated helper process's main thread.                                                   |
+| Main event loop during activation  | [macos_activation.rs](../apps/pet-town/src-tauri/src/macos_activation.rs)                                | `NSRunningApplication.isActive` is cached until the main run loop advances. The helper must service `NSRunLoop` during its bounded wait; sleeping and polling alone falsely timed out for three seconds even when Herdr became visible. Both 2D and Three.js town focus enter this code on the isolated helper process's main thread.                                         |
 | Exact, revalidated Herdr selection | [focus/herdr.rs](../apps/pet-town/src-tauri/src/focus/herdr.rs)                                          | Validate session identity, select workspace and tab, revalidate, then select the agent pane. The current outer route selects before host activation and again after it. Preserve session checks, the host lookup, activation-error reporting, and the post-activation selection. Herdr host activation uses empty options rather than raising every host window.              |
 | Exact Codex installation           | [broker focus.rs](../packages/pet-town-agent-broker/src/focus.rs)                                        | Retain the selected running application's `bundleURL` and send its validated thread link with `open -a <that path>`. Do not independently resolve the app again with `open -b com.openai.codex`: ChatGPT and Codex installations were observed sharing that bundle ID. Generic/fallback activation may succeed without a bundle path; only deep-link delivery requires one.   |
 | Click versus drag                  | [pet-interactions.ts](../apps/pet-town/src/pet-interactions.ts), [main.ts](../apps/pet-town/src/main.ts) | Focus uses the ID captured on pointerdown and dispatches on a non-drag pointerup. Dragging and context-menu actions must not also focus an agent.                                                                                                                                                                                                                             |
 
 `_setPreventsActivation:` is private macOS SPI. Its guarded use is a deliberate compatibility workaround, not an incidental cleanup candidate. If replacing it or changing the panel library, demonstrate an equivalent direct transition before removing it. If the selector is unavailable, the guard avoids a crash but does not guarantee the activation fix. The underlying style-mask/WindowServer mismatch is described in [the original FB16484811 investigation](https://philz.blog/nspanel-nonactivating-style-mask-flag/).
+
+## Pet Street visibility while playing Pet Town
+
+Pet Street hides while native Pet Town is foreground and returns when
+switching away or closing the town, unless the user explicitly hid Pet Street.
+`village_visibility.rs` retains the requested visibility and renderer-ready gates.
+On macOS, `godot_bridge/mod.rs` reconciles the owned Godot PID's activation on the
+GUI main run loop: bridge focus notifications request an immediate refresh, and
+the existing 80 ms control loop checks both focus directions even if Godot is
+busy or disconnected. Do not replace this with background-thread `isActive`
+checks or depend solely on render-loop heartbeats. Showing Pet Street continues
+to use `orderFrontRegardless` without activating Pet Town.
+
+Check switching away, returning, minimizing and closing the town, plus explicit
+Hide/Show Pets and direct pet-to-agent focus. Builds do not verify visible timing.
 
 ## What the investigation ruled out
 
@@ -61,7 +76,7 @@ to that window is unreliable.
 5. Check the existing 3D Open in Herdr action and stale/ended-agent handling. Do not open or resume a stale session.
 6. Rebuild embedded frontend assets when frontend code changes; this app uses Tauri's custom protocol. Confirm the replacement debug process is running. Build/type/format checks are necessary but do not establish the visual transition.
 
-Use Computer Use for the live check when available. If it cannot bind the strip or denies access to an adapter, report that limit and obtain the user's observation. Do not claim visual verification from process existence, a successful command, or a build alone. In this repair the final visible result was user-confirmed.
+Use Computer Use for the live check when available. If it cannot bind Pet Street or denies access to an adapter, report that limit and obtain the user's observation. Do not claim visual verification from process existence, a successful command, or a build alone. In this repair the final visible result was user-confirmed.
 
 ## Diagnostic evidence
 

@@ -33,6 +33,8 @@ pub(super) struct Session {
     #[serde(default)]
     pub tokens: Option<Tokens>,
     #[serde(default)]
+    pub counter_epoch: u64,
+    #[serde(default)]
     pub models: BTreeMap<String, Tokens>,
     #[serde(default)]
     pub updated_at_seconds: u64,
@@ -50,6 +52,8 @@ pub(super) struct Session {
 #[serde(rename_all = "camelCase")]
 pub(crate) struct Reading {
     pub status: String,
+    #[serde(skip)]
+    pub(super) counter_epoch: u64,
     pub model: Option<String>,
     #[serde(flatten)]
     pub(super) tokens: Tokens,
@@ -64,6 +68,7 @@ impl Default for Reading {
     fn default() -> Self {
         Self {
             status: "unavailable".into(),
+            counter_epoch: 0,
             model: None,
             tokens: Tokens::default(),
             estimated_credits: None,
@@ -85,6 +90,14 @@ pub(crate) struct Snapshot {
 }
 
 impl Tokens {
+    pub(super) fn regressed_from(&self, previous: &Self) -> bool {
+        self.input_tokens < previous.input_tokens
+            || self.cached_input_tokens < previous.cached_input_tokens
+            || self.output_tokens < previous.output_tokens
+            || self.reasoning_output_tokens < previous.reasoning_output_tokens
+            || self.total_tokens < previous.total_tokens
+    }
+
     pub(super) fn add(&mut self, other: &Self) {
         self.input_tokens = self.input_tokens.saturating_add(other.input_tokens);
         self.cached_input_tokens = self

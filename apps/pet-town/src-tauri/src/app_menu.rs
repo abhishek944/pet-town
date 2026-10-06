@@ -6,9 +6,9 @@ pub fn install(app: &tauri::App) -> tauri::Result<()> {
         .accelerator("CmdOrCtrl+,")
         .build(app)?;
     let setup = MenuItemBuilder::with_id("onboarding", "Welcome & setup…").build(app)?;
-    let open_3d_town = MenuItemBuilder::with_id("open-3d-town", "Open 3D Town").build(app)?;
-    let show_town = MenuItemBuilder::with_id("show-town", "Show Pet Strip").build(app)?;
-    let hide_town = MenuItemBuilder::with_id("hide-town", "Hide Pet Strip").build(app)?;
+    let open_3d_town = MenuItemBuilder::with_id("open-3d-town", "Open Pet Town").build(app)?;
+    let show_town = MenuItemBuilder::with_id("show-town", "Show Pet Street").build(app)?;
+    let hide_town = MenuItemBuilder::with_id("hide-town", "Hide Pet Street").build(app)?;
     let app_menu = SubmenuBuilder::new(app, "Pet Town")
         .about(None)
         .separator()
@@ -56,9 +56,9 @@ pub fn install(app: &tauri::App) -> tauri::Result<()> {
         _ => {}
     });
     let tray_settings = MenuItemBuilder::with_id("tray-settings", "Open Settings").build(app)?;
-    let tray_open_3d = MenuItemBuilder::with_id("tray-open-3d-town", "Open 3D Town").build(app)?;
-    let tray_show = MenuItemBuilder::with_id("tray-show-town", "Show Pet Strip").build(app)?;
-    let tray_hide = MenuItemBuilder::with_id("tray-hide-town", "Hide Pet Strip").build(app)?;
+    let tray_open_3d = MenuItemBuilder::with_id("tray-open-3d-town", "Open Pet Town").build(app)?;
+    let tray_show = MenuItemBuilder::with_id("tray-show-town", "Show Pet Street").build(app)?;
+    let tray_hide = MenuItemBuilder::with_id("tray-hide-town", "Hide Pet Street").build(app)?;
     let tray_quit = MenuItemBuilder::with_id("tray-quit", "Quit Pet Town").build(app)?;
     let tray_menu = MenuBuilder::new(app)
         .item(&tray_settings)

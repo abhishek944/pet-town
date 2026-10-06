@@ -26,9 +26,25 @@ trap cleanup EXIT INT TERM
 hdiutil attach -readonly -nobrowse -mountpoint "$mount" "$dmg" >/dev/null
 app="$mount/Pet Town.app"
 executable="$app/Contents/MacOS/pet-town"
+native="$app/Contents/Resources/resources/godot/Pet Town.app"
 runtime=$(find "$app/Contents/Resources" -name pet-town-pi-runtime.tar.gz -type f -print -quit)
 [ -d "$app" ] && [ -L "$mount/Applications" ] && [ -x "$executable" ]
 [ -n "$runtime" ] && [ -f "$runtime" ]
+[ -x "$native/Contents/MacOS/Godot" ]
+[ "$(lipo -archs "$native/Contents/MacOS/Godot")" = "$architecture" ] || {
+  echo "Native game runtime must contain only $architecture, not a universal editor." >&2
+  exit 1
+}
+grep -aqF 'Option legend (this build = release export template)' "$native/Contents/MacOS/Godot" || {
+  echo "Native game executable is not a Godot release export template." >&2
+  exit 1
+}
+[ ! -e "$app/Contents/Resources/resources/godot/Godot.app" ]
+[ ! -e "$app/Contents/Resources/resources/godot/world" ]
+[ -s "$native/Contents/Resources/Godot.pck" ]
+[ "$(plutil -extract CFBundleName raw "$native/Contents/Info.plist")" = "Pet Town" ]
+[ "$(plutil -extract CFBundleIdentifier raw "$native/Contents/Info.plist")" = dev.pet.town.native ]
+codesign --verify --deep --strict "$native"
 file "$executable" | grep -q "$architecture"
 if [ "${REQUIRE_SIGNED:-0}" = "1" ]; then
   [ "$(dwarfdump --uuid "$executable" | awk '{print $2}')" = "$(dwarfdump --uuid "$package_dir/pet-town.bin" | awk '{print $2}')" ]
@@ -50,6 +66,7 @@ if [ "${REQUIRE_SIGNED:-0}" = "1" ]; then
   [ -n "${EXPECTED_SIGNING_IDENTITY:-}" ]
   codesign --verify --deep --strict "$app"
   codesign -d --verbose=4 "$app" 2>&1 | grep -q "Authority=${EXPECTED_SIGNING_IDENTITY}"
+  codesign -d --verbose=4 "$native" 2>&1 | grep -qF "Authority=${EXPECTED_SIGNING_IDENTITY}"
   xcrun stapler validate "$app"
 fi
 

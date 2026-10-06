@@ -12,7 +12,7 @@ pub(crate) fn require_town(window: &WebviewWindow) -> Result<(), String> {
             .url()
             .is_ok_and(|url| crate::town_process::allowed_url(&url))
     {
-        return Err("This command is available only in the local 3D town.".into());
+        return Err("This command is available only in the local Pet Town.".into());
     }
     Ok(())
 }

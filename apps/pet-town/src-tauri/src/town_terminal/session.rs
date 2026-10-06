@@ -5,6 +5,7 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, Mutex,
 };
+use std::time::{Duration, Instant};
 use tauri::ipc::Channel;
 
 pub(crate) struct Session {
@@ -16,6 +17,7 @@ pub(crate) struct Session {
     pub ready: AtomicBool,
     child: Mutex<Child>,
     writer: Mutex<Option<ChildStdin>>,
+    last_verify: Mutex<Instant>,
 }
 
 impl Session {
@@ -57,6 +59,9 @@ impl Session {
             ready: AtomicBool::new(false),
             child: Mutex::new(child),
             writer: Mutex::new(writer),
+            // The opener already verified the target and a watchdog re-verifies
+            // every second, so per-keystroke checks would only add spawn latency.
+            last_verify: Mutex::new(Instant::now()),
         });
         events::status(
             &session.channel,
@@ -76,9 +81,15 @@ impl Session {
         {
             return Err("Terminal input is off. Reconnect or choose Take control.".into());
         }
-        if let Err(error) = self.target.verify() {
-            self.finish("stale", &error);
-            return Err(error);
+        if self.should_verify() {
+            if let Err(error) = self.target.verify() {
+                self.finish("stale", &error);
+                return Err(error);
+            }
+            *self
+                .last_verify
+                .lock()
+                .unwrap_or_else(|error| error.into_inner()) = Instant::now();
         }
         if self.cancelled.load(Ordering::SeqCst) {
             return Err("Terminal view is closed.".into());
@@ -103,6 +114,14 @@ impl Session {
             self.finish("disconnected", error);
         }
         result
+    }
+
+    fn should_verify(&self) -> bool {
+        self.last_verify
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .elapsed()
+            >= Duration::from_secs(5)
     }
 
     pub fn finish(&self, state: &str, message: &str) {

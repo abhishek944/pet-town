@@ -1,4 +1,5 @@
 use crate::agents::AgentView;
+use crate::token_activity::now_seconds as now;
 use crate::{event_focus, AdapterAgent, AdapterSnapshot};
 use fs2::FileExt;
 use serde::Deserialize;
@@ -8,7 +9,7 @@ use std::io::Read;
 use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
-use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, UNIX_EPOCH};
 
 const INPUT_LIMIT: usize = 64 * 1024;
 const RECORD_VERSION: u8 = 1;
@@ -29,6 +30,10 @@ struct EventRecord {
     focus_app: Option<String>,
     #[serde(default)]
     codex_thread_id: Option<String>,
+    #[serde(default)]
+    token_activity: Option<crate::TokenActivity>,
+    #[serde(default, rename = "stateObservedAtMs")]
+    _state_observed_at_ms: u64,
 }
 
 fn directory() -> Option<PathBuf> {
@@ -44,13 +49,6 @@ fn disabled(record: &EventRecord) -> bool {
         .and_then(|path| path.parent().map(Path::to_path_buf))
         .map(|path| path.join("disabled-adapters").join(&record.source))
         .is_some_and(|path| path.is_file())
-}
-
-fn now() -> u64 {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|duration| duration.as_secs())
-        .unwrap_or(0)
 }
 
 static LAST_RECORDS: OnceLock<Mutex<Option<Vec<EventRecord>>>> = OnceLock::new();
@@ -186,6 +184,9 @@ pub(crate) fn snapshot() -> AdapterSnapshot {
                     status,
                     label: record.label,
                     source: record.source,
+                    token_activity: record
+                        .token_activity
+                        .filter(|sample| sample.is_fresh(crate::token_activity::now_ms())),
                 },
                 focus_route,
             }

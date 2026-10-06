@@ -3,6 +3,14 @@ set -eu
 repo_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 world_dir="$repo_dir/apps/pet-town-godot-sample"
 resource_dir="$repo_dir/apps/pet-town/src-tauri/resources/godot"
+package=${1:-${PACKAGE:-}}
+case "$package" in
+macos-arm64 | macos-x64) ;;
+*)
+  echo "usage: $0 macos-arm64|macos-x64" >&2
+  exit 2
+  ;;
+esac
 godot_app=$(sh "$repo_dir/scripts/prepare-godot-engine.sh")
 python3 "$repo_dir/scripts/validate-godot-export.py"
 mkdir -p "$resource_dir/world"
@@ -26,7 +34,11 @@ if grep -Eq '^SCRIPT ERROR:|^ERROR:' "$diagnostics"; then
   exit 1
 fi
 test -s "$resource_dir/world/PetTown.pck"
-# Stage the official engine app together with the immutable source-derived world.
-# ditto preserves the existing signed universal runtime and its app metadata.
-ditto "$godot_app" "$resource_dir/Godot.app"
-echo "Native Godot runtime and full town pack prepared."
+# Share identical texture/data payloads without changing any resource path or byte.
+python3 "$repo_dir/scripts/deduplicate-godot-pack.py" "$resource_dir/world/PetTown.pck"
+# Preserve the branded app path, but ship a target-specific game-only runtime.
+GODOT_APP="$godot_app" sh "$repo_dir/scripts/prepare-pet-town-runtime.sh" \
+  "$resource_dir/Pet Town.app" "$package" "$resource_dir/world/PetTown.pck"
+# The signed native app now owns the pack; do not bundle another copy.
+rm -rf "$resource_dir/Godot.app" "$resource_dir/world"
+echo "Native Godot release runtime ($package) and full town pack prepared."

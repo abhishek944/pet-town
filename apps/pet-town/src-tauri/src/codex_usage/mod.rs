@@ -1,3 +1,4 @@
+mod activity;
 mod model;
 mod pricing;
 mod reader;
@@ -5,6 +6,7 @@ mod registration;
 mod snapshot;
 mod storage;
 
+pub(crate) use activity::attach_activity;
 pub(crate) use model::Snapshot;
 pub(crate) use registration::register;
 const REFRESH_READ_LIMIT: usize = 4 * 1024 * 1024;

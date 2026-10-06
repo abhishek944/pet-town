@@ -6,7 +6,9 @@ import { exportTree, exportProp } from "./export-world.js";
 const collector = "http://127.0.0.1:1427/asset/";
 async function post(name, bytes, type = "application/octet-stream") {
   const response = await fetch(collector + name, {
-    method: "POST", headers: { "Content-Type": type }, body: bytes,
+    method: "POST",
+    headers: { "Content-Type": type },
+    body: bytes,
   });
   if (!response.ok) throw new Error(`${name}: collector ${response.status}`);
 }
@@ -15,7 +17,8 @@ export function installAssetExport(ctx) {
   document.getElementById("godot-asset-export")?.remove();
   const panel = document.createElement("div");
   panel.id = "godot-asset-export";
-  panel.style.cssText = "position:fixed;left:20px;top:100px;z-index:999999;background:#fff4dc;color:#342c23;padding:16px;border-radius:16px;font:14px sans-serif";
+  panel.style.cssText =
+    "position:fixed;left:20px;top:100px;z-index:999999;background:#fff4dc;color:#342c23;padding:16px;border-radius:16px;font:14px sans-serif";
   const button = document.createElement("button");
   button.textContent = "Export Godot sample";
   const status = document.createElement("output");
@@ -40,23 +43,38 @@ export function installAssetExport(ctx) {
         root.updateMatrixWorld(true);
         const bounds = new THREE.Box3().setFromObject(root);
         const binary = await new GLTFExporter().parseAsync(root, {
-          binary: true, animations, onlyVisible: true, maxTextureSize: 1024,
+          binary: true,
+          animations,
+          onlyVisible: true,
+          maxTextureSize: 1024,
         });
         await post(`${name}.glb`, binary);
-        manifest.assets.push({ name, bytes: binary.byteLength,
-          bounds: { min: bounds.min.toArray(), max: bounds.max.toArray() }, ...metadata });
+        manifest.assets.push({
+          name,
+          bytes: binary.byteLength,
+          bounds: { min: bounds.min.toArray(), max: bounds.max.toArray() },
+          ...metadata,
+        });
       }
       for (const [index, block] of ctx.building.palette.slice(0, 12).entries()) {
         status.textContent = `Exporting block icon ${index + 1}/12…`;
-        const blob = await new Promise((resolve) => ctx.building.icon(block.key, 128).toBlob(resolve));
+        const blob = await new Promise((resolve) =>
+          ctx.building.icon(block.key, 128).toBlob(resolve),
+        );
         await post(`icon-${index}.png`, blob, "image/png");
-        manifest.icons.push({ index, key: block.key, name: block.name ?? block.label ?? block.key });
+        manifest.icons.push({
+          index,
+          key: block.key,
+          name: block.name ?? block.label ?? block.key,
+        });
       }
       await post("manifest.json", JSON.stringify(manifest), "application/json");
       status.textContent = `Complete: ${manifest.assets.length} original GLB assets and ${manifest.icons.length} icons`;
     } catch (error) {
       status.textContent = `Export failed: ${error.message}`;
       console.error(error);
-    } finally { button.disabled = false; }
+    } finally {
+      button.disabled = false;
+    }
   };
 }

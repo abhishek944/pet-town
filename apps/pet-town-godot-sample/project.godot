@@ -8,7 +8,7 @@ config/macos_native_icon="res://ui/icons/pet-town.icns"
 boot_splash/show_image=true
 boot_splash/image="res://ui/icons/boot-welcome.png"
 boot_splash/stretch_mode=1
-boot_splash/bg_color=Color(0.624, 0.847, 1, 1)
+boot_splash/bg_color=Color(0.969, 0.941, 0.863, 1)
 run/main_scene="res://scenes/startup.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/use_custom_user_dir=true
@@ -17,6 +17,7 @@ config/custom_user_dir_name="Pet Town Godot Sample"
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720
+window/size/mode=3
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="disabled"

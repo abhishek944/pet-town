@@ -52,6 +52,8 @@ func _ready() -> void:
 		block_selected.emit(index))
 	feedback = preload("res://ui/pet_feedback.gd").new()
 	root.add_child(feedback)
+	feedback.top_toolbar_visible = _has_top_toolbar
+	feedback.top_toolbar_bottom = _top_toolbar_bottom
 	feedback.pet_requested.connect(func() -> void: pet_requested.emit())
 	roster = preload("res://ui/companions.gd").new()
 	root.add_child(roster)
@@ -64,6 +66,7 @@ func _ready() -> void:
 	modal.sound_toggled.connect(set_sound)
 	modal.volume_changed.connect(set_volume)
 	modal.camera_requested.connect(func(first: bool) -> void: camera_requested.emit(first))
+	modal.usage_toggled.connect(func(value: bool) -> void: live.set_usage_visible(value))
 	journal = preload("res://ui/journal.gd").new()
 	root.add_child(journal)
 	journal.closed.connect(close_panel)
@@ -105,11 +108,17 @@ func update_clock(seconds: float) -> void:
 	clock_period.text = "AM" if hour < 12 else "PM"
 	var weather := "Starry" if hour < 6 or hour >= 20 else "Sunny"
 	weather_label.text = "%s · Day %d" % [weather, 1 + int(seconds / 86400)]
-	if dial.has_method("set_hour"):
+	if is_instance_valid(dial) and dial.has_method("set_hour"):
 		dial.set_hour(fmod(seconds / 3600.0, 24.0))
 func set_sound(enabled: bool) -> void:
 	sound_enabled = enabled
 	sound_button.icon = Style.icon("sound" if enabled else "mute")
+	sound_button.accessibility_name = "World sound %s" % ("on" if enabled else "off")
+	sound_button.accessibility_description = "Shortcut: M"
+	var hint: Label = sound_button.get_meta("shortcut_hint", null)
+	if is_instance_valid(hint):
+		hint.text = sound_button.accessibility_name + " · M"
+		hint.position.x = (sound_button.size.x - hint.get_combined_minimum_size().x) / 2
 	modal.sound_enabled = enabled
 	sound_toggled.emit(enabled)
 func set_volume(value: float) -> void:
@@ -127,6 +136,13 @@ func show_pet_response(name: String, text: String, screen_position: Vector2) -> 
 	feedback.show_response(name, text, screen_position)
 func show_toast(text: String) -> void:
 	feedback.show_toast(text)
+func _has_top_toolbar() -> bool:
+	if not is_instance_valid(live): return false
+	for panel in [live.profile, live.mayor]:
+		if is_instance_valid(panel) and panel.is_visible_in_tree() and absf(panel.position.y) < 1:
+			return true
+	return false
+func _top_toolbar_bottom() -> float: return maxf(live.profile.size.y if is_instance_valid(live.profile) and live.profile.is_visible_in_tree() else 0, live.mayor.size.y if live.mayor.is_visible_in_tree() else 0)
 func set_journal_data(places: Array, experiences: Array, collection: Array = []) -> void:
 	journal.set_data(places, experiences, collection)
 func toggle_settings() -> void:

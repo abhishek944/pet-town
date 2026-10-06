@@ -6,12 +6,12 @@ import { collectHitRegions } from "./renderer-layout";
 import { resolveLabelOverlaps } from "./renderer-labels";
 import { applyCitizenPreferences, resizeCitizens, shouldHideCompleted, shouldHideCompletedElement, travelDistanceFor } from "./renderer-preferences";
 import { applyFlowSample, CITIZEN_TRACK_WIDTH, createCitizenElement, distanceWhileAssetPending, type HitRegion, motionSeed, refreshCitizenLabelPosition, SUSPENSION_GAP_MS, updateCitizenElement } from "./renderer-view";
-import { setPreferenceHidden } from "./renderer-visibility";
+import { setPreferenceHidden } from "./renderer-visibility"; import { tokenMotionDistance, type TokenMotionState } from "./token-motion";
 export type { HitRegion } from "./renderer-view";
 interface MotionState {
   x: number; direction: -1 | 1; maximumX: number;
   behavior: BehaviorMachine; packFingerprint: string; fallbackAssetUrl: string;
-  pendingElapsedMs: number; dragging: boolean; dragOffsetX: number;
+  pendingElapsedMs: number; dragging: boolean; dragOffsetX: number; tokenMotion: TokenMotionState;
 }
 export class VillageRenderer {
   private readonly scenery: RendererScenery;
@@ -61,11 +61,11 @@ export class VillageRenderer {
           maximumX: motion?.maximumX ?? maximumX,
           behavior: new BehaviorMachine(pack, citizen.id, citizen.status),
           packFingerprint: pack.fingerprint, fallbackAssetUrl,
-          pendingElapsedMs: 0, dragging: false, dragOffsetX: 0,
+          pendingElapsedMs: 0, dragging: false, dragOffsetX: 0, tokenMotion: { activity: citizen.tokenActivity, scale: motion?.tokenMotion.scale ?? 1 },
         };
         this.motions.set(citizen.id, motion);
       } else {
-        motion.fallbackAssetUrl = fallbackAssetUrl;
+        motion.fallbackAssetUrl = fallbackAssetUrl; motion.tokenMotion.activity = citizen.tokenActivity;
       }
       updateCitizenElement(element, citizen);
       setPreferenceHidden(element, shouldHideCompleted(citizen, this.preferences), this.refreshGeometry);
@@ -117,7 +117,7 @@ export class VillageRenderer {
             sample: currentSample,
           };
       motion.pendingElapsedMs = advance.remainingMs;
-      const distance = travelDistanceFor(element, advance.distancePx, this.preferences, this.systemReducedMotion);
+      const distance = travelDistanceFor(element, tokenMotionDistance(motion.tokenMotion, advance.distancePx, element.dataset.status === "working", elapsedMs), this.preferences, this.systemReducedMotion);
       const position = advanceTrack(motion.x, motion.direction, distance, motion.maximumX);
       motion.x = position.x;
       motion.direction = position.direction;

@@ -118,6 +118,7 @@ func undo() -> void:
 	host.result("Latest asset change undone.")
 
 func rebuild() -> void:
+	host.ghost.clear()
 	for key in models:
 		models[key].get_parent().remove_child(models[key])
 		models[key].queue_free()
@@ -156,6 +157,8 @@ func update_support() -> void:
 func preview(id: String, target: String, yaw: float) -> void:
 	var check := checked(id, target, yaw)
 	if check.has("error"):
+		host.ghost.clear()
 		host.result(check.error)
 	else:
+		host.ghost.present(host.catalog[id], check.position, yaw)
 		host.result("Replacement fits the selected spot · %.1f, %.1f · Ready to replace" % [check.position.x, check.position.z])

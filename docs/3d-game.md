@@ -1,22 +1,28 @@
-# 3D game flow
+# Pet Town game flow
 
 **User goal:** Explore and build in Pet Town's native Godot world, follow live agent companions, and talk to Mayor through the desktop app. Three.js remains the source reference and public browser game.
 
 ```text
-Desktop: Open 3D Town
+Desktop: Open Pet Town
   → native Godot process and exported source-world resources
   → authenticated loopback TCP snapshot / scoped action requests
   → Rust broker's public agent and Mayor state
   → companion roster, camera, controls and Mayor presentation
 ```
 
-## Open the town
+## Open Pet Town
 
-Choose **Open 3D Town** in Pet Town desktop. The app launches or focuses its Godot process in fullscreen. Reopening sends the native window a fullscreen/focus request. Development loads `apps/pet-town-godot-sample`; release launches the bundled official Godot engine with `PetTown.pck`. Rust supplies a fresh capability and ephemeral loopback port through child environment variables. Godot clears them from its environment after reading them and authenticates every bridge request. The town receives sanitized public snapshots and scoped actions; credentials and private focus/session routes remain in Rust.
+Choose **Open Pet Town** in Pet Town desktop. The app launches or focuses its Godot process in fullscreen. Reopening sends the native window a fullscreen/focus request. Development loads `apps/pet-town-godot-sample` using the editor; release launches the architecture-specific official game-only Godot runtime, which automatically loads its world pack from `Pet Town.app/Contents/Resources/Godot.pck`. Rust supplies a fresh capability and ephemeral loopback port through child environment variables. Godot clears them from its environment after reading them and authenticates every bridge request. The town receives sanitized public snapshots and scoped actions; credentials and private focus/session routes remain in Rust.
 
-While the town window has focus, the desktop app temporarily hides the 2D strip. Switching away or closing the town restores the strip according to the existing visibility preference. Reopening the town focuses an existing window when one is present. Losing focus, navigating or closing releases a recording started by the town button.
+On macOS, the native world appears as **Pet Town**, not Godot. While it is open,
+it owns the Dock entry and the desktop runs as an accessory app; the menu-bar
+tray still offers Settings, Pet Street visibility and Quit Pet Town. Closing the
+world restores the desktop Dock entry. Quitting the native world alone leaves
+Pet Street running; tray **Quit Pet Town** closes both processes.
 
-The retained Three.js development server on `http://127.0.0.1:1422/` supports source comparisons and ordinary browser play. It has no desktop connection. Standalone Godot also works without the desktop bridge, showing unavailable companions and usage. Use the desktop app's **Open 3D Town** for live agents and voice.
+While the town window has focus, the desktop app temporarily hides Pet Street. Switching away or closing the town restores Pet Street according to the existing visibility preference. Reopening the town focuses an existing window when one is present. Losing focus, navigating or closing releases a recording started by the town button.
+
+The retained Three.js development server on `http://127.0.0.1:1422/` supports source comparisons and ordinary browser play. It has no desktop connection. Standalone Godot also works without the desktop bridge, showing unavailable companions and usage. Use the desktop app's **Open Pet Town** for live agents and voice.
 
 The public landing page uses a separate `public` build at **/play/**. Its extension is selected at build time: it includes the player, native wildlife, building and photos, and excludes the agent roster, Mayor and desktop bridge. The game loads only after the visitor chooses Play. Public settings contain World and How to play; Back, Undo and Redo remain available in the HUD. Touch retains movement, jump/glide, camera drag/pinch, tap-to-place and hold-to-break gestures. Back flushes animated block placements and awaits the save before navigating, with confirmation if storage failed.
 
@@ -44,7 +50,7 @@ The Rust broker remains authoritative for live agents. The town receives only op
 
 The **Companions** button shows the current count and every current companion. Choose a portrait row or click a companion in the world to follow it. The picker closes after selection; its count is the live roster size, with no ten-entry cap. Rows retain their focus and scroll position during status updates. Escape closes the picker before leaving a companion. **Option+A** cycles through the roster. Each ordinary agent receives a stable, ID-derived member of the eight woodland/storybook pets. Mayor keeps its golden explorer and crown until you explicitly choose another pet. The native scene uses exported source GLBs, portraits and baked animation clips for all eight pets plus Mayor, separately from Pet Studio's 2D APNG packs and the world's original animal population.
 
-Companions use native terrain/prop collision and the explorer's physics when controlled. Autonomous roaming chooses dry nearby destinations after collision sweeps and retries when blocked. **C** toggles control of the selected companion: WASD moves relative to the camera, Shift runs, and Space jumps. **V** switches between third-person and first-person views; the selected model and label hide in first person. **Escape** or **Leave** returns to the original player. Following routes movement away from the original player, and releasing control lets the companion resume roaming. Controlling a companion is a local game action; it does not send movement commands to a coding agent. Block building is disabled while following or controlling any companion, including Mayor; leave the companion to build again. Nearby-animal interactions use the followed companion's location.
+Companions use native terrain/prop collision and the explorer's physics when controlled. Autonomous companions start at spaced, ID-derived dry sites within 100 world units of the town start and roam within 18 units of their home. Roaming checks the full body footprint and every segment against current dry terrain, including pond and ocean margins, before collision sweeps. Actual movement is rechecked each step; a stranded companion returns to a validated site near its last safe ground, with a wider dry-site search only when needed. Releasing manual control on dry ground establishes a new local home. Supported boat passengers stay aboard rather than roaming into the sea. If no safe spawn exists, the companion stays listed and placement retries with later snapshots; choosing it explains that safe dry ground is needed rather than placing it in water. **C** toggles control of the selected companion: WASD moves relative to the camera, Shift runs, and Space jumps. **V** switches between third-person and first-person views; the selected model and label hide in first person. **Escape** or **Leave** returns to the original player. Following routes movement away from the original player, and releasing control lets the companion resume roaming. Controlling a companion is a local game action; it does not send movement commands to a coding agent. Block building is disabled while following or controlling any companion, including Mayor; leave the companion to build again. Nearby-animal interactions use the followed companion's location.
 
 Open **H → Companions** for the selected profile, **Control / Release control**, third-person/first-person choices, **Leave**, and **Open agent** or **Open in Herdr**. The latter action sends only the selected opaque ID to Rust. Rust recollects and revalidates the private focus route using the existing focus helper. Mayor's **Open in Herdr** targets its owned Firstmate pane.
 
@@ -78,7 +84,7 @@ Short output is anchored toward the bottom without reordering screen cells. **Or
 
 Rust resolves only the current private pane/socket/session behind the opaque companion ID. It validates the session before attachment and before input. Replacing or ending that session disables input rather than silently binding another process. Connecting, disconnected, stale and ownership-conflict states remain explicit; a written input is not a promise that the agent accepted or completed a task. Uncertain delivery is never automatically resent.
 
-Closing the dock, selecting another companion, opening H/photo/hidden UI, losing native focus, navigation and app exit release its owned CLI viewer and input control. The Herdr agent and its PTY keep running. Restoring hidden UI resumes passive observation; reconnecting after blur requires a deliberate action. The public browser build excludes this terminal and native IPC.
+Closing the dock, selecting another companion, opening H/photo/hidden UI, losing native focus, navigation and app exit release its owned CLI viewer and input control. The Herdr agent and its PTY keep running. Restoring hidden UI or returning after blur does not reattach a viewer or restore input ownership; choose Observe or Interact deliberately to reconnect. The public browser build excludes this terminal and native IPC.
 
 The native terminal's GPU fixture and nineteen cell-decoder comparisons against the source xterm implementation pass, including wide/combining text, attributes, cursor and screen editing. Native session-generation and input-release probes pass. A live user-owned Herdr terminal session remains unobserved in the final full-world build. The selected design is recorded under `var/herdr-terminal/implement-details/summary.md`; current evidence is under `var/godot-full-sync/`.
 
@@ -109,6 +115,10 @@ Explicit **Retry voice** can replay the latest completed reply in the current lo
 ## Ocean exploration
 
 Press **J** for ocean experiences, six ocean entries in **Places**, and discoveries in **Collection**, alongside the fifteen land destinations. Source scenery and dolphin, turtle and fish models accompany native water, underwater presentation and ripples. Swim west from Driftwood Camp, dive into coral and kelp, explore the sunken sailboat, and reach Pearlrest Island. Hold **Control** to dive and **Space** to rise; release both to stay at depth. Controlled companions share diving; Control+Option voice recording does not descend. **F** boards, takes/leaves the Harbor launch helm or uses the current boat prompt; WASD steers. Journal → Places shows the current launch position. Native ocean progress and boat state save separately from browser storage. The source export preserves the full connected ocean mask and all land/block coordinates. See [water exploration and live review steps](water.md).
+
+The native world's four outer edges have invisible physics walls. Explorers and companions stop at the edge while swimming, diving or gliding and can move along it or turn back; reaching the ocean boundary never returns them to land. Below-world fall recovery and the explicit **R** return-to-start action remain available.
+
+The water continues visually to the horizon beyond those playable edges, with the selected Clear open ocean treatment following the day/night sky. Shared water vertices and progressively coarser outer rows remove the rectangular cutoff without adding terrain, destinations or physics outside the map. Distant water projects to the horizon independently of the camera's existing town drawing distance. Boats retain their full-hull boundary checks; turn or reverse to head back.
 
 ## Connection and verification boundaries
 

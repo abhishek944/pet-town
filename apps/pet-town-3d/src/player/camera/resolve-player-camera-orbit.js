@@ -16,7 +16,9 @@ export function resolvePlayerCameraOrbit(queries, anchor, previous, desired, sub
       const candidate = anchor.clone().addScaledVector(offset, scale);
       if (!clear(candidate)) continue;
       const length = previous.distanceTo(candidate);
-      const step = previous.clone().lerp(candidate, Math.min(1, (12 * dt) / Math.max(length, 1e-6)));
+      const step = previous
+        .clone()
+        .lerp(candidate, Math.min(1, (12 * dt) / Math.max(length, 1e-6)));
       if (clear(step)) return step;
     }
   }

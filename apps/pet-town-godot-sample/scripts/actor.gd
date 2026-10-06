@@ -30,6 +30,7 @@ func _ready() -> void:
 		var model = load(model_path).instantiate()
 		visual.add_child(model)
 		preload("res://scripts/asset_style.gd").apply(model)
+		preload("res://scripts/effects/pet_visibility.gd").mark(model)
 		animator = load("res://scripts/actor_animation.gd").new()
 		visual.add_child(animator)
 		animator.configure(model)
@@ -50,7 +51,7 @@ func _physics_process(delta: float) -> void:
 	if animator:
 		animator.set_state(motion.gliding,motion.swimming,motion.diving)
 		animator.set_motion(Vector2(velocity.x, velocity.z).length(), is_on_floor(), velocity.y)
-	if position.y < -10 or (world and not world.contains(position)):
+	if position.y < -10:
 		respawn()
 
 func respawn() -> void:

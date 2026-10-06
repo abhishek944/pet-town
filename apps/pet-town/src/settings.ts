@@ -91,7 +91,10 @@ function render(): void {
 
 function bindControls(): void {
   byId<HTMLButtonElement>("welcome-setup").addEventListener("click", () => {
-    void invoke("open_onboarding").catch((error) => { state.message = String(error); render(); });
+    void invoke("open_onboarding").catch((error) => {
+      state.message = String(error);
+      render();
+    });
   });
   bindPetControls(
     () => state.preferences.pets[selectedPetId],

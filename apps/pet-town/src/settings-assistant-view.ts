@@ -68,7 +68,7 @@ export function renderAssistantStatus(
     if (!voiceHint.textContent || voiceHint.textContent === "Starting voice listener…") {
       voiceHint.textContent = configured?.wakeEnabled
         ? configured?.mode === "firstmate"
-          ? `Say “Hey Mayor” or “Hey ${name}” to focus Mayor. Hold to talk in Settings or hold Control+Option in the 3D town.`
+          ? `Say “Hey Mayor” or “Hey ${name}” to focus Mayor. Hold to talk in Settings or hold Control+Option in Pet Town.`
           : `Say “Hey Mayor” or “Hey ${name}” to talk using Live mode.`
         : "Wake listening is off.";
     }

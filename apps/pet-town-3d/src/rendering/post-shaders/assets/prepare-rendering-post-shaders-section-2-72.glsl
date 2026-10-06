@@ -5,7 +5,7 @@ uniform vec3 uShaftColor;
 uniform float uMist, uMistCap;
 uniform float uUseAO, uUseDOF, uSharpen, uTime;
 uniform vec3 uHazeColor, uSunDirW; uniform float uHazeAmt, uHazeStart, uHazeEnd, uHazeCool;
-uniform float uUnder, uWaterY; uniform vec3 uWaterColor, uWaterDeep;
+uniform float uUnder, uWaterY, uWaterLight, uWaterFogStart, uWaterFogEnd; uniform vec3 uWaterColor, uWaterDeep;
 uniform mat4 uProjInv, uCamWorld;
 
 // "water turbulence" caustics (after joltz0r), tiles every 1 unit of p
@@ -34,8 +34,7 @@ float upAO(vec2 uv, float z) {
 
 void main() {
   vec2 uv = vUv;
-  // per-pixel underwater mask: probe a point just in front of the lens against a wobbling surface,
-  // so a half-submerged camera gets a proper waterline
+  // Per-pixel waterline keeps the above-water half of a partly submerged lens unchanged.
   float under = 0.0;
   vec3 rayV = vec3(0.0);
   if (uUnder > 0.001) {
@@ -43,14 +42,12 @@ void main() {
     rayV = normalize(nv.xyz / nv.w);
     vec3 probe = (uCamWorld * vec4(rayV * 0.15, 1.0)).xyz;
     float wy = uWaterY + 0.02 * sin(probe.x * 5.0 + uTime * 1.9) + 0.015 * sin(probe.z * 7.0 - uTime * 1.4);
-    under = uUnder * smoothstep(wy + 0.012, wy - 0.012, probe.y);
-    uv += under * vec2(sin(uv.y * 38.0 + uTime * 2.1) + sin(uv.y * 17.0 - uTime * 1.3),
-                       cos(uv.x * 29.0 + uTime * 1.7)) * 0.0018;
+    under = uUnder * (1.0 - smoothstep(wy - 0.012, wy + 0.012, probe.y));
   }
   float z = viewZAt(uv);
   vec4 scene4 = texture2D(tScene, uv);
   vec3 col = sanitize(scene4.rgb);
-  float coc = uUseDOF > 0.5 ? cocAt(uv, z) : 0.0;
+  float coc = (uUseDOF > 0.5 ? cocAt(uv, z) : 0.0) * (1.0 - under);
 
   {
     vec2 t = 1.0 / uRes;
@@ -95,7 +92,7 @@ void main() {
     vec3 mb = m.rgb / max(m.a, 1e-5);
     vec3 lit = max(col, min(mb, col * (1.0 + uMistCap)));
     float dw = 0.45 + 0.55 * smoothstep(uFocusDist * 0.7, uFocusDist * 2.5, z);
-    col = mix(col, lit, uMist * dw);
+    col = mix(col, lit, uMist * dw * (1.0 - under));
   }
 
   // sun shafts (screen-space, from the bright sky around the sun)
@@ -121,18 +118,11 @@ void main() {
     float zz = min(z, 400.0);
     vec3 wp = (uCamWorld * vec4(rayV * (zz / max(-rayV.z, 1e-3)), 1.0)).xyz;
     float below = uWaterY - wp.y;
-    float caus = below > 0.0 ? caustics(wp.xz * 0.22, uTime * 0.55) * exp(-below * 0.22) : 0.0;
-    vec3 absorb = exp(-z * vec3(0.16, 0.05, 0.035));
-    vec3 uw = col * absorb * vec3(0.75, 1.0, 1.05);
-    uw += col * caus * 1.6 * absorb.g + vec3(0.6, 0.9, 1.0) * caus * 0.12 * absorb.g;
-    float fogF = 1.0 - exp(-z * 0.075);
-    vec3 fogC = mix(uWaterColor, uWaterDeep, clamp(uv.y * -1.0 + 0.9, 0.0, 1.0));
+    float caus = caustics(wp.xz * 0.22, 0.0) * smoothstep(2.0, 5.0, below);
+    vec3 uw = col + col * caus * 0.11;
+    float fogF = smoothstep(uWaterFogStart, max(uWaterFogStart + 0.001, uWaterFogEnd), z);
+    vec3 fogC = mix(uWaterColor, uWaterDeep, smoothstep(0.4, 1.0, uv.y)) * uWaterLight;
     uw = mix(uw, fogC, fogF);
-    // soft god rays slanting down from the surface
-    float rx = uv.x * 6.0 + (uv.y - 1.0) * (uv.x - 0.5) * 2.5;
-    float rays = pow(0.5 + 0.5 * sin(rx + uTime * 0.35) * sin(rx * 2.3 - uTime * 0.21 + 1.3), 4.0);
-    uw += uWaterColor * 1.6 * rays * smoothstep(0.15, 1.0, uv.y) * (0.35 + 0.65 * fogF);
-    uw *= 1.0 + 0.2 * smoothstep(0.55, 1.0, uv.y);
     col = mix(col, uw, under);
   }
 

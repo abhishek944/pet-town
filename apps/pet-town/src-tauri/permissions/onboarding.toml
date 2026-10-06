@@ -5,7 +5,7 @@ commands.allow = ["get_onboarding_context", "save_onboarding", "set_onboarding_a
 
 [[permission]]
 identifier = "allow-onboarding-presence"
-description = "Report visible pet identities from the trusted local desktop strip."
+description = "Report visible pet identities from trusted local Pet Street."
 commands.allow = ["report_onboarding_pets"]
 
 [[permission]]

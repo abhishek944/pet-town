@@ -1,5 +1,5 @@
 extends Node3D
-## Six native instance batches per school retain the source's 54 individual poses.
+## Three native instance batches per school retain 54 individually posed reef fish.
 var habitat: RefCounted
 var schools: Array=[]
 
@@ -24,13 +24,16 @@ func collect(node: Node, origin: Transform3D, parts: Array, count: int) -> void:
 		var instance:=MultiMeshInstance3D.new()
 		var mesh:=MultiMesh.new()
 		mesh.transform_format=MultiMesh.TRANSFORM_3D
-		mesh.mesh=node.mesh
+		# Carry painted surface overrides into the shared batch, not one copy per fish.
+		mesh.mesh=node.mesh.duplicate()
+		for surface in range(node.mesh.get_surface_count()):
+			mesh.mesh.surface_set_material(surface,node.get_active_material(surface))
 		mesh.instance_count=count
 		instance.multimesh=mesh
 		instance.material_override=node.material_override
 		instance.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(instance)
-		parts.append({"mesh":mesh,"local":origin*node.global_transform,"tail":node.name=="Tail"})
+		parts.append({"mesh":mesh,"local":origin*node.global_transform,"tail":node.name=="Tail","fins":node.name=="PectoralFins"})
 	for child in node.get_children(): collect(child,origin,parts,count)
 
 func update(_delta: float, time: float) -> void:
@@ -46,5 +49,8 @@ func update(_delta: float, time: float) -> void:
 			var pose:=Transform3D(Basis(Vector3.UP,yaw).scaled(Vector3.ONE*size),point)
 			for part in school.parts:
 				var local: Transform3D=part.local
-				if part.tail: local.basis=Basis(Vector3.UP,sin(time*7+index)*0.35)*local.basis
+				if part.tail:
+					local.basis=local.basis*Basis(Vector3.UP,sin(time*7+phase+index)*0.17)
+				elif part.fins:
+					local.basis=local.basis*Basis(Vector3.RIGHT,sin(time*4.5+phase+index)*0.07)
 				part.mesh.set_instance_transform(index,pose*local)

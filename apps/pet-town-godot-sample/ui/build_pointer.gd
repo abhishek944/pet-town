@@ -24,14 +24,21 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	if state in ["hide", "idle"] or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED: return
-	var tint := Color("ffb2a3") if state == "bad" else Color.WHITE
+	var tint := Color("ffb2a3") if state == "bad" else Color("fffaf0")
 	if state == "pet":
 		draw_texture_rect(load("res://ui/icons/heart.svg"), Rect2(-15, -15, 30, 30), false)
 		return
-	draw_circle(Vector2.ZERO, 5, Color("5a423259"))
-	draw_circle(Vector2.ZERO, 3, Color.WHITE)
-	for x in [-1, 1]:
-		for y in [-1, 1]:
-			var corner := Vector2(x * 16, y * 16)
-			draw_line(corner, corner - Vector2(x * 10, 0), tint, 3.5, true)
-			draw_line(corner, corner - Vector2(0, y * 10), tint, 3.5, true)
+	var outline := Color("5a423299")
+	var corners: Array[PackedVector2Array] = [
+		PackedVector2Array([Vector2(-14, -5), Vector2(-14, -14), Vector2(-5, -14)]),
+		PackedVector2Array([Vector2(5, -14), Vector2(14, -14), Vector2(14, -5)]),
+		PackedVector2Array([Vector2(14, 5), Vector2(14, 14), Vector2(5, 14)]),
+		PackedVector2Array([Vector2(-5, 14), Vector2(-14, 14), Vector2(-14, 5)]),
+	]
+	for points in corners:
+		draw_polyline(points, outline, 4.2, true)
+		for point in points: draw_circle(point, 2.1, outline)
+		draw_polyline(points, tint, 2, true)
+		for point in points: draw_circle(point, 1, tint)
+	draw_circle(Vector2.ZERO, 3, Color("5a423288"))
+	draw_circle(Vector2.ZERO, 1.6, tint)

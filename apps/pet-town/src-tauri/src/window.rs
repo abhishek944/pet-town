@@ -105,7 +105,7 @@ pub(crate) fn create_village_window(
     app.set_activation_policy(tauri::ActivationPolicy::Regular);
 
     tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
-        .title("Pet Town")
+        .title("Pet Street")
         // Additional transparent height lets Ocean water sit below boat hulls.
         // Standard pets retain their existing bottom-anchored on-screen position.
         .inner_size(1100.0, 290.0)

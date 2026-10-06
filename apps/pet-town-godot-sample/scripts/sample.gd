@@ -9,6 +9,7 @@ var ambience: Node
 var actor_audio: Node
 var region_actions: Node
 var post: Node
+var pet_visibility: Node3D
 var ocean: Node3D
 var desktop: Node3D
 var photos: CanvasLayer
@@ -99,6 +100,8 @@ func _ready() -> void:
 	add_child(post)
 	post.setup(world.effects.daylight.get_child(0))
 	post.update(world.effects.daylight.sample.sun_direction.y,world.effects.daylight.sample.exp,0,rig.camera,actor)
+	pet_visibility = preload("res://scripts/effects/pet_visibility.gd").new()
+	add_child(pet_visibility)
 	desktop = preload("res://scripts/desktop/companions.gd").new()
 	add_child(desktop)
 	desktop.setup(self)
@@ -116,6 +119,7 @@ func _process(delta: float) -> void:
 	day_time=fposmod(0.41435+elapsed/960.0,1.0)
 	hud.update_clock((0.41435+elapsed/960.0)*86400)
 	world.effects.set_time_of_day(day_time)
+	pet_visibility.update(world.effects.daylight.sample, rig.camera)
 	world.vegetation.set_lighting(world.effects.daylight.sample)
 	world.terrain.set_lighting(world.effects.daylight.sample)
 	if post: post.update(world.effects.daylight.sample.sun_direction.y,world.effects.daylight.sample.exp,delta,rig.camera,actor,rig.camera.global_position.y<world.water_at(rig.camera.global_position))

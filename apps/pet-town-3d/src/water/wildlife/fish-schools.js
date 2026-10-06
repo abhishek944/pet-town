@@ -1,61 +1,44 @@
 import * as THREE from "three";
 import { OCEAN_PLACES } from "../layout.js";
+import { createReefFishMaterial, createReefFishModel, FISH_SCHOOLS } from "./fish-model.js";
 
-/** Instancing keeps 54 individually animated fish to 15 draw calls. */
-export function createFishSchools(context, group, resources, habitat) {
-  const definitions = [
-    { place: "reef", color: 0xf3b354, fin: 0xe76f61, count: 18, radius: 6, speed: 0.23, depth: 2 },
-    {
-      place: "reef",
-      color: 0x54c6d3,
-      fin: 0x337eae,
-      count: 18,
-      radius: 9,
-      speed: -0.16,
-      depth: 3.4,
-    },
-    {
-      place: "kelp",
-      color: 0xb5d992,
-      fin: 0x5baf96,
-      count: 18,
-      radius: 7,
-      speed: 0.19,
-      depth: 2.8,
-    },
-  ];
+/** Three batches per school keep 54 marked, animated fish to nine draw calls. */
+export function createFishSchools(context, group, _resources, habitat) {
+  const material = createReefFishMaterial();
+  const models = FISH_SCHOOLS.map(({ id }) => createReefFishModel(id, material));
+  for (const model of models) model.updateMatrixWorld(true);
   const pose = new THREE.Object3D();
-  const schools = definitions.map((definition, index) => {
+  const transform = new THREE.Matrix4();
+  const swing = new THREE.Matrix4();
+  const schools = FISH_SCHOOLS.map((definition, index) => {
     const place = OCEAN_PLACES.find((entry) => entry.id === definition.place);
-    const parts = [
-      ["round", definition.color, 1],
-      ["tail", definition.fin, 1],
-      ["dorsal", definition.fin, 1],
-      ["round", 0x173a40, 2],
-      ["round", 0xf4eaca, 1],
-    ].map(([shape, color, multiplier]) => {
-      const mesh = new THREE.InstancedMesh(
-        resources.geometries[shape],
-        resources.material(color),
-        definition.count * multiplier,
-      );
+    const parts = models[index].children.map((source) => {
+      const mesh = new THREE.InstancedMesh(source.geometry, material, definition.count);
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       mesh.frustumCulled = false;
-      mesh.name = `ocean-${definition.place}-fish-${index}`;
+      mesh.name = `ocean-${definition.place}-fish-${index}-${source.name}`;
       group.add(mesh);
-      return mesh;
+      return { mesh, local: source.matrixWorld.clone(), animation: source.name };
     });
     return { ...definition, place, parts, index };
   });
-  function matrix(mesh, index, x, y, z, yaw, sx, sy, sz) {
+  function set(part, index, x, y, z, yaw, size, phase, time) {
     pose.position.set(x, y, z);
     pose.rotation.set(0, yaw, 0);
-    pose.scale.set(sx, sy, sz);
+    pose.scale.setScalar(size);
     pose.updateMatrix();
-    mesh.setMatrixAt(index, pose.matrix);
+    transform.multiplyMatrices(pose.matrix, part.local);
+    if (part.animation === "Tail") {
+      swing.makeRotationY(Math.sin(time * 7 + phase) * 0.17);
+      transform.multiply(swing);
+    } else if (part.animation === "PectoralFins") {
+      swing.makeRotationZ(Math.sin(time * 4.5 + phase) * 0.07);
+      transform.multiply(swing);
+    }
+    part.mesh.setMatrixAt(index, transform);
   }
   return {
-    update(dt, time) {
+    update(_dt, time) {
       for (const school of schools) {
         for (let index = 0; index < school.count; index++) {
           const phase = time * school.speed + school.index * 1.7 + index * 0.17;
@@ -71,45 +54,16 @@ export function createFishSchools(context, group, resources, habitat) {
             -Math.sin(phase) * Math.sign(school.speed),
             Math.cos(phase) * 0.7 * Math.sign(school.speed),
           );
-          const fx = Math.sin(yaw),
-            fz = Math.cos(yaw);
-          const sideX = Math.cos(yaw),
-            sideZ = -Math.sin(yaw);
-          const [body, tail, dorsal, eyes, belly] = school.parts;
-          matrix(body, index, x, y, z, yaw, 0.12 * size, 0.21 * size, 0.48 * size);
-          matrix(
-            tail,
-            index,
-            x - fx * 0.52 * size,
-            y,
-            z - fz * 0.52 * size,
-            yaw + Math.sin(time * 7 + index) * 0.35,
-            size * 0.55,
-            size * 0.6,
-            size * 0.6,
-          );
-          matrix(dorsal, index, x, y + 0.12 * size, z, yaw, size * 0.5, size * 0.3, size * 0.6);
-          matrix(belly, index, x, y - 0.11 * size, z, yaw, 0.108 * size, 0.075 * size, 0.36 * size);
-          for (let eye = 0; eye < 2; eye++) {
-            const side = eye ? 1 : -1;
-            matrix(
-              eyes,
-              index * 2 + eye,
-              x + fx * 0.27 * size + sideX * side * 0.103 * size,
-              y + 0.06 * size,
-              z + fz * 0.27 * size + sideZ * side * 0.103 * size,
-              yaw,
-              0.035 * size,
-              0.035 * size,
-              0.035 * size,
-            );
-          }
+          for (const part of school.parts)
+            set(part, index, x, y, z, yaw, size, phase + index, time);
         }
-        for (const mesh of school.parts) mesh.instanceMatrix.needsUpdate = true;
+        for (const part of school.parts) part.mesh.instanceMatrix.needsUpdate = true;
       }
     },
     dispose() {
-      for (const school of schools) for (const mesh of school.parts) mesh.dispose();
+      for (const school of schools) for (const part of school.parts) part.mesh.dispose();
+      for (const model of models) for (const part of model.children) part.geometry.dispose();
+      material.dispose();
     },
   };
 }

@@ -23,6 +23,7 @@ fn reading(session: &Session) -> Reading {
         .into(),
         model: session.model.clone().or_else(|| session.hook_model.clone()),
         tokens: session.tokens.clone().unwrap_or_default(),
+        counter_epoch: session.counter_epoch,
         estimated_credits: pricing::estimate(session),
         models: session.models.keys().cloned().collect(),
         updated_at_seconds: (session.updated_at_seconds > 0).then_some(session.updated_at_seconds),

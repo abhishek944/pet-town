@@ -75,6 +75,9 @@ def is_our_native_town(executable: str, command: str) -> bool:
     if any(flag in command for flag in ("--editor", "--script", "--headless")):
         return False
     runtimes = (
+        root / "var/godot-runtime/Pet Town.app/Contents/MacOS/Godot",
+        root / "apps/pet-town/src-tauri/resources/godot/Pet Town.app/Contents/MacOS/Godot",
+        # Also clean up runtimes launched before the branding migration.
         root / "var/godot-runtime/Godot.app/Contents/MacOS/Godot",
         root / "apps/pet-town/src-tauri/resources/godot/Godot.app/Contents/MacOS/Godot",
     )
@@ -104,7 +107,8 @@ def running() -> dict[int, str]:
 processes = running()
 if processes:
     print(
-        f"Stopping {len(processes)} Pet Town/3D town process(es) from this checkout...", flush=True
+        f"Stopping {len(processes)} Pet Street/Pet Town process(es) from this checkout...",
+        flush=True,
     )
     for pid, command in processes.items():
         if running().get(pid) != command:

@@ -5,6 +5,7 @@ mod ingestion;
 mod lifecycle;
 mod registry;
 mod relay;
+mod token_activity;
 
 use crate::agents::safe_display_label;
 pub use ingestion::record as record_from_stdin;
@@ -35,6 +36,17 @@ pub(crate) struct AdapterEventRecord {
     pub(crate) focus_app: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(crate) codex_thread_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) token_activity: Option<pet_town_agent_broker::TokenActivity>,
+    #[serde(default)]
+    pub(crate) state_observed_at_ms: u64,
+}
+
+pub(crate) fn current_time_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis().min(u128::from(u64::MAX)) as u64)
+        .unwrap_or(0)
 }
 
 pub(crate) fn current_time_seconds() -> u64 {

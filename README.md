@@ -1,8 +1,8 @@
 # Pet Town
 
 Pet Town turns live Herdr, Claude Code, Codex, OpenCode, Pi, Factory Droid,
-and Cursor sessions into small animated citizens in a transparent village along
-the bottom of your desktop.
+and Cursor sessions into small animated citizens in **Pet Street**, the 2D
+experience along the bottom of your desktop. **Pet Town** is the 3D world.
 
 ![Pet Town demo — 13s from Screen Recording (1:17–1:30) showing 15 agents + village pets](assets/pets-demo.gif)
 
@@ -11,8 +11,8 @@ the bottom of your desktop.
 </p>
 
 The desktop is a **Tauri v2 application** with a Rust backend and a
-TypeScript/CSS interface. Its 2D strip uses one lightweight window for the whole
-village, with no arbitrary agent limit. **Open 3D Town** opens the editable
+TypeScript/CSS interface. Pet Street uses one lightweight window for the whole
+village, with no arbitrary agent limit. **Open Pet Town** opens the editable
 native Godot world with the same live agents and Mayor. Its terrain, scenery and
 characters are exported from the original Three.js town, retaining all 27,037
 source dry-land cells. The [Godot guide](apps/pet-town-godot-sample/README.md)
@@ -23,7 +23,7 @@ retains browser instructions and source provenance.
 
 Pet Town is a standalone macOS desktop app. Download the DMG for your Mac,
 open it, and drag **Pet Town.app** into **Applications**. Launching the app opens
-Settings and starts the town; use **Show Town / Hide Town** in Settings, the app
+Settings and shows Pet Street; use **Show Pet Street / Hide Pet Street** in Settings, the app
 menu, or the tray menu without quitting the monitor. The application bundle
 includes the private Node/Pi runtime used by the optional voice orchestrator;
 users do not install Node.js, Pi, or Rust. The village discovers configured
@@ -55,9 +55,9 @@ user permissions, so review their manifest and source before installing.
 - Focuses an exact revalidated Herdr pane when its pet is clicked, or the best already-running application known for a standalone harness without launching or resuming anything.
 - Lets users drag a pet horizontally; it pauses while held and resumes its existing movement from the drop point.
 - Keeps **Preferences…** in each pet's right-click menu; menu animation actions are retired.
-- Opens a native macOS Settings window when the installed app launches, from **Preferences…** in a pet menu, or from the Herdr plugin action, with direct **Show Town / Hide Town** controls, per-character controls, a **Pet Studio**, and an **Agents** tab for atomic, reversible setup of all six standalone harness integrations.
+- Opens a native macOS Settings window when the installed app launches, from **Preferences…** in a pet menu, or from the Herdr plugin action, with direct **Show Pet Street / Hide Pet Street** controls, per-character controls, a **Pet Studio**, and an **Agents** tab for atomic, reversible setup of all six standalone harness integrations.
 - Lets users create or extend a pet by importing transparent looping APNGs in Settings and choosing an APNG and idle or walking action for each state. The Pets page shows those assignments.
-- Adds a user-named Mayor using the bundled Knight in the 2D strip and a crowned explorer in 3D, backed by one persistent Firstmate primary in Herdr. Live mode uses GPT-Live for speech; Standard mode uses transcription and generated speech.
+- Adds a user-named Mayor using the bundled Knight in Pet Street and a crowned explorer in Pet Town, backed by one persistent Firstmate primary in Herdr. Live mode uses GPT-Live for speech; Standard mode uses transcription and generated speech.
 - Runs Firstmate with GPT-5.6 Luna at medium thinking by default, supports task interruption, and keeps Live voice transcripts ephemeral.
 - Keeps the assistant independent from Pet Studio: its bundled Knight walk animation is fixed and cannot be replaced by user pet creation or extensions.
 - Includes every character in random assignment by default, lets users deselect unwanted characters, and immediately replaces visible deselected pets after Apply while preserving allowed assignments.
@@ -83,7 +83,7 @@ pending; see the
 Standalone Tauri process
   ├─ Rust adapter broker: lifecycle records, Herdr discovery, and focus routes
   ├─ Rust orchestrator state: local wake bridge, GPT-Live session creation, and Firstmate lifecycle
-  ├─ WebViews: 2D village, Settings, and ephemeral WebRTC voice conversation
+  ├─ WebViews: Pet Street, Settings, and ephemeral WebRTC voice conversation
   ├─ native Godot process: source world, public snapshots and scoped actions over authenticated loopback TCP
   └─ dedicated Herdr pane: trusted Firstmate checkout → selected Pi model
        ↑

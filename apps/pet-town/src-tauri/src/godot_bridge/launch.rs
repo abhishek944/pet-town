@@ -13,6 +13,14 @@ pub(super) fn spawn(app: &AppHandle, port: u16, token: &str) -> Result<Child, St
     let bundled = resource.join("PetTown");
     let (executable, project) = if bundled.is_file() {
         (bundled, None)
+    } else if !cfg!(debug_assertions)
+        && resource
+            .join("Pet Town.app/Contents/Resources/Godot.pck")
+            .is_file()
+    {
+        // Release templates discover their signed bundle pack automatically.
+        // Official 4.7+ templates reject --main-pack and --path overrides.
+        (resource.join("Pet Town.app/Contents/MacOS/Godot"), None)
     } else {
         let checkout = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../..");
         let project = if cfg!(debug_assertions) {
@@ -26,20 +34,21 @@ pub(super) fn spawn(app: &AppHandle, port: u16, token: &str) -> Result<Child, St
         let executable = if cfg!(debug_assertions) {
             std::env::var_os("PET_TOWN_GODOT_EXECUTABLE")
                 .map(PathBuf::from)
-                .or_else(|| {
-                    [
-                        checkout.join("var/godot-runtime/Godot.app/Contents/MacOS/Godot"),
-                        PathBuf::from("/Applications/Godot.app/Contents/MacOS/Godot"),
-                    ]
-                    .into_iter()
-                    .find(|p| p.is_file())
+                .unwrap_or_else(|| {
+                    if cfg!(target_os = "macos") {
+                        checkout.join("var/godot-runtime/Pet Town.app/Contents/MacOS/Godot")
+                    } else {
+                        PathBuf::from("godot")
+                    }
                 })
-                .unwrap_or_else(|| PathBuf::from("godot"))
         } else {
-            resource.join("Godot.app/Contents/MacOS/Godot")
+            resource.join("Pet Town.app/Contents/MacOS/Godot")
         };
         (executable, Some(project))
     };
+    if executable.components().count() > 1 && !executable.is_file() {
+        return Err("The Pet Town runtime is missing. Run pnpm run dev or rebuild the app.".into());
+    }
     let mut command = Command::new(executable);
     let log_dir = app.path().app_log_dir().map_err(|e| e.to_string())?;
     std::fs::create_dir_all(&log_dir).map_err(|e| e.to_string())?;

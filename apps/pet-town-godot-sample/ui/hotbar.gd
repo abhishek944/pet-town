@@ -25,10 +25,10 @@ func _ready() -> void:
 	add_child(tray)
 	tray.gui_input.connect(wheel_select)
 	for i in range(12):
-		var slot := Style.button("", Vector2(43, 45))
+		var slot := Style.button("", Vector2(44, 45))
 		slot.tooltip_text = NAMES[i]
 		slot.position = Vector2(13 + i * 48, 10)
-		slot.size = Vector2(43, 45)
+		slot.size = Vector2(44, 45)
 		tray.add_child(slot)
 		var texture_path: String = "res://ui/icons/%s.png" % KEYS[i]
 		if ResourceLoader.exists(texture_path):
@@ -73,18 +73,23 @@ func set_selected(index: int) -> void:
 		var width := maxf(60, Style.BODY.get_string_size(name_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 30)
 		name_panel.offset_left = -width / 2
 		name_panel.offset_right = width / 2
-		name_panel.offset_top = -133
-		name_panel.offset_bottom = -97
+		layout()
 
 func layout() -> void:
 	if not tray: return
-	var slot_width := clampf((size.x - 104) / 12, 24, 43) if size.x < 700 else 43.0
-	var gap := 3.0 if size.x < 700 else 5.0
-	var tray_width := 26 + slot_width * 12 + gap * 11
+	var columns := 12 if size.x >= 597 else 6 if size.x >= 305 else 3 if size.x >= 164 else 2 if size.x >= 117 else 1
+	var slot_width := 44.0
+	var gap := 3.0 if columns < 12 else 4.0
+	var tray_width := (25 if columns == 12 else 26) + slot_width * columns + gap * (columns - 1)
+	var rows := 12 / columns
+	tray.offset_top = -87 - (rows - 1) * 52
+	name_panel.offset_top = tray.offset_top - 46
+	name_panel.offset_bottom = tray.offset_top - 10
 	tray.offset_left = -tray_width / 2
 	tray.offset_right = tray_width / 2
 	for index in slots.size():
-		slots[index].position.x = 13 + index * (slot_width + gap)
+		slots[index].position.x = 13 + (index % columns) * (slot_width + gap)
+		slots[index].position.y = (index / columns) * 52 + (6 if index == selected_index else 10)
 		slots[index].custom_minimum_size.x = slot_width
 		slots[index].size.x = slot_width
 		for child in slots[index].get_children():

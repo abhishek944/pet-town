@@ -5,6 +5,11 @@ import { OCEAN_PLACES, OFFSHORE_ISLAND } from "../../pet-town-3d/src/water/layou
 import { createOceanPlacements } from "../../pet-town-3d/src/water/scenery/placements.js";
 import { reseatOceanScenery } from "../../pet-town-3d/src/water/scenery/support.js";
 import { createMarineResources } from "../../pet-town-3d/src/water/wildlife/resources.js";
+import {
+  createReefFishMaterial,
+  createReefFishModel,
+  FISH_SCHOOLS,
+} from "../../pet-town-3d/src/water/wildlife/fish-model.js";
 import { createMarineHabitat } from "../../pet-town-3d/src/water/wildlife/habitat.js";
 import { createDolphins } from "../../pet-town-3d/src/water/wildlife/dolphins.js";
 import { createSeaTurtles } from "../../pet-town-3d/src/water/wildlife/turtles.js";
@@ -19,6 +24,22 @@ function saved(suffix) {
     return JSON.parse(raw);
   } catch {
     return { unreadable: true, raw };
+  }
+}
+
+export async function exportFishModels(write = glb) {
+  const material = createReefFishMaterial();
+  try {
+    for (let index = 0; index < FISH_SCHOOLS.length; index++) {
+      const fish = createReefFishModel(FISH_SCHOOLS[index].id, material);
+      try {
+        await write(`ocean-fish-${index}.glb`, fish);
+      } finally {
+        for (const part of fish.children) part.geometry.dispose();
+      }
+    }
+  } finally {
+    material.dispose();
   }
 }
 
@@ -84,40 +105,11 @@ export async function exportOcean(ctx, manifest, report = () => {}) {
     await glb(file, model);
     data.wildlife[model.name] = file;
   }
-  data.schools = [
-    { place: "reef", color: 0xf3b354, fin: 0xe76f61, count: 18, radius: 6, speed: 0.23, depth: 2 },
-    {
-      place: "reef",
-      color: 0x54c6d3,
-      fin: 0x337eae,
-      count: 18,
-      radius: 9,
-      speed: -0.16,
-      depth: 3.4,
-    },
-    {
-      place: "kelp",
-      color: 0xb5d992,
-      fin: 0x5baf96,
-      count: 18,
-      radius: 7,
-      speed: 0.19,
-      depth: 2.8,
-    },
-  ];
-  for (let i = 0; i < data.schools.length; i++) {
-    const school = data.schools[i],
-      fish = new THREE.Group();
-    resources.mesh(fish, "round", school.color, [0, 0, 0], [0.12, 0.21, 0.48]);
-    const tail = resources.mesh(fish, "tail", school.fin, [0, 0, -0.52], [0.55, 0.6, 0.6]);
-    tail.name = "Tail";
-    resources.mesh(fish, "dorsal", school.fin, [0, 0.12, 0], [0.5, 0.3, 0.6]);
-    resources.mesh(fish, "round", 0xf4eaca, [0, -0.11, 0], [0.108, 0.075, 0.36]);
-    for (const side of [-1, 1])
-      resources.mesh(fish, "round", 0x173a40, [side * 0.103, 0.06, 0.27], [0.035, 0.035, 0.035]);
-    school.file = `ocean-fish-${i}.glb`;
-    await glb(school.file, fish);
-  }
+  data.schools = FISH_SCHOOLS.map((school, index) => ({
+    ...school,
+    file: `ocean-fish-${index}.glb`,
+  }));
+  await exportFishModels();
   resources.dispose();
   report("Ocean Harbor launch and dock");
   const launch = createHarborLaunch();

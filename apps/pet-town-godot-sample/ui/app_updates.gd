@@ -11,10 +11,15 @@ var install: Button
 var news: Button
 var state: Dictionary = {}
 var confirmation: ConfirmationDialog
+var confirmation_scrim: ColorRect
+var confirmation_layer: CanvasLayer
+var confirmation_copy: VBoxContainer
+var confirmation_actions: HFlowContainer
+var native_buttons: HBoxContainer
 
 func _ready() -> void:
 	add_child(Style.title("About Pet Town"))
-	add_child(Style.text("Your desktop pets and 3D Town, updated together.", 12))
+	add_child(Style.text("Pet Street and Pet Town, updated together.", 12))
 	var card := PanelContainer.new()
 	card.add_theme_stylebox_override("panel", Style.panel("f3eddd", 14, "dfcfac", false))
 	add_child(card)
@@ -47,11 +52,13 @@ func _ready() -> void:
 		var version: String = str(state.availableVersion) if state.get("availableVersion") else ""
 		OS.shell_open("https://github.com/abhishek944/pet-town/releases/" + ("tag/v" + version.uri_encode() if not version.is_empty() else "latest")))
 	actions.add_child(news)
+	visibility_changed.connect(_page_visibility_changed)
 	set_state({})
 
 func set_state(data: Dictionary) -> void:
 	state = data
 	var phase: String = str(data.get("phase", "unavailable"))
+	if phase != "ready": _dismiss_confirmation()
 	var current: String = str(data.get("currentVersion", ""))
 	var available: String = str(data.availableVersion) if data.get("availableVersion") else "update"
 	heading.text = {"idle":"Check for updates", "checking":"Checking for updates…", "current":"Pet Town is up to date", "available":"Pet Town %s is available" % available, "downloading":"Downloading Pet Town %s…" % available, "ready":"Pet Town %s is ready to install" % available, "preparing":"Preparing to install…", "installing":"Installing update…", "error":"Couldn’t check for updates"}.get(phase, "App updates require Pet Town desktop")
@@ -67,13 +74,120 @@ func set_state(data: Dictionary) -> void:
 	progress.value = float(data.get("downloadedBytes", 0))
 
 func confirm_install() -> void:
+	if state.get("phase", "") != "ready": return
+	if is_instance_valid(confirmation):
+		confirmation.grab_focus()
+		return
 	confirmation = ConfirmationDialog.new()
+	confirmation.theme = Style.theme()
+	var paper := Style.panel("fff8e9", 24, "d9c39c", false)
+	paper.set_content_margin_all(22)
+	confirmation.theme.set_stylebox("panel", "AcceptDialog", paper)
+	# Keep native modal/confirm/cancel handling, but draw the approved title inside.
+	confirmation.borderless = true
+	confirmation.transparent_bg = true
+	confirmation.transparent = true
+	confirmation.theme.set_constant("buttons_min_height", "AcceptDialog", 44)
+	confirmation.theme.set_constant("buttons_min_width", "AcceptDialog", 0)
+	confirmation.theme.set_constant("buttons_separation", "AcceptDialog", 23)
+	confirmation.dialog_autowrap = true
 	confirmation.title = "Install and restart Pet Town?"
 	confirmation.dialog_text = "Installing will close all Pet Town windows and end active Mayor voice or terminal sessions. Save your work in every open window before continuing."
 	confirmation.ok_button_text = "Install & Restart"
 	confirmation.cancel_button_text = "Keep playing"
-	confirmation.confirmed.connect(func() -> void: action_requested.emit("update_install"))
-	confirmation.popup_hide.connect(confirmation.queue_free)
+	confirmation.get_label().add_theme_font_size_override("font_size", 14)
+	confirmation.get_label().add_theme_color_override("font_color", Color("716449"))
+	confirmation.get_label().add_theme_constant_override("line_spacing", 6)
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 12)
+	confirmation.add_child(body)
+	var warning_scroll := ScrollContainer.new()
+	warning_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	warning_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	warning_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_child(warning_scroll)
+	confirmation_copy = VBoxContainer.new()
+	confirmation_copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	confirmation_copy.add_theme_constant_override("separation", 14)
+	warning_scroll.add_child(confirmation_copy)
+	var title := Style.title(confirmation.title, 23)
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	confirmation_copy.add_child(title)
+	confirmation.get_label().reparent(confirmation_copy)
+	confirmation_copy.minimum_size_changed.connect(func() -> void: call_deferred("_fit_confirmation"))
+	body.minimum_size_changed.connect(func() -> void: call_deferred("_fit_confirmation"))
+	confirmation_actions = HFlowContainer.new()
+	confirmation_actions.add_theme_constant_override("h_separation", 10)
+	confirmation_actions.add_theme_constant_override("v_separation", 8)
+	body.add_child(confirmation_actions)
+	confirmation.confirmed.connect(_confirm_install)
+	confirmation.canceled.connect(_dismiss_confirmation)
+	confirmation.close_requested.connect(_dismiss_confirmation)
+	confirmation.visibility_changed.connect(_confirmation_visibility_changed)
+	confirmation_scrim = ColorRect.new()
+	confirmation_scrim.color = Color("3c281e47")
+	confirmation_scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	confirmation_scrim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# The production HUD is CanvasLayer 10; dim its Settings, not only the world.
+	confirmation_layer = CanvasLayer.new()
+	confirmation_layer.layer = 11
+	get_viewport().add_child(confirmation_layer)
+	confirmation_layer.add_child(confirmation_scrim)
 	add_child(confirmation)
-	confirmation.popup_centered(Vector2i(460, 190))
+	native_buttons = confirmation.get_ok_button().get_parent() as HBoxContainer
+	# Keep the native buttons and signals; only their presentation can stack.
+	confirmation.get_cancel_button().reparent(confirmation_actions)
+	confirmation.get_ok_button().reparent(confirmation_actions)
+	native_buttons.hide()
+	_style_confirmation_button(confirmation.get_cancel_button(), true)
+	_style_confirmation_button(confirmation.get_ok_button(), false)
+	confirmation.popup_centered(Vector2i(460, 244))
+	get_viewport().size_changed.connect(_fit_confirmation)
+	_fit_confirmation()
 	confirmation.get_cancel_button().grab_focus()
+
+func _fit_confirmation() -> void:
+	if not is_instance_valid(confirmation): return
+	native_buttons.hide()
+	var available := Vector2(get_viewport_rect().size) - Vector2(32, 32)
+	var width := minf(460, maxf(1, available.x))
+	for button in [confirmation.get_cancel_button(), confirmation.get_ok_button()]:
+		button.custom_minimum_size.x = minf(203, maxf(1, width - 44))
+	var height := maxf(244, confirmation_copy.get_combined_minimum_size().y + confirmation_actions.get_combined_minimum_size().y + 56)
+	confirmation.size = Vector2i(roundi(width), roundi(minf(height, maxf(1, available.y))))
+	confirmation.move_to_center()
+
+func _style_confirmation_button(button: Button, safe: bool) -> void:
+	var background := "e7efd8" if safe else "fff1e1"
+	var border := "bdcfac" if safe else "d8b994"
+	for state_name in ["normal", "hover", "pressed", "disabled"]:
+		button.add_theme_stylebox_override(state_name, Style.panel(background, 10, border, false))
+	button.add_theme_font_size_override("font_size", 12)
+	for state in ["font_color", "font_focus_color", "font_hover_color", "font_pressed_color"]:
+		button.add_theme_color_override(state, Color("405d42" if safe else "87533e"))
+	button.custom_minimum_size = Vector2(0, 44)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+func _confirm_install() -> void:
+	if not is_instance_valid(confirmation): return
+	var eligible: bool = state.get("phase", "") == "ready"
+	_dismiss_confirmation()
+	if eligible: action_requested.emit("update_install")
+
+func _dismiss_confirmation() -> void:
+	if get_viewport().size_changed.is_connected(_fit_confirmation):
+		get_viewport().size_changed.disconnect(_fit_confirmation)
+	if is_instance_valid(confirmation_layer): confirmation_layer.queue_free()
+	confirmation_layer = null
+	confirmation_scrim = null
+	if not is_instance_valid(confirmation): return
+	var dialog := confirmation
+	confirmation = null
+	dialog.queue_free()
+
+func _confirmation_visibility_changed() -> void:
+	if is_instance_valid(confirmation) and not confirmation.visible:
+		call_deferred("_dismiss_confirmation")
+
+func _page_visibility_changed() -> void:
+	if not is_visible_in_tree(): _dismiss_confirmation()

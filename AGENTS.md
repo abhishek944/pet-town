@@ -1,5 +1,12 @@
 # Repository guidance
 
+## Product naming
+
+Use **Pet Street** for the 2D desktop experience and **Pet Town** for the 3D
+experience in UI, landing pages, documentation, and new code terminology.
+Pet Town remains the overall app/bundle name. Preserve existing storage keys,
+IPC/DOM identifiers, and package paths when renaming would break compatibility.
+
 ## Pet-to-agent focus
 
 Before changing pet click handling, macOS panel/window activation, focus helpers,

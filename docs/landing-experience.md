@@ -1,6 +1,6 @@
 # Landing experience recordings
 
-The landing page in `apps/web` shows actual recordings of both Pet Town views. Its large hero uses silent MP4 loops of the solo browser town. The three experience cards use GIFs of the town, wildlife petting, and running/jumping. The companions section uses a GIF of the native 2D Ocean desktop strip.
+The landing page in `apps/web` shows actual recordings of Pet Street and Pet Town. Its large hero uses silent MP4 loops of the solo browser town. The three experience cards use GIFs of the town, wildlife petting, and running/jumping. The companions section uses a GIF of native Pet Street with Ocean scenery.
 
 `sections/hero.html`, `town.html`, and `companions.html` own the content. `src/gameplay-hero.ts` selects a hero recording; `src/motion-previews.ts` owns playback, visibility, lazy loading, reduced motion, and shared pause controls. `src/styles/experience.css` provides the selected landing layout. Assets and recording provenance live under `public/media/gameplay/`. All public URLs honor Vite's base path.
 

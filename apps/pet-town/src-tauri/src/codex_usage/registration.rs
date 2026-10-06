@@ -138,6 +138,7 @@ pub(crate) fn register(session_id: &str, agent_id: &str, owner: Option<&str>, pa
         scan_offset: 0,
         file_identity: None,
         tokens: None,
+        counter_epoch: 0,
         models: BTreeMap::new(),
         updated_at_seconds: 0,
         estimate_incomplete: false,

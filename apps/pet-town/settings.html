@@ -42,9 +42,9 @@
           <div class="group">
             <div class="row"><span>Include this pet<small id="cast-count">All pets are included</small></span><button id="include-random-cast" class="switch" type="button" role="switch" aria-checked="true" aria-label="Include this pet in the random cast"></button></div>
           </div>
-          <h2>2D pet theme</h2>
+          <h2>Pet Street pet theme</h2>
           <div class="group"><label class="row"><span>Theme<small id="pet-theme-hint">Choose this pet’s animation style.</small></span><select id="pet-theme"><option value="standard">Standard</option><option value="ocean">Ocean</option></select></label></div>
-          <h2>2D agent states</h2>
+          <h2>Pet Street agent states</h2>
           <p id="state-map-hint" class="state-map-hint">Each state picks an APNG and whether the pet walks or stays in place. Select a visible state to preview its APNG.</p>
           <div id="pet-state-map" class="pet-state-map" aria-label="2D state assignments"></div>
           <h2>Appearance</h2>
@@ -102,7 +102,7 @@
             <div class="assistant-main">
               <section class="assistant-card"><h2>OpenAI voice key</h2><p id="assistant-key-source" class="hint">Checking saved key…</p><label>API key<input id="assistant-api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste a key to save it in Keychain" /></label><div class="assistant-actions assistant-key-actions"><button id="assistant-save-key" class="secondary" type="button">Save key</button><button id="assistant-import-key" class="secondary" type="button">Import from ~/.zshrc</button></div><p id="assistant-key-feedback" class="hint" role="status" aria-live="polite"></p></section>
               <section class="assistant-card"><h2>Identity</h2><label>Mayor name<input id="assistant-name" maxlength="32" autocomplete="off" /></label><p id="assistant-wake-phrase" class="hint">Start the mayor to activate the wake phrase.</p></section>
-              <section class="assistant-card"><h2>Conversation mode</h2><label>Mode<select id="assistant-mode"><option value="firstmate">Standard mode</option><option value="live">Live mode</option></select></label><div id="assistant-firstmate-location"><div class="row"><span>Firstmate folder</span><b id="assistant-firstmate-folder">Not selected</b></div><div class="assistant-actions"><button id="assistant-pick-firstmate" class="secondary" type="button">Choose Firstmate folder…</button></div><div id="assistant-standard-controls"><p class="hint">Speech is transcribed for Firstmate, then its reply is spoken. Hold here or hold Control+Option in the 3D town to talk. Wake and Option+M focus Mayor. Speech uses paid OpenAI APIs.</p><div class="assistant-actions"><button id="assistant-talk" class="primary" type="button">Hold to talk</button></div></div></div></section>
+              <section class="assistant-card"><h2>Conversation mode</h2><label>Mode<select id="assistant-mode"><option value="firstmate">Standard mode</option><option value="live">Live mode</option></select></label><div id="assistant-firstmate-location"><div class="row"><span>Firstmate folder</span><b id="assistant-firstmate-folder">Not selected</b></div><div class="assistant-actions"><button id="assistant-pick-firstmate" class="secondary" type="button">Choose Firstmate folder…</button></div><div id="assistant-standard-controls"><p class="hint">Speech is transcribed for Firstmate, then its reply is spoken. Hold here or hold Control+Option in Pet Town to talk. Wake and Option+M focus Mayor. Speech uses paid OpenAI APIs.</p><div class="assistant-actions"><button id="assistant-talk" class="primary" type="button">Hold to talk</button></div></div></div></section>
               <section class="assistant-card"><h2>Pi model</h2><div class="assistant-fields"><label>Model<select id="assistant-model"><option value="gpt-5.6-luna">GPT-5.6 Luna</option><option value="gpt-5.6-sol">GPT-5.6 Sol</option><option value="gpt-5.6-terra">GPT-5.6 Terra</option></select></label><label>Thinking<select id="assistant-thinking"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="xhigh">X-high</option></select></label></div><div id="assistant-live-prompt"><label>System prompt<textarea id="assistant-system-prompt" maxlength="4000" rows="6" placeholder="Instructions for the GPT-Live conversation." autocomplete="off"></textarea></label></div><p id="assistant-model-hint" class="hint">Choose the Pi model for this mode.</p></section>
               <section id="assistant-live-conversation" class="assistant-card"><h2>Live conversation</h2><p class="hint">GPT-Live handles speech and sends work to the selected Firstmate agent. An active conversation sends microphone audio to OpenAI and may incur API charges.</p></section>
               <div class="assistant-actions"><button id="assistant-toggle" class="primary" type="button">Start mayor</button></div>
@@ -112,14 +112,14 @@
         </section>
         <section id="panel-app" class="panel" data-panel="app" role="tabpanel" aria-labelledby="tab-app" hidden>
           <h1>App</h1>
-          <h2>Town</h2>
+          <h2>Pet Town</h2>
           <div class="group">
-            <div class="row"><span>3D Town<small>Explore the full town with your live agents.</small></span><button id="open-3d-town" class="primary" type="button">Open 3D Town</button></div>
+            <div class="row"><span>Pet Town<small>Explore the full town with your live agents.</small></span><button id="open-3d-town" class="primary" type="button">Open Pet Town</button></div>
           </div>
-          <h2>Village</h2>
+          <h2>Pet Street</h2>
           <div class="group">
-            <div class="row"><span>Town visibility<small id="town-visibility-status">Checking current state…</small></span><button id="town-visibility-toggle" class="secondary" type="button">Hide Town</button></div>
-            <label class="row"><span>2D strip theme<small>Ocean adds rowing animations; Rainforest includes After Rain/Firefly; Snowy includes Fresh Snow/Aurora Night; Desert Oasis includes three scenes and two moods.</small></span><select id="strip-theme"><option value="standard">Standard</option><option value="ocean">Ocean</option><option value="rainforest">Rainforest</option><option value="snowy">Snowy</option><option value="desert">Desert Oasis</option></select></label>
+            <div class="row"><span>Pet Street visibility<small id="town-visibility-status">Checking current state…</small></span><button id="town-visibility-toggle" class="secondary" type="button">Hide Pet Street</button></div>
+            <label class="row"><span>Pet Street theme<small>Ocean adds rowing animations; Rainforest includes After Rain/Firefly; Snowy includes Fresh Snow/Aurora Night; Desert Oasis includes three scenes and two moods.</small></span><select id="strip-theme"><option value="standard">Standard</option><option value="ocean">Ocean</option><option value="rainforest">Rainforest</option><option value="snowy">Snowy</option><option value="desert">Desert Oasis</option></select></label>
             <label class="row" id="rainforest-mode-row" hidden><span>Rainforest mode<small>Choose the rainforest atmosphere.</small></span><select id="rainforest-mode" disabled><option value="after-rain">After Rain</option><option value="firefly">Firefly</option></select></label>
             <label class="row" id="rainforest-opacity-row" hidden><span>Forest opacity<small id="rainforest-opacity-hint">Lower values reveal apps behind the forest. Pets and labels stay unchanged.</small></span><span class="range"><input id="rainforest-opacity" type="range" min="0" max="100" step="1" aria-describedby="rainforest-opacity-hint" disabled /><output id="rainforest-opacity-value" for="rainforest-opacity"></output></span></label>
             <div class="rainforest-preview" id="rainforest-preview" hidden aria-hidden="true"><div class="rainforest-preview-copy">Opacity preview · sample app behind forest<div class="rainforest-preview-controls"><span>New task</span><span>Settings</span><span>Continue →</span></div></div></div>
@@ -144,7 +144,7 @@
             <div class="row"><span>Also start with Herdr<small>Optional when you use Herdr alongside the standalone app.</small></span><button id="open-with-herdr" class="switch" type="button" role="switch" aria-checked="false" aria-label="Also start Pet Town when Herdr starts"></button></div>
           </div>
           <div class="group">
-            <div class="row"><span>Pet Town<small>Close the desktop app and its 3D Town.</small></span><button id="quit-pet-town" class="secondary" type="button">Quit Pet Town</button></div>
+            <div class="row"><span>Pet Town<small>Close the desktop app, Pet Street, and Pet Town.</small></span><button id="quit-pet-town" class="secondary" type="button">Quit Pet Town</button></div>
           </div>
           <p class="hint">Manual file edits can be loaded with the Herdr action <code>pet-town.reload-preferences</code>.</p>
           <button id="reset-all" class="secondary danger">Reset Everything…</button>

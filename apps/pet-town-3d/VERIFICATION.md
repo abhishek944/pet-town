@@ -38,7 +38,7 @@ Migration checks on October 1, 2026 used the signed native Pet Town Debug app an
 the editable Vite game at port 1422. These checks are separate from the source
 reconstruction audit below.
 
-- Settings → App → Open 3D Town opens the rendered Three.js world in a native
+- Settings → App → Open Pet Town opens the rendered Three.js world in a native
   window. Closing and reopening that window works.
 - The native roster showed real Codex/Herdr companions and Mayor; its count
   changed as the live roster changed. Distinct colors and accessories render.

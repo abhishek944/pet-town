@@ -1,4 +1,5 @@
 extends RefCounted
+
 const Style = preload("res://ui/hud_style.gd")
 
 static func render(data: Dictionary) -> Dictionary:
@@ -27,9 +28,30 @@ static func render(data: Dictionary) -> Dictionary:
 			talk = "Stop voice"
 		if active:
 			error = Style.text_or(data.get("error"), Style.text_or(data.get("degradedNote")))
-			if not error.is_empty(): phase = "Live voice error"; status = error; talk = "Retry Live voice" if not connecting and not live else talk
-	if not active: phase = "Stopped"; status = "Start Mayor in Settings."
+			if not error.is_empty():
+				phase = "Live voice error"
+				status = error
+				talk = "Retry Live voice" if not connecting and not live else talk
+	if not active:
+		phase = "Stopped"
+		status = "Start Mayor in Settings."
 	var pending := "" if not data.get("pending", false) else Style.text_or(data.get("pending"))
 	if not pending.is_empty() and pending != "false": status = pending
 	var speech := Style.text_or(data.get("speech"))
-	return {"name":Style.text_or(data.get("name"),"Mayor"),"phase":phase,"status":status,"speech":speech,"error":error,"standard":standard,"listening":listening,"active":active,"talk":talk,"status_visible":not active or speech.is_empty() or not error.is_empty() or not pending.is_empty()}
+	var talk_disabled: bool = not active or data.get("pending", false) or (standard and not listening and (data.get("working", false) or data.get("speaking", false)))
+	var retry_disabled: bool = not active or listening or data.get("speaking", false)
+	return {
+		"name": Style.text_or(data.get("name"), "Mayor"),
+		"phase": phase,
+		"status": status,
+		"speech": speech,
+		"error": error,
+		"standard": standard,
+		"listening": listening,
+		"active": active,
+		"talk": talk,
+		"talk_disabled": talk_disabled,
+		"retry_visible": standard,
+		"retry_disabled": retry_disabled,
+		"status_visible": not active or speech.is_empty() or not error.is_empty() or not pending.is_empty()
+	}

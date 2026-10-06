@@ -7,6 +7,7 @@ trap 'rm -rf "$TMP"' EXIT INT TERM
 cd "$ROOT/apps/pet-town"
 
 pnpm exec esbuild src/renderer-preferences.ts --bundle --platform=node --format=cjs \
+  --define:import.meta.glob=globalThis.__testGlob \
   --log-level=error --outfile="$TMP/renderer-preferences.cjs"
 cp "$ROOT/scripts/preference-checks/check.cjs" "$TMP/check.cjs"
 node "$TMP/check.cjs"

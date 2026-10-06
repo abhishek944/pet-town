@@ -11,6 +11,7 @@ mod state;
 mod terminal;
 mod terminal_api;
 mod terminal_socket;
+mod token_activity;
 
 use agents::parse_agent_list;
 use serde::{Deserialize, Serialize};
@@ -19,6 +20,7 @@ use std::collections::{BTreeMap, HashMap};
 pub use agents::AgentView;
 pub use focus::{focus_route, focus_route_with_codex_activation};
 pub use terminal::{terminal_target, TerminalTarget};
+pub use token_activity::{TokenActivity, TokenMeasurement};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
@@ -84,6 +86,18 @@ pub fn collect() -> BrokerSnapshot {
             });
             if replace || !by_owner.contains_key(&owner) {
                 by_owner.insert(owner, agent);
+            } else if let Some(current) = by_owner.get_mut(&owner) {
+                // Herdr remains authoritative for identity/state/focus. Its validated
+                // harness adapter may enrich that same pet with numeric activity.
+                if agent.view.token_activity.as_ref().is_some_and(|sample| {
+                    current
+                        .view
+                        .token_activity
+                        .as_ref()
+                        .is_none_or(|old| sample.observed_at_ms > old.observed_at_ms)
+                }) {
+                    current.view.token_activity = agent.view.token_activity;
+                }
             }
         }
     }

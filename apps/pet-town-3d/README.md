@@ -1,6 +1,8 @@
 # Pet Town — Three.js world
 
-The editable Three.js world used by Pet Town's **Open 3D Town** desktop window.
+The editable Three.js world used by the public browser game and standalone
+browser development. Desktop **Open Pet Town** launches the native Godot world;
+this browser bundle is not included in the desktop installer.
 It retains the terrain, water, scenery, animals, building, movement, HUD, audio
 and rendering reconstructed from
 [pokopia-teal.vercel.app](https://pokopia-teal.vercel.app/), the reference in
@@ -32,10 +34,10 @@ This starts `@pet-town/three-town` at [http://127.0.0.1:1422](http://127.0.0.1:1
 use `pnpm --filter @pet-town/three-town dev --port 1423`.
 
 The standalone browser supports world gameplay and shows a desktop connection
-notice for agents and Mayor. For the integrated experience, run `pnpm run dev`
-from the root and choose **Open 3D Town** in Pet Town desktop. That command owns
-both frontend servers; stop a standalone server on port 1422 before starting it.
-The native town uses scoped Tauri IPC, not a browser-accessible broker endpoint.
+notice for agents and Mayor. Root `pnpm run dev` still owns both frontend servers;
+stop a standalone server on port 1422 before starting it. Choosing **Open Pet Town**
+in the desktop app launches Godot, not this browser frontend. The retained
+browser extension's native IPC bridge is not a browser-accessible broker endpoint.
 
 The development server reads `index.html` → `src/main.js` directly. Edit source
 and Vite reloads the scene. World edits persist in browser storage. Keep the same
@@ -50,9 +52,9 @@ pnpm --filter @pet-town/three-town preview
 
 Stop the development server before previewing on the same port. `check` runs lint
 and a production build. `dist/` is disposable output with source maps; relative
-asset paths allow static hosting at the root or a subdirectory. The desktop build
-copies it to `apps/pet-town/dist/town`, and the packaged native window opens
-`town/index.html`. Root `pnpm run build` packages both towns without Godot.
+asset paths allow static hosting at the root or a subdirectory. Desktop builds
+remove stale `apps/pet-town/dist/town` output and do not build or copy this bundle.
+Root `pnpm run build` packages Pet Street and the native Godot Pet Town runtime.
 The original game's optional remote resources are Google Fonts; desktop Mayor
 voice uses the existing separately configured native voice services.
 
@@ -74,6 +76,8 @@ solo game once and serves it at port 4173 under `/play/`; rerun
 The web build includes `dist-public/` in `apps/web/dist/play/`, with relative
 assets and a Back link that also work under a static-host subdirectory.
 Set `VITE_BASE_PATH=/pet-town/` when building the landing page for that prefix.
+`apps/web/dist` deploys to the `pet-town-web` Cloudflare Worker, and
+`pnpm exec wrangler deploy --dry-run` from `apps/web` validates it without credentials.
 
 Public saves use the `pet-town-public` IndexedDB database and localStorage prefix,
 separate from the desktop/development `bloomvale` namespace. Back waits for pending

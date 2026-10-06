@@ -18,20 +18,23 @@ uniform float night = 0.0;
 uniform vec4 ripples[32];
 uniform float clock = 0.0;
 varying vec3 world_position;
+#include "ocean.gdshaderinc"
 void vertex() {
 	world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
 	vec2 uv=(world_position.xz-field_rect.xy)/field_rect.zw;
-	float dep=texture(water_fields,uv).r*depth_scale;
+	float dep=ocean_fields(uv).r*depth_scale;
 	float modulate=0.45+0.75*water_noise(world_position.xz*0.035+vec2(clock*0.011,-clock*0.008));
 	VERTEX.y+=swell(world_position.xz,clock).x*smoothstep(0.15,1.6,dep)*modulate;
+	POSITION=ocean_clip(VERTEX,world_position,PROJECTION_MATRIX,MODELVIEW_MATRIX,VIEW_MATRIX,CAMERA_POSITION_WORLD);
 }
 void fragment() {
 	vec2 p=world_position.xz,uv=(p-field_rect.xy)/field_rect.zw;
-	vec4 fields=texture(water_fields,uv);
-	if(fields.g<0.5 || any(lessThan(uv,vec2(0.0))) || any(greaterThan(uv,vec2(1.0)))) discard;
+	vec4 fields=ocean_fields(uv);
+	if(fields.g<0.5) discard;
 	float depth=fields.r*depth_scale;
 	// Undo the baked field's clamped land-cell half-width at the interpolated mask edge.
 	float shoreline=max(texture(shore_field,uv).r*8.0-0.5*(1.0-fields.g),0.0);
+	if(any(lessThan(uv,vec2(0.0))) || any(greaterThan(uv,vec2(1.0)))) shoreline=8.0;
 	vec2 g=swell(p,clock).yz*smoothstep(0.15,1.6,depth)+detail(p,clock);
 	float ring_foam=0.0;
 	for(int i=0;i<32;i++) {
@@ -84,5 +87,7 @@ void fragment() {
 	vec3 halfway=normalize(sun_direction+view);
 	float highlight=pow(max(dot(normal,halfway),0.0),900.0)*0.3;
 	color+=vec3(highlight)*mix(1.0,0.18,night);
-	ALBEDO=color*mix(1.0,0.28,night);
+	float distance_to_camera=length(p-CAMERA_POSITION_WORLD.xz);
+	float haze=smoothstep(120.0,1800.0,distance_to_camera)*0.62;
+	ALBEDO=mix(color*mix(1.0,0.28,night),sky_horizon.rgb,haze);
 }

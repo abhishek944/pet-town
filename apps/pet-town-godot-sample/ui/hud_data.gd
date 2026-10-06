@@ -36,3 +36,4 @@ func touch_contains_point(point: Vector2) -> bool:
 
 func set_companion_labels(records: Array, camera: Camera3D, selected_id: String = "", viewport_size := Vector2.ZERO) -> void:
 	get("live").labels.set_data(records, camera, selected_id, viewport_size)
+	get("live").update_reply_anchor()

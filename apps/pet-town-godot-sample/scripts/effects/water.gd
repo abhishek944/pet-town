@@ -42,11 +42,8 @@ func setup(manifest: Dictionary) -> void:
 		material.set_shader_parameter(pair[0], Color.hex((int(pair[1]) << 8) | 255))
 	ripples.resize(32)
 	var surface := MeshInstance3D.new()
-	var plane := PlaneMesh.new()
-	plane.size = field_rect.size
-	plane.subdivide_width = ceili(field_rect.size.x)
-	plane.subdivide_depth = ceili(field_rect.size.y)
-	surface.mesh = plane
+	surface.mesh = preload("ocean_mesh.gd").create(field_rect.size)
+	material.set_shader_parameter("ocean_extent", field_rect.size * 0.5 + Vector2.ONE * preload("ocean_mesh.gd").REACH)
 	surface.material_override = material
 	surface.position = Vector3(field_rect.get_center().x, water_level, field_rect.get_center().y)
 	surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

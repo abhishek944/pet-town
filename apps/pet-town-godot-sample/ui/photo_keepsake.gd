@@ -4,7 +4,7 @@ var town: Node3D
 var busy := false
 var last_photo: Dictionary = {}
 var overlay: Control
-var card: PanelContainer
+var card: Panel
 var flash: ColorRect
 var vignette: ColorRect
 
@@ -14,6 +14,7 @@ func _ready() -> void:
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(overlay)
+	overlay.resized.connect(layout_card)
 	flash = ColorRect.new()
 	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -62,36 +63,63 @@ func capture() -> void:
 
 func show_card(photo: Image, caption: String) -> void:
 	if is_instance_valid(card): card.queue_free()
-	card = PanelContainer.new()
+	card = Panel.new()
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.theme = Style.theme()
-	card.custom_minimum_size = Vector2(300, 225)
-	var box := Style.panel("ffffff", 14, "ffffff")
-	box.content_margin_left = 12
-	box.content_margin_right = 12
-	box.content_margin_top = 12
-	box.content_margin_bottom = 14
-	card.add_theme_stylebox_override("panel", box)
+	card.custom_minimum_size = Vector2(224, 268)
+	card.size = Vector2(224, 268)
+	var frame := Style.panel("f5eddc", 12, "d8c5a2")
+	frame.shadow_color = Color("26362422")
+	frame.shadow_size = 8
+	frame.shadow_offset = Vector2(0, 8)
+	card.add_theme_stylebox_override("panel", frame)
 	overlay.add_child(card)
-	card.position = get_viewport().get_visible_rect().size - Vector2(330, 259)
-	card.pivot_offset = Vector2(150, 112)
-	card.rotation = deg_to_rad(-4)
-	var column := VBoxContainer.new()
-	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.add_child(column)
+	layout_card()
+	for side in range(2):
+		var rail := Panel.new()
+		rail.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		rail.position = Vector2(0 if side == 0 else 212, 0)
+		rail.size = Vector2(12, 268)
+		var rail_style := StyleBoxFlat.new()
+		rail_style.bg_color = Color("b4a181")
+		rail_style.corner_radius_top_left = 12 if side == 0 else 0
+		rail_style.corner_radius_bottom_left = 12 if side == 0 else 0
+		rail_style.corner_radius_top_right = 12 if side == 1 else 0
+		rail_style.corner_radius_bottom_right = 12 if side == 1 else 0
+		rail.add_theme_stylebox_override("panel", rail_style)
+		card.add_child(rail)
+		for index in range(12):
+			var hole := ColorRect.new()
+			hole.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			hole.color = Color("fff8e9")
+			hole.position = Vector2(3, 12 + index * 22)
+			hole.size = Vector2(5, 8)
+			rail.add_child(hole)
 	var image := TextureRect.new()
 	image.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	image.texture = ImageTexture.create_from_image(photo)
 	image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	image.custom_minimum_size = Vector2(276, 155)
-	column.add_child(image)
-	column.add_child(Style.label("Photo saved!", 16))
-	column.add_child(Style.text(caption, 11))
-	var tape := Panel.new()
-	tape.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tape.add_theme_stylebox_override("panel", Style.panel("ffd678bf", 4, "ffd67800", false))
-	tape.position = Vector2(108, -12)
-	tape.size = Vector2(84, 24)
-	tape.rotation = deg_to_rad(3)
-	card.add_child(tape)
+	image.position = Vector2(20, 15)
+	image.custom_minimum_size = Vector2(182, 168)
+	image.size = Vector2(182, 168)
+	card.add_child(image)
+	var title := Style.label("Photo saved!", 15)
+	title.position = Vector2(20, 196)
+	title.size = Vector2(184, 20)
+	title.add_theme_color_override("font_color", Color("4c6146"))
+	card.add_child(title)
+	var name := Style.text(caption, 10, "73654f")
+	name.position = Vector2(20, 220)
+	name.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
+	name.clip_text = true
+	name.accessibility_name = caption
+	card.accessibility_description = "Photo saved: " + caption
+	card.add_child(name)
+	# Apply the width after inherited fonts and minimum-size changes settle.
+	name.set_deferred("size", Vector2(184, 40))
+
+func layout_card() -> void:
+	if not is_instance_valid(card): return
+	var viewport := get_viewport().get_visible_rect().size
+	card.position = Vector2(maxf(8, viewport.x - 248), clampf(viewport.y - 402, 8, maxf(8, viewport.y - 276)))

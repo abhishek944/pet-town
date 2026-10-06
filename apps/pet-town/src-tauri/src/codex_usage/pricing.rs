@@ -40,12 +40,7 @@ pub(super) fn estimate(session: &Session) -> Option<f64> {
 
 pub(super) fn record_delta(session: &mut Session, next: &Tokens) {
     let previous = session.tokens.clone().unwrap_or_default();
-    if next.input_tokens < previous.input_tokens
-        || next.cached_input_tokens < previous.cached_input_tokens
-        || next.output_tokens < previous.output_tokens
-        || next.reasoning_output_tokens < previous.reasoning_output_tokens
-        || next.total_tokens < previous.total_tokens
-    {
+    if next.regressed_from(&previous) {
         session.estimate_incomplete = true;
     }
     let delta = Tokens {

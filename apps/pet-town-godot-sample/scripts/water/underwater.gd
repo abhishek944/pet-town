@@ -32,6 +32,8 @@ func update(time: float) -> void:
 	var water: float=world.water_at(point)
 	surface.visible=water>-999 and point.y<water+0.2
 	if not surface.visible: return
+	var daylight := smoothstep(-0.28,0.0,float(world.effects.daylight.sample.sun_elevation))
+	material.set_shader_parameter("light_level",lerpf(0.055,1.0,daylight))
 	material.set_shader_parameter("water_y",water)
 	material.set_shader_parameter("clock",time)
 

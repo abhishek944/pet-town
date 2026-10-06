@@ -1,6 +1,6 @@
 # Pet Town — native Godot town
 
-The desktop's **Open 3D Town** launches this native Godot reconstruction of the complete original Three.js world. To explore it without a desktop connection, run from the repository root:
+The desktop's **Open Pet Town** launches this native Godot reconstruction of the complete original Three.js world. To explore it without a desktop connection, run from the repository root:
 
 ```sh
 sh apps/pet-town-godot-sample/tools/run.sh
@@ -18,25 +18,25 @@ Desktop connects over authenticated loopback TCP. Rust owns public agent snapsho
 
 ## Controls
 
-| Action | Control |
-|---|---|
-| Move / run | WASD / Shift |
-| Jump / glide | Space / hold Space in the air |
-| Swim up / dive | Space / Ctrl |
-| Orbit | Mouse drag; Q/E |
-| Zoom | Mouse wheel |
-| First person / capture mouse | V / L |
-| Place / break terrain | Right click / left click |
-| Copy block / cycle material | Middle click / Shift + wheel |
-| Choose material | 1–0, minus, equals, or hotbar |
-| Undo / redo | Ctrl Z / Ctrl Shift Z |
-| Pet nearby wildlife | F or click the creature |
-| Journal / asset library | J / K |
+| Action                             | Control                                |
+| ---------------------------------- | -------------------------------------- |
+| Move / run                         | WASD / Shift                           |
+| Jump / glide                       | Space / hold Space in the air          |
+| Swim up / dive                     | Space / Ctrl                           |
+| Orbit                              | Mouse drag; Q/E                        |
+| Zoom                               | Mouse wheel                            |
+| First person / capture mouse       | V / L                                  |
+| Place / break terrain              | Right click / left click               |
+| Copy block / cycle material        | Middle click / Shift + wheel           |
+| Choose material                    | 1–0, minus, equals, or hotbar          |
+| Undo / redo                        | Ctrl Z / Ctrl Shift Z                  |
+| Pet nearby wildlife                | F or click the creature                |
+| Journal / asset library            | J / K                                  |
 | Follow / control / leave companion | Click companion or roster / C / Escape |
-| Cycle companions / call Mayor | Option + A / Option + M |
-| Return to start | R |
-| Help / settings | H; Escape closes |
-| Photo / sound / volume | P / M / brackets |
+| Cycle companions / call Mayor      | Option + A / Option + M                |
+| Return to start                    | R                                      |
+| Help / settings                    | H; Escape closes                       |
+| Photo / sound / volume             | P / M / brackets                       |
 
 Dragging the camera does not edit terrain. Blocks cannot intersect the explorer or solid scenery; undo checks restored occupancy. Respawn searches for free capsule space. Original terrain can be excavated above the protected bottom layer. Native mesh collisions support tables, benches, roofs, slopes and edited blocks. Terrain geometry builds on a worker; validated changes publish visuals and collision together. Rapid undo/redo requests queue separately, and failed saves keep the previous world intact.
 

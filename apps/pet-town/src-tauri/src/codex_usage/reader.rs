@@ -42,6 +42,13 @@ fn consume(session: &mut Session, bytes: &[u8]) {
             return;
         }
         if let Some(tokens) = parse_tokens(value) {
+            if session
+                .tokens
+                .as_ref()
+                .is_some_and(|old| tokens.regressed_from(old))
+            {
+                session.counter_epoch = session.counter_epoch.saturating_add(1);
+            }
             pricing::record_delta(session, &tokens);
             session.tokens = Some(tokens);
             session.measurement_incomplete = false;
@@ -86,6 +93,7 @@ pub(super) fn advance(session: &mut Session, budget: &mut usize) {
         session.offset = 0;
         session.scan_offset = 0;
         session.tokens = None;
+        session.counter_epoch = session.counter_epoch.saturating_add(1);
         session.model = None;
         session.models.clear();
         session.estimate_incomplete = false;

@@ -50,8 +50,8 @@ for key in ("NSSpeechRecognitionUsageDescription", "NSMicrophoneUsageDescription
     if not isinstance(info.get(key), str) or not info[key].strip():
         raise SystemExit(f"Pet Town Info.plist is missing {key}")
 info.update({
-    "CFBundleName": "Pet Town Debug",
-    "CFBundleDisplayName": "Pet Town Debug",
+    "CFBundleName": "Pet Town",
+    "CFBundleDisplayName": "Pet Town",
     "CFBundleIdentifier": "dev.pet.town.debug",
     "CFBundleExecutable": "pet-town",
     "CFBundlePackageType": "APPL",

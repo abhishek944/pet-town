@@ -16,7 +16,7 @@ Use WASD or arrows to swim, and Shift to swim faster. Hold **Control** to descen
 
 Gamepad **X** descends and **A** rises. Touch devices show a hold-to-Dive button while swimming; the existing jump arrow rises. Control+Option voice recording does not trigger diving. The explorer and manually controlled companions share the physics. Releasing a companion clears its vertical input; opening the journal, switching away or hiding the document clears held controls.
 
-The following camera can submerge once its focus is underwater. The existing underwater postprocessing remains active; bubbles follow the submerged avatar. Pets do not cast a shadow above themselves on the water while diving.
+The following camera can submerge once its focus is underwater. Underwater rendering keeps nearby companion, fish, coral and seabed colors clear; a crystal-blue distance fade starts at 28 m and reaches its far tone at 85 m. Its overhead tone is a stronger blue, and distant colors dim with the existing night-lighting weights. Gentle static caustics add floor detail without screen wobble, red absorption or a near-field fog veil. Underwater grading and depth-of-field blur no longer wash out the scene. Local-water activation and the partial-lens waterline mask remain; bubbles follow the submerged avatar. Pets do not cast a shadow above themselves on the water while diving.
 
 The surface keeps the earlier palette, reflection selection and mesh detail footprint. Expanding the playable seabed preserves the original open-water treatment; only the new exploration destinations reveal their local seabed.
 
@@ -47,6 +47,8 @@ Walk down the gangway and use **F / Board boat**, or swim to the side ladder and
 The hull, cabin, benches and rails own collision shapes. Yaw-oriented solid boxes preserve the narrow deck passage while the boat turns. A pre-player extension phase moves the boat before explorer and companion physics; fixed-step body hooks carry grounded passengers using their local deck coordinates. Deck support and solid shapes follow the same vertical water sample. Shore, edited blocks and scenery are checked across the inflated hull before translation or rotation. Camera queries use the rendered boat and dock meshes. Building is blocked aboard, and the boat action takes priority over the creature-petting F prompt.
 
 The boat position saves separately under the existing native/public storage prefix; corrupt records are preserved. If a saved mooring is obstructed, the boat returns to its original harbor when that water remains clear. Original world blocks are not changed. The dock approach clears only nearby generated foliage. Blur, hidden documents, modals and selection changes release held helm inputs; gamepad input must return to neutral before resuming.
+
+The three fish schools retain 54 individually posed fish, now with distinct handcrafted silhouettes and markings: orange-and-cream Clementine clownfish, tall blue-and-cream Sailfin moonfish, and slender mint reef darts. Browser instances and native GLBs share the same procedural models. To regenerate only the native fish after model changes, run `node apps/pet-town-godot-sample/tools/export-ocean-fish.mjs`, import Godot resources, then reopen the native town. Native fish keep a mesh named `Tail` for hinge animation and carry painted vertex colors into their instance batches.
 
 At night, glowing plankton still follows the swimming avatar. Marine wildlife and the sunken wreck remain decoration without collision bodies.
 

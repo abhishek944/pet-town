@@ -21,6 +21,8 @@ pub(super) struct Process {
 pub(crate) struct GodotState {
     process: Mutex<Option<Process>>,
     focused: AtomicBool,
+    #[cfg(target_os = "macos")]
+    owns_dock: AtomicBool,
     terminal: Mutex<Option<Arc<Session>>>,
     terminal_epoch: AtomicU64,
     update_error: Mutex<Option<String>>,
@@ -62,6 +64,8 @@ pub(crate) fn open(app: &AppHandle) -> Result<(), String> {
     });
     state.window_serial.fetch_add(1, Ordering::SeqCst);
     server::start(app.clone(), listener, token, cancel);
+    drop(process);
+    set_focused(app, false);
     Ok(())
 }
 
@@ -81,6 +85,47 @@ pub(crate) fn focused(app: &AppHandle) -> bool {
         })
 }
 pub(super) fn set_focused(app: &AppHandle, active: bool) {
+    #[cfg(target_os = "macos")]
+    {
+        let _ = active;
+        let target = app.clone();
+        // AppKit caches activation until the main run loop advances. A bridge
+        // heartbeat or background-thread query must not override foreground state.
+        let _ = app.run_on_main_thread(move || {
+            let state = target.state::<GodotState>();
+            let (native_running, active) = state
+                .process
+                .lock()
+                .map(|process| {
+                    (
+                        process.is_some(),
+                        process
+                            .as_ref()
+                            .is_some_and(|process| launch::is_focused(process.child.id())),
+                    )
+                })
+                .unwrap_or((false, false));
+            // The native world owns the Dock while open, even when unfocused.
+            // Settings and the nonactivating pet panel remain in the desktop.
+            if state.owns_dock.load(Ordering::SeqCst) != native_running {
+                let policy = if native_running {
+                    tauri::ActivationPolicy::Accessory
+                } else {
+                    tauri::ActivationPolicy::Regular
+                };
+                match target.set_activation_policy(policy) {
+                    Ok(()) => state.owns_dock.store(native_running, Ordering::SeqCst),
+                    Err(error) => eprintln!("Could not update Pet Town Dock ownership: {error}"),
+                }
+            }
+            apply_focused(&target, active);
+        });
+    }
+    #[cfg(not(target_os = "macos"))]
+    apply_focused(app, active);
+}
+
+fn apply_focused(app: &AppHandle, active: bool) {
     let state = app.state::<GodotState>();
     if state.focused.swap(active, Ordering::SeqCst) != active {
         if !active {
@@ -108,8 +153,15 @@ pub(crate) fn reap(app: &AppHandle) {
     if ended {
         set_focused(app, false);
         terminal::release(app);
-    } else if state.focused.load(Ordering::SeqCst) && !focused(app) {
+    } else {
+        // Reconcile both directions even if Godot is busy rendering or its
+        // snapshot connection is down. The control loop runs every 80 ms.
+        #[cfg(target_os = "macos")]
         set_focused(app, false);
+        #[cfg(not(target_os = "macos"))]
+        if state.focused.load(Ordering::SeqCst) && !focused(app) {
+            set_focused(app, false);
+        }
     }
 }
 pub(crate) fn stop(app: &AppHandle) {

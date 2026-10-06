@@ -63,7 +63,7 @@ export class AssistantSettings {
       ? "This model runs the Firstmate primary agent in your selected checkout."
       : "Live mode uses GPT-Live for speech and this model for Firstmate's work.";
     byId<HTMLElement>("assistant-connection-hint").textContent = firstmate
-      ? "Wake or Option+M focuses Mayor. Hold to talk in Settings or hold Control+Option in the 3D town."
+      ? "Wake or Option+M focuses Mayor. Hold to talk in Settings or hold Control+Option in Pet Town."
       : "Wake or Option+M starts GPT-Live, with computer work sent to Firstmate.";
     byId<HTMLButtonElement>("assistant-talk").disabled = !this.talkAvailable(value);
     byId<HTMLButtonElement>("assistant-talk").textContent = this.talkLabel(

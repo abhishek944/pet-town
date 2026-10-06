@@ -6,7 +6,10 @@ var prompt: Button
 var pet_name: Label
 var toast: PanelContainer
 var toast_tween: Tween
+var pending_toast := ""
 var anchor := Vector2.ZERO
+var top_toolbar_visible: Callable
+var top_toolbar_bottom: Callable
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -70,6 +73,10 @@ func _draw() -> void:
 		draw_polyline(tail, Color.WHITE, 3, true)
 
 func show_toast(message: String) -> void:
+	if not is_visible_in_tree():
+		pending_toast = message
+		return
+	pending_toast = ""
 	if toast_tween:
 		toast_tween.kill()
 	if is_instance_valid(toast):
@@ -84,12 +91,15 @@ func show_toast(message: String) -> void:
 	box.content_margin_bottom = 6
 	toast.add_theme_stylebox_override("panel", box)
 	var row := HBoxContainer.new()
+	row.mouse_filter = MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", 10)
 	var icon := TextureRect.new()
 	icon.texture = Style.icon("heart")
+	icon.mouse_filter = MOUSE_FILTER_IGNORE
 	icon.custom_minimum_size = Vector2(30, 30)
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	var badge := PanelContainer.new()
+	badge.mouse_filter = MOUSE_FILTER_IGNORE
 	var badge_style := Style.panel("ffd6e2", 17, "ffd6e2", false)
 	badge_style.set_content_margin_all(2)
 	badge.add_theme_stylebox_override("panel", badge_style)
@@ -99,13 +109,26 @@ func show_toast(message: String) -> void:
 	toast.add_child(row)
 	add_child(toast)
 	toast.size = toast.get_combined_minimum_size()
-	toast.position = Vector2((size.x - toast.size.x) / 2, 22)
+	_layout_toast()
 	toast.modulate.a = 0
 	toast_tween = create_tween()
 	toast_tween.tween_property(toast, "modulate:a", 1.0, 0.3)
 	toast_tween.tween_interval(3.2)
 	toast_tween.tween_property(toast, "modulate:a", 0.0, 0.35)
 	toast_tween.tween_callback(toast.queue_free)
+
+func _process(_delta: float) -> void:
+	if is_visible_in_tree() and not pending_toast.is_empty(): show_toast(pending_toast)
+	if is_instance_valid(toast):
+		_layout_toast()
+		if toast_tween and toast_tween.is_valid():
+			if is_visible_in_tree(): toast_tween.play()
+			else: toast_tween.pause()
+
+func _layout_toast() -> void:
+	var toolbar := top_toolbar_visible.is_valid() and bool(top_toolbar_visible.call())
+	var top: float = maxf(116, float(top_toolbar_bottom.call()) + 20) if toolbar and top_toolbar_bottom.is_valid() else 116 if toolbar else 22
+	toast.position = Vector2((size.x - toast.size.x) / 2, top)
 
 func show_response(name: String, message: String, screen_position: Vector2) -> void:
 	show_toast(message if not message.is_empty() else name + " looks so happy!")

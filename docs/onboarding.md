@@ -22,37 +22,37 @@ Visiting Test never launches an agent. Explicit Test uses the selected ready too
 
 Creation, launch and prompt attempts are persisted before their effects. Retrying validates the workspace, pane, session and original foreground process identity including its birth time. Uncertain outcomes fail closed instead of creating a second sample or resending a prompt. A prompt is sent only to an idle or done sample. Stop validates ownership before closing the workspace; it removes only an empty owned demo directory. User-added files remain. An uncertain resource can be managed manually in Herdr before clearing the saved attempt.
 
-**Start my own agent** opens Herdr and observes new real broker records relative to a saved baseline. It does not create an agent. A previous sample remains separately available as Stop previous sample. Before either observation path, Pet Town makes its desktop strip visible and asks the user to close Settings or leave an active 3D Town when necessary.
+**Start my own agent** opens Herdr and observes new real broker records relative to a saved baseline. It does not create an agent. A previous sample remains separately available as Stop previous sample. Before either observation path, Pet Town makes Pet Street visible and asks the user to close Settings or leave an active Pet Town window when necessary.
 
 Arrival needs a matching real session, working or done activity, and a recent visible-pet report from the actual desktop renderer. Process startup alone cannot produce success. Blocked means Needs your input, using the blocked artwork. Waiting, blocked and error states retain skip/recovery actions. Open in Herdr uses the existing validated pet focus helper; see [pet focus](pet-focus.md). Generic Herdr opening runs in a separate main-thread helper for macOS activation.
 
 ## Completion and access boundaries
 
-Finish saves completion, reveals the desktop strip and closes welcome. Optional Mayor setup opens the existing Settings flow; it does not enable voice, import a key, request the microphone or start Firstmate. A new detailed voice wizard remains deferred.
+Finish saves completion, reveals Pet Street and closes welcome. Optional Mayor setup opens the existing Settings flow; it does not enable voice, import a key, request the microphone or start Firstmate. A new detailed voice wizard remains deferred.
 
 Privileged commands require the local onboarding window and exact local route. Only the trusted main renderer can acknowledge visible pet IDs. Public onboarding state contains safe labels, normalized states and opaque IDs; private sockets, pane routes, process output and folder paths stay native. Update installation and setup operations share admission guards to prevent interruption of active setup.
 
 ## Owning files
 
-| Boundary | Files |
-| --- | --- |
-| Installer | `apps/pet-town/src-tauri/dmg-background.html`, generated `.png`, existing DMG configuration |
+| Boundary                               | Files                                                                                                             |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Installer                              | `apps/pet-town/src-tauri/dmg-background.html`, generated `.png`, existing DMG configuration                       |
 | Native entry, persistence and commands | `apps/pet-town/src-tauri/src/onboarding/`, `app_commands.rs`, `lib.rs`, `main.rs`, `app_menu.rs`, `app_events.rs` |
-| Scoped permissions | `src-tauri/permissions/onboarding.toml`, `capabilities/onboarding.json`, existing main/desktop capabilities |
-| Interface, recovery and previews | `apps/pet-town/onboarding.html`, `src/onboarding/`, `public/onboarding/`, Vite input |
-| Desktop presence and reentry | `src/main.ts`, `settings.html`, `src/settings.ts` |
-| Update admission | `src-tauri/src/app_updates/install.rs` |
+| Scoped permissions                     | `src-tauri/permissions/onboarding.toml`, `capabilities/onboarding.json`, existing main/desktop capabilities       |
+| Interface, recovery and previews       | `apps/pet-town/onboarding.html`, `src/onboarding/`, `public/onboarding/`, Vite input                              |
+| Desktop presence and reentry           | `src/main.ts`, `settings.html`, `src/settings.ts`                                                                 |
+| Update admission                       | `src-tauri/src/app_updates/install.rs`                                                                            |
 
 ## User-owned live acceptance checks
 
 Static renderer captures, builds and source review do not establish installed-app behavior. Use a signed packaged build on a disposable macOS user profile for first-run cases. Preserve the current user's preferences.
 
 1. Open the DMG: confirm native drag targets, copy into Applications, and launch. Launch from the mounted image first and confirm it offers move guidance without installing dependencies. Confirm ordinary macOS first-open behavior.
-2. Advance welcome/states/scenery; test keyboard focus, text scaling, screen reader and reduced motion. Change scenery, close before committing, reopen, then Keep this look and confirm the actual strip changes.
+2. Advance welcome/states/scenery; test keyboard focus, text scaling, screen reader and reduced motion. Change scenery, close before committing, reopen, then Keep this look and confirm Pet Street changes.
 3. Exercise missing Herdr, offline installation, verified successful installation, existing ready Herdr, and an installed but unready host. Confirm existing installations stay intact. Close/reopen during recovery and confirm progress survives.
 4. Select installed/signed-in Codex, Claude or Cursor, then a missing or signed-out tool. Confirm setup/recheck guidance and no automatic paid task. For Pi/OpenCode/Droid use the explicit manual Herdr path.
-5. Choose Test; complete any normal trust/approval prompt in Herdr. Confirm exactly one owned sample workspace, a real pet in the strip, truthful blocked/working/done transitions, and arrival only after visibility. Retry during a delayed/uncertain result and confirm no duplicate agent or prompt. Stop only the sample, preserving unrelated workspaces and any added demo files.
-6. Start your own agent with an older sample still present. Confirm the new pet is observed, no sample retry targets it, and Stop previous sample affects only the older owned workspace. Exit Town/close Settings as instructed and confirm the strip becomes visible.
+5. Choose Test; complete any normal trust/approval prompt in Herdr. Confirm exactly one owned sample workspace, a real pet in Pet Street, truthful blocked/working/done transitions, and arrival only after visibility. Retry during a delayed/uncertain result and confirm no duplicate agent or prompt. Stop only the sample, preserving unrelated workspaces and any added demo files.
+6. Start your own agent with an older sample still present. Confirm the new pet is observed, no sample retry targets it, and Stop previous sample affects only the older owned workspace. Exit Pet Town/close Settings as instructed and confirm Pet Street becomes visible.
 7. Click Open in Herdr and the actual pet once. Confirm a direct transition to its exact existing pane, without an intermediate Pet Town/default-desktop jump. Preserve drag and context-menu behavior.
 8. Use Continue later/Explore first, finish, restart, and reopen setup from Settings and Help. Confirm skipped work resumes and returning users retain their settings. Confirm an app update cannot install while setup is open or busy.
 9. Open and dismiss the Mayor invitation; confirm no key import, microphone prompt, voice enable or Firstmate launch. Open Mayor Settings only when intentionally chosen.

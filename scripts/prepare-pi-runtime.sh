@@ -3,6 +3,7 @@ set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 TARGET=${1:-}
+NATIVE_APP=${2:-}
 NODE_VERSION=22.21.1
 PI_VERSION=0.85.1
 
@@ -133,6 +134,16 @@ except subprocess.TimeoutExpired:
 raise SystemExit(result.returncode)
 PY
   done <"$WORK/runtime-files.txt"
+  # Tauri does not re-sign app bundles stored in resources. Reuse this build's
+  # temporary signing keychain before it closes, preserving engine entitlements.
+  if [ -n "$NATIVE_APP" ]; then
+    codesign --force --sign "$APPLE_SIGNING_IDENTITY" --timestamp --options runtime \
+      --preserve-metadata=entitlements,flags "$NATIVE_APP"
+    codesign --verify --deep --strict "$NATIVE_APP"
+  fi
+elif [ "${REQUIRE_SIGNED:-0}" = 1 ]; then
+  echo "APPLE_SIGNING_IDENTITY is required for signed runtime preparation" >&2
+  exit 1
 fi
 
 python3 - "$WORK/runtime" "$NODE_VERSION" "$PI_VERSION" "$ARCH" <<'PY'

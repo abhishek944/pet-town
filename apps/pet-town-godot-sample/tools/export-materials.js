@@ -9,8 +9,19 @@ export function exportMaterial(source, tint) {
   for (const key of ["color", "emissive"]) {
     if (material[key] && source[key]) material[key].copy(source[key]);
   }
-  for (const key of ["map", "normalMap", "roughnessMap", "metalnessMap", "alphaMap",
-    "transparent", "opacity", "alphaTest", "side", "vertexColors", "depthWrite"])
+  for (const key of [
+    "map",
+    "normalMap",
+    "roughnessMap",
+    "metalnessMap",
+    "alphaMap",
+    "transparent",
+    "opacity",
+    "alphaTest",
+    "side",
+    "vertexColors",
+    "depthWrite",
+  ])
     if (source[key] !== undefined) material[key] = source[key];
   if (source.metalness !== undefined) material.metalness = source.metalness;
   if (tint) material.color.multiply(tint);

@@ -1,14 +1,49 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Pet Town world export</title><style>body{margin:0}canvas{display:block}</style></head><body><canvas id="game"></canvas><script type="module">
-import { context } from '/src/main.js';
-import { installRegionExport } from './region-export.js?sync=1';
-import { exportWildlife } from './wildlife-export.js';
-import { installCharacterExport } from './character-export.js';
-installCharacterExport();
-installRegionExport(context);
-const panel=document.createElement('div');
-panel.style='position:fixed;left:20px;top:260px;z-index:999999;background:#fff4dc;padding:16px';
-const button=document.createElement('button'); button.textContent='Export original wildlife';
-const status=document.createElement('output'); status.style='display:block';
-panel.append(button,status);document.body.append(panel);
-button.onclick=async()=>{button.disabled=true;try{await exportWildlife(context,{bounds:window.__godotRegionManifest?.bounds,report:t=>status.textContent=t});status.textContent='Wildlife complete';}catch(e){status.textContent=String(e.stack||e);}finally{button.disabled=false;}};
-</script></body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Pet Town world export</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <script type="module">
+      import { context } from "/src/main.js";
+      import { installRegionExport } from "./region-export.js?sync=1";
+      import { exportWildlife } from "./wildlife-export.js";
+      import { installCharacterExport } from "./character-export.js";
+      installCharacterExport();
+      installRegionExport(context);
+      const panel = document.createElement("div");
+      panel.style =
+        "position:fixed;left:20px;top:260px;z-index:999999;background:#fff4dc;padding:16px";
+      const button = document.createElement("button");
+      button.textContent = "Export original wildlife";
+      const status = document.createElement("output");
+      status.style = "display:block";
+      panel.append(button, status);
+      document.body.append(panel);
+      button.onclick = async () => {
+        button.disabled = true;
+        try {
+          await exportWildlife(context, {
+            bounds: window.__godotRegionManifest?.bounds,
+            report: (t) => (status.textContent = t),
+          });
+          status.textContent = "Wildlife complete";
+        } catch (e) {
+          status.textContent = String(e.stack || e);
+        } finally {
+          button.disabled = false;
+        }
+      };
+    </script>
+  </body>
+</html>

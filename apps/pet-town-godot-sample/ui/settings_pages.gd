@@ -4,7 +4,7 @@ const Style = preload("res://ui/hud_style.gd")
 const GUIDES := [
 	["GETTING AROUND", [["Walk", "W A S D"], ["Jump · hold to glide", "Space"], ["Run", "Shift"], ["Turn camera", "Q E"], ["Look around", "Right drag"], ["Zoom", "Scroll"]]],
 	["BUILDING", [["Place / break", "Right / Left click"], ["Choose block", "1 … ="], ["Cycle blocks", "Shift + scroll"], ["Copy a block", "Middle click"], ["Undo / redo", "Ctrl Z / Ctrl ⇧ Z"]]],
-	["FRIENDS & WORLD", [["Pet a friend", "F"], ["Take a photo", "P"], ["World sound", "M"], ["World volume", "[ ]"], ["Lock mouse", "L"], ["Call Mayor", "⌥ M"], ["Cycle companions", "⌥ A"]]]
+	["FRIENDS & WORLD", [["Pet a friend", "F"], ["Take a photo", "P"], ["World sound", "M"], ["World volume", "[ ]"], ["Lock mouse", "L"], ["Call Mayor", "⌥ M"], ["Cycle companions", "⌥ A"], ["Usage", "⌥ T"], ["Town settings", "H"], ["Journal", "J"], ["Asset library", "K"]]]
 ]
 
 static func help(body: VBoxContainer) -> void:
@@ -74,4 +74,19 @@ static func world(body: VBoxContainer, host: Control) -> void:
 		host.volume = value / 100.0
 		amount.text = "%d%%" % value
 		host.volume_changed.emit(host.volume))
-	body.add_child(Style.text("Your builds are saved on this device. Reset world opens a separate confirmation.", 12))
+	var usage := Style.flat_button("Hide usage  ⌥ T" if host.usage_visible else "Show usage  ⌥ T")
+	usage.custom_minimum_size.y = 44
+	usage.pressed.connect(func() -> void:
+		host.usage_visible = not host.usage_visible
+		usage.text = "Hide usage  ⌥ T" if host.usage_visible else "Show usage  ⌥ T"
+		host.usage_toggled.emit(host.usage_visible))
+	body.add_child(usage)
+	var note := Style.text("Your builds are saved on this device.\nReset world opens a separate confirmation.", 12)
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.add_child(note)
+	var shortcuts := PanelContainer.new()
+	shortcuts.add_theme_stylebox_override("panel", Style.panel("edf0da", 12, "d6debd", false))
+	var hint := Style.text("J opens Journal    K opens Asset library", 12, "486344")
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	shortcuts.add_child(hint)
+	body.add_child(shortcuts)

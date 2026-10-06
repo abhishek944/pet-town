@@ -35,7 +35,8 @@ pnpm install --frozen-lockfile
 if [ "$(uname -s)" = Darwin ]; then
   GODOT_APP=$(sh "$ROOT/scripts/prepare-godot-engine.sh")
   export GODOT_BIN="$GODOT_APP/Contents/MacOS/Godot"
-  export PET_TOWN_GODOT_EXECUTABLE="$GODOT_BIN"
+  PET_TOWN_APP=$(sh "$ROOT/scripts/prepare-pet-town-runtime.sh")
+  export PET_TOWN_GODOT_EXECUTABLE="$PET_TOWN_APP/Contents/MacOS/Godot"
   python3 "$ROOT/scripts/validate-godot-export.py"
   "$GODOT_BIN" --headless --single-threaded-scene --path "$ROOT/apps/pet-town-godot-sample" --editor --import --quit
 fi

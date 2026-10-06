@@ -122,7 +122,7 @@ pub(crate) fn report_onboarding_pets(
         || ids.len() > 256
         || ids.iter().any(|id| id.len() > 256)
     {
-        return Err("Pet presence is available only from the local desktop strip.".into());
+        return Err("Pet presence is available only from Pet Street.".into());
     }
     let mut runtime = state.runtime();
     runtime.rendered_ids = if window.is_visible().unwrap_or(false) {

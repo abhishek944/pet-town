@@ -10,8 +10,19 @@ const { journalArt } = await import(
   `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`
 );
 const kinds = [
-  "garden", "fish", "lantern", "shell", "photo", "dolphin", "reef",
-  "kelp", "wreck", "island", "ship", "glow", "stars",
+  "garden",
+  "fish",
+  "lantern",
+  "shell",
+  "photo",
+  "dolphin",
+  "reef",
+  "kelp",
+  "wreck",
+  "island",
+  "ship",
+  "glow",
+  "stars",
 ];
 for (const kind of kinds) {
   const target = new URL(`./icons/journal-${kind}.svg`, import.meta.url);

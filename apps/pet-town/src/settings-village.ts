@@ -34,8 +34,8 @@ export class VillageVisibilitySettings {
       ? "Visible above the Dock"
       : "Hidden while Pet Town keeps running";
     byId<HTMLButtonElement>("town-visibility-toggle").textContent = this.visible
-      ? "Hide Town"
-      : "Show Town";
+      ? "Hide Pet Street"
+      : "Show Pet Street";
   }
 
   private async toggle(): Promise<void> {
@@ -49,7 +49,7 @@ export class VillageVisibilitySettings {
         this.render();
       }
     } catch (error) {
-      this.reportError(`Could not change town visibility. ${String(error)}`);
+      this.reportError(`Could not change Pet Street visibility. ${String(error)}`);
     }
   }
 }

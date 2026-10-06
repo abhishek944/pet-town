@@ -17,9 +17,10 @@ Every public agent record contains only:
 - an opaque ID;
 - the normalized state (`working`, `blocked`, `idle`, `done`, or `unknown`);
 - a sanitized display label;
-- the adapter source name.
+- the adapter source name;
+- optional numeric output-token activity (`outputTokensPerMinute`, `observedAtMs`, and `measurement`: `estimated` or `reported`).
 
-Raw session identifiers, full paths, prompts, tool inputs, and agent output never cross into the renderer.
+Raw session identifiers, full paths, prompts, tool inputs, and agent output never cross into the renderer. Token activity contains no response text. The Pi adapter estimates activity from text, thinking, and tool-call stream-fragment lengths, publishing at most once a second over an approximately five-second window; fragments are not individual tokens. Codex's existing private collector supplies sampled output-counter increments to the 2D blocking snapshot worker. First readings, counter resets, transcript replacements, partial replay, and long observation gaps are baselines rather than live traffic. Other harnesses currently omit activity and retain configured movement speed.
 
 ## Hook event bridge
 
@@ -37,7 +38,7 @@ On every broker collection:
 
 1. The Herdr adapter produces the current authoritative roster.
 2. The broker checks whether the claimed canonical pane and opaque incarnation exist now.
-3. If it exists, the Herdr record wins and the hook event does not create another pet.
+3. If it exists, the Herdr record wins and the hook event does not create another pet. Fresh harness token activity may enrich that same authoritative pet, without replacing its identity, state, label, or focus route.
 4. If it does not exist, the event remains a standalone harness session.
 
 This rule applies equally to Claude Code, Codex, OpenCode, Pi, Factory Droid, and Cursor. It prevents duplicates without losing agents manually launched from a shell that happens to carry stale Herdr context.

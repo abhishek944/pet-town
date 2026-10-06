@@ -114,7 +114,7 @@ const phases: Record<string, [string, string, string, string, string, string, st
   ],
   arrived: [
     "There it is!",
-    "Your real companion reached the desktop strip.",
+    "Your real companion reached Pet Street.",
     "Real agent connected",
     "Hello, little companion.",
     "Its state follows the agent as it works, waits and finishes.",

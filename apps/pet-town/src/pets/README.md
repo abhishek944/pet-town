@@ -12,8 +12,14 @@ The restored pets are Bao Panda Chef, Bigfoot Yeti, Brassbell Automaton Porter, 
 
 ## Ocean and KayKit artwork
 
-Every bundled pet folder also contains five separate transparent Ocean-theme APNGs (150 total): `ocean-rowing.png` for Working, `ocean-blocked.png` for Blocked, `ocean-done.png` for Completed, `ocean-listening.png` for Mayor Listening, and `ocean-speaking.png` for Mayor Speaking. Idle and Unknown remain hidden. The App 2D strip theme chooses Ocean for all Ocean-enabled pets; with App Standard, these pets can independently choose between Standard behavior-pack APNGs and Ocean artwork. The Standard state animations are untouched. The twenty restored originals have identity-preserving Ocean artwork in wooden rowboats, with six frames at 160 ms each (960 ms loops). Custom pets without bundled Ocean assets continue using Standard artwork even when the App theme is Ocean.
+Every bundled pet folder also contains five separate transparent Ocean-theme APNGs (150 total): `ocean-rowing.png` for Working, `ocean-blocked.png` for Blocked, `ocean-done.png` for Completed, `ocean-listening.png` for Mayor Listening, and `ocean-speaking.png` for Mayor Speaking. Idle and Unknown remain hidden. The App Pet Street theme chooses Ocean for all Ocean-enabled pets; with App Standard, these pets can independently choose between Standard behavior-pack APNGs and Ocean artwork. The Standard state animations are untouched. Bundled Ocean canvases are 384×384, with their original frame counts, exact timing, infinite loops and sRGB metadata preserved. The twenty restored originals have identity-preserving Ocean artwork in wooden rowboats, with six frames at 160 ms each (960 ms loops). Custom pets without bundled Ocean assets continue using Standard artwork even when the App theme is Ocean.
 
 The bundled KayKit roster uses walking APNGs. All ten bundled KayKit pets have `blocked.png` (thought bubble to exclamation) and `sleep.png` (growing Zs) for Blocked and Completed. Their walking APNG remains the Running animation. Each also has `listen.png`, a stationary listening APNG with a pulsing horizontal audio waveform above its head, and `speak.png`, a stationary speaking APNG with an animated chat bubble, for the Mayor's voice states. The generated source sheets and review copies are stored under `~/Desktop/pet-town-sprites/`; the copies in these folders are the runtime assets. To add artwork, add the file to the pet folder, add a named entry under `clips`, and point the desired state at that animation. Right-click animation actions are retired; **Preferences…** remains available.
+
+After adding 512×512 Ocean artwork, run `python3 scripts/resize-ocean-assets.py`
+from the repository root using Python with Pillow installed. It stages and validates
+the complete conversion before replacing files, keeps exact original working-tree
+backups under `var/download-size/ocean-384-assets/`, and leaves Standard artwork
+untouched. Existing 384×384 files are not resized again.
 
 Run `pnpm run check:flow` from the repository root after changing a pack.

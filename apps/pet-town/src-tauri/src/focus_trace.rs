@@ -1,4 +1,4 @@
-// Temporary, debug-only input tracing while diagnosing the native pet strip.
+// Temporary, debug-only input tracing while diagnosing native Pet Street.
 pub(crate) fn record(stage: &str) {
     #[cfg(debug_assertions)]
     {

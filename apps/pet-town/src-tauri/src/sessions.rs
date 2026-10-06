@@ -56,6 +56,20 @@ pub(crate) fn collect_visible() -> BrokerSnapshot {
     collected
 }
 
+fn collect_with_activity() -> BrokerSnapshot {
+    let mut collected = collect_visible();
+    // Pet Street must not depend on Pet Town being open for Codex telemetry.
+    let usage = if collected.snapshot.agents.iter().any(|agent| {
+        agent.status == "working" && matches!(agent.source.as_str(), "codex" | "herdr")
+    }) {
+        crate::codex_usage::refresh()
+    } else {
+        crate::codex_usage::Snapshot::default()
+    };
+    crate::codex_usage::attach_activity(&mut collected.snapshot.agents, &usage);
+    collected
+}
+
 pub fn snapshot_json() -> String {
     let collected = collect_visible();
     serde_json::to_string(&collected.snapshot)
@@ -64,7 +78,7 @@ pub fn snapshot_json() -> String {
 
 #[tauri::command]
 pub(crate) async fn list_agents() -> Result<AgentSnapshot, String> {
-    let collected = tauri::async_runtime::spawn_blocking(collect_visible)
+    let collected = tauri::async_runtime::spawn_blocking(collect_with_activity)
         .await
         .unwrap_or_else(|_| BrokerSnapshot {
             snapshot: AgentSnapshot {

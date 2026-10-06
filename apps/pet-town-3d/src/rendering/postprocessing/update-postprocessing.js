@@ -53,24 +53,25 @@ export function updatePostprocessing(deltaSeconds, context) {
     parameters.mist *
     (0.22 * daylight.day + 0.18 * daylight.golden + 0.1 * daylight.night) *
     (1 - post.underFull);
-  passes.dofPass.enabled = parameters.dof || mistAmount > 0;
+  passes.dofPass.enabled = (parameters.dof && !post.underFull) || mistAmount > 0;
   passes.bloomPass.enabled = parameters.bloom;
   let compositeUniforms = materials.compMat.uniforms;
   compositeUniforms.uMist.value = parameters.debug ? 0 : mistAmount;
   compositeUniforms.uMistCap.value = parameters.mistCap;
   compositeUniforms.uUseAO.value = +!!aoEnabled;
-  compositeUniforms.uUseDOF.value = +!!parameters.dof;
+  compositeUniforms.uUseDOF.value = +!!parameters.dof * (1 - post.underFull);
   materials.dofDownMat.uniforms.uUseAO.value = +!!aoEnabled;
   compositeUniforms.uSharpen.value = parameters.sharpenEff;
   compositeUniforms.uTime.value = post.time;
   compositeUniforms.uUnder.value = post.under;
   compositeUniforms.uWaterY.value = post.waterY;
+  compositeUniforms.uWaterLight.value = 1 - 0.945 * daylight.night;
   compositeUniforms.uProjInv.value.copy(camera.projectionMatrixInverse);
   compositeUniforms.uCamWorld.value.copy(camera.matrixWorld);
   compositeUniforms.uDebug.value = parameters.debug;
   if (parameters.debug) {
     passes.bloomPass.enabled = false;
   }
-  updatePostColorGrade(deltaTime, daylight);
+  updatePostColorGrade(daylight);
   updatePostAtmosphere(context, daylight);
 }

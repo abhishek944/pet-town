@@ -46,8 +46,10 @@ export function createPostParameters(query) {
       : 0,
     toneMapping: query.get("tm") ?? "neutral",
     exposure: readPostNumericParameter(query, "exposure", 1),
-    underwaterColor: new THREE.Color(0.1, 0.42, 0.5),
-    underwaterDeep: new THREE.Color(0.03, 0.14, 0.24),
+    underwaterColor: new THREE.Color(0x69cafa),
+    underwaterDeep: new THREE.Color(0x3daeee),
+    underwaterFogStart: 28,
+    underwaterFogEnd: 85,
   };
   for (const [key, value] of query) {
     if (key.startsWith("p.") && key.slice(2) in parameters && Number.isFinite(parseFloat(value))) {

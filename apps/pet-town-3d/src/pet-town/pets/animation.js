@@ -1,5 +1,6 @@
 import { updatePlayerLocomotion } from "../../player/character/update-player-locomotion.js";
 import { applyPlayerBodyPose } from "../../player/character/apply-player-body-pose.js";
+import { animatePlayerGlider } from "../../player/character/animate-player-glider.js";
 
 export function animatePet(character, dt, frame = {}) {
   const timeStep = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.1)) : 0;
@@ -37,6 +38,7 @@ export function animatePet(character, dt, frame = {}) {
     acceleration,
     pose,
   );
+  animatePlayerGlider.call(character, pose, timeStep, time);
   character.smile.visible = true;
   character.mouthO.visible = false;
   return character.events;

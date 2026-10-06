@@ -135,7 +135,7 @@ pub(super) fn prepare_observation(app: &AppHandle) -> Result<(), String> {
         .active
         .load(std::sync::atomic::Ordering::SeqCst)
     {
-        return Err("Return from 3D Town to this setup window before running the test.".into());
+        return Err("Return from Pet Town to this setup window before running the test.".into());
     }
     crate::village_visibility::set(app, true).map(|_| ())
 }

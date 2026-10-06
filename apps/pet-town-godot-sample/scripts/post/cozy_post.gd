@@ -9,6 +9,7 @@ var parameters := Parameters.new()
 var focus_y := .5
 var focus_distance := 26.0
 var has_focus := false
+var focus_blur := 1.0
 
 func setup(holder: WorldEnvironment) -> void:
 	environment = holder.environment
@@ -31,7 +32,9 @@ func update(sun_elevation: float, exposure: float, delta: float, camera: Camera3
 		return
 	# The custom pass owns exposure. Godot only performs the final sRGB transfer.
 	environment.tonemap_exposure = 1.0
-	var focus := PackedFloat32Array([.5,26,0,0,.05,500,.5,.3])
+	var blur_target := 0.0 if underwater else 1.0
+	focus_blur = lerpf(focus_blur,blur_target,1-exp(-clampf(delta,0,.1)*10)) if has_focus else blur_target
+	var focus := PackedFloat32Array([.5,26,0,0,.05,500,.5*focus_blur,.3*focus_blur])
 	if camera:
 		var desired_y := .5
 		var desired_distance := 26.0
@@ -48,5 +51,5 @@ func update(sun_elevation: float, exposure: float, delta: float, camera: Camera3
 		focus_distance = lerpf(focus_distance,desired_distance,weight)
 		has_focus = true
 		var tilt := smoothstep(.12,.6,camera.global_basis.z.y)
-		focus = PackedFloat32Array([focus_y,focus_distance,.4*tilt,.5*tilt,camera.near,camera.far,.5,.3])
+		focus = PackedFloat32Array([focus_y,focus_distance,.4*tilt*focus_blur,.5*tilt*focus_blur,camera.near,camera.far,.5*focus_blur,.3*focus_blur])
 	effect.set_frame(parameters.sample(sun_elevation,exposure,delta,underwater),focus,atmosphere.sample(sun_elevation,exposure,camera,focus_distance,underwater))

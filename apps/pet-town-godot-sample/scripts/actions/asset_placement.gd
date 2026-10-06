@@ -10,6 +10,7 @@ var records: Array = []
 var save_blocked := false
 var lighting_delay := 0.0
 var replacements: Node3D
+var ghost := preload("asset_ghost.gd").new()
 
 func setup(value: Node3D, source: Array) -> void:
 	sample = value
@@ -17,14 +18,18 @@ func setup(value: Node3D, source: Array) -> void:
 	replacements = preload("asset_replacements.gd").new()
 	add_child(replacements)
 	replacements.setup(self)
+	ghost.host = self
+	add_child(ghost)
 	sample.hud.set_asset_catalog(catalog.values())
 	restore.call_deferred()
 
 func preview(id: String, yaw: float, distance: float) -> void:
 	var check := candidate(id, yaw, distance)
 	if check.has("error"):
+		ghost.clear()
 		sample.hud.set_asset_placement_result(check.error, false)
 	else:
+		ghost.present(catalog[id], check.position, yaw)
 		var p: Vector3 = check.position
 		sample.hud.set_asset_placement_result("Clear, level ground · %.1f, %.1f · Ready to place" % [p.x, p.z], true)
 
@@ -62,6 +67,7 @@ func place(id: String, yaw: float, distance: float) -> void:
 		return
 	replacements.remember()
 	records = next
+	ghost.clear()
 	placed.append(create_asset(entry, point, yaw))
 	sample.hud.set_asset_placement_result(entry.name + " added. Walk over and make yourself at home.", false)
 
@@ -156,6 +162,7 @@ func reset() -> void:
 	if not Save.write(PATH, {"version": 1, "assets": []}):
 		result("The asset reset could not be saved. Your assets have been kept.")
 		return
+	ghost.clear()
 	for object in placed:
 		remove_child(object)
 		object.queue_free()
@@ -170,6 +177,7 @@ func result(message: String) -> void:
 	sample.hud.set_asset_result(message)
 
 func _process(delta: float) -> void:
+	ghost.sync_visibility()
 	lighting_delay -= delta
 	if not sample or lighting_delay > 0:
 		return

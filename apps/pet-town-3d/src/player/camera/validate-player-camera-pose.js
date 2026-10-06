@@ -53,9 +53,16 @@ export function validatePlayerCameraPose(focus, desired, frame = null, deltaTime
       ).position;
       if (anchor && frame && this.idleInput < 0.3) {
         const subject = frame.head ?? frame.pos.clone().setY(frame.pos.y + 1.4);
-        position = resolvePlayerCameraOrbit(
-          queries, anchor, previous, desired, subject, radius, deltaTime,
-        ) ?? position;
+        position =
+          resolvePlayerCameraOrbit(
+            queries,
+            anchor,
+            previous,
+            desired,
+            subject,
+            radius,
+            deltaTime,
+          ) ?? position;
       }
     }
   } else if (!previousValid && previous) state = "overlap-recovery";

@@ -10,14 +10,12 @@ var viewport_size := Vector2.ZERO
 var labels: Dictionary = {}
 var occluded: Dictionary = {}
 var visibility_timer := 0.0
-var font := SystemFont.new()
+var font: Font = Style.BODY
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	mouse_filter = MOUSE_FILTER_IGNORE
 	clip_contents = true
-	font.font_names = PackedStringArray(["SF Pro Rounded", "Helvetica", "sans-serif"])
-	font.font_weight = 700
 
 func set_data(data: Array, view: Camera3D, selected: String, dimensions := Vector2.ZERO) -> void:
 	records = data
@@ -39,20 +37,21 @@ func set_data(data: Array, view: Camera3D, selected: String, dimensions := Vecto
 		var name := Style.text_or(record.get("label"), "Companion")
 		button.text = name
 		button.tooltip_text = "%s · %s · Follow" % [name, Style.text_or(record.get("status"))]
-		var width := clampf(font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 22, 22, 160)
+		var width := clampf(font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 28, 28, 180)
 		if not button.has_meta("selected") or button.get_meta("selected") != (id == selected):
 			var box := background(id == selected)
 			for state in ["normal", "hover", "pressed"]: button.add_theme_stylebox_override(state, box)
 			button.set_meta("selected", id == selected)
-		button.custom_minimum_size = Vector2(width, 23)
-		button.size = Vector2(width, 23)
+		button.custom_minimum_size = Vector2(width, 32)
+		button.size = Vector2(width, 32)
 
 func create_label(id: String) -> void:
 	var button := Button.new()
 	button.clip_text = true
 	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	button.add_theme_font_override("font", font)
-	button.add_theme_font_size_override("font_size", 11)
+	button.add_theme_font_size_override("font_size", 13)
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	for state in ["font_color", "font_hover_color", "font_pressed_color"]: button.add_theme_color_override(state, Color("51463d"))
 	button.mouse_default_cursor_shape = CURSOR_POINTING_HAND
 	button.gui_input.connect(func(event: InputEvent) -> void:
@@ -68,12 +67,12 @@ func create_label(id: String) -> void:
 	visibility_timer = 0
 
 static func background(selected: bool) -> StyleBoxFlat:
-	var box := Style.panel("ddf3d8" if selected else "fffbf1e8", 30, "a1c995" if selected else "ffffff88", false)
+	var box := Style.panel("ddf3d8" if selected else "fffbf1f2", 20, "a1c995" if selected else "ffffffb8", false)
 	box.set_border_width_all(2)
-	box.content_margin_left = 11
-	box.content_margin_right = 11
-	box.content_margin_top = 5
-	box.content_margin_bottom = 5
+	box.content_margin_left = 12
+	box.content_margin_right = 12
+	box.content_margin_top = 0
+	box.content_margin_bottom = 0
 	box.shadow_color = Color("3b302423")
 	box.shadow_size = 3
 	box.shadow_offset = Vector2(0,2)

@@ -73,6 +73,13 @@ fn publish(
     let path = super::record_path(&directory, source, &session_key);
     fs::create_dir_all(&directory).map_err(|_| "could not create adapter registry".to_string())?;
     let tombstone = path.with_extension("ended");
+    if event == "token_activity" {
+        if source != "pi" || tombstone.exists() {
+            return Ok(());
+        }
+        return super::token_activity::publish(&path, &payload);
+    }
+    let previous = super::token_activity::previous(&path);
     let hosted_owner_key = super::herdr_host::owner_key(session_id);
     if source == "codex" {
         crate::codex_usage::register(
@@ -93,6 +100,11 @@ fn publish(
     } else if tombstone.exists() {
         return Ok(());
     }
+    let token_activity = previous.and_then(|old| {
+        (old.state == "working" && state == "working")
+            .then_some(old.token_activity)
+            .flatten()
+    });
     let record = super::AdapterEventRecord {
         version: super::RECORD_VERSION,
         source: source.to_string(),
@@ -100,6 +112,8 @@ fn publish(
         state: state.to_string(),
         label: super::safe_label(&payload, source, &super::opaque_key(session_id)),
         observed_at_seconds: super::current_time_seconds(),
+        state_observed_at_ms: super::current_time_ms(),
+        token_activity,
         hosted_owner_key,
         focus_app: super::focus_hint::focus_application(source),
         codex_thread_id: (source == "codex")

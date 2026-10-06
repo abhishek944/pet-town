@@ -3,8 +3,15 @@ import { CHARACTER_IDS, type CharacterId } from "./character-packs";
 export type AgentStatus =
   "working" | "blocked" | "idle" | "done" | "unknown" | "listening" | "speaking";
 
+export interface TokenActivity {
+  outputTokensPerMinute: number;
+  observedAtMs: number;
+  measurement: "estimated" | "reported";
+}
+
 export interface AgentView {
   id: string;
+  tokenActivity?: TokenActivity;
   status: AgentStatus | string;
   label: string;
   source: string;

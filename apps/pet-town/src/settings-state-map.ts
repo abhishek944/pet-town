@@ -89,7 +89,7 @@ export function renderStateMap(
         previewButton.append(empty);
       }
       const animation = document.createElement("span");
-      animation.textContent = assigned ? `2D: ${displayName}` : "Hidden";
+      animation.textContent = assigned ? `Pet Street: ${displayName}` : "Hidden";
       previewButton.append(animation);
       previewButton.disabled = !assigned;
       previewButton.setAttribute(

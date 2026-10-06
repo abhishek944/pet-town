@@ -15,19 +15,49 @@ These desktop commands stop only this checkout's desktop and frontend processes,
 so save work in those windows first. They preserve Cargo's
 `apps/pet-town/src-tauri/target` cache. Development starts and waits for both Vite
 servers: desktop on port 1420 and the retained Three.js source/browser server on
-port 1422. **Open 3D Town** now launches or focuses the native Godot process.
-Development uses `apps/pet-town-godot-sample` and the executable selected by
-`PET_TOWN_GODOT_EXECUTABLE`, the repository's `var/godot-runtime/Godot.app`,
-`/Applications/Godot.app`, or `godot` on PATH. Godot 4.7+ and the exported assets
+port 1422. **Open Pet Town** now launches or focuses the native Godot process.
+Development uses `apps/pet-town-godot-sample` and stages a branded copy of the
+official engine at `var/godot-runtime/Pet Town.app`. `GODOT_APP` selects the source
+engine without changing it. Advanced `PET_TOWN_GODOT_EXECUTABLE` overrides must
+point to a similarly branded runtime to preserve the Pet Town app identity. Godot 4.7+ and the exported assets
 are required. Starting the Vite servers does not verify native gameplay.
 
-The desktop frontend build first builds `@pet-town/three-town`, then copies its
-output into `apps/pet-town/dist/town` for the retained browser/source build.
+The desktop frontend build includes only the Pet Street/Settings frontend.
+It does not build or copy the unused Three.js browser town into the installer;
+stale `apps/pet-town/dist/town` output is removed. The public website still builds
+its browser game, and `pnpm run dev:town` retains standalone browser development.
 `scripts/build.sh` also runs `scripts/prepare-godot-runtime.sh`: it checks the
 source export with `scripts/validate-godot-export.py`, imports the Godot resources,
-exports `PetTown.pck`, and stages the official engine app under Tauri's
-`resources/godot`. Release **Open 3D Town** loads that bundled pack. Set
-`GODOT_APP` to an official universal macOS Godot 4.7+ app when packaging.
+exports `PetTown.pck`, deduplicates identical resource payloads, and stages a
+branded **game-only release runtime** as `resources/godot/Pet Town.app`.
+`scripts/deduplicate-godot-pack.py` shares byte-identical textures/data within
+unencrypted standalone PCK v4 archives. Every resource path, size, checksum and
+decoded byte remains unchanged. Before atomically replacing the exported pack,
+it validates the complete resource directory and compares every resource's bytes;
+unsupported formats/flags or integrity failures stop the build. Deduplication
+runs before native-app signing, and does not edit source models or user saves. The editor is used for development and asset
+imports, but is not shipped. `scripts/prepare-godot-template.py` downloads the
+official export templates matching the editor's stable version, verifies their
+SHA-512 checksum, and caches only the macOS release executable under
+`var/godot-runtime/export-templates/`. The initial template download includes all
+platforms, but neither that archive nor the other platform/debug binaries enter
+the installer. `scripts/prepare-pet-town-runtime.sh` selects only `arm64` for
+`macos-arm64` or `x86_64` for `macos-x64`, sets the macOS name, identifier and icon,
+and re-signs after replacing the executable and placing the unchanged world pack
+at `Contents/Resources/Godot.pck`. Official Godot 4.7+ templates disable path
+and `--main-pack` overrides, so release launches use automatic bundle-pack
+discovery. The old external `resources/godot/world` copy is removed to avoid
+duplicating the world data. Development without a package argument retains
+the branded editor.
+For signed releases, `prepare-pi-runtime.sh` also signs that native app with the
+release identity while its temporary signing keychain is available; Tauri does
+not re-sign nested apps copied into resources. Release **Open Pet Town** loads that bundled pack. Set
+`GODOT_APP` to an official stable universal macOS Godot 4.7+ editor when packaging;
+its exact version must have matching official export templates. To prepare only
+the native release resources, run `sh scripts/prepare-godot-runtime.sh macos-arm64`
+or `sh scripts/prepare-godot-runtime.sh macos-x64`. `check-dmg.sh` rejects a native
+runtime with the wrong or multiple architectures, a non-release-template
+executable, or a missing bundled world pack.
 The release executable is written to
 `apps/pet-town/src-tauri/target/<rust-target>/release/pet-town` and copied into the
 matching `bin/macos-*` plugin package directory. The same build produces
@@ -46,7 +76,7 @@ For first-time development, use Corepack to select pnpm 10.28.2, then run
 changing native scripts, scenes or exported assets. To work only on
 the browser game, run `pnpm run dev:town`; `pnpm run dev:workshop` is an alias for
 that standalone server. Browser gameplay does not connect agents or Mayor; use
-**Open 3D Town** in the native desktop for that integration. Browser and native
+**Open Pet Town** in the native desktop for that integration. Browser and native
 Godot saves are separate: the browser retains legacy `bloomvale` storage keys;
 Godot uses its isolated `Pet Town Godot Sample` user directory. The public build
 continues to use `pet-town-public`. See the
@@ -105,4 +135,4 @@ do not substitute for the live visual, ocean, terminal, focus and voice checks.
 11. Enable **Hide completed pets**, select a delay, and Apply. Confirm completed pets disappear after that delay, no longer affect crowd sizing or clicks, and return immediately if they begin working or become blocked.
 12. Confirm reduced movement or hover pauses only horizontal travel while the pet keeps animating; also confirm closing Settings discards any unapplied draft and resumes current Herdr states.
 13. Edit `~/.pet-town/preferences.json`, invoke `pet-town.reload-preferences`, and confirm valid changes load while invalid JSON is preserved and rejected.
-14. Invoke `pet-town.village-off` and confirm the strip disappears.
+14. Invoke `pet-town.village-off` and confirm Pet Street disappears.

@@ -45,6 +45,11 @@ for path in (
     root / "apps" / "pet-town-3d" / "THIRD_PARTY_NOTICES.md",
     root / "scripts" / "check-packaged.sh",
     root / "scripts" / "check-dmg.sh",
+    root / "scripts" / "prepare-godot-engine.sh",
+    root / "scripts" / "prepare-godot-runtime.sh",
+    root / "scripts" / "deduplicate-godot-pack.py",
+    root / "scripts" / "prepare-godot-template.py",
+    root / "scripts" / "prepare-pet-town-runtime.sh",
     root / "scripts" / "prepare-pi-runtime.sh",
     root / "scripts" / "pi-runtime-package-lock.json",
 ):

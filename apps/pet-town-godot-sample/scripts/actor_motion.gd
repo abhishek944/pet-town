@@ -9,6 +9,10 @@ var flutter_used := false
 var diving := false
 var dive_target = null
 var time := 0.0
+var step_time := 0.0
+var step_direction := Vector3.ZERO
+var step_floor := 0.0
+var step_snap := 0.0
 
 func step(actor: CharacterBody3D, delta: float) -> void:
 	time += delta
@@ -25,7 +29,7 @@ func step(actor: CharacterBody3D, delta: float) -> void:
 		swimming=false
 		diving=false
 		dive_target=null
-	if actor.is_on_floor():
+	if actor.is_on_floor() or step_time>0:
 		coyote=0.12
 		air_time=0
 		flutter_used=false
@@ -84,9 +88,14 @@ func step(actor: CharacterBody3D, delta: float) -> void:
 	try_step(actor,delta)
 
 func try_step(actor: CharacterBody3D, delta: float) -> void:
+	if continue_step(actor, delta): return
 	if (not actor.is_on_floor() and coyote<=0) or swimming or actor.velocity.y>0: return
 	var motion := Vector3(actor.velocity.x,0,actor.velocity.z)*delta
-	if motion.length_squared()<0.00001 or not actor.test_move(actor.global_transform,motion): return
+	if motion.length_squared()<0.00001: return
+	var obstacle := KinematicCollision3D.new()
+	if not actor.test_move(actor.global_transform,motion,obstacle): return
+	# Walkable slopes belong to move_and_slide, not the ahead-of-body ledge lift.
+	if obstacle.get_normal().y>cos(actor.floor_max_angle): return
 	var high := actor.global_transform
 	if actor.test_move(high,Vector3.UP*1.02): return
 	high.origin.y+=1.02
@@ -100,3 +109,24 @@ func try_step(actor: CharacterBody3D, delta: float) -> void:
 		var rise := 1.02+contact.get_travel().y
 		if rise>0.03 and rise<=1.01:
 			actor.position.y+=rise
+			step_direction=motion.normalized()
+			step_floor=actor.position.y
+			step_time=clampf(support_motion.length()/Vector2(actor.velocity.x,actor.velocity.z).length()+0.05,0.08,0.3)
+			step_snap=actor.floor_snap_length
+			actor.floor_snap_length=0
+			actor.velocity.y=0
+
+func continue_step(actor: CharacterBody3D, delta: float) -> bool:
+	if step_time<=0: return false
+	step_time=maxf(0,step_time-delta)
+	var horizontal:=Vector3(actor.velocity.x,0,actor.velocity.z)
+	var settled:=actor.is_on_floor() and absf(actor.position.y-step_floor)<0.03
+	var forward:=horizontal.length()>0.1 and horizontal.normalized().dot(step_direction)>0.5
+	if step_time<=0 or settled or not forward or swimming or actor.velocity.y>0:
+		actor.floor_snap_length=step_snap
+		step_time=0
+		return false
+	# The landing probe is ahead of the capsule. Keep its feet at that height
+	# until normal horizontal movement reaches support, without a forward teleport.
+	actor.velocity.y=0
+	return true

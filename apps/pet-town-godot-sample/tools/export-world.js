@@ -5,8 +5,10 @@ import { exportMaterial, rangeGeometry } from "./export-materials.js";
 export function exportTree(ctx, type) {
   const player = ctx.player.position ?? ctx.player.mesh.position;
   const trees = ctx.vegetation.trees.filter((tree) => tree.type === type);
-  trees.sort((a, b) => Math.hypot(a.x - player.x, a.z - player.z)
-    - Math.hypot(b.x - player.x, b.z - player.z));
+  trees.sort(
+    (a, b) =>
+      Math.hypot(a.x - player.x, a.z - player.z) - Math.hypot(b.x - player.x, b.z - player.z),
+  );
   const tree = trees[0];
   if (!tree) throw new Error(`No existing ${type} tree`);
   const root = new THREE.Group();
@@ -22,13 +24,22 @@ export function exportTree(ctx, type) {
     matrix.decompose(mesh.position, mesh.quaternion, mesh.scale);
     root.add(mesh);
   }
-  return { root, metadata: { source: "Original vegetation instance", type,
-    sourcePosition: [tree.x, tree.y, tree.z], trunkRadius: tree.radius, height: tree.height } };
+  return {
+    root,
+    metadata: {
+      source: "Original vegetation instance",
+      type,
+      sourcePosition: [tree.x, tree.y, tree.z],
+      trunkRadius: tree.radius,
+      height: tree.height,
+    },
+  };
 }
 
 export function exportProp(ctx, assetId) {
-  const record = [...propsState.propsRuntime.recs.values()]
-    .find((item) => item.entry?.assetId === assetId);
+  const record = [...propsState.propsRuntime.recs.values()].find(
+    (item) => item.entry?.assetId === assetId,
+  );
   if (!record) throw new Error(`No existing prop ${assetId}`);
   const root = new THREE.Group();
   root.name = assetId;
@@ -44,6 +55,13 @@ export function exportProp(ctx, assetId) {
     }
   });
   if (!root.children.length) throw new Error(`No published mesh ranges for ${assetId}`);
-  return { root, metadata: { source: "Original tagged prop geometry", assetId,
-    sourcePosition: [record.x, record.y, record.z], sourceRotation: record.entry.rot } };
+  return {
+    root,
+    metadata: {
+      source: "Original tagged prop geometry",
+      assetId,
+      sourcePosition: [record.x, record.y, record.z],
+      sourceRotation: record.entry.rot,
+    },
+  };
 }

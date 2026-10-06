@@ -27,7 +27,7 @@ struct VillageVisibilityChanged {
 fn apply(app: &AppHandle, visible: bool) -> Result<(), String> {
     let window = app
         .get_webview_window("main")
-        .ok_or_else(|| "main village window is unavailable".to_string())?;
+        .ok_or_else(|| "Pet Street window is unavailable".to_string())?;
     if visible {
         crate::window::show_window(&window)
     } else {

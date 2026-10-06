@@ -144,12 +144,21 @@ The Vite `#town-extensions` alias selects `src/extensions/index.js` normally and
 main game. The public extension supplies Back and Undo/Redo; public settings omit
 Companion and Mayor controls. Keep this boundary at build time so the published
 browser bundle does not import the native bridge. `build:public` emits
-`dist-public/`; the landing build copies it to `apps/web/dist/play/`. Native
-`dist/` remains a separate artifact.
+`dist-public/`; the landing build copies it to `apps/web/dist/play/`, which deploys as
+`/play/` on the site. Standalone `dist/` remains a separate browser-development artifact.
 
-[`town_process.rs`](../pet-town/src-tauri/src/town_process.rs) creates or focuses the native `town` WebView. Debug uses `http://127.0.0.1:1422/`; release uses `WebviewUrl::App("town/index.html")`. Window focus temporarily suppresses the 2D strip and blur/close restores the requested visibility. Snapshot/actions require this window and local URL, not an ordinary browser tab.
+[`town_process.rs`](../pet-town/src-tauri/src/town_process.rs) delegates desktop
+**Open Pet Town** to `godot_bridge::open`, which launches the native Godot world.
+It no longer creates a browser-town WebView. The retained browser IPC handlers
+still require an authorized town window and local URL, not an ordinary browser tab.
+See the [3D flow](../../docs/3d-game.md) for native launch and focus ownership.
 
-The package is `@pet-town/three-town`. Root desktop development owns both Vite servers (1420 and 1422); the desktop frontend build copies this app's output to `apps/pet-town/dist/town`. Vite uses `base: "./"` for relative packaged assets. Root dev/build no longer requires Godot or a Godot asset import.
+The package is `@pet-town/three-town`. Root desktop development still owns both
+Vite servers (1420 and 1422); the desktop frontend build removes stale
+`apps/pet-town/dist/town` and neither builds nor copies this app's output. Vite
+uses `base: "./"` for relative browser assets. Root dev/build requires Godot;
+release packaging exports and deduplicates the full native world pack before
+signing its game-only runtime.
 
 [`src/persistence/storage/prepare.js`](src/persistence/storage/prepare.js) deliberately retains the `bloomvale` IndexedDB database and `bloomvale:` localStorage prefix for normal builds. Public builds use `pet-town-public` and `pet-town-public:`. UI branding and the development ready event use Pet Town; renaming the legacy keys would strand existing saves in the same context. Ordinary browsers and native WebViews have separate storage. Do not describe that compatibility as automatic browser-to-desktop save transfer or as an import of old Godot layouts. `building.saveNow()` flushes pending animated placements and returns the active save promise so Back can wait for persistence.
 

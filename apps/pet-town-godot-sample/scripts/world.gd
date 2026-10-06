@@ -14,6 +14,7 @@ func _ready() -> void:
 	if manifest.is_empty():
 		push_error("Original-world export is missing; run the region exporter.")
 		return
+	add_world_boundary()
 	for cell in Buffers.read_json(manifest.groundFile).cells:
 		ground[Vector2i(floori(cell[0]),floori(cell[2]))]=Vector2(cell[1],cell[3])
 	terrain=load("res://scripts/region/terrain.gd").new()
@@ -44,6 +45,20 @@ func water_at(point: Vector3) -> float:
 func contains(point: Vector3) -> bool:
 	var b: Dictionary=manifest.bounds
 	return point.x>=b.minX and point.x<b.maxX and point.z>=b.minZ and point.z<b.maxZ
+
+func add_world_boundary() -> void:
+	var b: Dictionary=manifest.bounds
+	var body := StaticBody3D.new()
+	body.name="WorldBoundary"
+	body.collision_layer=1
+	body.collision_mask=0
+	for plane in [Plane(Vector3.RIGHT,b.minX),Plane(Vector3.LEFT,-b.maxX),Plane(Vector3.BACK,b.minZ),Plane(Vector3.FORWARD,-b.maxZ)]:
+		var shape := WorldBoundaryShape3D.new()
+		shape.plane=plane
+		var collider := CollisionShape3D.new()
+		collider.shape=shape
+		body.add_child(collider)
+	add_child(body)
 
 func add_mesh_collision(root: Node3D) -> void:
 	var faces := PackedVector3Array()
