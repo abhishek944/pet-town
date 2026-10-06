@@ -2,11 +2,4 @@
   "name": "pet-town-web",
   "compatibility_date": "2026-10-06",
   "assets": { "directory": "./dist" },
-  "workers_dev": true,
-  // Routes run before the origin, so the site serves from the Worker while the
-  // existing proxied A records (now just the old origin) stay untouched.
-  "routes": [
-    { "pattern": "pettown.town/*", "zone_name": "pettown.town" },
-    { "pattern": "www.pettown.town/*", "zone_name": "pettown.town" },
-  ],
 }
