@@ -82,14 +82,14 @@ func _snapshot(data: Dictionary) -> void:
 
 func _spawn(entry: Dictionary) -> void:
 	var id:=str(entry.id)
-	var point = preload("spawn.gd").find(town.world,actors,preload("spawn.gd").agent_seed(id))
+	var point = preload("spawn.gd").find(town.world,actors,preload("spawn.gd").seed(id))
 	if point == null: return
 	var body=preload("companion.gd").new()
 	body.entry=entry
 	body.world=town.world
 	body.view=town.rig
-	body.pet_id=str(choices.get_value("pets",id,"mayor" if id==MAYOR_ID else PETS[preload("spawn.gd").agent_seed(id)%PETS.size()]))
-	if body.pet_id not in PETS+["mayor"]: body.pet_id="mayor" if id==MAYOR_ID else PETS[preload("spawn.gd").agent_seed(id)%PETS.size()]
+	body.pet_id=str(choices.get_value("pets",id,"mayor" if id==MAYOR_ID else PETS[preload("spawn.gd").seed(id)%PETS.size()]))
+	if body.pet_id not in PETS+["mayor"]: body.pet_id="mayor" if id==MAYOR_ID else PETS[preload("spawn.gd").seed(id)%PETS.size()]
 	body.spawn=point
 	add_child(body)
 	actors[id]=body
