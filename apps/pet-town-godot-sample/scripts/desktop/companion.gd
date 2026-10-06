@@ -1,4 +1,7 @@
 extends "res://scripts/actor.gd"
+const Land = preload("roaming_land.gd")
+var last_safe := Vector3.ZERO
+var was_controlled := false
 var entry: Dictionary = {}
 var controlled := false
 var pet_id := "maple"
@@ -14,6 +17,7 @@ var roam_retry_at := 0
 
 func _ready() -> void:
 	super._ready()
+	last_safe = spawn
 	collision_layer=4
 	collision_mask=5
 	random.seed = hash(str(entry.get("id","")))
@@ -44,6 +48,7 @@ func set_pet(id: String) -> void:
 	var model = load(path).instantiate()
 	visual.add_child(model)
 	preload("res://scripts/asset_style.gd").apply(model)
+	preload("res://scripts/effects/pet_visibility.gd").mark(model)
 	animator = preload("res://scripts/actor_animation.gd").new()
 	visual.add_child(animator)
 	animator.configure(model)
@@ -67,6 +72,7 @@ func set_pet(id: String) -> void:
 func _physics_process(delta: float) -> void:
 	elapsed+=delta
 	if controlled:
+		was_controlled = true
 		if roam_search_pending: _rest_roam()
 		super._physics_process(delta)
 	else:
@@ -74,13 +80,24 @@ func _physics_process(delta: float) -> void:
 		if ocean and ocean.before_body_step(self,delta):
 			if animator: animator.set_motion(0,is_on_floor(),0)
 			return
-		if spawn_pending:
-			respawn()
-			spawn_pending = false
+		spawn_pending = false
+		var aboard: bool = ocean != null and ocean.aboard(self)
+		var ground = Land.height(world, position)
+		if not aboard and (ground == null or position.y < float(ground) - 0.2):
+			if Time.get_ticks_msec() >= roam_retry_at:
+				preload("spawn.gd").recover(self)
+				_rest_roam()
+			return
+		if was_controlled:
+			was_controlled = false
+			if not aboard: spawn = position
+			_rest_roam()
+		if not aboard and is_on_floor(): last_safe = Vector3(position.x, float(ground) + 0.03, position.z)
+		if aboard: _rest_roam()
 		motion.step(self,delta)
 		var conversation := _in_conversation()
 		roam_time -= delta
-		if not paused and not conversation and not roam_search_pending and Time.get_ticks_msec() >= roam_retry_at and (roam_time <= 0 or position.distance_to(destination)<0.8):
+		if not aboard and not paused and not conversation and not roam_search_pending and Time.get_ticks_msec() >= roam_retry_at and (roam_time <= 0 or position.distance_to(destination)<0.8):
 			roam_time=random.randf_range(3,7)
 			roam_attempts=24
 			roam_search_pending=true
@@ -97,25 +114,29 @@ func _physics_process(delta: float) -> void:
 			visual.rotation.y=lerp_angle(visual.rotation.y,atan2(toward_camera.x,toward_camera.z),1-exp(-12*delta))
 		velocity.x = move_toward(velocity.x,direction.x*1.672,delta*8)
 		velocity.z = move_toward(velocity.z,direction.z*1.672,delta*8)
-		if direction.length_squared()>0 and test_move(global_transform,Vector3(velocity.x,0,velocity.z)*delta): _rest_roam()
+		var travel := Vector3(velocity.x,0,velocity.z)*delta
+		if not aboard and (not Land.segment(world,position,position+travel) or test_move(global_transform,travel)): _rest_roam()
 		move_and_slide()
+		if not aboard and Land.height(world,position) == null:
+			preload("spawn.gd").recover(self)
+			_rest_roam()
 		if ocean: ocean.after_body_step(self)
 		if direction.length_squared()>0:
 			visual.rotation.y=lerp_angle(visual.rotation.y,atan2(direction.x,direction.z),1-exp(-8*delta))
 		if animator:
 			animator.set_state(motion.gliding,motion.swimming,motion.diving)
 			animator.set_motion(Vector2(velocity.x,velocity.z).length(),is_on_floor(),velocity.y)
-		if position.y < -10 or not world.contains(position): respawn()
 
 func _choose_target() -> bool:
-	if paused or controlled or _in_conversation():
+	if paused or controlled or _in_conversation() or (ocean and ocean.aboard(self)):
 		_rest_roam()
 		return true
 	roam_attempts-=1
 	var candidate := position+Vector3(random.randf_range(-5,5),0,random.randf_range(-5,5))
-	if not world.contains(candidate): return _reject_roam_candidate()
+	if Vector2(candidate.x-spawn.x,candidate.z-spawn.z).length() > Land.HOME_RADIUS: return _reject_roam_candidate()
+	if not Land.segment(world,position,candidate): return _reject_roam_candidate()
 	var height: float=world.ground_at(candidate)
-	if absf(height-position.y)>1.02 or world.water_at(candidate)>height+0.1: return _reject_roam_candidate()
+	if absf(height-position.y)>1.02: return _reject_roam_candidate()
 	candidate.y=height+0.05
 	var sweep := candidate-position
 	sweep.y=0
