@@ -1,5 +1,5 @@
 extends RefCounted
-const DEFAULT := Color("e4ebdc")
+const DEFAULT := Color("3f493f")
 const ANSI := ["000000","cd0000","bdebb1","eddaa0","0000ee","d6c6ed","00cdcd","e5e5e5","7f7f7f","ff0000","00ff00","ffff00","5c5cff","ff00ff","00ffff","ffffff"]
 
 static func apply(parameters: String, current: Color) -> Color:

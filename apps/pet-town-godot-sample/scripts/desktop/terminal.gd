@@ -9,7 +9,7 @@ var sequence := -1
 var escape := ""
 var foreground := preload("terminal_colors.gd").DEFAULT
 var color_rows: Array[PackedColorArray] = []
-var state := {"state":"closed","control":false,"message":"Choose Observe or Interact"}
+var state := {"state":"closed","control":false,"message":""}
 
 func reset() -> void:
 	rows.clear()

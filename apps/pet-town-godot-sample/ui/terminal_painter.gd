@@ -1,26 +1,28 @@
 extends RefCounted
 const Attributes = preload("res://ui/terminal_attributes.gd")
+const WrapGeometry = preload("res://ui/terminal_wrap_geometry.gd")
+const BASE := Color("0b0e0b")
 
 static func draw(surface: TextEdit) -> void:
 	var grid: RefCounted = surface.grid
+	surface.draw_rect(Rect2(Vector2.ZERO, surface.size), BASE)
 	var size: Vector2 = surface.cell_size
-	var origin: Vector2 = surface.cell_origin
 	var scale := 12.5 / 13
 	for row in range(grid.rows):
-		var y := origin.y + row * size.y
-		if y + size.y < 0 or y > surface.size.y: continue
-		for column in range(grid.cols):
+		for column in range(surface.display_cell_count(row)):
 			var cell: Dictionary = grid.cells[row][column]
 			if cell.width == 0: continue
-			var point := Vector2(origin.x + column * size.x, y)
-			var extent := Vector2(size.x * cell.width, size.y)
-			if point.x + extent.x < 0 or point.x > surface.size.x: continue
+			var point: Vector2 = WrapGeometry.cell_position(surface, row, column)
+			if point.x == -1 or point.y == -1: continue
+			var advance: float = surface.glyph_advance(cell.glyph)
+			var extent := Vector2(maxf(size.x * cell.width, advance), size.y)
+			if point.y + size.y < 0 or point.y > surface.size.y or point.x + extent.x < 0 or point.x > surface.size.x: continue
 			var foreground: Color = cell.fg
 			if cell.bold and cell.fg_index >= 0 and cell.fg_index < 8: foreground = Attributes.indexed(cell.fg_index + 8)
-			var background: Color = cell.bg
+			var background: Color = cell.bg if cell.bg.a > 0 else BASE
 			if cell.inverse:
 				var swap := foreground
-				foreground = background if background.a > 0 else Color.BLACK
+				foreground = background
 				background = swap
 			if surface.selected(column, row):
 				background = Color("7f987a")
@@ -37,7 +39,7 @@ static func draw(surface: TextEdit) -> void:
 			if cell.underline > 0: decoration(surface, point + Vector2(0, size.y - 3), extent.x, underline, cell.underline)
 			if cell.overline: surface.draw_line(point + Vector2(0,2),point + Vector2(extent.x,2),foreground,1)
 			if cell.strike: surface.draw_line(point + Vector2(0, size.y / 2), point + Vector2(extent.x, size.y / 2), foreground, 1)
-	if grid.cursor_visible: cursor(surface, grid, origin, size)
+	if grid.cursor_visible: cursor(surface, grid, size)
 
 static func decoration(surface: Control, point: Vector2, width: float, color: Color, style: int) -> void:
 	if style in [1, 2]:
@@ -51,20 +53,28 @@ static func decoration(surface: Control, point: Vector2, width: float, color: Co
 		var segment := 1 if style == 4 else 3
 		for x in range(0, int(ceil(width)), segment + 2): surface.draw_line(point + Vector2(x, 0), point + Vector2(minf(width, x + segment), 0), color, 1)
 
-static func cursor(surface: TextEdit, grid: RefCounted, origin: Vector2, size: Vector2) -> void:
-	var column: int = mini(grid.cols - 1, grid.cursor.x)
-	var point := origin + Vector2(column * size.x, grid.cursor.y * size.y)
-	var color := Color("c5dac0")
-	if not surface.has_focus(): surface.draw_rect(Rect2(point, size), color, false, 1); return
-	if grid.cursor_style in [3, 4]: surface.draw_rect(Rect2(point + Vector2(0,size.y - 2),Vector2(size.x,2)),color)
+static func cursor(surface: TextEdit, grid: RefCounted, size: Vector2) -> void:
+	var row := clampi(grid.cursor.y, 0, grid.rows - 1)
+	var column: int = clampi(grid.cursor.x, 0, grid.cols - 1)
+	var cell: Dictionary = grid.cells[row][column]
+	var point: Vector2 = WrapGeometry.cell_position(surface, row, column)
+	if point.x == -1 or point.y == -1: return
+	var advance: float = surface.glyph_advance(cell.glyph)
+	var extent := Vector2(maxf(size.x * maxi(1, cell.width), advance), size.y)
+	var background: Color = cell.bg if cell.bg.a > 0 else BASE
+	if cell.inverse: background = cell.fg
+	var dark_surface := background.get_luminance() > 0.45
+	var color := Color("426448") if dark_surface else Color("fffaf0")
+	var foreground := Color("fffaf0") if dark_surface else Color("3f493f")
+	if not surface.has_focus(): surface.draw_rect(Rect2(point, extent), color, false, 1); return
+	if grid.cursor_style in [3, 4]: surface.draw_rect(Rect2(point + Vector2(0,size.y - 2),Vector2(extent.x,2)),color)
 	elif grid.cursor_style in [5, 6]: surface.draw_rect(Rect2(point,Vector2(1,size.y)),color)
 	else:
-		surface.draw_rect(Rect2(point,size),color)
-		var cell: Dictionary = grid.cells[grid.cursor.y][column]
+		surface.draw_rect(Rect2(point,extent),color)
 		if cell.width == 0 or cell.glyph == " ": return
 		var face: Font = surface.font_faces[(2 if cell.bold else 0) + (1 if cell.italic else 0)]
 		var scale := 12.5 / 13
 		var baseline: float = face.get_ascent(13) * scale + (size.y - face.get_height(13) * scale) / 2
 		surface.draw_set_transform(point,0,Vector2.ONE * scale)
-		surface.draw_string(face,Vector2(0,baseline / scale),cell.glyph,HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color.BLACK)
+		surface.draw_string(face,Vector2(0,baseline / scale),cell.glyph,HORIZONTAL_ALIGNMENT_LEFT,-1,13,foreground)
 		surface.draw_set_transform(Vector2.ZERO)

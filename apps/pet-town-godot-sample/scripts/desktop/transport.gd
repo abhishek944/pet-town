@@ -8,6 +8,8 @@ var port := 0
 var connected := false
 var buffer := PackedByteArray()
 var pending: Array[Dictionary] = []
+# A single coalesced close barrier has reserved capacity ahead of ordinary work.
+var terminal_close: Dictionary = {}
 var in_flight: Dictionary = {}
 var sequence := 0
 var elapsed := 0.0
@@ -69,17 +71,47 @@ func _process(delta: float) -> void:
 		_lost()
 		return
 	if in_flight.is_empty():
-		if not pending.is_empty(): _send(pending.pop_front())
-		elif elapsed >= 0.35: _send({"type":"poll", "focused":focus})
+		if not terminal_close.is_empty():
+			var close := terminal_close
+			terminal_close = {}
+			_send(close)
+		else:
+			var next := -1
+			for i in range(pending.size()):
+				if str(pending[i].get("type", "")).begins_with("terminal."):
+					next = i
+					break
+			if next >= 0: _send(pending.pop_at(next))
+			elif not pending.is_empty(): _send(pending.pop_front())
+			elif elapsed >= 0.35: _send({"type":"poll", "focused":focus})
 
 func request(data: Dictionary) -> bool:
 	if not connected:
 		response_received.emit(data, {"ok":false,"error":"Open the town from Pet Town desktop to connect live companions."})
 		return false
+	if data.get("type", "") == "terminal.close":
+		terminal_close = data.duplicate(true)
+		return true
 	if pending.size() >= 32:
 		response_received.emit(data, {"ok":false,"error":"The desktop connection is busy. Try again."})
 		return false
+	if str(data.get("type", "")) == "terminal.send" and not pending.is_empty():
+		if _merge_terminal_input(data): return true
 	pending.append(data.duplicate(true))
+	return true
+
+## Fold rapid keystrokes into one queued write so bursts cross the bridge once.
+func _merge_terminal_input(data: Dictionary) -> bool:
+	var command: Dictionary = data.get("command", {})
+	if str(command.get("type", "")) != "terminal.input": return false
+	var last: Dictionary = pending[pending.size() - 1]
+	if str(last.get("type", "")) != "terminal.send": return false
+	if str(last.get("session", "")) != str(data.get("session", "")): return false
+	var prior: Dictionary = last.get("command", {})
+	if str(prior.get("type", "")) != "terminal.input": return false
+	var combined := str(prior.get("text", "")) + str(command.get("text", ""))
+	if combined.is_empty() or combined.to_utf8_buffer().size() > 32768: return false
+	prior["text"] = combined
 	return true
 
 func _send(data: Dictionary) -> void:
@@ -109,6 +141,7 @@ func _read_lines() -> void:
 					DisplayServer.window_move_to_foreground()
 				snapshot_received.emit(data)
 			else: response_received.emit(request_data,value)
+			if str(request_data.get("type", "")).begins_with("terminal."): elapsed = 99.0
 		newline = buffer.find(10)
 
 func _lost() -> void:
@@ -116,6 +149,7 @@ func _lost() -> void:
 	connected = false
 	buffer.clear()
 	pending.clear()
+	terminal_close.clear()
 	if not in_flight.is_empty():
 		response_received.emit(in_flight,{"ok":false,"error":"Connection ended. Check Herdr before retrying terminal input."})
 	in_flight = {}

@@ -2,6 +2,7 @@ extends RefCounted
 var host: Node
 var terminal_token := ""
 var generation := 0
+var terminal_control_requested := false
 var terminal := preload("terminal.gd").new()
 
 func dispatch(id: String, action: String, payload: Dictionary) -> void:
@@ -15,12 +16,11 @@ func dispatch(id: String, action: String, payload: Dictionary) -> void:
 		"pet": host.change_pet(id,str(payload.get("petId",payload.get("pet",payload.get("id","")))))
 		"focus": _action("focusAgent",{"id":id})
 		"observe","terminal_watch","interact","terminal_takeover":
-			generation+=1
-			terminal=preload("terminal.gd").new()
-			terminal.state={"state":"connecting","control":false,"viewGeneration":generation,"message":"Connecting terminal…"}
-			host.town.hud.set_terminal(terminal.state)
-			terminal_token=""
-			host.transport.request({"type":"terminal.open","id":id,"control":action not in ["observe","terminal_watch"],"takeover":action=="terminal_takeover","cols":80,"rows":24,"viewGeneration":generation})
+			_open_terminal(id, action not in ["observe","terminal_watch"], action=="terminal_takeover")
+		"terminal_reconnect":
+			if host.town.hud.live.dock.terminal.get("state", "closed") in ["paused", "disconnected", "error", "stale", "conflict"]: _open_terminal(id, terminal_control_requested)
+		"terminal_disconnect":
+			if id == host.selected_id: suspend_terminal("disconnected")
 		"terminal_release": close_terminal()
 		"terminal_input": _terminal({"type":"terminal.input","text":_input(payload)})
 		"terminal_live": _terminal({"type":"terminal.live"})
@@ -40,6 +40,21 @@ func dispatch(id: String, action: String, payload: Dictionary) -> void:
 		"update_check","update_download","update_install": host.transport.request({"type":"update.action","action":action})
 		"mayor_mode": _action("setMayorMode",{"mode":str(payload.get("mode","firstmate"))})
 
+func _open_terminal(id: String, control: bool, takeover := false) -> void:
+	if id.is_empty() or id != host.selected_id: return
+	var view := _cached_view()
+	close_terminal(true)
+	terminal_control_requested = control
+	view.merge({"state":"connecting", "control":false, "viewGeneration":generation, "message":"Connecting to the existing terminal."}, true)
+	terminal.state = view
+	host.town.hud.set_terminal(view)
+	host.transport.request({"type":"terminal.open","id":id,"control":control,"takeover":takeover,"cols":80,"rows":24,"viewGeneration":generation})
+
+func _cached_view() -> Dictionary:
+	var view: Dictionary = host.town.hud.live.dock.terminal.duplicate(true)
+	for field in ["rawFrame", "error", "reconnectFailed"]: view.erase(field)
+	return view
+
 func _action(name: String, payload: Dictionary={}) -> void:
 	var request:=payload.duplicate()
 	request.type="action"
@@ -48,24 +63,48 @@ func _action(name: String, payload: Dictionary={}) -> void:
 
 func _terminal(command: Dictionary) -> void:
 	if terminal_token.is_empty() or (command.get("type","")=="terminal.input" and str(command.get("text","")).is_empty()): return
-	host.transport.request({"type":"terminal.send","session":terminal_token,"command":command})
+	host.transport.request({"type":"terminal.send","session":terminal_token,"command":command,"viewGeneration":generation})
 
-func close_terminal() -> void:
+func release_hidden_ui(open := false) -> void:
+	if not open and host.town.hud.visible and host.town.hud.root.visible: return
+	if host.town.hud.live.dock.terminal_visible or terminal.state.get("state", "closed") != "closed" or not terminal_token.is_empty(): close_terminal()
+
+func suspend_terminal(state := "paused") -> void:
+	var view := _cached_view()
+	if view.get("state", "closed") == "closed": return
+	if view.get("state") in ["paused", "disconnected", "error", "stale"] and terminal_token.is_empty(): return
+	close_terminal(true)
+	view.merge({"state":state, "control":false, "viewGeneration":generation, "message":""}, true)
+	terminal.state = view
+	host.town.hud.set_terminal(view)
+
+func close_terminal(keep_view := false) -> void:
 	generation+=1
 	host.transport.cancel_terminal_pending()
-	if host.transport.connected: host.transport.request({"type":"terminal.close"})
+	if host.transport.connected: host.transport.request({"type":"terminal.close","viewGeneration":generation})
 	terminal_token=""
 	terminal=preload("terminal.gd").new()
 	terminal.state.viewGeneration=generation
-	host.town.hud.set_terminal(terminal.state)
+	if not keep_view:
+		terminal_control_requested = false
+		host.town.hud.set_terminal(terminal.state)
 
 func response(request: Dictionary, data: Dictionary) -> void:
-	if request.get("type","")=="terminal.open" and (int(request.get("viewGeneration",-1))!=generation or request.get("id","")!=host.selected_id): return
+	var kind := str(request.get("type", ""))
+	if kind.begins_with("terminal.") and int(request.get("viewGeneration", -1)) != generation: return
+	if kind == "terminal.close":
+		if not data.get("ok", false): host.town.hud.show_toast(str(data.get("error", "Terminal release could not complete.")))
+		return
+	if kind == "terminal.open" and request.get("id", "") != host.selected_id: return
 	if not data.get("ok",false):
 		var message:=str(data.get("error","Desktop action could not complete."))
 		host.town.hud.show_toast(message)
-		if str(request.get("type","")).begins_with("terminal"):
-			host.town.hud.set_terminal({"state":"error","control":false,"message":message,"viewGeneration":generation})
+		if kind.begins_with("terminal."):
+			var view := _cached_view()
+			close_terminal(true)
+			view.merge({"state":"error", "control":false, "error":message, "message":message, "reconnectFailed":kind=="terminal.open", "viewGeneration":generation}, true)
+			terminal.state = view
+			host.town.hud.set_terminal(view)
 		return
 	if request.get("type","")=="terminal.open":
 		if int(request.get("viewGeneration",-1))!=generation or request.get("id","")!=host.selected_id: return

@@ -7,13 +7,9 @@ var last_cell := Vector2i.ZERO
 var last_modifiers := 0
 
 func enabled() -> bool:
-	return host.grid.error.is_empty() and host.terminal.get("control", false) and host.terminal.get("state", "") == "ready"
+	return host.is_visible_in_tree() and host.get_window().has_focus() and host.grid.error.is_empty() and host.terminal.get("control", false) and host.terminal.get("state", "") == "ready"
 
 func handle(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN] and not event.shift_pressed and not enabled():
-		host.feedback.text = "Interact to scroll Herdr history. Watching shows the current server view."
-		host.output.accept_event()
-		return
 	if not enabled():
 		cancel()
 		return
@@ -85,10 +81,11 @@ func emit(action: String, payload: Dictionary) -> void:
 	host.action_requested.emit(host.selected_id, action, payload)
 
 func resize() -> void:
-	if not is_instance_valid(host.output) or host.terminal.get("state", "") != "ready": return
+	if not is_instance_valid(host.output) or not enabled(): return
 	var font: Font = host.output.get_theme_font("font")
 	var width := maxf(1, font.get_string_size("M", HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x)
 	var dimensions: Vector2i = host.output.dimensions() if host.output.has_method("dimensions") else Vector2i(maxi(2, int((host.output.size.x - 16) / width)), maxi(1, host.output.get_visible_line_count()))
+	dimensions = Vector2i(clampi(dimensions.x, 2, 512), clampi(dimensions.y, 2, 256))
 	if dimensions == host.terminal_size: return
 	host.terminal_size = dimensions
 	emit("terminal_resize", {"cols": dimensions.x, "rows": dimensions.y})

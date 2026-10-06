@@ -1,73 +1,104 @@
 extends TextEdit
 ## Draw server cells; the native text layer retains focus, selection and copying.
 const Painter = preload("res://ui/terminal_painter.gd")
+const WrapGeometry = preload("res://ui/terminal_wrap_geometry.gd")
 var grid: RefCounted
-var original_grid := false
 var capture_grid := false
 var cell_size := Vector2(7.5, 20)
-var cell_origin := Vector2.ZERO
 var font_faces: Array[Font] = []
 var selecting := false
 var selection_start := Vector2i.ZERO
 var blink_timer := 0.0
 var blink_visible := true
 var has_blink := false
-var used_rows := 1
+var last_v_scroll := -1.0
+var cell_text_columns: Array = []
+var display_columns := PackedInt32Array()
+var advance_cache := {}
 
 func _ready() -> void:
 	editable = false
-	wrap_mode = LINE_WRAPPING_NONE
+	wrap_mode = LINE_WRAPPING_BOUNDARY
 	for bold in [false, true]:
 		for italic in [false, true]:
 			var face := SystemFont.new()
 			face.font_names = PackedStringArray(["Menlo", "Monaco", "monospace"])
 			face.font_weight = 700 if bold else 400
 			face.font_italic = italic
+			var cjk := SystemFont.new()
+			cjk.font_names = PackedStringArray(["Arial Unicode MS"])
+			cjk.font_weight = face.font_weight
+			cjk.font_italic = face.font_italic
+			var fallback_fonts: Array[Font] = [cjk]
+			face.fallbacks = fallback_fonts
 			font_faces.append(face)
 	add_theme_font_override("font", font_faces[0])
 	add_theme_font_size_override("font_size", 13)
 	add_theme_constant_override("line_spacing", maxi(0, int(20 - font_faces[0].get_height(13))))
 	for key in ["font_color", "font_readonly_color", "font_selected_color", "caret_color", "selection_color"]: add_theme_color_override(key, Color.TRANSPARENT)
+	var focus_style := StyleBoxFlat.new()
+	focus_style.bg_color = Color.TRANSPARENT
+	focus_style.border_color = Color("426448")
+	focus_style.set_border_width_all(2)
+	focus_style.set_expand_margin_all(0)
+	focus_style.set_content_margin_all(0)
+	add_theme_stylebox_override("focus", focus_style)
 	cell_size.x = font_faces[0].get_string_size("M", HORIZONTAL_ALIGNMENT_LEFT, -1, 1000).x * 12.5 / 1000
 	caret_changed.connect(queue_redraw)
 	focus_entered.connect(queue_redraw)
-	resized.connect(update_origin)
-	focus_exited.connect(func() -> void: selecting = false)
-	update_origin()
+	resized.connect(queue_redraw)
+	focus_exited.connect(func() -> void: selecting = false; queue_redraw())
 
-func set_grid(value: RefCounted, full_grid: bool) -> void:
+func glyph_advance(glyph: String) -> float:
+	if advance_cache.has(glyph): return advance_cache[glyph]
+	var advance: float = font_faces[0].get_string_size(glyph, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	advance_cache[glyph] = advance
+	return advance
+
+func set_grid(value: RefCounted, _full_grid: bool) -> void:
 	grid = value
-	original_grid = full_grid
-	var source := "\n".join(grid.lines())
+	var source := cache_projection()
 	if text != source:
 		var selection := [get_selection_from_line(), get_selection_from_column(), get_selection_to_line(), get_selection_to_column()] if has_selection() else []
-		var scroll := Vector2(get_h_scroll(), get_v_scroll())
+		var scroll := get_v_scroll()
 		text = source
-		set_h_scroll(int(scroll.x))
-		set_v_scroll(scroll.y)
+		set_h_scroll(0)
+		set_v_scroll(scroll)
 		if not selection.is_empty(): select(selection[0], selection[1], selection[2], selection[3])
-	used_rows = preload("res://ui/terminal_layout.gd").used_rows(grid, original_grid)
 	has_blink = false
 	for row in grid.cells:
 		for cell in row:
 			if cell.blink: has_blink = true; break
-	update_origin()
 	queue_redraw()
 
-func update_origin() -> void:
-	if not is_instance_valid(grid): return
-	var panel := get_theme_stylebox("normal")
-	var left := panel.get_content_margin(SIDE_LEFT)
-	var top := panel.get_content_margin(SIDE_TOP)
-	var bottom := panel.get_content_margin(SIDE_BOTTOM)
-	var used := used_rows
-	cell_origin = Vector2(left - get_h_scroll(), top - get_v_scroll() * cell_size.y)
-	if not original_grid: cell_origin.y += maxf(0, size.y - top - bottom - used * cell_size.y)
+func cache_projection() -> String:
+	cell_text_columns.clear()
+	display_columns = PackedInt32Array()
+	var lines: Array[String] = []
+	for row in range(grid.rows):
+		var columns := PackedInt32Array()
+		var content := ""
+		var visible := 0
+		for column in range(grid.cols):
+			columns.append(content.length())
+			var cell: Dictionary = grid.cells[row][column]
+			content += str(cell.glyph)
+			if meaningful(cell): visible = maxi(visible, column + (2 if cell.width == 2 else 1))
+		columns.append(content.length())
+		if grid.cursor_visible and grid.cursor.y == row: visible = maxi(visible, mini(grid.cols, grid.cursor.x + 1))
+		display_columns.append(visible)
+		cell_text_columns.append(columns)
+		lines.append(content.substr(0, columns[visible]))
+	return "\n".join(lines)
+
+func meaningful(cell: Dictionary) -> bool:
+	var glyph := str(cell.glyph)
+	return (not glyph.is_empty() and glyph != " ") or cell.bg.a > 0 or cell.inverse or cell.underline > 0 or cell.overline or cell.strike
 
 func _process(delta: float) -> void:
-	var previous := cell_origin
-	update_origin()
-	if cell_origin != previous: queue_redraw()
+	if get_h_scroll() != 0: set_h_scroll(0)
+	var scroll := get_v_scroll()
+	if scroll != last_v_scroll: last_v_scroll = scroll; queue_redraw()
 	if not has_blink: return
 	blink_timer += delta
 	if blink_timer >= 0.5:
@@ -77,23 +108,29 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	if is_instance_valid(grid) and not font_faces.is_empty(): Painter.draw(self)
+	if has_focus(): draw_style_box(get_theme_stylebox("focus"), Rect2(Vector2.ZERO, size))
 
 func cell_at_point(point: Vector2) -> Vector2i:
-	var local := point - cell_origin
-	return Vector2i(clampi(int(floor(local.x / cell_size.x)), 0, grid.cols - 1), clampi(int(floor(local.y / cell_size.y)), 0, grid.rows - 1))
+	return WrapGeometry.hit_cell(self, point, false)
+
+func selection_cell_at_point(point: Vector2) -> Vector2i:
+	return WrapGeometry.hit_cell(self, point, true)
 
 func text_column(point: Vector2i) -> int:
-	var column := 0
-	for cell in range(mini(point.x, grid.cols)):
-		column += str(grid.cells[point.y][cell].glyph).length()
-	return column
+	var row := clampi(point.y, 0, grid.rows - 1)
+	var cell := clampi(point.x, 0, display_columns[row])
+	return cell_text_columns[row][cell]
 
 func cell_column(line: int, column: int) -> int:
-	var chars := 0
-	for cell in range(grid.cols):
-		if chars >= column: return cell
-		chars += str(grid.cells[line][cell].glyph).length()
-	return grid.cols
+	var row := clampi(line, 0, grid.rows - 1)
+	for cell in range(display_columns[row]):
+		if grid.cells[row][cell].width == 0: continue
+		var start: int = cell_text_columns[row][cell]
+		if column < start + str(grid.cells[row][cell].glyph).length(): return cell
+	return display_columns[row]
+
+func display_cell_count(row: int) -> int:
+	return display_columns[row]
 
 func selected(column: int, row: int) -> bool:
 	if not has_selection(): return false
@@ -105,17 +142,17 @@ func _gui_input(event: InputEvent) -> void:
 	if not is_instance_valid(grid): return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed and (event.shift_pressed or not capture_grid):
-			selection_start = cell_at_point(event.position)
+			selection_start = selection_cell_at_point(event.position)
 			selecting = true
 			grab_focus()
 			deselect()
 			accept_event()
 		elif not event.pressed and selecting:
-			update_selection(cell_at_point(event.position))
+			update_selection(selection_cell_at_point(event.position))
 			selecting = false
 			accept_event()
 	elif event is InputEventMouseMotion and selecting:
-		update_selection(cell_at_point(event.position))
+		update_selection(selection_cell_at_point(event.position))
 		accept_event()
 
 func update_selection(point: Vector2i) -> void:
@@ -125,7 +162,9 @@ func update_selection(point: Vector2i) -> void:
 func dimensions() -> Vector2i:
 	var panel := get_theme_stylebox("normal")
 	var available := size - Vector2(panel.get_content_margin(SIDE_LEFT) + panel.get_content_margin(SIDE_RIGHT), panel.get_content_margin(SIDE_TOP) + panel.get_content_margin(SIDE_BOTTOM))
-	return Vector2i(maxi(2, int(available.x / cell_size.x)), maxi(1, int(available.y / cell_size.y)))
+	var cell_width: float = get_theme_font("font").get_string_size("M", HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	var scrollbar_width: float = get_v_scroll_bar().get_combined_minimum_size().x
+	return Vector2i(maxi(2, int((available.x - scrollbar_width) / cell_width)), maxi(1, int(available.y / cell_size.y)))
 
 func set_plain(source: String, colors: Dictionary = {}) -> void:
 	var projection := preload("res://ui/terminal_grid.gd").new()
@@ -141,8 +180,8 @@ func set_plain(source: String, colors: Dictionary = {}) -> void:
 	projection.resize(width, projection.rows)
 	for row in colors:
 		if int(row) >= projection.rows: continue
-		var foreground := Color("e4ebdc")
+		var foreground := Color("eeeeec")
 		for column in range(projection.cols):
 			if colors[row].has(column): foreground = colors[row][column]
 			projection.cells[int(row)][column].fg = foreground
-	set_grid(projection, original_grid)
+	set_grid(projection, true)
