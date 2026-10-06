@@ -37,7 +37,7 @@ importers:
         version: 5.6.3
       wrangler:
         specifier: ^4.0.0
-        version: 4.136.3(@cloudflare/workers-types@5.20260922.1)
+        version: 4.136.3(@cloudflare/workers-types@5.20260922.1)(@types/node@22.20.4)
 
   apps/pet-town:
     dependencies:
@@ -92,8 +92,11 @@ importers:
         specifier: ~5.6.2
         version: 5.6.3
       vite:
-        specifier: ^6.0.3
+        specifier: ^6.4.3
         version: 6.4.3(@types/node@22.20.4)
+      wrangler:
+        specifier: ^4.136.3
+        version: 4.136.3(@cloudflare/workers-types@5.20260922.1)(@types/node@22.20.4)
 
 packages:
 
@@ -2409,10 +2412,10 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
-  miniflare@5.20260921.0-alpha:
+  miniflare@5.20260921.0-alpha(@types/node@22.20.4):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      sharp: 0.35.4
+      sharp: 0.35.4(@types/node@22.20.4)
       undici: 7.29.0
       workerd: 1.20260921.1
       ws: 8.21.0
@@ -2511,7 +2514,7 @@ snapshots:
 
   semver@7.8.5: {}
 
-  sharp@0.35.4:
+  sharp@0.35.4(@types/node@22.20.4):
     dependencies:
       '@img/colour': 1.1.0
       detect-libc: 2.1.2
@@ -2542,6 +2545,7 @@ snapshots:
       '@img/sharp-win32-arm64': 0.35.4
       '@img/sharp-win32-ia32': 0.35.4
       '@img/sharp-win32-x64': 0.35.4
+      '@types/node': 22.20.4
 
   shebang-command@2.0.0:
     dependencies:
@@ -2631,13 +2635,13 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260921.1
       '@cloudflare/workerd-windows-64': 1.20260921.1
 
-  wrangler@4.136.3(@cloudflare/workers-types@5.20260922.1):
+  wrangler@4.136.3(@cloudflare/workers-types@5.20260922.1)(@types/node@22.20.4):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.5.0
       '@cloudflare/unenv-preset': 2.16.2(unenv@2.0.0-rc.24)(workerd@1.20260921.1)
       blake3-wasm: 2.1.5
       esbuild: 0.28.1
-      miniflare: 5.20260921.0-alpha
+      miniflare: 5.20260921.0-alpha(@types/node@22.20.4)
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.24
       workerd: 1.20260921.1
