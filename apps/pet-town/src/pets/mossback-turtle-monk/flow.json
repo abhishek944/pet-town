@@ -4,29 +4,29 @@
   "packVersion": "3",
   "clips": {
     "staff-walk": {
-      "asset": "walk.png",
+      "asset": "walk.webp",
       "durationMs": 870,
       "role": "locomotion",
       "sourceFacing": "right",
       "mirror": true
     },
     "gentle-bow": {
-      "asset": "work.png",
+      "asset": "work.webp",
       "durationMs": 1110,
       "role": "locomotion",
       "sourceFacing": "right",
       "mirror": true,
-      "holdAsset": "done.png"
+      "holdAsset": "done.webp"
     },
     "sleep": {
-      "asset": "sleep.png",
+      "asset": "sleep.webp",
       "durationMs": 900,
       "role": "stationary",
       "sourceFacing": "right",
       "mirror": true
     },
     "wave": {
-      "asset": "wave.png",
+      "asset": "wave.webp",
       "durationMs": 900,
       "role": "stationary",
       "sourceFacing": "right",

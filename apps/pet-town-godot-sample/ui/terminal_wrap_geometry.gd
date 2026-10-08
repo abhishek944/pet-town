@@ -1,21 +1,75 @@
 extends RefCounted
 
+var positions := {}
+var row_layouts := {}
+var layout_size := Vector2(-1, -1)
+var vertical_scroll := -1.0
+var horizontal_scroll := -1.0
+var scrollbar_visible := false
+var validated_frame := -1
+
+func invalidate() -> void:
+	positions.clear()
+	row_layouts.clear()
+	validated_frame = -1
+
+func prepare(surface: TextEdit, force := false) -> void:
+	var vertical := surface.get_v_scroll()
+	var horizontal := surface.get_h_scroll()
+	var scrollbar := surface.get_v_scroll_bar().visible
+	if layout_size != surface.size or vertical_scroll != vertical or horizontal_scroll != horizontal or scrollbar_visible != scrollbar:
+		invalidate()
+		layout_size = surface.size
+		vertical_scroll = vertical
+		horizontal_scroll = horizontal
+		scrollbar_visible = scrollbar
+	var frame := Engine.get_process_frames()
+	if not force and validated_frame == frame: return
+	validated_frame = frame
+	# TextEdit can settle wrapping/scroll origins after its public values change.
+	# Also validate at paint/hit boundaries if native drawing settled in this frame.
+	for row in row_layouts:
+		var layout: Dictionary = row_layouts[row]
+		var changed: bool = layout.fragments != surface.get_line_wrapped_text(row)
+		if not changed:
+			for index in layout.anchors:
+				if layout.anchors[index] != surface.get_rect_at_line_column(row, layout.starts[index]):
+					changed = true
+					break
+		if changed:
+			invalidate()
+			validated_frame = frame
+			return
+
 static func cell_position(surface: TextEdit, row: int, column: int) -> Vector2:
+	var cache: RefCounted = surface.wrap_geometry
+	cache.prepare(surface)
+	var key := Vector2i(column, row)
+	if not cache.positions.has(key): cache.positions[key] = cache.measure(surface, row, column)
+	return cache.positions[key]
+
+func measure(surface: TextEdit, row: int, column: int) -> Vector2:
 	var grid: RefCounted = surface.grid
 	var source_column := column
 	var continuation: bool = column < grid.cols and column > 0 and grid.cells[row][column].width == 0 and grid.cells[row][column - 1].width == 2
 	if continuation: source_column -= 1
 	var text_column: int = surface.text_column(Vector2i(source_column, row))
-	var fragments: PackedStringArray = surface.get_line_wrapped_text(row)
-	if fragments.is_empty(): return Vector2(-1, -1)
+	if not row_layouts.has(row):
+		var fragments: PackedStringArray = surface.get_line_wrapped_text(row)
+		var starts := PackedInt32Array()
+		var offset := 0
+		for fragment in fragments:
+			starts.append(offset)
+			offset += fragment.length()
+		row_layouts[row] = {"fragments":fragments, "starts":starts, "anchors":{}}
+	var layout: Dictionary = row_layouts[row]
 	var wrap_index: int = surface.get_line_wrap_index_at_column(row, text_column)
-	if wrap_index < 0 or wrap_index >= fragments.size(): return Vector2(-1, -1)
-	var fragment_start := 0
-	for index in range(wrap_index): fragment_start += fragments[index].length()
-	var fragment: String = fragments[wrap_index]
-	# The native wrap RID starts at fragment_start; anchor there, even for singleton fragments.
-	var anchor_column := fragment_start
-	var anchor: Rect2i = surface.get_rect_at_line_column(row, anchor_column)
+	if wrap_index < 0 or wrap_index >= layout.fragments.size(): return Vector2(-1, -1)
+	var fragment_start: int = layout.starts[wrap_index]
+	var fragment: String = layout.fragments[wrap_index]
+	# Anchor at the native fragment's first glyph, including singleton fragments.
+	if not layout.anchors.has(wrap_index): layout.anchors[wrap_index] = surface.get_rect_at_line_column(row, fragment_start)
+	var anchor: Rect2i = layout.anchors[wrap_index]
 	if anchor.position.x == -1 or anchor.position.y == -1: return Vector2(-1, -1)
 	var prefix_length := clampi(text_column - fragment_start, 0, fragment.length())
 	var prefix := fragment.substr(0, prefix_length)
@@ -28,6 +82,7 @@ static func cell_position(surface: TextEdit, row: int, column: int) -> Vector2:
 	return point
 
 static func hit_cell(surface: TextEdit, point: Vector2, selection_endpoint: bool) -> Vector2i:
+	surface.wrap_geometry.prepare(surface, true)
 	var grid: RefCounted = surface.grid
 	var text_position: Vector2i = surface.get_line_column_at_pos(Vector2i(point))
 	var row := clampi(text_position.y, 0, grid.rows - 1)

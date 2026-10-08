@@ -14,7 +14,7 @@ function collectAssets(directory, current = directory) {
     fs.readdirSync(current, { withFileTypes: true }).flatMap((entry) => {
       const absolute = path.join(current, entry.name);
       if (entry.isDirectory()) return Object.entries(collectAssets(directory, absolute));
-      if (!entry.isFile() || !entry.name.endsWith(".png")) return [];
+      if (!entry.isFile() || !entry.name.endsWith(".webp")) return [];
       return [[path.relative(directory, absolute).split(path.sep).join("/"), entry.name]];
     }),
   );
@@ -67,16 +67,16 @@ for (const pet of petDirectories) {
   if (!result.pack) throw new Error(`${pet}/flow.json: ${JSON.stringify(result.diagnostics)}`);
   if (result.pack.id !== pet) throw new Error(`${pet}/flow.json: pack id must match its folder`);
   const requiredAssets = [
-    "sleep.png",
-    "walk.png",
-    "ocean-rowing.png",
-    "ocean-blocked.png",
-    "ocean-done.png",
-    "ocean-listening.png",
-    "ocean-speaking.png",
+    "sleep.webp",
+    "walk.webp",
+    "ocean-rowing.webp",
+    "ocean-blocked.webp",
+    "ocean-done.webp",
+    "ocean-listening.webp",
+    "ocean-speaking.webp",
   ];
-  if (kaykitPets.includes(pet)) requiredAssets.push("blocked.png", "listen.png", "speak.png");
-  else requiredAssets.push("wave.png", "done.png");
+  if (kaykitPets.includes(pet)) requiredAssets.push("blocked.webp", "listen.webp", "speak.webp");
+  else requiredAssets.push("wave.webp", "done.webp");
   const missingAssets = requiredAssets.filter((asset) => !Object.hasOwn(assets, asset));
   if (missingAssets.length)
     throw new Error(`${pet}: missing bundled artwork: ${missingAssets.join(", ")}`);
@@ -94,7 +94,7 @@ for (const pet of petDirectories) {
   };
   for (const [state, animation] of Object.entries(expectedAnimations)) {
     if (result.pack.stateAssignments[state].animation !== animation)
-      throw new Error(`${pet}/flow.json: ${state} has wrong APNG`);
+      throw new Error(`${pet}/flow.json: ${state} has wrong animation`);
   }
   if (result.pack.stateAssignments.working.action !== "walking")
     throw new Error(`${pet}: running pet does not walk`);

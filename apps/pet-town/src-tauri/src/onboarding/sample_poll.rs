@@ -64,8 +64,9 @@ pub(super) fn poll(state: &Onboarding) {
             .is_some_and(|at| at.elapsed().as_secs() < 3);
     let submitted = owner.as_ref().is_none_or(|owner| owner.prompt_attempted);
     let arrived = visible && submitted && matches!(agent.status.as_str(), "working" | "done");
-    if arrived && owner.as_ref().is_some_and(|owner| !owner.arrival_seen) {
-        if state
+    if arrived
+        && owner.as_ref().is_some_and(|owner| !owner.arrival_seen)
+        && state
             .store
             .update(|p| {
                 if let Some(owner) = &mut p.sample {
@@ -73,9 +74,8 @@ pub(super) fn poll(state: &Onboarding) {
                 }
             })
             .is_err()
-        {
-            return;
-        }
+    {
+        return;
     }
     let phase = if agent.status == "blocked" {
         "blocked"

@@ -1,7 +1,6 @@
 const Module = require("node:module");
 const listeners = {};
 let resolvePreferences;
-let resolveSettingsOpen;
 const initial = { revision: 2, preferences: { marker: "initial" } };
 const applied = { revision: 1, preferences: { marker: "applied" } };
 const stale = { revision: 0, preferences: { marker: "stale" } };
@@ -20,7 +19,6 @@ Module._load = (request, parent, main) => {
       invoke: (command) =>
         new Promise((resolve) => {
           if (command === "get_preferences") resolvePreferences = resolve;
-          else if (command === "is_settings_open") resolveSettingsOpen = resolve;
         }),
     };
   return originalLoad(request, parent, main);
@@ -56,7 +54,6 @@ function assert(value, message) {
   listeners["preferences-applied"]({ payload: applied });
   listeners["preferences-applied"]({ payload: stale });
   resolvePreferences(initial);
-  resolveSettingsOpen(false);
   await installing;
   listeners["preferences-applied"]({ payload: later });
   assert(paused, "startup snapshot overrode a newer pause event");

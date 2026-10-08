@@ -82,7 +82,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed:
 			var focused := get_viewport().gui_get_focus_owner()
-			if focused is LineEdit or focused is TextEdit:
+			if is_instance_valid(focused):
 				focused.release_focus()
 				preload("res://scripts/town_input.gd").clear_gameplay()
 		if event.shift_pressed and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN]:

@@ -21,7 +21,7 @@ export interface PetInteractionDelegate {
   geometryChanged(): void;
 }
 function petTarget(target: EventTarget | null): HTMLElement | null {
-  return target instanceof Element ? target.closest<HTMLElement>(".pet") : null;
+  return target instanceof Element ? target.closest<HTMLElement>(".pet, .project") : null;
 }
 function agentId(target: EventTarget | null): string | null {
   return target instanceof Element ? target.closest<HTMLElement>(".citizen")?.dataset.agentId ?? null : null;

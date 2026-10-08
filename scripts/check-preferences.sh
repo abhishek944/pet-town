@@ -21,6 +21,7 @@ node "$TMP/cast-check.cjs"
 pnpm exec esbuild src/renderer.ts --bundle --platform=node --format=cjs --loader:.png=dataurl \
   --define:import.meta.glob=globalThis.__testGlob --log-level=error --outfile="$TMP/renderer.cjs"
 cp "$ROOT/scripts/preference-checks/renderer-check.cjs" "$TMP/renderer-check.cjs"
+cp "$ROOT/scripts/preference-checks/fake-dom.cjs" "$TMP/fake-dom.cjs"
 node "$TMP/renderer-check.cjs"
 
 pnpm exec esbuild src/settings-preview.ts --bundle --platform=node --format=cjs \

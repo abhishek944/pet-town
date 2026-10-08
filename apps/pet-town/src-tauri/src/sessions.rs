@@ -1,6 +1,6 @@
 use pet_town_agent_broker::{AgentSnapshot, BrokerSnapshot, FocusRoute};
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(serde::Deserialize)]
 struct MayorSessionOwner {
@@ -25,7 +25,7 @@ fn active_mayor_owner() -> Option<MayorSessionOwner> {
 
 fn is_mayor_primary(route: &FocusRoute, owner: &MayorSessionOwner) -> bool {
     matches!(route, FocusRoute::Herdr { pane_id, agent_session_id, .. }
-        if pane_id == &owner.pane && PathBuf::from(agent_session_id) == owner.log)
+        if pane_id == &owner.pane && owner.log.as_path() == Path::new(agent_session_id))
 }
 
 pub(crate) fn mayor_primary_route() -> Option<FocusRoute> {
@@ -44,7 +44,8 @@ pub(crate) fn collect_visible() -> BrokerSnapshot {
     let owned_ids: Vec<String> = collected
         .focus_routes
         .iter()
-        .filter_map(|(id, route)| is_mayor_primary(route, &owner).then(|| id.clone()))
+        .filter(|&(_, route)| is_mayor_primary(route, &owner))
+        .map(|(id, _)| id.clone())
         .collect();
     collected
         .snapshot

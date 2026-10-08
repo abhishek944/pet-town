@@ -12,8 +12,10 @@ func set_usage(town: Dictionary, selected: Dictionary = {}) -> void:
 	get("live").set_usage(town, selected)
 func set_mayor(state: Dictionary) -> void:
 	get("live").set_mayor(state)
-func set_terminal(state: Dictionary) -> void:
-	get("live").set_terminal(state)
+func set_terminal(state: Dictionary, defer_view := false) -> void:
+	get("live").set_terminal(state, defer_view)
+func refresh_terminal() -> void:
+	get("live").refresh_terminal()
 func set_pet_catalog(entries: Array) -> void:
 	get("live").pet_catalog = entries
 	get("modal").pet_catalog = entries

@@ -96,6 +96,19 @@ fn handle(
             );
             Ok(snapshot)
         }
+        "app.menu" => {
+            // Dock actions remain available while another app is foreground.
+            // Authentication above still scopes them to the owned native town.
+            let action = request["action"].as_str().unwrap_or("");
+            if !matches!(
+                action,
+                "preferences" | "open-3d-town" | "show-town" | "hide-town"
+            ) {
+                return Err("Unsupported app menu action.".into());
+            }
+            crate::app_menu::action(app, action)?;
+            Ok(Value::Null)
+        }
         "action" => {
             if !super::focused(app) {
                 return Err("Focus the town before using companion actions.".into());

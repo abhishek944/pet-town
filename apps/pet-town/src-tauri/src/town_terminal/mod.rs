@@ -20,6 +20,8 @@ pub(crate) struct TownTerminalState {
 }
 
 #[tauri::command]
+// The parameter list is the IPC contract with the terminal frontend, so it is kept flat.
+#[allow(clippy::too_many_arguments)]
 pub(crate) async fn town_terminal_open(
     app: AppHandle,
     window: WebviewWindow,

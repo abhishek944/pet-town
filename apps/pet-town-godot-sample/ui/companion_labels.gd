@@ -13,6 +13,8 @@ var visibility_timer := 0.0
 var font: Font = Style.BODY
 
 func _ready() -> void:
+	# Project this frame's head records after desktop/labels.gd (priority 30).
+	process_priority = 40
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	mouse_filter = MOUSE_FILTER_IGNORE
 	clip_contents = true
@@ -99,7 +101,8 @@ func _process(delta: float) -> void:
 		var screen := camera.unproject_position(point)
 		screen *= dimensions / view
 		button.visible = not occluded[id] and screen.x >= -dimensions.x * 0.05 and screen.x <= dimensions.x * 1.05 and screen.y >= -dimensions.y * 0.05 and screen.y <= dimensions.y * 1.05
-		if button.visible: button.position = screen - Vector2(button.size.x / 2, button.size.y)
+		# Whole-pixel placement avoids changing glyph coverage as the pill moves.
+		if button.visible: button.position = (screen - Vector2(button.size.x / 2, button.size.y)).round()
 
 func is_occluded(point: Vector3) -> bool:
 	var query := PhysicsRayQueryParameters3D.create(camera.global_position, point, 1)

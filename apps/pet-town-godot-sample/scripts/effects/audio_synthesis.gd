@@ -79,8 +79,13 @@ static func tones(parts: Array, duration := 1.0) -> AudioStreamWAV:
 static func pcm(samples: PackedFloat32Array, looping: bool) -> AudioStreamWAV:
 	var bytes := PackedByteArray()
 	bytes.resize(samples.size() * 2)
+	var fade := mini(int(RATE * 0.005), samples.size() / 2)
 	for i in samples.size():
-		bytes.encode_s16(i * 2, int(clampf(samples[i], -1, 1) * 32767))
+		var value := samples[i]
+		if not looping and fade > 0:
+			# Short one-shot clips must enter and leave silence without a hard edge.
+			value *= minf(1.0, float(mini(i, samples.size() - 1 - i)) / fade)
+		bytes.encode_s16(i * 2, int(clampf(value, -1, 1) * 32767))
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
 	stream.mix_rate = RATE

@@ -80,6 +80,33 @@ pub(super) fn focus(pid: u32) -> Result<(), String> {
     super::focus::request(pid)
 }
 
+pub(super) fn close(child: &mut Child) -> Result<bool, String> {
+    // Check the owned child before targeting its PID; exited/reaped PIDs may be reused.
+    if child
+        .try_wait()
+        .map_err(|error| error.to_string())?
+        .is_some()
+    {
+        return Ok(false);
+    }
+    #[cfg(target_os = "macos")]
+    {
+        // A normal app quit delivers Godot's close notification even if its
+        // companion bridge is disconnected. Never forceTerminate here.
+        let town = objc2_app_kit::NSRunningApplication::runningApplicationWithProcessIdentifier(
+            child.id() as i32,
+        )
+        .ok_or("Pet Town is still starting. Try Close Pet Town again.")?;
+        if town.terminate() {
+            Ok(true)
+        } else {
+            Err("Pet Town could not accept the close request.".into())
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    Err("Close Pet Town from its native window on this platform.".into())
+}
+
 pub(super) fn is_focused(pid: u32) -> bool {
     #[cfg(target_os = "macos")]
     {

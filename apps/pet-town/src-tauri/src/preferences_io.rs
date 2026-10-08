@@ -9,6 +9,9 @@ pub enum SaveOutcome {
     Durable,
     CommittedWithWarning(String),
 }
+// The preferences payload is large, but a result is produced by one read and matched immediately,
+// so boxing the variant would add indirection at every match site without removing a real copy.
+#[allow(clippy::large_enum_variant)]
 pub enum ReadResult {
     Missing,
     Valid(PreferencesFile),

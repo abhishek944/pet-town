@@ -21,6 +21,11 @@ EXCLUDED_SUFFIXES = {
     ".txt",  # Documentation
 }
 LOCK_NAMES = {"pnpm-lock.yaml", "package-lock.json"}
+EXCLUDED_PATHS = {
+    # Exported Godot data tables, reviewed as data rather than as maintained source.
+    "apps/pet-town-godot-sample/scripts/actions/source-data.json",
+    "apps/pet-town-godot-sample/scripts/effects/daylight_keys.json",
+}
 
 
 def listed_paths() -> set[Path]:
@@ -32,6 +37,8 @@ def listed_paths() -> set[Path]:
 
 def included(path: Path) -> bool:
     if path.suffix.lower() in EXCLUDED_SUFFIXES:
+        return False
+    if path.relative_to(ROOT).as_posix() in EXCLUDED_PATHS:
         return False
     name = path.name.lower()
     return not (

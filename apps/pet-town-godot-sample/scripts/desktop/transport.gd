@@ -29,6 +29,9 @@ func _ready() -> void:
 	OS.unset_environment("PET_TOWN_BRIDGE_TOKEN")
 	OS.unset_environment("PET_TOWN_BRIDGE_PORT")
 	OS.unset_environment("PET_TOWN_DESKTOP_PID")
+	var dock_menu := preload("dock_menu.gd").new()
+	dock_menu.transport=self
+	add_child(dock_menu)
 	focus = DisplayServer.window_is_focused()
 	last_contact=Time.get_ticks_msec()
 

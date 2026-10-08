@@ -4,7 +4,7 @@
   "packVersion": "1",
   "clips": {
     "walk": {
-      "asset": "walk.png",
+      "asset": "walk.webp",
       "durationMs": 960,
       "role": "locomotion",
       "sourceFacing": "right",
@@ -12,7 +12,7 @@
       "scale": 1.1
     },
     "listen": {
-      "asset": "listen.png",
+      "asset": "listen.webp",
       "durationMs": 960,
       "role": "stationary",
       "sourceFacing": "right",
@@ -20,7 +20,7 @@
       "scale": 1.1
     },
     "speak": {
-      "asset": "speak.png",
+      "asset": "speak.webp",
       "durationMs": 960,
       "role": "stationary",
       "sourceFacing": "right",
@@ -28,7 +28,7 @@
       "scale": 1.1
     },
     "think": {
-      "asset": "blocked.png",
+      "asset": "blocked.webp",
       "durationMs": 1200,
       "role": "stationary",
       "sourceFacing": "right",
@@ -36,7 +36,7 @@
       "scale": 1.1
     },
     "sleep": {
-      "asset": "sleep.png",
+      "asset": "sleep.webp",
       "durationMs": 1200,
       "role": "stationary",
       "sourceFacing": "right",

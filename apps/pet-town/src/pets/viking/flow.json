@@ -4,23 +4,23 @@
   "packVersion": "5",
   "clips": {
     "march": {
-      "asset": "walk.png",
+      "asset": "walk.webp",
       "durationMs": 630,
       "role": "locomotion",
       "sourceFacing": "right",
       "mirror": true
     },
     "forge": {
-      "asset": "hammer.png",
+      "asset": "hammer.webp",
       "durationMs": 1080,
       "role": "locomotion",
       "sourceFacing": "right",
       "mirror": true,
       "scale": 1.7,
-      "holdAsset": "done.png"
+      "holdAsset": "done.webp"
     },
     "ponder": {
-      "asset": "think.png",
+      "asset": "think.webp",
       "durationMs": 1800,
       "role": "stationary",
       "sourceFacing": "right",
@@ -28,7 +28,7 @@
       "scale": 1.2
     },
     "sleep": {
-      "asset": "sleep.png",
+      "asset": "sleep.webp",
       "durationMs": 900,
       "role": "stationary",
       "sourceFacing": "right",
@@ -36,7 +36,7 @@
       "scale": 1.7
     },
     "wave": {
-      "asset": "wave.png",
+      "asset": "wave.webp",
       "durationMs": 900,
       "role": "stationary",
       "sourceFacing": "right",

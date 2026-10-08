@@ -55,9 +55,8 @@ pub fn set(active: bool, app: AppHandle) -> Result<(), String> {
         GENERATION.fetch_add(1, Ordering::SeqCst);
         super::firstmate::set_phase(&app, super::firstmate::WORKING);
         super::task_cancel::set_orchestrator_listening(false, app.clone());
-        let path = stop().map_err(|error| {
+        let path = stop().inspect_err(|_| {
             super::firstmate::set_phase(&app, super::firstmate::READY);
-            error
         })?;
         let started = STARTED_AT
             .lock()

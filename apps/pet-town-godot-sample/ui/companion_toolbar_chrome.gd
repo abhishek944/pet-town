@@ -88,7 +88,13 @@ static func _create_action(action_row: HBoxContainer, hint_layer: Control, spec:
 	button.mouse_filter = Control.MOUSE_FILTER_STOP
 	for icon_state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color"]:
 		button.add_theme_color_override(icon_state, Color("725638"))
-	button.pressed.connect(func() -> void: activate.call(key))
+	button.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton: button.set_meta("pointer", true)
+		elif event is InputEventKey: button.set_meta("pointer", false))
+	button.pressed.connect(func() -> void:
+		# Return pointer actions to gameplay before dispatch can hide the toolbar.
+		if button.get_meta("pointer", false): button.release_focus()
+		activate.call(key))
 	button.mouse_entered.connect(func() -> void: show_hint.call(key))
 	button.mouse_exited.connect(func() -> void: sync_hint.call(key))
 	button.focus_entered.connect(func() -> void: sync_hint.call(key))

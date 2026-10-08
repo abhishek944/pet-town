@@ -20,6 +20,7 @@ var probe_timer := 0.0
 var water_proximity := 0.0
 var movement: Node
 var actions: Node
+var music: AudioStreamPlayer
 var suppress_block_audio := false
 
 func setup(manifest: Dictionary = {}) -> void:
@@ -41,6 +42,11 @@ func setup(manifest: Dictionary = {}) -> void:
 		add_child(voice)
 		loops[spec[0]] = voice
 		voice.play()
+	music = preload("res://scripts/effects/native_music.gd").new()
+	add_child(music)
+	music.setup()
+	music.set_world_volume(volume)
+	music.set_enabled(enabled)
 	for kind in ["tweet", "tweet", "trill", "whistle", "chirp"]:
 		bird_songs.append(Birds.call_song(kind))
 	cricket_song = Birds.cricket()
@@ -63,6 +69,8 @@ func set_enabled(value: bool) -> void:
 				voice.stop()
 	if actions:
 		actions.set_enabled(value)
+	if music:
+		music.set_enabled(value)
 
 func play_action(action: String, strength := 1.0) -> void:
 	if enabled and movement:
@@ -79,6 +87,8 @@ func set_volume(value: float) -> void:
 				voice.volume_linear *= volume/previous
 	if actions:
 		actions.set_volume(volume)
+	if music:
+		music.set_world_volume(volume)
 
 func play_effect(kind: String, options: Dictionary = {}) -> void:
 	if enabled and actions:
@@ -107,9 +117,12 @@ func _process(delta: float) -> void:
 		probe_timer = 0.4
 		water_proximity = _water_nearby()
 	var night := 1.0 - smoothstep(-0.16, -0.035, sin(TAU * (time_of_day - 0.25)))
+	if music:
+		music.night_amount = night
 	var height := clampf((player_position.y - 10) / 22, 0, 1)
 	_gain("wind", (0.05 + 0.1 * height + 0.06 * gust) * (1 + 0.3 * night), delta, 0.8)
-	loops.wind.pitch_scale = (300 + 450 * gust + 350 * height) / 500
+	# Gust boundaries must not abruptly change the looping waveform's pitch.
+	loops.wind.pitch_scale = lerpf(loops.wind.pitch_scale, (300 + 450 * gust + 350 * height) / 500, 1.0 - exp(-delta / 1.2))
 	_gain("rustle", 0.012 * gust * gust * (1 - height * 0.5), delta, 0.6)
 	_gain("brook", 0.1 * water_proximity * water_proximity, delta, 0.5)
 	loops.brook.pitch_scale = 1.0 + sin(clock * 1.7) * 0.08

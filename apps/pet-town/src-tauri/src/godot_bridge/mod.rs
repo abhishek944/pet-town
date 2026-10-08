@@ -164,6 +164,18 @@ pub(crate) fn reap(app: &AppHandle) {
         }
     }
 }
+pub(crate) fn request_close(app: &AppHandle) -> Result<bool, String> {
+    let state = app.state::<GodotState>();
+    let mut process = state
+        .process
+        .lock()
+        .map_err(|_| "Town close is unavailable.")?;
+    let Some(process) = process.as_mut() else {
+        return Ok(false);
+    };
+    launch::close(&mut process.child)
+}
+
 pub(crate) fn stop(app: &AppHandle) {
     if let Some(mut process) = app
         .state::<GodotState>()

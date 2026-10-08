@@ -20,7 +20,7 @@ pub fn keychain_key() -> Option<String> {
             return None;
         }
         *cached = Some(value.clone());
-        return Some(value);
+        Some(value)
     }
     #[cfg(not(target_os = "macos"))]
     None
@@ -64,7 +64,7 @@ pub async fn import_openai_key_from_shell(app: AppHandle) -> Result<(), String> 
         let key = tauri::async_runtime::spawn_blocking(shell_key)
             .await
             .map_err(|_| "Could not read the shell key.".to_string())??;
-        return save_openai_key(key, app);
+        save_openai_key(key, app)
     }
     #[cfg(not(target_os = "macos"))]
     {

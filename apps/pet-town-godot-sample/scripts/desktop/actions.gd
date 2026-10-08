@@ -111,9 +111,13 @@ func response(request: Dictionary, data: Dictionary) -> void:
 		terminal_token=str(data.get("result",{}).get("token",""))
 
 func events(data: Array) -> void:
+	var changed := false
 	for event_data in data:
 		if event_data is Dictionary and int(event_data.get("viewGeneration",-1))==generation and event_data.get("id","")==host.selected_id:
-			host.town.hud.set_terminal(terminal.event(event_data))
+			# Consume every ordered delta; publish only the final view in this batch.
+			host.town.hud.set_terminal(terminal.event(event_data), true)
+			changed = true
+	if changed: host.town.hud.refresh_terminal()
 
 func _input(payload: Dictionary) -> String:
 	if payload.has("text"):

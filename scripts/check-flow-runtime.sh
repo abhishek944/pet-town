@@ -20,4 +20,4 @@ pnpm exec esbuild src/renderer-view.ts --bundle --platform=node --format=cjs --l
 cp "$ROOT/scripts/flow-checks/check-renderer.cjs" "$TMP/check-renderer.cjs"
 node "$TMP/check-renderer.cjs"
 node "$ROOT/scripts/flow-checks/check-packs.cjs" "$ROOT/apps/pet-town" "$TMP/flow-runtime.js"
-python3 "$ROOT/scripts/check-apng-assets.py"
+python3 "$ROOT/scripts/check-pet-assets.py"

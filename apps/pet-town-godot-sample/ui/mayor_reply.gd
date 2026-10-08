@@ -22,6 +22,8 @@ var measured_width := -1.0
 var measured_height := 0.0
 
 func _ready() -> void:
+	# Keep the speech tail on this frame's name pill (priority 40).
+	process_priority = 50
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pointer_border = Polygon2D.new()

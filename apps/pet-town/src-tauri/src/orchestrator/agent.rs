@@ -8,6 +8,9 @@ pub struct AgentSession {
     pub workspace_id: String,
     pub tab_id: String,
     pub pane_id: String,
+    // Stable, privacy-preserving identity intended for display instead of the raw session id.
+    // Nothing reads it yet, so the lint is silenced for the field rather than for the crate.
+    #[allow(dead_code)]
     pub public_id: String,
     pub agent_name: String,
     pub model: String,

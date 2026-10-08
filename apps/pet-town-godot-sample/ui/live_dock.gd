@@ -17,6 +17,7 @@ var terminal_visible := false
 var original_grid := true
 var terminal_size := Vector2i.ZERO
 var grid_generation := -1
+var resize_pending := false
 var dock_view := DockView.new()
 var grid := preload("res://ui/terminal_grid.gd").new()
 var input_events := preload("res://ui/terminal_input.gd").new()
@@ -92,7 +93,7 @@ func reset_grid() -> void:
 	grid = preload("res://ui/terminal_grid.gd").new()
 	grid_generation = -1
 
-func set_terminal(state: Dictionary) -> void:
+func set_terminal(state: Dictionary, defer_view := false) -> void:
 	var was_attached: bool = terminal.get("state", "") == "ready" and bool(terminal.get("control", false))
 	var generation_changed: bool = state.has("viewGeneration") and state.get("viewGeneration") != terminal.get("viewGeneration")
 	if generation_changed: terminal_size = Vector2i.ZERO
@@ -100,15 +101,21 @@ func set_terminal(state: Dictionary) -> void:
 	if state.get("state", "closed") == "closed":
 		reset_grid()
 		terminal_size = Vector2i.ZERO
+		resize_pending = false
 	elif state.has("rawFrame"): feed_grid(state)
 	terminal = state
 	terminal_visible = state.get("state", "closed") != "closed"
+	resize_pending = resize_pending or generation_changed or not was_attached
+	if not defer_view: refresh_terminal()
+
+func refresh_terminal() -> void:
 	var rebuild_needed := terminal_visible != is_instance_valid(output)
 	if rebuild_needed: rebuild()
 	else: update_terminal_view()
 	if terminal_visible: update_output()
-	if terminal.get("state", "") == "ready" and terminal.get("control", false) and (generation_changed or not was_attached or rebuild_needed):
+	if terminal.get("state", "") == "ready" and terminal.get("control", false) and (resize_pending or rebuild_needed):
 		input_events.call_deferred("resize")
+	resize_pending = false
 
 func feed_grid(state: Dictionary) -> void:
 	if not state.has("viewGeneration"): return

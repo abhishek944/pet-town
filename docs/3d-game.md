@@ -16,9 +16,11 @@ Choose **Open Pet Town** in Pet Town desktop. The app launches or focuses its Go
 
 On macOS, the native world appears as **Pet Town**, not Godot. While it is open,
 it owns the Dock entry and the desktop runs as an accessory app; the menu-bar
-tray still offers Settings, Pet Street visibility and Quit Pet Town. Closing the
-world restores the desktop Dock entry. Quitting the native world alone leaves
-Pet Street running; tray **Quit Pet Town** closes both processes.
+tray and the current Dock entry both offer **Settings**, **Open Pet Town**,
+**Close Pet Town**, **Show Pet Street** and **Hide Pet Street**. The tray also
+retains **Quit Pet Town**. Close Pet Town closes only the 3D experience; closing
+the world restores the desktop Dock entry with the same five actions. Quitting
+the native world alone leaves Pet Street running; tray **Quit Pet Town** closes both processes.
 
 While the town window has focus, the desktop app temporarily hides Pet Street. Switching away or closing the town restores Pet Street according to the existing visibility preference. Reopening the town focuses an existing window when one is present. Losing focus, navigating or closing releases a recording started by the town button.
 

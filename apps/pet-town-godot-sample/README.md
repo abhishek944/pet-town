@@ -40,6 +40,12 @@ Desktop connects over authenticated loopback TCP. Rust owns public agent snapsho
 
 Dragging the camera does not edit terrain. Blocks cannot intersect the explorer or solid scenery; undo checks restored occupancy. Respawn searches for free capsule space. Original terrain can be excavated above the protected bottom layer. Native mesh collisions support tables, benches, roofs, slopes and edited blocks. Terrain geometry builds on a worker; validated changes publish visuals and collision together. Rapid undo/redo requests queue separately, and failed saves keep the previous world intact.
 
+## World audio
+
+The native world includes a gentle, source-inspired 80 BPM bell/mallet melody with soft chords, quieter at night. Music is synthesized once into a seamless loop; note timing does not depend on rendering frames. **M**, the speaker button and World volume control apply to music, ambience and effects together. Mayor voice remains independent.
+
+Ambient wind pitch changes are smoothed, and generated one-shot sounds fade into and out of silence to avoid hard waveform edges.
+
 ## Persistence and isolation
 
 Edits, placed assets, journal/ocean discoveries, boat state, companion pet choices, sound preferences, photos and native mesh caches live in Godot's separate `Pet Town Godot Sample` user directory. Native gameplay never overwrites the browser town's saved edits. Voxel saves include a source-buffer fingerprint. Earlier native preview saves migrate at their original coordinates only when their immutable source cells match; the original save is backed up before the widened save is written. Browser persistence remains separate.

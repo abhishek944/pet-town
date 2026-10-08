@@ -161,8 +161,12 @@ func set_mayor(data: Dictionary) -> void:
 	reply.set_latest_reply(mayor.latest_reply)
 	sync_visibility()
 
-func set_terminal(data: Dictionary) -> void:
-	dock.set_terminal(data)
+func set_terminal(data: Dictionary, defer_view := false) -> void:
+	dock.set_terminal(data, defer_view)
+	if not defer_view: sync_visibility()
+
+func refresh_terminal() -> void:
+	dock.refresh_terminal()
 	sync_visibility()
 
 func set_build_pointer(point: Vector2, state: String, _material := "") -> void:

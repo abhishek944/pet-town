@@ -2,7 +2,7 @@ import type { HerdrState } from "./flow-types";
 import type { PetTheme, PreferencesFile } from "./preferences-types";
 
 // Ocean art is bundled separately from the Standard behavior packs.
-const oceanModules = import.meta.glob("./pets/*/ocean-*.png", {
+const oceanModules = import.meta.glob("./pets/*/ocean-*.webp", {
   eager: true,
   import: "default",
   query: "?url",
@@ -11,7 +11,7 @@ const oceanModules = import.meta.glob("./pets/*/ocean-*.png", {
 const oceanAssets = new Map(
   Object.entries(oceanModules).map(([path, url]) => {
     const [, , petId, filename] = path.split("/");
-    return [`${petId}/${filename.slice(0, -4)}`, url];
+    return [`${petId}/${filename.slice(0, -5)}`, url];
   }),
 );
 

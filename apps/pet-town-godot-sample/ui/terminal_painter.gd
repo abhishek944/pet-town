@@ -4,11 +4,16 @@ const WrapGeometry = preload("res://ui/terminal_wrap_geometry.gd")
 const BASE := Color("0b0e0b")
 
 static func draw(surface: TextEdit) -> void:
+	# Native TextEdit drawing may have refreshed anchors since an earlier hit query.
+	surface.wrap_geometry.prepare(surface, true)
 	var grid: RefCounted = surface.grid
 	surface.draw_rect(Rect2(Vector2.ZERO, surface.size), BASE)
 	var size: Vector2 = surface.cell_size
 	var scale := 12.5 / 13
-	for row in range(grid.rows):
+	# Include the partly visible bottom row; native geometry still clips fragments.
+	var first := maxi(0, surface.get_first_visible_line())
+	var last := mini(grid.rows, surface.get_last_full_visible_line() + 2)
+	for row in range(first, last):
 		for column in range(surface.display_cell_count(row)):
 			var cell: Dictionary = grid.cells[row][column]
 			if cell.width == 0: continue

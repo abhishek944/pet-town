@@ -104,14 +104,14 @@ const characterDetails: CharacterDetails[] = [
   },
 ];
 
-const walkImages = import.meta.glob("../../pet-town/src/pets/*/walk.png", {
+const walkImages = import.meta.glob("../../pet-town/src/pets/*/walk.webp", {
   eager: true,
   import: "default",
   query: "?url",
 }) as Record<string, string>;
 
 export const characters: Character[] = characterDetails.map((details) => {
-  const image = walkImages[`../../pet-town/src/pets/${details.id}/walk.png`];
+  const image = walkImages[`../../pet-town/src/pets/${details.id}/walk.webp`];
   if (!image) throw new Error(`Missing bundled character preview for ${details.id}`);
   return { ...details, image };
 });

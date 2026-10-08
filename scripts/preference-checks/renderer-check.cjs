@@ -1,6 +1,8 @@
+const { fakeNode, installFakeDom } = require("./fake-dom.cjs");
+
 let nextFrame = null;
 global.__testGlob = () => ({});
-global.document = { hidden: false };
+installFakeDom();
 global.window = {
   innerWidth: 1000,
   innerHeight: 150,
@@ -23,6 +25,8 @@ const pet = {
   hidden: true,
   dataset: {},
   style,
+  matches: () => false,
+  closest: () => null,
   getBoundingClientRect: () => ({ x: 0, y: 0, width: 0, height: 0 }),
 };
 let hovered = false;
@@ -31,13 +35,15 @@ const element = {
   hidden: true,
   style,
   classList: { contains: () => false, toggle() {} },
+  matches: () => false,
+  closest: () => null,
   querySelector: (selector) => {
     if (selector === "img.pet" || selector === ".pet") return pet;
     if (selector === ".pet:hover") return hovered ? pet : null;
     return null;
   },
 };
-const root = { style: { setProperty() {} }, querySelectorAll: () => [] };
+const root = fakeNode();
 const sample = {
   visible: false,
   moving: true,
@@ -67,6 +73,7 @@ renderer.motions.set("agent", {
   pendingElapsedMs: 0,
   dragging: false,
   dragOffsetX: 0,
+  tokenMotion: { activity: undefined, scale: 1 },
 });
 const preferences = {
   app: {

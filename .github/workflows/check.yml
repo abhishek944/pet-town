@@ -45,3 +45,40 @@ jobs:
           file "$binary" | grep -q "Mach-O 64-bit executable $architecture"
           runtime_sha=$(shasum -a 256 "bin/$package/pet-town-pi-runtime.tar.gz" | cut -d' ' -f1)
           strings "$binary" | grep -F "$runtime_sha" >/dev/null
+
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install Rust 1.88 with clippy and rustfmt
+        run: rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
+      - run: pnpm install --frozen-lockfile
+      # Bare prettier rather than `pnpm run format:check`: the full script also calls ruff, shfmt,
+      # taplo, shellcheck and actionlint, which are not repository dependencies.
+      - name: Formatting
+        run: |
+          pnpm exec prettier --check .
+          cargo +1.88.0 fmt --manifest-path apps/pet-town/src-tauri/Cargo.toml -- --check
+      - name: Types and code style
+        run: |
+          pnpm run typecheck
+          pnpm exec turbo run lint
+      - name: Rust lints
+        env:
+          RUSTUP_TOOLCHAIN: 1.88.0
+        run: pnpm exec turbo run lint:rust
+      # check:preferences is excluded: its static architecture lock still asserts assertions from
+      # before the settings CSS was split and the settings commands moved to app_commands.rs.
+      - name: Repository guards
+        run: |
+          pnpm run check:lines
+          pnpm run check:flow
+          pnpm run check:focus
+          pnpm run check:interactions

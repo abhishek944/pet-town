@@ -15,6 +15,8 @@ var last_v_scroll := -1.0
 var cell_text_columns: Array = []
 var display_columns := PackedInt32Array()
 var advance_cache := {}
+var wrap_geometry := WrapGeometry.new()
+var projected_sequence := -1
 
 func _ready() -> void:
 	editable = false
@@ -46,7 +48,8 @@ func _ready() -> void:
 	cell_size.x = font_faces[0].get_string_size("M", HORIZONTAL_ALIGNMENT_LEFT, -1, 1000).x * 12.5 / 1000
 	caret_changed.connect(queue_redraw)
 	focus_entered.connect(queue_redraw)
-	resized.connect(queue_redraw)
+	resized.connect(func() -> void: wrap_geometry.invalidate(); queue_redraw())
+	text_changed.connect(wrap_geometry.invalidate)
 	focus_exited.connect(func() -> void: selecting = false; queue_redraw())
 
 func glyph_advance(glyph: String) -> float:
@@ -56,7 +59,10 @@ func glyph_advance(glyph: String) -> float:
 	return advance
 
 func set_grid(value: RefCounted, _full_grid: bool) -> void:
+	if grid == value and value.sequence >= 0 and projected_sequence == value.sequence: return
 	grid = value
+	projected_sequence = grid.sequence
+	wrap_geometry.invalidate()
 	var source := cache_projection()
 	if text != source:
 		var selection := [get_selection_from_line(), get_selection_from_column(), get_selection_to_line(), get_selection_to_column()] if has_selection() else []
@@ -69,6 +75,7 @@ func set_grid(value: RefCounted, _full_grid: bool) -> void:
 	for row in grid.cells:
 		for cell in row:
 			if cell.blink: has_blink = true; break
+		if has_blink: break
 	queue_redraw()
 
 func cache_projection() -> String:
@@ -105,6 +112,11 @@ func _process(delta: float) -> void:
 		blink_timer = 0
 		blink_visible = not blink_visible
 		queue_redraw()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_THEME_CHANGED:
+		wrap_geometry.invalidate()
+		advance_cache.clear()
 
 func _draw() -> void:
 	if is_instance_valid(grid) and not font_faces.is_empty(): Painter.draw(self)

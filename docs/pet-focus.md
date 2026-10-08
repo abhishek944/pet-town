@@ -7,7 +7,7 @@
 ## Working flow
 
 ```text
-2D pet pointerdown → pointerup, below the drag threshold
+2D pet or name badge pointerdown → pointerup, below the drag threshold
   → main.ts invokes focus_agent with the opaque agent ID
   → the GUI launches its current executable with --focus-agent <ID>
   → main.rs handles the argument before Tauri/singleton initialization
@@ -40,7 +40,7 @@ to that window is unreliable.
 | Main event loop during activation  | [macos_activation.rs](../apps/pet-town/src-tauri/src/macos_activation.rs)                                | `NSRunningApplication.isActive` is cached until the main run loop advances. The helper must service `NSRunLoop` during its bounded wait; sleeping and polling alone falsely timed out for three seconds even when Herdr became visible. Both 2D and Three.js town focus enter this code on the isolated helper process's main thread.                                         |
 | Exact, revalidated Herdr selection | [focus/herdr.rs](../apps/pet-town/src-tauri/src/focus/herdr.rs)                                          | Validate session identity, select workspace and tab, revalidate, then select the agent pane. The current outer route selects before host activation and again after it. Preserve session checks, the host lookup, activation-error reporting, and the post-activation selection. Herdr host activation uses empty options rather than raising every host window.              |
 | Exact Codex installation           | [broker focus.rs](../packages/pet-town-agent-broker/src/focus.rs)                                        | Retain the selected running application's `bundleURL` and send its validated thread link with `open -a <that path>`. Do not independently resolve the app again with `open -b com.openai.codex`: ChatGPT and Codex installations were observed sharing that bundle ID. Generic/fallback activation may succeed without a bundle path; only deep-link delivery requires one.   |
-| Click versus drag                  | [pet-interactions.ts](../apps/pet-town/src/pet-interactions.ts), [main.ts](../apps/pet-town/src/main.ts) | Focus uses the ID captured on pointerdown and dispatches on a non-drag pointerup. Dragging and context-menu actions must not also focus an agent.                                                                                                                                                                                                                             |
+| Click versus drag                  | [pet-interactions.ts](../apps/pet-town/src/pet-interactions.ts), [main.ts](../apps/pet-town/src/main.ts) | Pets and name badges share the same pointer handler. Focus uses the ID captured on pointerdown and dispatches on a non-drag pointerup. Dragging and context-menu actions must not also focus an agent.                                                                                                                                                                        |
 
 `_setPreventsActivation:` is private macOS SPI. Its guarded use is a deliberate compatibility workaround, not an incidental cleanup candidate. If replacing it or changing the panel library, demonstrate an equivalent direct transition before removing it. If the selector is unavailable, the guard avoids a crash but does not guarantee the activation fix. The underlying style-mask/WindowServer mismatch is described in [the original FB16484811 investigation](https://philz.blog/nspanel-nonactivating-style-mask-flag/).
 

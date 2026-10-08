@@ -73,6 +73,17 @@ pub(crate) fn reap(app: &AppHandle) {
     }
 }
 
+// User close is graceful so Godot can save boat state and release workers.
+// The existing force-stop remains reserved for desktop shutdown.
+pub(crate) fn close(app: &AppHandle) -> Result<(), String> {
+    if !crate::godot_bridge::request_close(app)? {
+        if let Some(window) = app.get_webview_window(TOWN_LABEL) {
+            window.close().map_err(|error| error.to_string())?;
+        }
+    }
+    Ok(())
+}
+
 pub(crate) fn stop(app: &AppHandle) {
     crate::godot_bridge::stop(app);
     set_active(app, false);

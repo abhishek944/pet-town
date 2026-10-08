@@ -8,6 +8,8 @@ mod app_singleton;
 mod app_updates;
 mod codex_usage;
 mod control;
+#[cfg(target_os = "macos")]
+mod dock_menu;
 mod focus;
 mod focus_id;
 mod focus_trace;

@@ -5,7 +5,7 @@ const manifestModules = import.meta.glob("./pets/*/flow.json", {
   import: "default",
 }) as Record<string, unknown>;
 
-const assetModules = import.meta.glob("./pets/**/*.png", {
+const assetModules = import.meta.glob("./pets/**/*.webp", {
   eager: true,
   import: "default",
   query: "?url",
