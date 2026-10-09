@@ -7,6 +7,7 @@ const sectionNames = [
   "header",
   "hero",
   "features",
+  "setup",
   "companions",
   "mayor",
   "town",

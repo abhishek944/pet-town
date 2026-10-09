@@ -70,7 +70,14 @@
 .mobile-menu {
   display: none;
 }
-@media (max-width: 780px) {
+@media (max-width: 1000px) {
+  .site-header {
+    padding: 0 20px;
+  }
+  .site-header nav,
+  .site-header .tag {
+    display: none;
+  }
   .mobile-menu {
     display: block;
     position: relative;

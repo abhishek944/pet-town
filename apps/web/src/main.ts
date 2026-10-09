@@ -106,7 +106,7 @@ async function preferredMacDownload(): Promise<{ href: string; label: string; hi
           : "your platform";
     return {
       href: "#download",
-      label: "View macOS downloads",
+      label: "View free Mac downloads",
       hint: `Detected ${os} · Pet Town currently ships for macOS only`,
     };
   }
@@ -116,12 +116,12 @@ async function preferredMacDownload(): Promise<{ href: string; label: string; hi
   return intel
     ? {
         href: "https://github.com/abhishek944/pet-town/releases/latest/download/Pet-Town-macOS-Intel.dmg",
-        label: "Download for Intel Mac",
+        label: "Download free for Intel Mac",
         hint: "Intel Mac detected · Apple Silicon option available",
       }
     : {
         href: "https://github.com/abhishek944/pet-town/releases/latest/download/Pet-Town-macOS-Apple-Silicon.dmg",
-        label: "Download for macOS",
+        label: "Download free for Mac",
         hint: "Apple Silicon recommended · Intel option available",
       };
 }
