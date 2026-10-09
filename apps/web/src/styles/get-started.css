@@ -1,0 +1,61 @@
+.hero-description .actions {
+  flex-wrap: wrap;
+}
+.setup-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  padding: 0;
+  margin: 0 0 20px;
+  list-style: none;
+}
+.setup-steps li {
+  padding: 26px;
+  border: 1px solid #d6ddce;
+  border-radius: 20px;
+  background: #edf2e6;
+}
+.setup-steps h3 {
+  font:
+    30px "Instrument Serif",
+    Georgia,
+    serif;
+  font-weight: 400;
+  margin: 14px 0;
+  letter-spacing: -0.02em;
+}
+.setup-steps p,
+.setup-steps .text-link,
+.feedback-invitation {
+  font-size: 13px;
+}
+.setup-steps .hint {
+  font-size: 11px;
+}
+.feedback-invitation {
+  max-width: 480px;
+  margin: 28px auto 0;
+}
+.feedback-invitation a {
+  display: block;
+  margin-top: 8px;
+}
+@media (max-width: 850px) {
+  .setup-steps {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+@media (max-width: 600px) {
+  .setup-steps li {
+    padding: 22px;
+  }
+  footer {
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+  footer nav {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+}
