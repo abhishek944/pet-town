@@ -4,6 +4,9 @@ var host: CanvasLayer
 
 func _input(event: InputEvent) -> void:
 	if not host or not host.is_menu_open or host.active_panel == "Welcome": return
+	if is_instance_valid(host.modal.wildlife_detail) and host.modal.wildlife_detail.visible:
+		host.modal.wildlife_detail.handle_input(event)
+		return
 	if not event is InputEventKey or not event.pressed or event.echo: return
 	if is_instance_valid(host.modal.confirmation) and event.keycode != KEY_TAB:
 		if event.keycode in [KEY_ENTER, KEY_KP_ENTER]: host.modal.confirm_reset()

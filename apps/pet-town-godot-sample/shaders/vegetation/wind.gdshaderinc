@@ -7,21 +7,25 @@ float vegNoise(vec2 p) {
 vec3 vegDisplace(vec3 o, vec3 lp, float w) {
   vec3 disp = vec3(0.0);
   if (w <= 0.0) return disp;
-  vec2 wd = normalize(uWind.xy + 1e-5);
-  float t = TIME;
+  vec2 wd = normalize(weather_wind.xy + 1e-5);
+  float t = weather_wind_time >= 0.0 ? weather_wind_time : TIME;
+  float energy = smoothstep(0.24, 1.15, weather_wind.z);
   // Large travelling gusts (visible waves rolling over grass) + per-plant flutter.
   float along = dot(o.xz, wd);
   float gust = vegNoise(vec2(along * 0.07 - t * 0.55, dot(o.xz, vec2(-wd.y, wd.x)) * 0.05));
-  gust = smoothstep(0.25, 0.95, gust) * (0.85+0.25*sin(TIME*0.13)+0.1*sin(TIME*0.041+1.3));
+  gust = smoothstep(0.25, 0.95, gust) * (0.85+0.25*sin(t*0.13)+0.1*sin(t*0.041+1.3));
+  // Broad rolling pulses become readable in strong wind, while calm stays gentle.
+  float wave = pow(0.5 + 0.5 * sin(along * 0.38 - t * 1.7 + vegNoise(o.xz * 0.025) * 1.8), 2.0);
+  gust = mix(gust, gust * 0.55 + wave * 0.85, energy);
   float ph = vegHash(floor(o.xz * 3.0)) * 6.2831;
   float flutter = sin(t * uSwayFreq + ph + along * 0.6) * 0.6 + sin(t * uSwayFreq * 2.17 + ph * 1.7) * 0.25;
-  float bend = (0.35 + gust * 1.4) * uWind.z;
-  disp.xz = wd * (bend + flutter * (0.35 + 0.65 * gust)) * uSwayAmp * w;
-  disp.xz += vec2(-wd.y, wd.x) * sin(t * uSwayFreq * 1.3 + ph * 2.3) * 0.18 * uSwayAmp * w;
+  float bend = (0.35 + gust * 1.4) * uWind.z * (0.45 + weather_wind.z * 1.6);
+  disp.xz = wd * (bend + flutter * (0.35 + 0.65 * gust) * (1.0 + energy * 1.5) * weather_motion) * uSwayAmp * w;
+  disp.xz += vec2(-wd.y, wd.x) * sin(t * uSwayFreq * 1.3 + ph * 2.3) * 0.18 * (1.0 + energy * 0.8) * weather_motion * uSwayAmp * w;
   // Leaf rustle: small high-frequency per-vertex jitter (canopies).
   if (uRustle > 0.0) {
     vec3 q = lp * 2.3 + o * 0.7;
-    disp += vec3(sin(t * 3.1 + q.x + q.y), sin(t * 2.6 + q.y * 1.3 + q.z) * 0.6, cos(t * 3.4 + q.z + q.x)) * uRustle * w * (0.5 + gust);
+    disp += vec3(sin(t * 3.1 + q.x + q.y), sin(t * 2.6 + q.y * 1.3 + q.z) * 0.6, cos(t * 3.4 + q.z + q.x)) * uRustle * w * (0.5 + gust) * (1.0 + energy * 2.5) * weather_motion;
   }
   // Player / creature push: flatten well beyond the body radius so small creatures stay visible.
   if (uPushAmt > 0.0) {

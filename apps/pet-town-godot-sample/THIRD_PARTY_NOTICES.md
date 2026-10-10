@@ -244,3 +244,13 @@ from the installed npm package.
    limitations under the License.
 
 ```
+
+## Battle skeletons
+
+The four recovered KayKit skeleton models under `assets/battle/` retain their original CC0 notice in [assets/battle/License.txt](assets/battle/License.txt). Existing rig clips are retained alongside Pet Town-authored combat clips. The seed launcher is authored for Pet Town.
+
+## KayKit Adventurers companions
+
+Knight, Mage, Barbarian, Rogue and Ranger are from [KayKit — Adventurers Character Pack 2.0](https://kaylousberg.itch.io/kaykit-adventurers), by Kay Lousberg. Their idle, walk, run and jump clips derive from the General and Movement Basic libraries in [KayKit — Character Animations](https://kaylousberg.itch.io/kaykit-character-animations). Both packs are distributed under CC0; the author’s license is retained in `assets/adventurers/License.txt`.
+
+Pet Town normalizes these five original rigs to its companion scale, bundles the four movement clips and adds its own gentle glide and swim loops. These additions are native companions only; they do not replace the original player, Mayor or Battle Mode skeletons. No paid characters or hooded Rogue variant are included.

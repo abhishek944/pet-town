@@ -10,6 +10,7 @@ uniform float uSeam = 0.12;
 uniform float uAODirect = 0.35;
 uniform float uDetail = 0.06;
 uniform float uRim = 0.12;
+uniform float weather_wetness = 0.0;
 uniform float uNight = 0.0;
 uniform float uWaterLevel = 7.62;
 uniform float uPillow = 1.0;
@@ -49,7 +50,8 @@ void fragment() {
 		if (tL.a*smoothstep(0.3,0.42,vLUv.y)<0.72) { discard; }
 		ALBEDO = tL.rgb*vTint;
 	}
-	ROUGHNESS = 0.93; SPECULAR = 0.5;
+	ALBEDO *= 1.0 - weather_wetness * 0.16;
+	ROUGHNESS = mix(0.93,0.48,weather_wetness); SPECULAR = 0.5;
 	AO = vAO; AO_LIGHT_AFFECT = uAODirect;
 	EMISSION = ALBEDO*uEmit[int(vTile+0.5)];
 	float bs = uBump[int(vTile+0.5)]*uBumpScale*(1.0-overA);

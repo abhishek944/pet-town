@@ -1,6 +1,6 @@
 extends Node
 ## Live Mayor overrides on the exact source facial nodes after baked locomotion.
-var body: CharacterBody3D
+var body: RigidBody3D
 var nodes: Dictionary={}
 var mouth_scale:=Vector3.ONE
 var elapsed:=0.0
@@ -8,7 +8,7 @@ var look_yaw:=0.0
 var look_pitch:=0.0
 var was_speaking:=false
 
-func setup(actor: CharacterBody3D, model: Node3D, facial: Dictionary) -> void:
+func setup(actor: RigidBody3D, model: Node3D, facial: Dictionary) -> void:
 	body=actor
 	process_priority=20
 	for key in ["smile","mouthO","neck","head","hips"]:

@@ -3,17 +3,6 @@ extends RefCounted
 const FLAGS=(Mesh.ARRAY_CUSTOM_RGBA_FLOAT<<Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT)|(Mesh.ARRAY_CUSTOM_RGBA_FLOAT<<Mesh.ARRAY_FORMAT_CUSTOM1_SHIFT)
 
 static func prepare(record: Dictionary) -> void:
-	var ranges: Dictionary={}
-	var cells: Array=record.cells
-	var start:=0
-	while start<cells.size():
-		var cell: Vector3i=cells[start]
-		var end:=start+1
-		while end<cells.size() and cells[end]==cell: end+=1
-		if not ranges.has(cell): ranges[cell]=[]
-		ranges[cell].append(Vector2i(start*3,end*3))
-		start=end
-	record.ranges=ranges
 	record.hidden={}
 	record.collider=null
 	for body in record.node.get_children():
@@ -32,6 +21,7 @@ static func apply(record: Dictionary,replaced: Dictionary) -> void:
 		if cached.hidden==hidden:
 			install(record,cached)
 			return
+	if record.arrays.is_empty(): record.arrays=preload("source_metadata.gd").source_arrays(record.node)
 	var original: PackedInt32Array=record.arrays[Mesh.ARRAY_INDEX]
 	var kept:=PackedInt32Array()
 	for cell in record.ranges:

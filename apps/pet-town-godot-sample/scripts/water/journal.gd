@@ -5,7 +5,7 @@ func data() -> Dictionary:
 	var place_rows: Array=[]
 	var experiences: Array=[]
 	var collection: Array=[]
-	var actor: CharacterBody3D=ocean.actor
+	var actor: RigidBody3D=ocean.actor
 	for place in ocean.places():
 		var found: bool=ocean.discoveries().has(place.id)
 		var offset:=Vector2(place.x-actor.position.x,place.z-actor.position.z) if actor else Vector2.ZERO
@@ -18,6 +18,8 @@ func data() -> Dictionary:
 		collection.append({"title":place.name,"art":place.get("art","reef"),"note":"",
 			"meta":"Ocean · "+("Discovery stamp ✓" if found else "Still to discover"),"actions":[],"found":found})
 	for adventure in ocean.source.get("experiences",[]):
+		# The imported night-plankton experience belongs to the browser reference.
+		if adventure.get("art", "") == "glow" and adventure.get("passive", false): continue
 		var place: Dictionary=ocean.find_place(adventure.id)
 		if place.is_empty(): continue
 		var distance:=Vector2(place.x-actor.position.x,place.z-actor.position.z).length() if actor else 0.0
@@ -27,7 +29,7 @@ func data() -> Dictionary:
 		experiences.append({"title":adventure.name,"art":adventure.art,"note":adventure.note+"\n"+adventure.how,
 			"meta":meta,"actions":[{"id":"ocean-heading:"+adventure.id,"label":"Set a heading","enabled":true}]})
 	experiences.append({"title":"A little swimming guide","art":"reef","meta":"Start at Driftwood Camp, then walk west to the sea.",
-		"note":"WASD to swim · Shift to swim faster\nHold Control to dive · Hold Space to rise\nRelease both to stay at depth. There is no oxygen timer.\nGamepad: X to dive, A to rise. Touch: hold Dive and the jump arrow to rise. Controlled companions can dive too.","actions":[]})
+		"note":"WASD to swim · Shift to swim faster\nHold X to dive · Hold Space to rise\nRelease both to stay at depth. There is no oxygen timer.\nGamepad: X to dive, A to rise. Touch: hold Dive or Rise. Controlled companions can dive too.","actions":[]})
 	return {"places":place_rows,"experiences":experiences,"collection":collection}
 
 static func cardinal(offset: Vector2) -> String:

@@ -58,7 +58,9 @@ func set_prompt(name: String, screen_position: Vector2) -> void:
 	prompt.size = Vector2(width, 46)
 	anchor = Vector2(clampf(screen_position.x, width / 2 + 8, size.x - width / 2 - 8), clampf(screen_position.y, size.y * 0.16 + 46, size.y - 125))
 	var target := anchor - Vector2(width / 2, 46)
-	prompt.position = prompt.position.lerp(target, 0.25) if prompt.visible else target
+	# Preserve the 60 FPS response at any render rate.
+	var blend := 1.0 - pow(0.75, get_process_delta_time() * 60.0)
+	prompt.position = prompt.position.lerp(target, blend) if prompt.visible else target
 	prompt.show()
 	queue_redraw()
 

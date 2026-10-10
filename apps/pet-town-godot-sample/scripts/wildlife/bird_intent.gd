@@ -16,7 +16,7 @@ static func tick(actor, delta: float) -> void:
 	runtime.retry -= delta
 	if actor.state == "happy" and actor.age < actor.duration:
 		return
-	var supported: bool = actor.is_on_floor() and is_finite(actor.ground_height) and absf(actor.position.y - actor.ground_height) < 0.2 and actor.ground_height >= actor.system.water_level - 0.05
+	var supported: bool = actor.is_grounded() and is_finite(actor.ground_height) and absf(actor.position.y - actor.ground_height) < 0.2 and actor.ground_height >= actor.system.water_level - 0.05
 	if actor.state == "land" and not actor.has_goal and supported:
 		actor.flying = false
 		runtime.flight_time = 0.0
@@ -36,7 +36,7 @@ static func tick(actor, delta: float) -> void:
 		if not should_rest:
 			actor.set_state("fly", 30.0)
 		elif actor.age < 30.0:
-			# Native move_and_slide confirms floor contact before sleep is allowed.
+			# Native body contacts confirm floor support before sleep is allowed.
 			return
 	if actor.state != "land" and should_rest:
 		actor.has_goal = false

@@ -8,8 +8,8 @@ var daylight: Node3D
 var water: Node3D
 var fires: Array[Node3D] = []
 var motes: CPUParticles3D
-var last_player := Vector3.INF
-var wake_delay := 0.0
+var reduced_motion := false
+var splash: CPUParticles3D
 
 func setup(manifest: Dictionary) -> void:
 	daylight = Daylight.new()
@@ -21,6 +21,8 @@ func setup(manifest: Dictionary) -> void:
 	water = Water.new()
 	add_child(water)
 	water.setup(manifest)
+	splash = preload("res://scripts/water/entry_splash.gd").new()
+	add_child(splash)
 	water.set_lighting(daylight.sample)
 	for data in manifest.get("campfires", []):
 		var fire := Campfire.new()
@@ -38,24 +40,24 @@ func setup(manifest: Dictionary) -> void:
 func set_time_of_day(value: float) -> void:
 	if not daylight:
 		return
-	if not daylight.set_time_of_day(value):
-		return
-	water.set_lighting(daylight.sample)
+	daylight.set_time_of_day(value)
+
+func apply_lighting(sample: Dictionary) -> void:
+	daylight.apply_sample(sample)
+	water.set_lighting(sample)
 	for fire in fires:
-		fire.night = float(daylight.sample.get("stars", 0.0))
+		fire.night = float(sample.get("night", sample.get("stars",0.0)))
 
 func set_player_position(value: Vector3) -> void:
 	if not water:
 		return
 	motes.global_position = value + Vector3.UP * 1.8
-	if wake_delay <= 0.0 and value.distance_squared_to(last_player) > 0.03 and absf(value.y - water.water_level) < 1.4:
-		water.add_ripple(value, 0.65)
-		wake_delay = 0.35
-	last_player = value
 
 func add_ripple(position: Vector3, strength := 1.5) -> void:
-	if water:
+	if water and not reduced_motion:
 		water.add_ripple(position, strength)
 
-func _process(delta: float) -> void:
-	wake_delay = maxf(0.0, wake_delay - delta)
+func add_splash(at: Vector3) -> void:
+	if reduced_motion or not water: return
+	add_ripple(at, 1.0)
+	splash.play(Vector3(at.x, get_parent().water_at(at), at.z))

@@ -1,4 +1,5 @@
 extends RefCounted
+const PATH_SURFACE_DROP := 0.01
 
 static func emit(mesh: RefCounted,face: Dictionary,u: float,v: float) -> int:
 	var state: RefCounted=mesh.state
@@ -9,7 +10,7 @@ static func emit(mesh: RefCounted,face: Dictionary,u: float,v: float) -> int:
 	var normal: Vector3=bevel[1] if bevel[2]>0 else Vector3(mesh.NORMALS[face.direction])
 	var highlight:=minf(1.0,(1.0-normal.dot(Vector3(mesh.NORMALS[face.direction])))*3.4) if bevel[2]>0 else 0.0
 	normal=(normal*127.0).round()/127.0
-	if face.dropped: point.y-=0.085
+	if face.dropped: point.y-=PATH_SURFACE_DROP
 	if original.y>7.000001 and original.y<=8.000001:
 		var drop: float=state.shore(original.x,original.z)
 		if drop>0:

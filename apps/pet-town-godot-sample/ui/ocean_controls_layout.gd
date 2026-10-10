@@ -92,7 +92,7 @@ func _first_fit(owner: Control, size: Vector2, points: Array[Vector2], obstacles
 		if _fits(owner, candidate, obstacles + occupied): return candidate
 	return Rect2()
 
-func _hud_obstacles(owner: Control) -> Array[Rect2]:
+func _hud_obstacles(owner: Control, include_swim := true) -> Array[Rect2]:
 	var result: Array[Rect2] = []
 	var live := owner.get_parent()
 	var hud = live.get("host") if live is Control else null
@@ -110,6 +110,10 @@ func _hud_obstacles(owner: Control) -> Array[Rect2]:
 		if control is Control and control.is_visible_in_tree() and control.size.x > 0 and control.size.y > 0:
 			var rect := _rect(owner, control)
 			if rect.intersects(Rect2(Vector2.ZERO, owner.size)): result.append(rect)
+	var swim = owner.get("swim")
+	if include_swim and swim is Control:
+		for control in [swim.left, swim.build]:
+			if control.is_visible_in_tree(): result.append(_rect(owner, control))
 	return result
 
 func _obstacles(owner: Control, dive: Control, helm: Control) -> Array[Rect2]:

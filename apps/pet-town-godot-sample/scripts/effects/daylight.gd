@@ -5,9 +5,14 @@ var sunlight: DirectionalLight3D
 var sky_material: ShaderMaterial
 var time_of_day := 0.38
 var sample: Dictionary = {}
+var base_sample: Dictionary = {}
 var keys: Array = []
 var last_update_msec := -1000
 var cloud_tick := -1
+var cloud_offset := Vector2.ZERO
+var cloud_velocity := Vector2(0.24,0.1)
+var weather_sky_msec := -1000
+var atmosphere_controlled := false
 
 func setup(manifest: Dictionary) -> void:
 	keys = JSON.parse_string(FileAccess.get_file_as_string("res://scripts/effects/daylight_keys.json"))
@@ -68,6 +73,14 @@ func set_time_of_day(value: float) -> bool:
 	sample.sun_elevation = direction.y
 	sample.sun_elevation_radians = elevation
 	sunlight.rotation = Vector3(-maxf(elevation, deg_to_rad(18)), atan2(horizontal.x, horizontal.z), 0)
+	base_sample = sample.duplicate()
+	if not atmosphere_controlled: apply_sample(sample)
+	return true
+
+func apply_sample(value: Dictionary) -> void:
+	sample = value
+	var direction: Vector3 = sample.sun_direction
+	var elevation: float = sample.sun_elevation_radians
 	sunlight.light_color = sample.sun
 	sunlight.light_energy = float(sample.sunI)/PI
 	sunlight.shadow_opacity = lerpf(0.72, 0.85, smoothstep(0.12, 0.45, elevation)) if elevation > -0.035 else 0.6
@@ -75,6 +88,10 @@ func set_time_of_day(value: float) -> bool:
 	environment.ambient_light_color = sample.hSky
 	environment.ambient_light_energy = float(sample.hI)/PI
 	preload("res://scripts/effects/hemisphere.gd").update(sample)
+	cloud_velocity = sample.get("cloud_wind",Vector2(0.24,0.1))
+	var now := Time.get_ticks_msec()
+	if now - weather_sky_msec < 250: return
+	weather_sky_msec = now
 	for key in ["zenith", "mid", "horizon", "sunHz", "glow", "cLit", "cShade"]:
 		sky_material.set_shader_parameter(key, sample[key])
 	sky_material.set_shader_parameter("sun_direction", direction)
@@ -85,13 +102,15 @@ func set_time_of_day(value: float) -> bool:
 	var disc_energy := lerpf(3.2, 32.0, smoothstep(0.06, 0.5, elevation)) * smoothstep(-0.06, 0.0, elevation) / float(sample.exp)
 	sky_material.set_shader_parameter("sun_disc", Vector3(sun_color.r, sun_color.g, sun_color.b) * disc_energy)
 	sky_material.set_shader_parameter("sun_size", lerpf(0.036, 0.027, smoothstep(0.0, 0.35, elevation)))
-	return true
+	sky_material.set_shader_parameter("cloud_cover", sample.get("cloud_cover", 0.08))
+	sky_material.set_shader_parameter("sun_visibility", sample.get("sun_visibility",1.0))
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	cloud_offset += cloud_velocity * delta * 0.012
 	var tick := int(Time.get_ticks_msec() / 250)
 	if tick != cloud_tick and sky_material:
 		cloud_tick = tick
-		sky_material.set_shader_parameter("cloud_clock", float(tick) * 0.25)
+		sky_material.set_shader_parameter("cloud_offset", cloud_offset)
 
 func _color(value: int) -> Color:
 	return Color.hex((value << 8) | 255)

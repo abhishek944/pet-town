@@ -1,6 +1,7 @@
 extends VBoxContainer
 
 signal action_requested(action: String)
+const Palette = preload("res://ui/settings_style.gd")
 const Style = preload("res://ui/hud_style.gd")
 var heading: Label
 var copy: Label
@@ -18,14 +19,13 @@ var confirmation_actions: HFlowContainer
 var native_buttons: HBoxContainer
 
 func _ready() -> void:
-	add_child(Style.title("About Pet Town"))
-	add_child(Style.text("Pet Street and Pet Town, updated together.", 12))
+	preload("res://ui/settings_content.gd").intro(self, "MADE FOR YOUR TIME TOGETHER", "About Pet Town", "Pet Street and Pet Town, updated together.")
 	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", Style.panel("f3eddd", 14, "dfcfac", false))
+	card.add_theme_stylebox_override("panel", Palette.box(Palette.CREAM, Palette.BORDER, 10))
 	add_child(card)
 	var column := VBoxContainer.new()
 	card.add_child(column)
-	column.add_child(Style.title("App updates", 21))
+	column.add_child(Style.title("App updates", 17))
 	heading = Style.label("Checking for updates…", 13)
 	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(heading)
@@ -37,17 +37,17 @@ func _ready() -> void:
 	column.add_child(progress)
 	var actions := HFlowContainer.new()
 	column.add_child(actions)
-	check = Style.flat_button("Check for updates")
+	check = Palette.action("Check for updates")
 	check.pressed.connect(func() -> void: action_requested.emit("update_check"))
 	actions.add_child(check)
-	download = Style.flat_button("Download update")
+	download = Palette.action("Download update")
 	download.pressed.connect(func() -> void: action_requested.emit("update_download"))
 	actions.add_child(download)
-	install = Style.flat_button("Install & Restart", "426448", "426448")
+	install = Palette.action("Install & Restart", true)
 	install.add_theme_color_override("font_color", Color("fff7e4"))
 	install.pressed.connect(confirm_install)
 	actions.add_child(install)
-	news = Style.flat_button("What’s new ↗")
+	news = Palette.action("What’s new ↗")
 	news.pressed.connect(func() -> void:
 		var version: String = str(state.availableVersion) if state.get("availableVersion") else ""
 		OS.shell_open("https://github.com/abhishek944/pet-town/releases/" + ("tag/v" + version.uri_encode() if not version.is_empty() else "latest")))

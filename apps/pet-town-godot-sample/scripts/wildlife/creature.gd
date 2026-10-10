@@ -1,4 +1,4 @@
-extends CharacterBody3D
+extends "res://scripts/physics/body.gd"
 const Intent = preload("res://scripts/wildlife/intent.gd")
 const Style = preload("res://scripts/asset_style.gd")
 const WildlifeMaterials = preload("res://scripts/wildlife/materials.gd")
@@ -47,17 +47,9 @@ func setup(data: Dictionary, owner_system: Node3D) -> void:
 	position = Vector3(data.position[0], data.position[1], data.position[2])
 	home = Vector3(data.home[0], data.position[1], data.home[2])
 	rotation.y = float(data.yaw)
-	collision_layer = 4
-	collision_mask = 1
+	configure_body(preload("res://scripts/physics/profiles.gd").wildlife(definition, size_factor))
 	floor_snap_length = 0.5
 	floor_max_angle = deg_to_rad(48)
-	var shape := CollisionShape3D.new()
-	var capsule := CapsuleShape3D.new()
-	capsule.radius = minf(0.4, radius * 0.72)
-	capsule.height = maxf(capsule.radius * 2, float(definition.height) * size_factor)
-	shape.shape = capsule
-	shape.position.y = capsule.height * 0.5
-	add_child(shape)
 	var scene_path := "res://assets/%s.glb" % str(data.model)
 	if not ResourceLoader.exists(scene_path):
 		return
@@ -80,6 +72,7 @@ func _find_animation(node: Node) -> void:
 		_find_animation(child)
 
 func _physics_process(delta: float) -> void:
+	begin_motion()
 	if not is_instance_valid(system.player):
 		return
 	if not initialized:
@@ -88,7 +81,7 @@ func _physics_process(delta: float) -> void:
 			if definition.has("flight") and position.y > ground + 0.5:
 				flying = true
 			else:
-				position.y = ground
+				relocate(Vector3(position.x, ground, position.z))
 		ground_height = ground
 		support_timer = float(get_index() % 6) / 60.0
 		initialized = true
@@ -128,8 +121,15 @@ func _physics_process(delta: float) -> void:
 			if not system.inside(next) or (not flying and (not is_finite(next_ground) or next_ground < position.y - 1.0 or (not swimmer and next_ground < system.water_level - 0.05))):
 				desired = Vector3.ZERO
 				has_goal = false
-	velocity.x = move_toward(velocity.x, desired.x, delta * 7.0)
-	velocity.z = move_toward(velocity.z, desired.z, delta * 7.0)
+	var avoidance := steer(desired, flying or in_water)
+	var avoided_point := global_position + avoidance * maxf(delta, 0.13)
+	if not system.inside(avoided_point): avoidance = Vector3.ZERO
+	if not flying and avoidance != desired:
+		var avoided_ground: float = system.support(avoided_point, 0.7, 2.0)
+		if not is_finite(avoided_ground) or avoided_ground < position.y - 1 or (not swimmer and avoided_ground < system.water_level - 0.05): avoidance = Vector3.ZERO
+	medium = "air" if flying else ("water" if in_water else "land")
+	velocity.x = move_toward(velocity.x, avoidance.x, delta * 7.0)
+	velocity.z = move_toward(velocity.z, avoidance.z, delta * 7.0)
 	if flying and is_finite(ground):
 		var profile: Dictionary = definition.get("flight", {})
 		var flight_height := float(profile.get("minAltitude", 3.0))
@@ -140,19 +140,18 @@ func _physics_process(delta: float) -> void:
 			destination_y = ground
 		velocity.y = clampf((destination_y - position.y) * 2.0, -2.5, 4.0)
 	elif in_water:
-		velocity.y = (system.water_level - 0.25 - position.y) * 8.0
+		# Request a damped buoyancy force, rather than replacing vertical speed.
+		# Full velocity correction oscillates through the rigid body's motor delay.
+		var depth_error: float = system.water_level - 0.25 - position.y
+		velocity.y += (depth_error * 32.0 - velocity.y * 10.0) * delta
 	else:
-		velocity.y = -0.5 if is_on_floor() else velocity.y - delta * 22.0
-	# Resting grounded bodies need only periodic support refresh; moving bodies
-	# retain the full native collision sweep every physics frame.
-	if has_goal or flying or in_water or not is_on_floor() or Vector2(velocity.x, velocity.z).length_squared() > 0.001 or settle_timer <= 0.0:
-		move_and_slide()
-		settle_timer = 0.1
+		velocity.y = -0.5 if is_grounded() else velocity.y - delta * 22.0
+	submit_motion()
 	if desired.length() > 0.05:
-		rotation.y = lerp_angle(rotation.y, atan2(desired.x, desired.z), 1.0 - exp(-delta * 7.0))
+		set_heading(lerp_angle(rotation.y, atan2(desired.x, desired.z), 1.0 - exp(-delta * 7.0)))
 	elif state in ["greet", "happy"]:
 		var direction: Vector3 = system.player.global_position - global_position
-		rotation.y = lerp_angle(rotation.y, atan2(direction.x, direction.z), 1.0 - exp(-delta * 4.0))
+		set_heading(lerp_angle(rotation.y, atan2(direction.x, direction.z), 1.0 - exp(-delta * 4.0)))
 	var clip := "idle"
 	if state in ["happy", "sleep", "rest", "graze", "flee"]:
 		clip = state
@@ -160,13 +159,13 @@ func _physics_process(delta: float) -> void:
 		clip = "fly"
 	elif in_water:
 		clip = "swim"
-	elif Vector2(velocity.x, velocity.z).length() > 0.08:
+	elif Vector2(linear_velocity.x, linear_velocity.z).length() > 0.08:
 		clip = "walk"
 	if animation and clips.has(clip) and clip != current_clip:
 		animation.play(clips[clip], 0.14)
 		current_clip = clip
 	if animation:
-		animation.speed_scale = clampf(Vector2(velocity.x, velocity.z).length() / walk, 0.8, 1.6) if clip == "walk" else 1.0
+		animation.speed_scale = clampf(Vector2(linear_velocity.x, linear_velocity.z).length() / walk, 0.8, 1.6) if clip == "walk" else 1.0
 
 func set_state(value: String, seconds: float) -> void:
 	state = value

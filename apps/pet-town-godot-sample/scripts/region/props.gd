@@ -1,6 +1,7 @@
 extends Node3D
 const Buffers = preload("buffers.gd")
 var props: Dictionary = {}
+var prefetch: RefCounted
 var entries: Dictionary = {}
 var materials: Dictionary = {}
 var details: Dictionary = {}
@@ -13,13 +14,16 @@ var lamp_weights: Array[float] = []
 var lamp_timer := 0.0
 var lamp_nearest: Array[int] = []
 
-func setup(manifest: Dictionary) -> void:
+func setup(manifest: Dictionary, budget: RefCounted = null) -> void:
+	prefetch = preload("scene_prefetch.gd").new(manifest.props,budget)
 	details = Buffers.read_json(manifest.get("propDetailsFile", "region-prop-details.json"))
 	for key in details.get("materials", {}):
 		materials[key] = make_material(details.materials[key])
+		if budget: await budget.checkpoint()
 	for entry in manifest.props:
 		if not entry.get("file"): continue
-		var scene: PackedScene = load("res://assets/" + entry.file)
+		var scene: PackedScene = await prefetch.take(str(entry.file))
+		if not is_inside_tree(): return
 		if scene == null: continue
 		var instance: Node3D = scene.instantiate()
 		instance.name = str(entry.name).validate_node_name()
@@ -29,6 +33,7 @@ func setup(manifest: Dictionary) -> void:
 		add_collision(instance)
 		props[entry.file] = instance
 		entries[entry.file] = entry
+		if budget: await budget.checkpoint()
 	for entry in details.get("windmills", []):
 		var parent := Node3D.new()
 		parent.name = "WindmillHub"
@@ -38,6 +43,7 @@ func setup(manifest: Dictionary) -> void:
 		parent.add_child(rotor)
 		apply_materials(rotor)
 		rotors.append(rotor)
+		if budget: await budget.checkpoint()
 	for point in details.get("lanterns", []):
 		lantern_positions.append(Vector3(point[0],point[1],point[2]))
 	for i in mini(6,lantern_positions.size()):
@@ -52,6 +58,7 @@ func setup(manifest: Dictionary) -> void:
 		lamp_sources.append(i)
 		lamp_weights.append(0.0)
 	set_night_factor(0.0)
+	prefetch.finish()
 
 func make_material(source: Dictionary) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
@@ -99,26 +106,18 @@ func material_key(node_name: String) -> String:
 	return ""
 
 func add_collision(root: Node3D) -> void:
-	var faces := collect_faces(root,root.global_transform.affine_inverse())
-	if faces.is_empty(): return
+	var shape := preload("prop_collision.gd").shape(str(root.get_meta("original_prop").file),root)
+	if not shape: return
 	var body := StaticBody3D.new()
 	body.name = "OriginalMeshCollision"
 	body.collision_layer = 1
-	var shape := ConcavePolygonShape3D.new()
-	shape.set_faces(faces)
-	shape.backface_collision = true
 	var collider := CollisionShape3D.new()
 	collider.shape = shape
 	body.add_child(collider)
 	root.add_child(body)
 
 func collect_faces(node: Node, to_root: Transform3D) -> PackedVector3Array:
-	var faces := PackedVector3Array()
-	if node is MeshInstance3D and node.mesh:
-		faces.append_array((to_root*node.global_transform)*node.mesh.get_faces())
-	for child in node.get_children():
-		faces.append_array(collect_faces(child,to_root))
-	return faces
+	return preload("prop_collision.gd").collect_faces(node,to_root)
 
 func set_night_factor(value: float) -> void:
 	var factor := clampf(value,0.0,1.0)
@@ -161,3 +160,6 @@ func update_lamps(delta: float) -> void:
 						lanterns[i].position=lantern_positions[source]
 						break
 		lanterns[i].light_energy=night_factor*8.0*lamp_weights[i]
+
+func _exit_tree() -> void:
+	if prefetch: prefetch.finish()

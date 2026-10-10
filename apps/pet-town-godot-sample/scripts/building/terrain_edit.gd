@@ -8,7 +8,7 @@ var glass_material: Material
 var replaced: Dictionary={}
 var last_profile: Dictionary={}
 
-func setup(owner_world: Node3D,voxel_store: RefCounted) -> void:
+func setup(owner_world: Node3D,voxel_store: RefCounted,budget: RefCounted = null) -> void:
 	world=owner_world
 	store=voxel_store
 	var half:=int(world.manifest.sourceBounds.maxX)/16
@@ -16,22 +16,11 @@ func setup(owner_world: Node3D,voxel_store: RefCounted) -> void:
 		var parts:=str(instance.name).split("_")
 		var key:=Vector2i(int(parts[1])-half,int(parts[2])-half)
 		if not records.has(key): records[key]=[]
-		var arrays: Array=instance.mesh.surface_get_arrays(0)
-		var indices: PackedInt32Array=arrays[Mesh.ARRAY_INDEX]
-		var points: PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
-		var attrs: PackedFloat32Array=arrays[Mesh.ARRAY_CUSTOM0]
-		var cells: Array[Vector3i]=[]
-		var faces:=PackedByteArray()
-		for index in range(0,indices.size(),3):
-			var vertex:=indices[index]
-			var face:=int(attrs[vertex*4+3])%8
-			var center: Vector3=(points[vertex]+points[indices[index+1]]+points[indices[index+2]])/3.0
-			var cell:=Vector3i((center-Vector3(FaceMesh.NORMALS[face])*0.14).floor())
-			cells.append(cell)
-			faces.append(face)
-		var record:={"node":instance,"mesh":instance.mesh,"arrays":arrays,"cells":cells,"faces":faces,"lip":str(instance.name).begins_with("lip")}
+		var ranges: Dictionary = await preload("source_metadata.gd").ranges(instance,budget)
+		var record:={"node":instance,"mesh":instance.mesh,"arrays":[],"ranges":ranges,"lip":str(instance.name).begins_with("lip")}
 		preload("original_filter.gd").prepare(record)
 		records[key].append(record)
+		if budget: await budget.checkpoint()
 	glass_material=load("res://scripts/building/glass_material.gd").new().create()
 
 func prepare(snapshot: RefCounted,changed: Array) -> RefCounted:
@@ -39,19 +28,20 @@ func prepare(snapshot: RefCounted,changed: Array) -> RefCounted:
 	worker.configure(snapshot,changed,world.manifest)
 	return worker
 
-func refresh(changed: Array) -> void:
+func refresh(changed: Array,budget: RefCounted = null) -> void:
 	# Synchronous startup/internal path; interactive edits always use the worker queue.
 	var worker:=prepare(preload("mesh_worker.gd").copy_store(store),changed)
-	worker.run()
-	publish(worker.result)
+	if budget: await budget.background(worker.run)
+	else: worker.run()
+	await publish(worker.result,budget)
 
-func publish(result: Dictionary) -> void:
+func publish(result: Dictionary,budget: RefCounted = null) -> void:
 	var begin:=Time.get_ticks_usec()
 	last_profile={"filter_us":0,"geometry_us":result.geometry_us,"upload_collision_us":0}
 	replaced=result.replaced
 	for key in result.groups:
 		var tick:=Time.get_ticks_usec()
-		for record in records.get(key,[]): preload("original_filter.gd").apply(record,replaced)
+		for record in records.get(key,[]): preload("original_filter.gd").apply(record,replaced[key])
 		last_profile.filter_us+=Time.get_ticks_usec()-tick
 		tick=Time.get_ticks_usec()
 		if additions.has(key):
@@ -73,4 +63,5 @@ func publish(result: Dictionary) -> void:
 			if index!=2: instance.create_trimesh_collision()
 		additions[key]=group
 		last_profile.upload_collision_us+=Time.get_ticks_usec()-tick
+		if budget: await budget.checkpoint()
 	last_profile.total_us=Time.get_ticks_usec()-begin

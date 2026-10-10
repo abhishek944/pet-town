@@ -62,6 +62,7 @@ pub(crate) struct Reading {
     pub updated_at_seconds: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
+    pub coin_contribution: Option<CoinBalance>,
 }
 
 impl Default for Reading {
@@ -75,6 +76,7 @@ impl Default for Reading {
             models: Vec::new(),
             updated_at_seconds: None,
             reason: None,
+            coin_contribution: None,
         }
     }
 }
@@ -87,9 +89,42 @@ pub(crate) struct Snapshot {
     pub totals: Reading,
     pub tracked_sessions: usize,
     pub measured_sessions: usize,
+    pub coins: CoinBalance,
+    pub coin_sync_unavailable: bool,
+}
+
+#[derive(Clone, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct CoinBalance {
+    pub available: bool,
+    pub whole_coins: u64,
+    pub earned_coins: u64,
+    pub spent_coins: u64,
+    pub remainder_tokens: u64,
+    pub tokens_per_coin: u64,
+}
+
+impl CoinBalance {
+    pub(super) fn from_tokens(tokens: u64) -> Self {
+        Self {
+            available: true,
+            whole_coins: tokens / 1_000_000,
+            earned_coins: tokens / 1_000_000,
+            spent_coins: 0,
+            remainder_tokens: tokens % 1_000_000,
+            tokens_per_coin: 1_000_000,
+        }
+    }
 }
 
 impl Tokens {
+    pub(super) fn counted(&self) -> Option<u64> {
+        (self.cached_input_tokens <= self.input_tokens
+            && self.reasoning_output_tokens <= self.output_tokens)
+            .then(|| self.input_tokens.checked_add(self.output_tokens))
+            .flatten()
+    }
+
     pub(super) fn regressed_from(&self, previous: &Self) -> bool {
         self.input_tokens < previous.input_tokens
             || self.cached_input_tokens < previous.cached_input_tokens

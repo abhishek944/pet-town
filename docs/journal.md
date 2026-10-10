@@ -2,7 +2,7 @@
 
 Press **J** or click **Journal** for one field book covering land and water. It replaces the separate Ocean Guide; O no longer opens a panel. Water rendering, activity rules, save keys and schemas remain unchanged.
 
-- **Experiences:** illustrated gardening, fishing, wish lanterns, shell hunting, photography, stargazing, dolphins, reef diving, kelp, wreck exploration, Pearlrest Island, passing ships and night plankton. Location hints show distance, Nearby and Best after dusk where appropriate. Existing activity controls remain here. Ships, plankton and stargazing are quiet experiences without extra completion counters.
+- **Experiences:** illustrated gardening, fishing, wish lanterns, shell hunting, photography, stargazing, dolphins, reef diving, kelp, wreck exploration, Pearlrest Island, passing ships and night plankton. Location hints show distance, Nearby and Best after dusk where appropriate. Existing activity controls remain here. Ships, plankton and stargazing are quiet experiences without extra completion counters. Native Godot omits the browser’s night-plankton experience because gentle physical water feedback replaces that effect.
 - **Places:** land destinations with safe Visit controls; ocean destinations with Head this way controls, distance and direction. A heading closes the journal and shows the compass. Companions can follow headings, while land travel requires choosing Leave first.
 - **Collection:** garden growth, fish discoveries, saved wishes, coastal shells and all land/ocean stamps. Feature a collected shell while standing at the Shell Cove shelf. Existing storage records are read directly; browser and desktop records stay separate.
 

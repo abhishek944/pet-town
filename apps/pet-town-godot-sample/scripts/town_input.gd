@@ -7,7 +7,16 @@ static func clear_gameplay() -> void:
 
 func setup(value: Node3D) -> void:
 	town = value
-	var actions := {"move_forward":KEY_W,"move_back":KEY_S,"move_left":KEY_A,"move_right":KEY_D,"run":KEY_SHIFT,"jump":KEY_SPACE,"orbit_left":KEY_Q,"orbit_right":KEY_E,"view":KEY_V,"dive":KEY_CTRL}
+	# Space belongs to jump; focused controls still accept Enter and gamepad input.
+	for action in ["ui_accept", "ui_select"]:
+		for event in InputMap.action_get_events(action):
+			if event is InputEventKey and (event.keycode == KEY_SPACE or event.physical_keycode == KEY_SPACE):
+				InputMap.action_erase_event(action, event)
+	var actions := {"move_forward":KEY_W,"move_back":KEY_S,"move_left":KEY_A,"move_right":KEY_D,"run":KEY_SHIFT,"jump":KEY_SPACE,"orbit_left":KEY_Q,"orbit_right":KEY_E,"view":KEY_V}
+	if not InputMap.has_action("dive"): InputMap.add_action("dive")
+	for event in InputMap.action_get_events("dive"):
+		if event is InputEventKey: InputMap.action_erase_event("dive", event)
+	actions["dive"] = KEY_X
 	for action in actions:
 		if not InputMap.has_action(action): InputMap.add_action(action)
 		var key := InputEventKey.new()
@@ -30,6 +39,7 @@ func setup(value: Node3D) -> void:
 		InputMap.action_add_event(pair[0],button)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if town.battle and town.battle.active(): return
 	if event is InputEventJoypadButton and event.is_action_pressed("interact") and town.actor and town.actor.enabled:
 		if not town.ocean or not town.ocean.interact(): town.wildlife.pet_nearest()
 		return
@@ -51,4 +61,5 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and town and town.ocean:
+		clear_gameplay()
 		town.ocean.release_controls()

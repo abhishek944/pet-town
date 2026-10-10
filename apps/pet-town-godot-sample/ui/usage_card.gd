@@ -1,6 +1,7 @@
 extends PanelContainer
 
 const Format = preload("res://ui/usage_format.gd")
+const Coins = preload("res://ui/coin_format.gd")
 const View = preload("res://ui/usage_card_view.gd")
 var view := View.new()
 var expanded := false
@@ -16,8 +17,10 @@ func render_combined(snapshot: Dictionary, selected_reading: Dictionary, selecte
 	var available: bool = snapshot.get("available", false)
 	var town: Dictionary = snapshot.get("totals", {}) if available else {}
 	var primary := _view_data(town, true, "" if available else "Usage collector unavailable")
-	primary.coverage = _coverage(snapshot, town)
+	primary.coins = snapshot.get("coins", {})
+	primary.coverage = Coins.coverage(snapshot)
 	var following := _view_data(selected_reading, false)
+	following.available = following.available and available
 	if not selected_model.is_empty(): following.model = selected_model
 	has_snapshot = not snapshot.is_empty() or not selected_reading.is_empty() or not selected_label.is_empty()
 	view.render_combined(primary, following, selected_label, expanded)
@@ -41,7 +44,8 @@ func render(reading: Dictionary, name: String, model: String, fallback: String, 
 	_sync_visibility()
 
 func _view_data(reading: Dictionary, is_town: bool, fallback := "") -> Dictionary:
-	return {"reading": reading, "available": _available(reading), "status": _status(reading, fallback), "note": _note(reading, is_town, fallback), "model": str(reading.get("model", "")), "is_town": is_town}
+	var contribution: Dictionary = reading.coinContribution if reading.get("coinContribution") is Dictionary else {}
+	return {"reading": reading, "coins": contribution, "available": _available(reading), "status": _status(reading, fallback), "note": _note(reading, is_town, fallback), "model": str(reading.get("model", "")), "is_town": is_town}
 
 func _coverage(snapshot: Dictionary, reading: Dictionary) -> String:
 	var measured := Format.count(snapshot.get("measuredSessions"))

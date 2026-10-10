@@ -9,6 +9,8 @@ var selected_index := 0
 var name_label: Label
 var name_panel: PanelContainer
 var tray: Panel
+var swimming := false
+var palette_open := false
 
 func _ready() -> void:
 	mouse_filter = MOUSE_FILTER_IGNORE
@@ -82,7 +84,10 @@ func layout() -> void:
 	var gap := 3.0 if columns < 12 else 4.0
 	var tray_width := (25 if columns == 12 else 26) + slot_width * columns + gap * (columns - 1)
 	var rows := 12 / columns
-	tray.offset_top = -87 - (rows - 1) * 52
+	tray.offset_top = -87 - (rows - 1) * 52 - (60 if swimming else 0)
+	tray.offset_bottom = -18 - (60 if swimming else 0)
+	tray.visible = not swimming or palette_open
+	name_panel.visible = tray.visible
 	name_panel.offset_top = tray.offset_top - 46
 	name_panel.offset_bottom = tray.offset_top - 10
 	tray.offset_left = -tray_width / 2
@@ -102,3 +107,13 @@ func wheel_select(event: InputEvent) -> void:
 	if event.button_index not in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]: return
 	selected.emit(posmod(selected_index + (1 if event.button_index == MOUSE_BUTTON_WHEEL_DOWN else -1), 12))
 	accept_event()
+
+func set_swimming(value: bool) -> void:
+	if swimming == value: return
+	swimming = value
+	palette_open = false
+	layout()
+
+func toggle_palette() -> void:
+	palette_open = not palette_open
+	layout()

@@ -1,5 +1,6 @@
 extends Node3D
 const Buffers = preload("buffers.gd")
+const DetailLevels = preload("vegetation_lod.gd")
 var materials: Array[ShaderMaterial] = []
 var player: Node3D
 var update_time := 0.0
@@ -7,49 +8,39 @@ var last_lighting_ms := -1000
 var rank_fields: Dictionary = {}
 var tier: Dictionary = {}
 var missing_ranks := 0
+var editable_groups: Array = []
 
-func setup(manifest: Dictionary) -> void:
-	load_ranks()
+func setup(manifest: Dictionary, budget: RefCounted = null) -> void:
+	await load_ranks(budget)
 	for field in manifest.vegetation.fields:
 		var blob: bool=field.name=="blob"
 		var material := make_blob(field.material) if blob else make_material(field.material)
 		if not blob:
 			materials.append(material)
 			apply_density(material,field)
-		var source := Buffers.read_json(field.instanceFile)
-		var matrices := Buffers.values(source.matrices)
-		var colors := Buffers.values(source.colors)
 		var ranks: Dictionary=rank_fields.get("%s:%s" % [field.name,field.variant],{})
-		var ranked:=field.get("density") is Array
+		var prepared: Dictionary = await preload("vegetation_buffers.gd").prepare(field,ranks,budget)
+		missing_ranks+=int(prepared.missing)
+		var groups: Dictionary = prepared.groups
 		var distance_scale: float=tier.get("dist",1.0)
-		var groups := {}
-		for i in source.count:
-			var key := Vector2i(floori(matrices[i*16+12]/16.0),floori(matrices[i*16+14]/16.0))
-			if not groups.has(key): groups[key] = []
-			groups[key].append(i)
 		var lods: Array = field.lods
+		var detail_groups := {}
 		for lod in lods.size():
 			var mesh := Buffers.resource_mesh(lods[lod].file)
 			mesh.surface_set_material(0,material)
 			for key in groups:
-				var items: Array = groups[key]
+				var group: Dictionary = groups[key]
 				var multi := MultiMesh.new()
 				multi.transform_format = MultiMesh.TRANSFORM_3D
 				multi.use_custom_data = true
 				multi.mesh = mesh
-				multi.instance_count = items.size()
+				multi.instance_count = int(group.count)
+				multi.buffer = group.buffer
 				var origin := Vector3(key.x*16+8,0,key.y*16+8)
-				for j in items.size():
-					var i: int = items[j]
-					var transform := Buffers.transform(Array(matrices.slice(i*16,i*16+16)))
-					var rank: float=ranks.get(transform.origin,0.0) if ranked else 0.0
-					if ranked and not ranks.has(transform.origin) and lod==0: missing_ranks+=1
-					transform.origin -= origin
-					multi.set_instance_transform(j,transform)
-					multi.set_instance_custom_data(j,Color(colors[i*3],colors[i*3+1],colors[i*3+2],rank))
 				var instance := MultiMeshInstance3D.new()
-				instance.name = field.name+"_"+str(key)+"_lod"+str(lod)
+				instance.name = field.name+"_"+str(field.variant)+"_"+str(key)+"_lod"+str(lod)
 				instance.multimesh = multi
+				instance.set_meta("foliage_anchors",group.anchors)
 				instance.position = origin
 				instance.visibility_range_begin = 0 if lod == 0 else float(lods[lod].distance)*distance_scale
 				instance.visibility_range_end = float(lods[lod+1].distance)*distance_scale if lod+1<lods.size() else float(field.maxDistance)*distance_scale
@@ -57,6 +48,13 @@ func setup(manifest: Dictionary) -> void:
 				instance.visibility_range_end_margin = 1
 				instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if field.castShadow else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				add_child(instance)
+				if not detail_groups.has(key): detail_groups[key] = []
+				detail_groups[key].append(instance)
+				if budget: await budget.checkpoint()
+		for levels in detail_groups.values():
+			DetailLevels.link(levels)
+			if str(field.name).begins_with("grass") or str(field.name).begins_with("tall") or str(field.name).begins_with("fl_") or str(field.name).begins_with("clover") or str(field.name).begins_with("fern"):
+				editable_groups.append({"meshes":levels.map(func(level): return level.multimesh),"anchors":levels[0].get_meta("foliage_anchors")})
 	if missing_ranks>0: push_warning("Original vegetation ranks missing for %s instances" % missing_ranks)
 	for tree in manifest.trees:
 		var body := StaticBody3D.new()
@@ -69,6 +67,7 @@ func setup(manifest: Dictionary) -> void:
 		collider.position.y=shape.height*0.5
 		body.add_child(collider)
 		add_child(body)
+		if budget: await budget.checkpoint()
 
 func make_material(source: Dictionary) -> ShaderMaterial:
 	var result := ShaderMaterial.new()
@@ -115,15 +114,17 @@ func set_lighting(sample: Dictionary) -> void:
 		material.set_shader_parameter("sun_dir",direction)
 		material.set_shader_parameter("sun_color",Vector3(linear.r,linear.g,linear.b)*energy)
 
-func load_ranks() -> void:
+func load_ranks(budget: RefCounted = null) -> void:
 	var file:="region-vegetation-ranks.json"
 	if not FileAccess.file_exists("res://assets/"+file): return
 	var source:=Buffers.read_json(file)
 	tier=source.get("tier",{})
 	for field in source.get("fields",[]):
 		var positions: Dictionary={}
-		for item in field.items:
+		for i in field.items.size():
+			var item: Array = field.items[i]
 			positions[Vector3(item[0],item[1],item[2])]=float(item[3])
+			if budget and i % 256 == 0: await budget.checkpoint()
 		rank_fields["%s:%s" % [field.name,field.variant]]=positions
 
 func apply_density(material: ShaderMaterial,field: Dictionary) -> void:

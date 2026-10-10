@@ -19,12 +19,13 @@ vec3 sanitize(vec3 c){
  if(any(isnan(c))||any(isinf(c)))return vec3(0);
  float m=max(c.r,max(c.g,c.b));return m>12.?c*(12./m):max(c,0.);
 }
-float coc(vec2 uv,float z){
+float coc(vec2 uv,float z,float depth_value){
  float dy=1.-uv.y-f.focus.x;
  float tilt=dy>0.?smoothstep(.2,.56,dy)*f.focus.z*smoothstep(f.focus.y*.8,f.focus.y*1.6,z):smoothstep(.2,.488,-dy)*f.focus.w;
  float far_blur=smoothstep(max(f.focus.y*1.8,20.),max(f.focus.y*5.,80.),z)*f.camera.z;
  float near_blur=(1.-smoothstep(f.focus.y*.2,f.focus.y*.42,z))*f.camera.w;
- float c=max(max(tilt,far_blur),near_blur);return clamp(z>f.camera.y*.95?c*.15:c,0.,1.);
+ // Only empty depth is sky. Extended ocean writes a real, near-far depth.
+ float c=max(max(tilt,far_blur),near_blur);return clamp(depth_value<=.000001?c*.15:c,0.,1.);
 }
 float up_ao(vec2 uv,float z){
  vec2 res=vec2(textureSize(ao_texture,0));vec2 pixel=uv*res-.5,fracture=fract(pixel),t=1./res,b=(floor(pixel)+.5)*t;
@@ -37,7 +38,7 @@ void main(){
  ivec2 pixel=ivec2(gl_GlobalInvocationID.xy);if(any(greaterThanEqual(pixel,ivec2(p.size.xy))))return;
  vec2 uv=(vec2(pixel)+.5)/p.size.xy,tx=1./p.size.xy;
  float d=textureLod(depth,uv,0).r,z=f.camera.x*f.camera.y/(f.camera.x+d*(f.camera.y-f.camera.x));
- vec4 scene4=textureLod(scene,uv,0);vec3 col=sanitize(scene4.rgb);float blur=coc(uv,z);
+ vec4 scene4=textureLod(scene,uv,0);vec3 col=sanitize(scene4.rgb);float blur=coc(uv,z,d);
  vec3 n=sanitize(textureLod(scene,uv+vec2(tx.x,0),0).rgb),s=sanitize(textureLod(scene,uv-vec2(tx.x,0),0).rgb);
  vec3 e=sanitize(textureLod(scene,uv+vec2(0,tx.y),0).rgb),w=sanitize(textureLod(scene,uv-vec2(0,tx.y),0).rgb);
  vec3 mn=min(min(n,s),min(e,w)),mx=max(max(n,s),max(e,w));
@@ -63,7 +64,8 @@ void main(){
   float align=dot(normalize(rd.xz+1.e-5),normalize(a.sun.xz+1.e-5));
   float anti=(1.-smoothstep(-.6,.3,align))*a.atmosphere.z;
   vec3 hc=mix(a.haze.rgb,vec3(luma(a.haze.rgb))*vec3(.84,.9,1.1),anti);
-  col=mix(col,hc,hz*step(z,f.camera.y*.98));
+  // Keep ocean haze continuous through the camera far range; exclude only sky.
+  col=mix(col,hc,d>.000001?hz:0.);
  }
  imageStore(target,pixel,vec4(col,scene4.a));
 }

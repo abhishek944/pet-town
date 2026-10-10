@@ -11,7 +11,7 @@ func run() -> void:
 		if not InputMap.has_action(action): InputMap.add_action(action)
 	var world: Node3D=load("res://scripts/world.gd").new()
 	root.add_child(world)
-	var actor: CharacterBody3D=load("res://scripts/actor.gd").new()
+	var actor: RigidBody3D=load("res://scripts/actor.gd").new()
 	actor.world=world
 	actor.spawn=Vector3(2.5,9.1,3.5)
 	root.add_child(actor)
@@ -48,12 +48,12 @@ func run() -> void:
 	await physics_frame
 	await physics_frame
 	var new_top:=ray(world,from,to)
-	actor.position=Vector3(placed)+Vector3(0.5,2.5,0.5)
+	actor.relocate(Vector3(placed)+Vector3(0.5,2.5,0.5))
 	actor.spawn_pending=false
 	actor.set_physics_process(true)
 	for frame in 50: await physics_frame
 	var landed:=actor.position
-	var on_floor:=actor.is_on_floor()
+	var on_floor: bool=actor.is_grounded()
 	actor.set_physics_process(false)
 	builder.apply(placed,0)
 	await physics_frame

@@ -5,7 +5,7 @@ const Navigation=preload("boat_navigation.gd")
 const Passengers=preload("boat_passengers.gd")
 const Storage=preload("storage.gd")
 var world: Node3D
-var body: StaticBody3D
+var body: AnimatableBody3D
 var navigation:=Navigation.new()
 var passengers:=Passengers.new()
 var storage:=Storage.new()
@@ -25,7 +25,8 @@ func setup(owner_world: Node3D, source: Dictionary) -> void:
 	world=owner_world
 	data=source
 	process_physics_priority=-100
-	body=StaticBody3D.new()
+	body=AnimatableBody3D.new()
+	body.sync_to_physics=false
 	body.name="HarborLaunch"
 	add_child(body)
 	var model: Node3D=load("res://assets/"+data.file).instantiate()
@@ -62,7 +63,7 @@ func initialize() -> void:
 	body.collision_layer=1 if active else 0
 	if not active: message.emit("The harbor launch needs clear water west of Driftwood Camp. Clear the saved blocks there.")
 
-func set_actor(actor: CharacterBody3D) -> void:
+func set_actor(actor: RigidBody3D) -> void:
 	if passengers.pilot and passengers.pilot!=actor: passengers.release_helm()
 	passengers.actor=actor
 
@@ -74,7 +75,7 @@ func _physics_process(delta: float) -> void:
 	blocked_in=maxf(0,blocked_in-delta)
 	save_in=maxf(0,save_in-delta)
 	wake_in=maxf(0,wake_in-delta)
-	var actor: CharacterBody3D=passengers.actor
+	var actor: RigidBody3D=passengers.actor
 	if passengers.pilot and (not is_instance_valid(passengers.pilot) or passengers.pilot!=actor): passengers.release_helm()
 	var blocked: bool=input_captured() or not get_window().has_focus()
 	if blocked:
@@ -102,7 +103,7 @@ func _physics_process(delta: float) -> void:
 		save_in=3.0
 
 func input_captured() -> bool:
-	var actor: CharacterBody3D=passengers.actor
+	var actor: RigidBody3D=passengers.actor
 	var focused:=get_viewport().gui_get_focus_owner()
 	if not actor or not actor.enabled or get_tree().paused or focused is LineEdit or focused is TextEdit:
 		return true
@@ -124,10 +125,10 @@ func action() -> String:
 func interact() -> bool:
 	return passengers.interact() if active and not input_captured() else false
 
-func before_body_step(actor: CharacterBody3D) -> bool:
+func before_body_step(actor: RigidBody3D) -> bool:
 	return passengers.before_body_step(actor) if active else false
 
-func after_body_step(actor: CharacterBody3D) -> void:
+func after_body_step(actor: RigidBody3D) -> void:
 	if active: passengers.after_body_step(actor)
 
 func save() -> void:

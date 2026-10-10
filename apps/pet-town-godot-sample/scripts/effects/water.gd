@@ -92,7 +92,7 @@ func set_lighting(sample: Dictionary) -> void:
 	material.set_shader_parameter("sky_horizon", sample.get("horizon", Color.SKY_BLUE))
 	material.set_shader_parameter("sky_zenith", sample.get("zenith", Color.CORNFLOWER_BLUE))
 	material.set_shader_parameter("sun_direction", sample.get("sun_direction", Vector3.UP))
-	material.set_shader_parameter("night", float(sample.get("stars", 0.0)))
+	material.set_shader_parameter("night", float(sample.get("night",sample.get("stars",0.0))))
 
 func _bounds(value) -> Rect2:
 	if value is Array:

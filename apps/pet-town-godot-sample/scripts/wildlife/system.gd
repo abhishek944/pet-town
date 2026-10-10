@@ -2,6 +2,7 @@ extends Node3D
 ## Original exported actors; native navigation, proximity, animation and petting.
 signal prompt_changed(text: String)
 signal petted(creature_name: String,head_position: Vector3)
+signal species_petted(species: String)
 const Actor = preload("res://scripts/wildlife/creature.gd")
 const Hearts = preload("res://scripts/wildlife/hearts.gd")
 const PetSound = preload("res://scripts/wildlife/pet_sound.gd")
@@ -17,7 +18,7 @@ var enabled := true
 var sound_enabled := true
 var prompt := ""
 
-func setup(target: Node3D, data: Dictionary = {}) -> void:
+func setup(target: Node3D, data: Dictionary = {}, budget: RefCounted = null) -> void:
 	player = target
 	world_data = data
 	var path := "res://assets/wildlife-manifest.json"
@@ -39,6 +40,7 @@ func setup(target: Node3D, data: Dictionary = {}) -> void:
 		creature.setup(entry, self)
 		add_child(creature)
 		actors.append(creature)
+		if budget: await budget.checkpoint()
 
 func _process(_delta: float) -> void:
 	nearest = null
@@ -89,6 +91,7 @@ func _pet(creature: Node3D) -> bool:
 	if creature == null or not enabled:
 		return false
 	creature.pet()
+	species_petted.emit(str(creature.entry.get("species", "")))
 	hearts.emit_icons(creature.head_position(), "heart", 7)
 	if creature.entry.get("rare", false):
 		hearts.emit_icons(creature.head_position(), "sparkle", 4)

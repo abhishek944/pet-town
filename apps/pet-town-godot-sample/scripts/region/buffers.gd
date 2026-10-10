@@ -94,14 +94,12 @@ static func mesh(data: Dictionary, terrain := false) -> ArrayMesh:
 	return result
 
 static func resource_mesh(file: String, terrain := false) -> ArrayMesh:
-	# Immutable source-buffer hash invalidates cached native meshes after any re-export.
-	var signature := FileAccess.get_sha256("res://assets/"+file)
-	var directory := "user://native-mesh-cache"
-	var path := directory+"/v2-"+signature+("-terrain" if terrain else "-vegetation")+".res"
-	if ResourceLoader.exists(path):
-		var cached = load(path)
-		if cached is ArrayMesh: return cached
-	var result := mesh(read_json(file),terrain)
-	DirAccess.make_dir_recursive_absolute(directory)
-	ResourceSaver.save(result,path)
+	var cache := preload("native_cache.gd")
+	var id: String = cache.key(file,"mesh-terrain" if terrain else "mesh-vegetation")
+	var cached := cache.read_resource(id)
+	if cached is ArrayMesh: return cached
+	# Reuse the previous immutable mesh cache when upgrading an existing installation.
+	var legacy: String = "user://native-mesh-cache/v2-"+cache.fingerprint(file)+("-terrain" if terrain else "-vegetation")+".res"
+	var result: ArrayMesh = load(legacy) if ResourceLoader.exists(legacy) else mesh(read_json(file),terrain)
+	cache.write_resource(id,result)
 	return result

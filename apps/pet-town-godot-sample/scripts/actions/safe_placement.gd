@@ -44,21 +44,13 @@ static func approach_clear(world: Node3D, point: Vector3, hw: float, hd: float, 
 			if paths.has("%d,%d" % [x,z]): return false
 	return true
 
-static func travel_point(world: Node3D, point: Vector3, actor: CharacterBody3D) -> Variant:
+static func travel_point(world: Node3D, point: Vector3, actor: RigidBody3D) -> Variant:
 	for offset in [Vector2(0.5, 0.5), Vector2(-1.5, 0.5), Vector2(0.5, -1.5), Vector2(2.5, 0.5), Vector2(0.5, 2.5), Vector2(-2.5, -1.5), Vector2(3.5, -1.5)]:
 		var candidate := Vector3(point.x + offset.x, 0, point.z + offset.y)
-		var fitted := ground_fit(world, candidate, 0.47, 0.47, 0)
+		var fitted := ground_fit(world, candidate, actor.body_radius + 0.05, actor.body_radius + 0.05, 0)
 		if fitted.has("error"):
 			continue
 		candidate = fitted.position
-		var shape := CapsuleShape3D.new()
-		shape.height = 1.7
-		shape.radius = 0.47
-		var query := PhysicsShapeQueryParameters3D.new()
-		query.shape = shape
-		query.collision_mask = 1
-		query.exclude = [actor.get_rid()]
-		query.transform.origin = candidate + Vector3.UP * 0.87
-		if world.get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty():
+		if actor.clear_at(candidate):
 			return candidate
 	return null

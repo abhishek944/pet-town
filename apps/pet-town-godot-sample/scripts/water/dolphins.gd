@@ -1,6 +1,7 @@
 extends Node3D
+const MarineBody = preload("marine_body.gd")
 var habitat: RefCounted
-var actor: CharacterBody3D
+var actor: RigidBody3D
 var actors: Array=[]
 var lagoon:=Vector3(-94,0,66)
 var reef:=Vector3(-112,0,84)
@@ -8,13 +9,22 @@ var reef:=Vector3(-112,0,84)
 func setup(owner_habitat: RefCounted, data: Dictionary) -> void:
 	habitat=owner_habitat
 	for index in 3:
-		var node: Node3D=load("res://assets/"+data.wildlife["ocean-dolphin-"+str(index)]).instantiate()
+		var node := MarineBody.new()
+		node.configure_body(preload("res://scripts/physics/profiles.gd").marine("dolphin"))
+		node.habitat = habitat
+		node.minimum_depth = 2.3
+		node.habitat_radius = 1.3
+		var model: Node3D = load("res://assets/"+data.wildlife["ocean-dolphin-"+str(index)]).instantiate()
+		node.add_child(model)
+		var point := lagoon+Vector3(index*2,0,0)
+		point.y=habitat.world.water_at(point)-0.85
+		node.position=point
 		add_child(node)
-		preload("res://scripts/asset_style.gd").apply(node)
-		node.position=lagoon+Vector3(index*2,0,0)
+		if not habitat.clear(point,2.3,1.3) or not node.clear_at(point): node.set_contact_enabled(false)
+		preload("res://scripts/asset_style.gd").apply(model)
 		actors.append({"node":node,"index":index,"mode":"roam","age":0.0,
 			"cooldown":20.0+index*9,"heading":0.0,"breach":0.0,"next_breach":12.0+index*8,
-			"target":Vector3.ZERO,"start":Vector3.ZERO,"ripple_in":0.0,"tail":node.find_child("Tail",true,false)})
+			"target":Vector3.ZERO,"start":Vector3.ZERO,"ripple_in":0.0,"model":model,"tail":node.find_child("Tail",true,false)})
 
 func target_for(entry: Dictionary, delta: float, swimming: bool) -> void:
 	entry.age+=delta
@@ -38,22 +48,18 @@ func target_for(entry: Dictionary, delta: float, swimming: bool) -> void:
 		var phase: float=entry.age*0.19+entry.index*2.1
 		entry.target=lagoon+Vector3(cos(phase)*(8+entry.index),0,sin(phase)*(6+entry.index))
 
-func update(delta: float, time: float) -> void:
+func update(delta: float, time: float, activity: RefCounted = null) -> void:
 	if not actor: return
 	var swimming: bool=habitat.clear(actor.position,1) and actor.position.y<habitat.world.water_at(actor.position)+1.2
 	for entry in actors:
+		if activity:
+			entry.node.set_simulating(activity.near(entry.node.global_position,entry.node.simulating))
+		if not entry.node.simulating: continue
 		target_for(entry,delta,swimming)
-		var point: Vector3=entry.node.position
-		var offset: Vector3=entry.target-point
-		offset.y=0
-		var distance:=offset.length()
-		point+=offset.normalized()*minf(distance,delta*(2.3 if entry.mode=="roam" else 3.8))
-		entry.node.visible=habitat.clear(point,2.3,1.8)
-		if not entry.node.visible:
-			entry.mode="roam"
-			if habitat.clear(entry.target,2.3,1.8): entry.node.position=entry.target
-			continue
-		if distance>0.05: entry.heading=lerp_angle(entry.heading,atan2(offset.x,offset.z),minf(1,delta*3))
+		var point: Vector3 = entry.node.position
+		var offset: Vector3 = entry.target - point
+		offset.y = 0
+		if offset.length() > 0.05: entry.heading = lerp_angle(entry.heading, atan2(offset.x,offset.z), minf(1,delta*3))
 		entry.next_breach-=delta
 		if entry.next_breach<=0 and entry.breach==0 and entry.mode=="roam":
 			entry.breach=0.001
@@ -69,13 +75,14 @@ func update(delta: float, time: float) -> void:
 			if phase==1:
 				entry.breach=0.0
 				ripple(point,1.2)
-		point.y=habitat.world.water_at(point)+height
+		var goal: Vector3 = entry.target
+		goal.y = habitat.world.water_at(point) + height
 		entry.ripple_in-=delta
 		if entry.ripple_in<=0 and height>-0.5:
 			ripple(point,0.18)
 			entry.ripple_in=0.8
-		entry.node.position=point
-		entry.node.rotation=Vector3(pitch,entry.heading,0)
+		entry.node.seek(goal, 2.3 if entry.mode == "roam" else 3.8, delta, Vector3.ZERO, entry.breach > 0)
+		entry.model.rotation.x = pitch
 		if entry.tail: entry.tail.rotation.x=sin(time*4.8+entry.index)*0.22
 
 func ripple(point: Vector3, strength: float) -> void:

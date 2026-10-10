@@ -2,6 +2,7 @@
 uniform vec3 base_color = vec3(1.0);
 uniform vec3 emission_color = vec3(0.0);
 uniform float emission_energy = 0.0;
+uniform float weather_wetness = 0.0;
 uniform float surface_roughness = 0.85;
 uniform float surface_metallic = 0.0;
 uniform float surface_opacity = 1.0;
@@ -49,7 +50,8 @@ void fragment() {
 	if (has_map) texel = texture(map_texture,source_uv(UV,map_transform,map_flip_y));
 	if (texel.a*surface_opacity < alpha_cutoff) discard;
 	ALBEDO = base_color * texel.rgb * (use_vertex_color ? COLOR.rgb : vec3(1.0));
-	ROUGHNESS = surface_roughness;
+	ALBEDO *= 1.0 - weather_wetness * 0.1;
+	ROUGHNESS = mix(surface_roughness, min(surface_roughness,0.38),weather_wetness);
 	METALLIC = surface_metallic;
 	vec3 emission = emission_color*emission_energy;
 	if (has_emission_map) emission *= texture(emission_texture,source_uv(UV,emission_transform,emission_flip_y)).rgb;

@@ -1,8 +1,9 @@
 extends Node3D
-const PETS := ["maple","clover","juniper","scout","puddle","moss","mossback","fern"]
+const Catalog = preload("pet_catalog.gd")
+const PETS := Catalog.IDS
 const MAYOR_ID := "pet-town-mayor"
 var town: Node3D
-var explorer: CharacterBody3D
+var explorer: RigidBody3D
 var transport: Node
 var actions := preload("actions.gd").new()
 var actors: Dictionary = {}
@@ -36,13 +37,7 @@ func setup(owner_node: Node3D) -> void:
 	var labels=preload("labels.gd").new()
 	labels.host=self
 	add_child(labels)
-	var catalog_path:="res://assets/companion-manifest.json"
-	if FileAccess.file_exists(catalog_path):
-		var manifest=JSON.parse_string(FileAccess.get_file_as_string(catalog_path))
-		if manifest is Dictionary:
-			var catalog: Array=manifest.get("catalog",[])
-			for item in catalog: item.path="res://assets/"+str(item.get("modelFile",""))
-			town.hud.set_pet_catalog(catalog)
+	town.hud.set_pet_catalog(Catalog.entries())
 	_disconnected()
 
 func _snapshot(data: Dictionary) -> void:
@@ -79,17 +74,20 @@ func _snapshot(data: Dictionary) -> void:
 		focus_serial=next_serial
 		if actors.has(MAYOR_ID): follow(MAYOR_ID)
 	updater.apply(data)
-
 func _spawn(entry: Dictionary) -> void:
 	var id:=str(entry.id)
-	var point = preload("spawn.gd").find(town.world,actors,preload("spawn.gd").agent_seed(id))
+	# Keep seeded appearances stable for existing agents without a saved choice.
+	var default_pet: String = "mayor" if id==MAYOR_ID else Catalog.ORIGINAL_IDS[preload("spawn.gd").agent_seed(id)%Catalog.ORIGINAL_IDS.size()]
+	var pet_id := str(choices.get_value("pets",id,default_pet))
+	if pet_id not in PETS+["mayor"]: pet_id=default_pet
+	var profile := preload("res://scripts/physics/profiles.gd").pet(pet_id)
+	var point = preload("spawn.gd").find(town.world,actors,preload("spawn.gd").agent_seed(id),null,RID(),profile)
 	if point == null: return
 	var body=preload("companion.gd").new()
 	body.entry=entry
 	body.world=town.world
 	body.view=town.rig
-	body.pet_id=str(choices.get_value("pets",id,"mayor" if id==MAYOR_ID else PETS[preload("spawn.gd").agent_seed(id)%PETS.size()]))
-	if body.pet_id not in PETS+["mayor"]: body.pet_id="mayor" if id==MAYOR_ID else PETS[preload("spawn.gd").agent_seed(id)%PETS.size()]
+	body.pet_id=pet_id
 	body.spawn=point
 	add_child(body)
 	actors[id]=body
@@ -110,7 +108,6 @@ func follow(id: String, keep_panel:=false) -> void:
 	if not keep_panel: town.hud.close_panel()
 	_menu(town.hud.is_menu_open)
 	_refresh_selection()
-
 func leave() -> void:
 	actions.close_terminal()
 	if actors.has(selected_id): actors[selected_id].controlled=false
@@ -120,7 +117,7 @@ func leave() -> void:
 	_menu(town.hud.is_menu_open)
 	_refresh_selection()
 
-func _set_target(body: CharacterBody3D) -> void:
+func _set_target(body: RigidBody3D) -> void:
 	if is_instance_valid(town.actor.visual): town.actor.visual.visible=true
 	town.actor=body
 	if town.ocean:
@@ -154,7 +151,7 @@ func _menu(open: bool) -> void:
 		actors[id].paused=open
 
 func change_pet(id: String, pet: String) -> void:
-	if id!=selected_id or not actors.has(id) or pet not in PETS: return
+	if id==MAYOR_ID or id!=selected_id or not actors.has(id) or pet not in PETS: return
 	choices.set_value("pets",id,pet)
 	if choices.save("user://companion-pets.cfg")!=OK:
 		choices.load("user://companion-pets.cfg")

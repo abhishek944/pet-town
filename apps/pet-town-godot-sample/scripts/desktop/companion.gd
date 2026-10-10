@@ -19,7 +19,7 @@ func _ready() -> void:
 	super._ready()
 	last_safe = spawn
 	collision_layer=4
-	collision_mask=5
+	collision_mask=7
 	random.seed = hash(str(entry.get("id","")))
 	set_entry(entry)
 	set_pet(pet_id)
@@ -31,6 +31,7 @@ func set_pet(id: String) -> void:
 	var path := "res://assets/companion-%s.glb" % id
 	if not ResourceLoader.exists(path): return
 	pet_id = id
+	configure_body(preload("res://scripts/physics/profiles.gd").pet(id))
 	if is_instance_valid(presentation):
 		remove_child(presentation)
 		presentation.queue_free()
@@ -76,9 +77,10 @@ func _physics_process(delta: float) -> void:
 		if roam_search_pending: _rest_roam()
 		super._physics_process(delta)
 	else:
+		begin_motion()
 		enabled = false
 		if ocean and ocean.before_body_step(self,delta):
-			if animator: animator.set_motion(0,is_on_floor(),0)
+			if animator: animator.set_motion(0,is_grounded(),0)
 			return
 		spawn_pending = false
 		var aboard: bool = ocean != null and ocean.aboard(self)
@@ -92,7 +94,7 @@ func _physics_process(delta: float) -> void:
 			was_controlled = false
 			if not aboard: spawn = position
 			_rest_roam()
-		if not aboard and is_on_floor(): last_safe = Vector3(position.x, float(ground) + 0.03, position.z)
+		if not aboard and is_grounded(): last_safe = Vector3(position.x, float(ground) + 0.03, position.z)
 		if aboard: _rest_roam()
 		motion.step(self,delta)
 		var conversation := _in_conversation()
@@ -112,11 +114,14 @@ func _physics_process(delta: float) -> void:
 			velocity.z=0
 			var toward_camera: Vector3=view.camera.global_position-global_position if view else Vector3.ZERO
 			visual.rotation.y=lerp_angle(visual.rotation.y,atan2(toward_camera.x,toward_camera.z),1-exp(-12*delta))
-		velocity.x = move_toward(velocity.x,direction.x*1.672,delta*8)
-		velocity.z = move_toward(velocity.z,direction.z*1.672,delta*8)
+		var preferred := steer(direction * 1.672)
+		var next := position + preferred * maxf(delta, 0.13)
+		if not aboard and not Land.segment(world, position, next): preferred = Vector3.ZERO
+		velocity.x = move_toward(velocity.x,preferred.x,delta*8)
+		velocity.z = move_toward(velocity.z,preferred.z,delta*8)
 		var travel := Vector3(velocity.x,0,velocity.z)*delta
-		if not aboard and (not Land.segment(world,position,position+travel) or test_move(global_transform,travel)): _rest_roam()
-		move_and_slide()
+		if not aboard and (not Land.segment(world,position,position+travel) or sweep(global_transform,travel,true)): _rest_roam()
+		submit_motion()
 		if not aboard and Land.height(world,position) == null:
 			preload("spawn.gd").recover(self)
 			_rest_roam()
@@ -125,7 +130,7 @@ func _physics_process(delta: float) -> void:
 			visual.rotation.y=lerp_angle(visual.rotation.y,atan2(direction.x,direction.z),1-exp(-8*delta))
 		if animator:
 			animator.set_state(motion.gliding,motion.swimming,motion.diving)
-			animator.set_motion(Vector2(velocity.x,velocity.z).length(),is_on_floor(),velocity.y)
+			animator.set_motion(Vector2(linear_velocity.x - support_velocity.x,linear_velocity.z - support_velocity.z).length(),is_grounded(),linear_velocity.y)
 
 func _choose_target() -> bool:
 	if paused or controlled or _in_conversation() or (ocean and ocean.aboard(self)):
@@ -140,7 +145,7 @@ func _choose_target() -> bool:
 	candidate.y=height+0.05
 	var sweep := candidate-position
 	sweep.y=0
-	if test_move(global_transform,sweep): return _reject_roam_candidate()
+	if self.sweep(global_transform,sweep,true): return _reject_roam_candidate()
 	destination=candidate
 	roam_search_pending=false
 	roam_retry_at=Time.get_ticks_msec()+int(random.randf_range(500,1500))

@@ -2,15 +2,13 @@ extends RefCounted
 const Land = preload("roaming_land.gd")
 const WORLD_RADIUS := 100.0
 
-static func find(world: Node3D, actors: Dictionary, seed_value: int, near: Variant = null, ignored := RID()) -> Variant:
+static func find(world: Node3D, actors: Dictionary, seed_value: int, near: Variant = null, ignored := RID(), profile: Dictionary = {}) -> Variant:
 	var center: Vector3=world.spawn_point() if near == null else near
 	var random: Array[int]=[seed_value]
 	var query:=PhysicsShapeQueryParameters3D.new()
-	var shape:=CapsuleShape3D.new()
-	shape.radius=0.28
-	shape.height=1.44
-	query.shape=shape
-	query.collision_mask=5
+	if profile.is_empty(): profile = preload("res://scripts/physics/profiles.gd").pet("explorer")
+	query.shape = profile.shape
+	query.collision_mask=7
 	if ignored.is_valid(): query.exclude = [ignored]
 	for attempt in range(200):
 		var angle:=_random(random)*TAU
@@ -26,21 +24,20 @@ static func find(world: Node3D, actors: Dictionary, seed_value: int, near: Varia
 				occupied=true
 				break
 		if occupied: continue
-		query.transform.origin=candidate+Vector3.UP*0.73
+		query.transform.origin=candidate+Vector3(profile.offset)
 		if world.get_world_3d().direct_space_state.intersect_shape(query,1).is_empty(): return candidate
 	# Never return an unchecked fallback into water or obstructed ground.
 	return null
 
-static func recover(body: CharacterBody3D) -> bool:
+static func recover(body: RigidBody3D) -> bool:
 	var actors: Dictionary = body.get_parent().actors.duplicate()
 	actors.erase(str(body.entry.get("id", "")))
-	var point = find(body.world, actors, agent_seed(str(body.entry.get("id", ""))), body.last_safe, body.get_rid())
-	if point == null: point = find(body.world, actors, agent_seed(str(body.entry.get("id", ""))), null, body.get_rid())
+	var point = find(body.world, actors, agent_seed(str(body.entry.get("id", ""))), body.last_safe, body.get_rid(), body.body_profile)
+	if point == null: point = find(body.world, actors, agent_seed(str(body.entry.get("id", ""))), null, body.get_rid(), body.body_profile)
 	if point == null: return false
-	body.position = point
+	body.relocate(point)
 	body.spawn = point
 	body.last_safe = point
-	body.velocity = Vector3.ZERO
 	body.motion = preload("res://scripts/actor_motion.gd").new()
 	body.floor_snap_length = 0.25
 	body.spawn_pending = false

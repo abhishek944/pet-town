@@ -11,7 +11,7 @@ var persist_edits:=true
 var transactions: RefCounted
 var world: Node3D
 var camera: Camera3D
-var actor: CharacterBody3D
+var actor: RigidBody3D
 var active:=true
 var selected:=0
 var blocks: Dictionary={}
@@ -24,44 +24,52 @@ var ghost: MeshInstance3D
 var preview: Node3D
 var names: Array[String]=["Grass","Soil","Cobblestone","Sand","Wood Planks","Log","Brick","Glass","Roof Tile","Leafy Block","Flower Bed","Lantern"]
 
+signal initialization_finished
+var initialization_complete := false
+var boot_budget: RefCounted
+
 func _ready() -> void:
+	await initialize()
+	initialization_complete = true
+	initialization_finished.emit()
+
+func initialize() -> void:
 	if not world or world.manifest.is_empty(): return
 	transactions=preload("building/transactions.gd").new()
 	transactions.host=self
 	store=preload("building/voxel_store.gd").new()
-	store.setup(world.manifest)
+	if boot_budget: await boot_budget.background(store.setup.bind(world.manifest))
+	else: store.setup(world.manifest)
 	world.set("voxels",store)
 	blocks=store.edits
 	terrain_editor=preload("building/terrain_edit.gd").new()
 	add_child(terrain_editor)
-	terrain_editor.setup(world,store)
+	await terrain_editor.setup(world,store,boot_budget)
 	foliage_editor=preload("building/foliage_edit.gd").new()
-	foliage_editor.setup(world.vegetation,store)
+	await foliage_editor.setup(world.vegetation,store,boot_budget)
 	preview=preload("building/preview.gd").new()
 	add_child(preview)
 	preview.setup(self)
 	ghost=preview.ghost
 	var restored: Array=store.load_edits()
 	if not restored.is_empty():
-		terrain_editor.refresh(restored)
-		for cell in restored: update_column(cell)
+		await terrain_editor.refresh(restored,boot_budget)
+		for cell in restored:
+			update_column(cell)
+			if boot_budget: await boot_budget.checkpoint()
 
 func _process(delta: float) -> void:
 	if transactions: transactions.tick()
 	if not preview: return
 	var screen:=aim_screen(get_viewport().get_mouse_position())
-	var enabled: bool=active and actor.enabled and get_viewport().gui_get_hovered_control()==null
+	var enabled: bool=active and actor.enabled and preview.is_awake() and get_viewport().gui_get_hovered_control()==null
 	var hit: Dictionary=target(screen) if enabled else {}
 	preview.update(delta,hit,enabled)
 	var state:="idle" if hit.is_empty() else ("aim" if can_place(hit.place) else "bad")
 	pointer_changed.emit(screen,state,names[selected])
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion or event is InputEventMouseButton or event is InputEventKey:
-		wake_preview()
-
 func wake_preview() -> void:
-	if preview: preview.wake()
+	if preview and active and actor.enabled: preview.wake()
 
 func aim_screen(screen: Vector2) -> Vector2:
 	if actor and actor.view and (actor.view.first_person or Input.mouse_mode==Input.MOUSE_MODE_CAPTURED):
@@ -104,12 +112,15 @@ func can_place(cell: Vector3i) -> bool:
 	if not store.contains(cell) or cell.y<=0 or store.get_id(cell)!=0: return false
 	var volume:=AABB(Vector3(cell),Vector3.ONE).grow(0.32)
 	if volume.has_point(actor.global_position+Vector3.UP*0.4) or volume.has_point(actor.global_position+Vector3.UP*1.1): return false
+	return cell_clear(cell)
+
+func cell_clear(cell: Vector3i, mask := 7) -> bool:
 	var query:=PhysicsShapeQueryParameters3D.new()
 	var shape:=BoxShape3D.new()
 	shape.size=Vector3.ONE*0.9
 	query.shape=shape
 	query.transform.origin=Vector3(cell)+Vector3.ONE*0.5
-	query.collision_mask=1
+	query.collision_mask=mask
 	return get_world_3d().direct_space_state.intersect_shape(query,1).is_empty()
 
 func edit(button: int,screen: Vector2) -> void:
@@ -150,11 +161,13 @@ func apply(cell: Vector3i,value: int) -> void:
 	store.set_id(cell,value)
 	terrain_editor.refresh([cell])
 	update_column(cell)
+	world.invalidate_collision([Vector2i(cell.x,cell.z)],true)
 	edited.emit(cell,previous,value)
 
 func update_column(cell: Vector3i) -> void:
 	var top: int=store.top_y(cell.x,cell.z)
 	var water_ground: int=store.water_ground_y(cell.x,cell.z,float(world.manifest.waterLevel))
+	world.submerged_floors[Vector2i(cell.x,cell.z)]=water_ground
 	world.ground[Vector2i(cell.x,cell.z)]=Vector2(top,1 if water_ground<float(world.manifest.waterLevel) else 0)
 	if world.effects.water.has_method("set_terrain_column"):
 		world.effects.water.set_terrain_column(cell.x,cell.z,float(water_ground))

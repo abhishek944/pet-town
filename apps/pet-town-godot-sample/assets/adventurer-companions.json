@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "source": "KayKit Adventurers 2.0 FREE by Kay Lousberg (CC0), with Pet Town glide/swim loops",
+  "sourceUrl": "https://kaylousberg.itch.io/kaykit-adventurers",
+  "catalog": [
+    {
+      "id": "knight",
+      "name": "Knight",
+      "species": "Armored adventurer",
+      "description": "A silver helmet, a red cape and a steady friend for exploring town.",
+      "trait": "Steadfast · friendly · brave",
+      "colors": ["#9caeb3", "#b95957", "#d8b594"],
+      "modelFile": "companion-knight.glb",
+      "portraitFile": "companion-knight.png",
+      "bytes": 498852,
+      "scale": 0.72,
+      "runtimeScale": 1,
+      "animations": [{"name": "idle", "duration": 1.0666666666666667}, {"name": "walk", "duration": 1.0666666666666667}, {"name": "run", "duration": 0.8}, {"name": "jump", "duration": 2.3333333333333335}, {"name": "glide", "duration": 1.6}, {"name": "swim", "duration": 1.6}],
+      "facial": {}
+    },
+    {
+      "id": "mage",
+      "name": "Mage",
+      "species": "Storybook mage",
+      "description": "A pointed blue hat and a little spellbook for a curious town companion.",
+      "trait": "Curious · thoughtful · kind",
+      "colors": ["#586d9f", "#cb9065", "#e4d1ad"],
+      "modelFile": "companion-mage.glb",
+      "portraitFile": "companion-mage.png",
+      "bytes": 508084,
+      "scale": 0.72,
+      "runtimeScale": 1,
+      "animations": [{"name": "idle", "duration": 1.0666666666666667}, {"name": "walk", "duration": 1.0666666666666667}, {"name": "run", "duration": 0.8}, {"name": "jump", "duration": 2.3333333333333335}, {"name": "glide", "duration": 1.6}, {"name": "swim", "duration": 1.6}],
+      "facial": {}
+    },
+    {
+      "id": "barbarian",
+      "name": "Barbarian",
+      "species": "Bear-hood adventurer",
+      "description": "A bear-shaped hood, warm boots and a big heart for the next adventure.",
+      "trait": "Bold · cheerful · loyal",
+      "colors": ["#9b8973", "#ad7353", "#d8b594"],
+      "modelFile": "companion-barbarian.glb",
+      "portraitFile": "companion-barbarian.png",
+      "bytes": 545776,
+      "scale": 0.72,
+      "runtimeScale": 1,
+      "animations": [{"name": "idle", "duration": 1.0666666666666667}, {"name": "walk", "duration": 1.0666666666666667}, {"name": "run", "duration": 0.8}, {"name": "jump", "duration": 2.3333333333333335}, {"name": "glide", "duration": 1.6}, {"name": "swim", "duration": 1.6}],
+      "facial": {}
+    },
+    {
+      "id": "rogue",
+      "name": "Rogue",
+      "species": "Green-cloaked adventurer",
+      "description": "A green cloak and a quiet step for a resourceful friend around town.",
+      "trait": "Nimble · observant · playful",
+      "colors": ["#4c8060", "#8b613f", "#d9b78a"],
+      "modelFile": "companion-rogue.glb",
+      "portraitFile": "companion-rogue.png",
+      "bytes": 570360,
+      "scale": 0.72,
+      "runtimeScale": 1,
+      "animations": [{"name": "idle", "duration": 1.0666666666666667}, {"name": "walk", "duration": 1.0666666666666667}, {"name": "run", "duration": 0.8}, {"name": "jump", "duration": 2.3333333333333335}, {"name": "glide", "duration": 1.6}, {"name": "swim", "duration": 1.6}],
+      "facial": {}
+    },
+    {
+      "id": "ranger",
+      "name": "Ranger",
+      "species": "Woodland adventurer",
+      "description": "A blue scarf and a quiver for an outdoorsy companion on the town trails.",
+      "trait": "Patient · adventurous · attentive",
+      "colors": ["#5d8ca0", "#b18a57", "#e6dbb4"],
+      "modelFile": "companion-ranger.glb",
+      "portraitFile": "companion-ranger.png",
+      "bytes": 643496,
+      "scale": 0.72,
+      "runtimeScale": 1,
+      "animations": [{"name": "idle", "duration": 1.0666666666666667}, {"name": "walk", "duration": 1.0666666666666667}, {"name": "run", "duration": 0.8}, {"name": "jump", "duration": 2.3333333333333335}, {"name": "glide", "duration": 1.6}, {"name": "swim", "duration": 1.6}],
+      "facial": {}
+    }
+  ]
+}

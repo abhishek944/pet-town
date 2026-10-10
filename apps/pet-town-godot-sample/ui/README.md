@@ -4,11 +4,15 @@ This folder translates the existing Three.js HTML/CSS into Godot Controls. It us
 
 The source style contracts are `hud/styles/assets/town-hud.css`, `welcome.css`, `hud/settings/settings*.css`, and `world-expansion/activities/assets/journal.css` in `apps/pet-town-3d/src/`. Welcome, hotbar, settings, journal, and library are independent native components. Dialog blur uses a canvas shader; preview models render in an isolated native SubViewport.
 
-All dimensions are CSS-equivalent pixels. Disable project canvas scaling if the native window should preserve those pixel dimensions. The welcome layout has the source compact breakpoints; the desktop dialogs target 1280 × 720 and larger.
+All dimensions are CSS-equivalent pixels. Disable project canvas scaling if the native window should preserve those pixel dimensions. The welcome composes portrait or landscape picnic artwork for its viewport; the desktop dialogs target 1280 × 720 and larger.
 
 ## Startup
 
-`scenes/startup.tscn` draws the approved hanging wooden sign over the cream/sage waves (`loading-woodland.svg`) before constructing the world. The decorative background is used for boot/loading/failure only; the ready welcome remains over the actual world. It shows **Waking up the town…**, then hands off to the existing live-world **Click anywhere to begin** screen. Loading clicks cannot start gameplay. Project boot settings use a PNG of this same native UI and the desktop Pet Town icon, so the engine default splash is never requested.
+`scenes/startup.tscn` draws the selected **Paper picnic**: a cream rabbit, blue duck, rust fox and hedgehog in offset six-pose loops at five poses per second. The fixed paper landscape, Fraunces title and loading cue stay still. Portrait and imagegen-extended landscape plates preserve the composition in different window shapes. The same scene remains for the ready **Let’s play →** cue; its animation phase survives the handoff.
+
+The selected clean loading pill uses a native PanelContainer with a separate dot and unpadded label. A shared footer VBox keeps the loading/ready/error cue 12 pixels above the sound note. Loading stays on one line; errors may wrap to the available width. Width includes real font metrics and all panel margins.
+
+Loading stays above the constructing HUD and consumes input. While this opaque opening is visible, the root viewport skips unseen 3D rendering; dismissal, external hiding and teardown release that suspension. Physics and initialization continue. Bounded terrain/vegetation/prop work yields to the scene tree; pure audio synthesis runs on workers while native nodes remain on the main thread. The town disables processing until all systems are initialized, and separate completion/success states preserve the failure message even for immediate failures. No animation cycle or minimum duration delays readiness. Saved Time & weather reduced motion uses a static cast; loading failure stops the decorative motion. Tab focuses the ready button, Enter/controller accept starts, and a ready click retains the existing anywhere-to-begin behavior. Gameplay actions are released on dismissal. Optional world sound is preserved.
 
 Regenerate that PNG after changing the loading design with:
 
@@ -16,13 +20,13 @@ Regenerate that PNG after changing the loading design with:
 var/godot-runtime/Godot.app/Contents/MacOS/Godot --path apps/pet-town-godot-sample --script res://tools/render-boot.gd
 ```
 
-The renderer creates `ui/icons/boot-welcome.png` from the native Controls at 1280×720. The boot splash preserves its aspect ratio on other screens; the actual loading and welcome Controls adapt to the viewport.
+The renderer creates `ui/icons/boot-welcome.png` from the native Controls at 1280×720 with a deterministic static first pose. The boot splash preserves its aspect ratio on other screens; the actual loading and welcome Controls adapt to the viewport.
 
 ## Root integration
 
 Existing `block_selected`, `settings_toggled`, `sound_toggled`, `photo_requested`, `set_selected`, `set_status`, `update_clock`, `set_companion_count`, and `toggle_settings` remain available.
 
-- Call `show_welcome()` after the native world is ready. This hides the gameplay HUD, blocks player input through `settings_toggled(true)`, and shows the original wooden sign. World animation should continue. Any click or keyboard press dismisses it.
+- Call `show_welcome()` after the native world is ready. This hides the gameplay HUD, blocks player input through `settings_toggled(true)`, and shows the ready picnic. World animation continues. A click, Enter or controller accept dismisses it; Tab focuses the cue without dismissing.
 - `set_pet_prompt(name, screen_position)` takes the projected point above the creature. `clear_pet_prompt()` hides it. `pet_requested` fires when the pink prompt is clicked. Keyboard F remains owned by native gameplay.
 - `show_pet_response(name, text, screen_position)` displays the actual wildlife response plus six floating source hearts. Empty response text uses the source “looks so happy!” response. `show_toast(text)` displays a transient source toast.
 - `volume_changed(value)` is normalized 0–1. `set_volume(value)` updates the UI and emits it. `set_sound(enabled)` updates the HUD and emits `sound_toggled`. Settings has the actual world-volume slider.
@@ -41,6 +45,8 @@ Experiences: `{title, art, meta, note, actions}`. All thirteen illustrations are
 ## Asset library data
 
 `set_asset_catalog(entries)` expects `{id, name, category, path, footprint?}` for imported native PackedScenes. It renders the actual catalog count, selectable cards, source-style native 3D preview, quarter-turn control, distance slider, placement, and undo. Preview fitting handles world-baked vertices by computing imported mesh bounds and centering the object.
+
+Catalog thumbnails use `library_thumbnail.gd` to retain a still render between model, size and visibility changes. The selected model stage keeps its existing preview behavior. Native comparison evidence is under `var/native-ui-performance/implement-details/thumbnail/`.
 
 `asset_place_requested(id, yaw, distance)` emits radians and world units. `asset_undo_requested` requests native undo. `set_asset_result(message)` displays success or a concrete clearance failure. The root owns placement validity, collision, save/undo state, and the catalog subset. Nearby original scenery is exposed by `set_asset_targets(entries)`: `{id, name, distance, position, replaced}`. Selecting an original target disables Add. Replace emits `asset_replace_requested(id, target, yaw)`; Restore emits `asset_restore_requested(target)`; selection and turn changes emit `asset_replace_preview_requested(id, target, yaw)` for actual clearance feedback.
 
@@ -65,3 +71,15 @@ Settings, Journal and the asset library constrain their outer cards to the viewp
 ## Verification boundary
 
 Godot parser and isolated headless page-constructor checks validate startup and all native UI components. Visible parity and interaction acceptance require Computer checks in the integrated world; headless checks do not establish that. The repository’s maintained-source limit applies to every GDScript and shader here.
+
+## Native atmosphere controls
+
+The whole clock card opens the cached **Time & weather** settings page through the existing modal lifecycle. `atmosphere_changed(field, value)` routes to `scripts/atmosphere/driver.gd`, and `set_atmosphere(snapshot)` updates both clock caption and controls from the authoritative state. Escape/H restores the clock-entry focus. The category uses the approved cream/sage 800×600 shell, a horizontal category row in compact windows, one scrolling body and pinned header/footer. All Settings categories reuse this warm cream/sage shell. `settings_content.gd` supplies the shared eyebrow/title/description hierarchy, section dividers, switches and quiet notes; `settings_style.gd` matches the atmosphere control palette. Companions, World, Wildlife, Coins & usage, How to play, About and the pet chooser retain their existing native actions and state owners.
+
+`ui/atmosphere_*_controls.gd` own time, weather, effects and sound. The state/persistence adapter owns validated versioned fields in the existing `preferences.cfg` atmosphere section, debounced selection saves and a 15-second running-clock checkpoint. `set_atmosphere_saved(bool)` keeps the remembered/save-error caption current without recreating the page or disturbing focus/scroll.
+
+Rendering and packaging checks are recorded under `var/time-weather/implement-details/`. Standalone native renders establish appearance and rendering behavior, not live keyboard/gameplay/audio acceptance; the final interaction checklist remains user-owned.
+
+## Wildlife care
+
+H → Wildlife renders all native species separately from companions. Cards retain their nodes and focus while mood and live population refresh. Details use a horizontal portrait/content dialog, stack and scroll on narrow windows, trap keyboard/controller focus and return it to the selected card. Find delegates to the native care owner. The quiet HUD reminder opens Wildlife only on explicit action and avoids other HUD controls. See [wildlife happiness](../../../docs/wildlife-happiness.md) for timing, persistence and live review steps.

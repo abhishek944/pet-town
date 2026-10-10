@@ -9,6 +9,7 @@ var height: int
 var original: PackedByteArray
 var cells: PackedByteArray
 var edits: Dictionary = {}
+var edits_by_chunk: Dictionary = {}
 var definitions: Array
 var palette := [1,2,12,4,11,13,14,GLASS,15,16,17,18]
 var signature := ""
@@ -49,6 +50,13 @@ func set_id(cell: Vector3i, id: int) -> void:
 	cells[offset(cell)]=id
 	if id==get_id(cell,true): edits.erase(cell)
 	else: edits[cell]=id
+	var key := Vector2i(floori(cell.x/16.0),floori(cell.z/16.0))
+	# Copy only the changed bucket; worker snapshots share untouched immutable buckets.
+	var bucket: Dictionary = edits_by_chunk.get(key,{}).duplicate()
+	if edits.has(cell): bucket[cell]=true
+	else: bucket.erase(cell)
+	if bucket.is_empty(): edits_by_chunk.erase(key)
+	else: edits_by_chunk[key]=bucket
 
 func top_y(x: int,z: int) -> int:
 	for y in range(height-1,-1,-1):

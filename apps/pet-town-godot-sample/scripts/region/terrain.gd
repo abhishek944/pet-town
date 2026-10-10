@@ -3,7 +3,7 @@ const Buffers = preload("buffers.gd")
 var materials: Array[ShaderMaterial] = []
 var chunks: Array[MeshInstance3D] = []
 
-func setup(manifest: Dictionary) -> void:
+func setup(manifest: Dictionary, budget: RefCounted = null) -> void:
 	var metadata: Dictionary = manifest.terrain
 	var images: Array[Image] = []
 	for entry in metadata.layers:
@@ -12,6 +12,7 @@ func setup(manifest: Dictionary) -> void:
 		image.convert(Image.FORMAT_RGBA8)
 		image.generate_mipmaps()
 		images.append(image)
+		if budget: await budget.checkpoint()
 	var atlas := Texture2DArray.new()
 	atlas.create_from_images(images)
 	for lip in [false, true]:
@@ -36,18 +37,23 @@ func setup(manifest: Dictionary) -> void:
 			material.set_shader_parameter(key,value)
 		materials.append(material)
 	for entry in metadata.chunks:
-		var data := Buffers.read_json(entry.file)
 		var instance := MeshInstance3D.new()
 		instance.name = entry.name
+		instance.set_meta("source_file",entry.file)
 		instance.mesh = Buffers.resource_mesh(entry.file, true)
-		instance.transform = Buffers.transform(data.matrix)
+		instance.transform = preload("terrain_descriptor.gd").transform(entry.file)
 		instance.material_override = materials[1 if entry.lip else 0]
 		add_child(instance)
 		chunks.append(instance)
 		if not entry.lip:
-			instance.create_trimesh_collision()
+			var body := StaticBody3D.new()
+			var collider := CollisionShape3D.new()
+			collider.shape = preload("native_cache.gd").collision(entry.file,instance.mesh)
+			body.add_child(collider)
+			instance.add_child(body)
+		if budget: await budget.checkpoint()
 
 func set_lighting(sample: Dictionary) -> void:
 	for material in materials:
 		material.set_shader_parameter("uLightDir",sample.sun_direction)
-		material.set_shader_parameter("uNight",float(sample.stars))
+		material.set_shader_parameter("uNight",float(sample.get("night",sample.stars)))

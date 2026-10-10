@@ -6,7 +6,7 @@ var pending: Array[Dictionary] = []
 var queued: Dictionary = {}
 var last_frame := -1
 
-func request(body: CharacterBody3D) -> void:
+func request(body: RigidBody3D) -> void:
 	var id := body.get_instance_id()
 	if queued.has(id): return
 	queued[id] = true

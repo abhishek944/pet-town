@@ -111,7 +111,10 @@ export function createChunkVertexWriter(chunk, state) {
               1,
               Math.max(
                 0,
-                (worldY + (chunk.droppedPath ? -0.085 : 0) - state.wallRange[0]) / wallHeight,
+                (worldY +
+                  (chunk.droppedPath ? -terrainState.pathSurfaceDrop : 0) -
+                  state.wallRange[0]) /
+                  wallHeight,
               ),
             )
           : 1;

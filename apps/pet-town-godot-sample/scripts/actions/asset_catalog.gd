@@ -1,6 +1,6 @@
 extends RefCounted
 
-static func build(manifest: Dictionary, source: Array) -> Dictionary:
+static func build(manifest: Dictionary, source: Array, budget: RefCounted = null) -> Dictionary:
 	var entries := {}
 	for prop in manifest.props:
 		var origin: Dictionary = prop.get("entry") if prop.get("entry") is Dictionary else {}
@@ -27,6 +27,7 @@ static func build(manifest: Dictionary, source: Array) -> Dictionary:
 			item.height = maxf(0.3, box.size.y)
 			model.free()
 			entries[id] = item
+			if budget: await budget.checkpoint()
 	return entries
 
 static func bounds(root: Node3D) -> AABB:

@@ -83,7 +83,8 @@ func finish() -> void:
 		return
 	# Recheck after worker latency: a walking pet must never be enclosed by placement.
 	for change in active.changes:
-		if host.store.get_id(change.cell)!=change.before or (kind!="reset" and change.after>0 and not host.can_place(change.cell)):
+		var occupied: bool = change.after>0 and (not host.cell_clear(change.cell,6) if kind=="reset" else not host.can_place(change.cell))
+		if host.store.get_id(change.cell)!=change.before or occupied:
 			host.message.emit("That space is occupied now. Try another spot")
 			host.transaction_finished.emit(kind,false)
 			return
@@ -95,7 +96,11 @@ func finish() -> void:
 			return
 	for change in active.changes: host.store.set_id(change.cell,change.after)
 	host.terrain_editor.publish(worker.result)
-	for change in active.changes: host.update_column(change.cell)
+	var columns := {}
+	for change in active.changes:
+		host.update_column(change.cell)
+		columns[Vector2i(change.cell.x,change.cell.z)] = true
+	host.world.invalidate_collision(columns.keys(),true)
 	if kind=="edit":
 		host.undo_stack.append(active.changes[0])
 		if host.undo_stack.size()>128: host.undo_stack.pop_front()

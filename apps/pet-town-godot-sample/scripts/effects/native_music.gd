@@ -8,7 +8,12 @@ const MELODY := [0, 4, 7, 9, 7, 4, 2, 4, 9, 12, 9, 7, 4, 2, 4, 0]
 var world_volume := 0.75
 var night_amount := 0.0
 
-func setup() -> void:
+func setup(budget: RefCounted = null) -> void:
+	stream = await preload("music_cache.gd").prepare(bake_stream,budget)
+	volume_linear = 0.0
+	play()
+
+static func bake_stream() -> AudioStreamWAV:
 	var samples := PackedFloat32Array()
 	samples.resize(int(LENGTH * Synth.RATE))
 	for bar in CHORDS.size():
@@ -19,9 +24,7 @@ func setup() -> void:
 		_note(samples, start + BEAT * 4, 48 + CHORDS[bar][2], 2.0, 0.06, "mallet")
 	for index in MELODY.size():
 		_note(samples, index * BEAT * 2 + BEAT * 0.5, 72 + MELODY[index], 2.5, 0.07, "bell")
-	stream = Synth.pcm(samples, true)
-	volume_linear = 0.0
-	play()
+	return Synth.pcm(samples, true)
 
 func set_world_volume(value: float) -> void:
 	world_volume = clampf(value, 0.0, 1.0)

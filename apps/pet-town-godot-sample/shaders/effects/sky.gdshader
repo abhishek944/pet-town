@@ -13,7 +13,9 @@ uniform float glow_strength = 0.6;
 uniform float stars = 0.0;
 uniform vec3 sun_disc = vec3(30.0);
 uniform float sun_size = 0.027;
-uniform float cloud_clock = 0.0;
+uniform vec2 cloud_offset = vec2(0.0);
+uniform float cloud_cover = 0.08;
+uniform float sun_visibility = 1.0;
 float hash(vec2 p) { return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p) {
 	vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
@@ -41,11 +43,11 @@ vec3 sky_color(vec3 direction) {
 	color=mix(color,zenith.rgb,smoothstep(0.2,0.95,h));
 	float sun_dot=max(dot(direction,sun_direction),0.0);
 	color=mix(color,sunHz.rgb,pow(sun_dot,5.0)*exp(-h*4.0)*0.45);
-	vec2 cp=direction.xz/max(direction.y+0.12,0.07)*2.1+vec2(cloud_clock*0.0025,cloud_clock*0.0014);
-	float density=cloud(cp), cover=smoothstep(0.55,0.72,density)*smoothstep(0.0,0.12,h);
+	vec2 cp=direction.xz/max(direction.y+0.12,0.07)*2.1-cloud_offset;
+	float density=cloud(cp), cover=smoothstep(mix(0.62,0.18,cloud_cover),mix(0.78,0.52,cloud_cover),density)*smoothstep(0.0,0.12,h);
 	vec3 clouds=mix(cShade.rgb,cLit.rgb,smoothstep(0.48,0.76,density));
 	color=mix(color,clouds,cover*0.92);
-	float star=step(0.9985,hash(floor(direction.xz/max(h,0.1)*500.0)))*stars*h;
+	float star=step(0.9985,hash(floor(direction.xz/max(h,0.1)*500.0)))*stars*h*(1.0-cover);
 	vec3 scene=display_to_linear(color)+vec3(star);
 	vec3 glow_linear=srgb_to_linear(glow.rgb)*glow_strength*1.6/max(exposure,0.001);
 	float glow_max=max(glow_linear.r,max(glow_linear.g,glow_linear.b));
@@ -53,8 +55,8 @@ vec3 sky_color(vec3 direction) {
 	float inner=pow(sun_dot,2400.0)*5.0+pow(sun_dot,260.0)*0.7+pow(sun_dot,60.0)*0.16;
 	float outer=pow(sun_dot,14.0)*0.1+pow(sun_dot,5.0)*0.05;
 	float cut=smoothstep(-0.012,0.004,direction.y);
-	scene+=(glow_warm*inner+glow_linear*outer)*mix(0.45,1.0,cut);
-	scene+=sun_disc*smoothstep(cos(sun_size)-0.0015,cos(sun_size)+0.0004,dot(direction,sun_direction))*cut;
+	scene+=(glow_warm*inner+glow_linear*outer)*sun_visibility*mix(0.45,1.0,cut);
+	scene+=sun_disc*sun_visibility*smoothstep(cos(sun_size)-0.0015,cos(sun_size)+0.0004,dot(direction,sun_direction))*cut;
 	return scene;
 }
 

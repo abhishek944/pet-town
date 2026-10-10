@@ -10,7 +10,7 @@ static func wrap(details: VBoxContainer, column: VBoxContainer) -> void:
 	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(details)
 	var fit := func() -> void:
-		scroll.custom_minimum_size.y = minf(280, maxf(44, scroll.get_viewport_rect().size.y - 280))
+		scroll.custom_minimum_size.y = minf(218, maxf(44, scroll.get_viewport_rect().size.y - 370))
 	scroll.get_viewport().size_changed.connect(fit)
 	fit.call()
 	scroll.hide()

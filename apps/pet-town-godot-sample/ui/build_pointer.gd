@@ -3,12 +3,16 @@ extends Control
 var state := "hide"
 var target := Vector2.ZERO
 var initialized := false
+var captured := false
 
 func _ready() -> void:
 	mouse_filter = MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 
 func set_target(point: Vector2, kind: String) -> void:
+	var next_captured := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	var drawing_changed := state != kind or captured != next_captured
+	captured = next_captured
 	target = point
 	if state != kind and kind in ["idle", "aim", "bad"]:
 		Input.set_custom_mouse_cursor(load("res://ui/icons/build-cursor-%s.svg" % kind), Input.CURSOR_ARROW, Vector2(16, 16))
@@ -16,11 +20,10 @@ func set_target(point: Vector2, kind: String) -> void:
 	if not initialized or position.distance_to(point) > 260:
 		position = point
 		initialized = true
-	queue_redraw()
+	if drawing_changed: queue_redraw()
 
 func _process(delta: float) -> void:
 	position = position.lerp(target, 1.0 - exp(-delta * 22))
-	queue_redraw()
 
 func _draw() -> void:
 	if state in ["hide", "idle"] or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED: return

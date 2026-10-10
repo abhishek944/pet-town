@@ -28,6 +28,7 @@ fn reading(session: &Session) -> Reading {
         models: session.models.keys().cloned().collect(),
         updated_at_seconds: (session.updated_at_seconds > 0).then_some(session.updated_at_seconds),
         reason: None,
+        coin_contribution: None,
     }
 }
 

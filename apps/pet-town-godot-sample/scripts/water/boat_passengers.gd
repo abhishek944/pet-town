@@ -3,24 +3,22 @@ const Geometry=preload("boat_geometry.gd")
 var boat: StaticBody3D
 var world: Node3D
 var navigation: RefCounted
-var actor: CharacterBody3D
-var pilot: CharacterBody3D
+var actor: RigidBody3D
+var pilot: RigidBody3D
 var supports: Dictionary={}
 var dock: Dictionary={}
 
-func aboard(body: CharacterBody3D) -> bool:
+func aboard(body: RigidBody3D) -> bool:
 	if not body: return false
 	var local:=boat.to_local(body.position)
 	var motion=body.get("motion")
 	return Geometry.inside(local,0.08) and local.y>=0.48 and local.y<3.7 and (not motion or not motion.swimming)
 
-func move(body: CharacterBody3D, point: Vector3) -> void:
-	body.position=point+Vector3.UP*0.005
-	body.velocity=Vector3.ZERO
-	body.reset_physics_interpolation()
+func move(body: RigidBody3D, point: Vector3) -> void:
+	body.relocate(point+Vector3.UP*0.005)
 	var motion=body.get("motion")
 	if motion:
-		motion.swimming=body.position.y<world.water_at(point)+0.2
+		motion.swimming=point.y<world.water_at(point)+0.2
 		motion.diving=false
 	supports[body.get_instance_id()]=boat.transform
 
@@ -60,25 +58,24 @@ func interact() -> bool:
 		if navigation.point_clear(point,actor): move(actor,point)
 	return true
 
-func before_body_step(body: CharacterBody3D) -> bool:
-	if supports.has(body.get_instance_id()):
-		var previous: Transform3D=supports[body.get_instance_id()]
-		var local:=previous.affine_inverse()*body.position
-		if body.velocity.y<=0.1 and local.y>=0.46 and Geometry.inside(local,0.05):
-			body.position=boat.transform*local
-		else: supports.erase(body.get_instance_id())
-	if pilot!=body: return false
-	body.position=boat.to_global(Geometry.HELM)+Vector3.UP*0.005
-	body.velocity=Vector3.ZERO
-	if body.visual: body.visual.rotation.y=boat.rotation.y
+func before_body_step(body: RigidBody3D) -> bool:
+	# Jolt supplies deck velocity through the actual floor contact. No position carry.
+	if pilot != body: return false
+	if not aboard(body):
+		release_helm()
+		return false
+	var offset: Vector3 = boat.to_global(Geometry.HELM) - body.global_position
+	var desired: Vector3 = body.steer(Vector3(offset.x, 0, offset.z).limit_length(1.2))
+	var delta: float = body.get_physics_process_delta_time()
+	body.velocity.x = move_toward(body.velocity.x, desired.x, delta * 4)
+	body.velocity.z = move_toward(body.velocity.z, desired.z, delta * 4)
+	body.velocity.y = -0.5 if body.is_grounded() else body.velocity.y - delta * 22
+	body.submit_motion()
+	if body.visual: body.visual.rotation.y = boat.rotation.y
 	return true
 
-func after_body_step(body: CharacterBody3D) -> void:
-	var local:=boat.to_local(body.position)
-	var deck:=Geometry.deck_height(local)
-	if body.is_on_floor() and absf(local.y-deck)<0.15:
-		supports[body.get_instance_id()]=boat.transform
-	else: supports.erase(body.get_instance_id())
+func after_body_step(body: RigidBody3D) -> void:
+	if pilot == body and not aboard(body): release_helm()
 
 func dock_height(point: Vector3) -> float:
 	var top: float=world.manifest.waterLevel+0.81
@@ -88,7 +85,7 @@ func dock_height(point: Vector3) -> float:
 		return top+(point.x-dock.x)*(shore-top)/(dock.shoreX-dock.x)
 	return -INF
 
-func exit_point(body: CharacterBody3D) -> Dictionary:
+func exit_point(body: RigidBody3D) -> Dictionary:
 	var offsets: Array=[Vector3(2.7,0,2.3),Vector3(-2.7,0,2.3),Vector3(0,0,4.5),Vector3(2.8,0,0),Vector3(-2.8,0,0)]
 	var candidates: Array=[]
 	if Vector2(boat.position.x-dock.x,boat.position.z-dock.z).length()<7: candidates.append(Vector3(dock.x,0,dock.z))

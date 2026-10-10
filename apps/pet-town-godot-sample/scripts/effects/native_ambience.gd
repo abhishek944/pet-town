@@ -2,6 +2,9 @@ extends Node
 ## Source noise colors, filter bands, proximity gains and bird-call envelopes in native audio.
 const Synth = preload("res://scripts/effects/audio_synthesis.gd")
 const Birds = preload("res://scripts/effects/bird_audio.gd")
+var night_factor := -1.0
+var weather_wind_gain := 1.0
+var weather_bird_gain := 1.0
 var enabled := true
 var volume := 0.75
 var time_of_day := 0.38
@@ -23,33 +26,36 @@ var actions: Node
 var music: AudioStreamPlayer
 var suppress_block_audio := false
 
-func setup(manifest: Dictionary = {}) -> void:
+func setup(manifest: Dictionary = {}, budget: RefCounted = null) -> void:
 	time_of_day = float(manifest.get("environment", {}).get("timeOfDay", 0.38))
 	if DisplayServer.get_name() == "headless":
 		return
 	movement = preload("res://scripts/effects/movement_audio.gd").new()
 	add_child(movement)
-	movement.setup()
+	await movement.setup(budget)
 	actions = preload("res://scripts/effects/action_audio.gd").new()
 	add_child(actions)
 	actions.setup()
 	actions.set_volume(volume)
 	actions.set_enabled(enabled)
+	if budget: await budget.checkpoint()
 	for spec in [["wind", "brown", 500, 0.55, "bandpass"], ["rustle", "pink", 2600, 0.5, "highpass"], ["brook", "white", 1000, 3.2, "bandpass"], ["lap", "brown", 420, 0.5, "lowpass"]]:
 		var voice := AudioStreamPlayer.new()
-		voice.stream = Synth.noise(spec[1], spec[2], spec[3], spec[4])
+		var bake := Synth.noise.bind(spec[1], spec[2], spec[3], spec[4])
+		voice.stream = await budget.background(bake) if budget else bake.call()
 		voice.volume_db = -80
 		add_child(voice)
 		loops[spec[0]] = voice
 		voice.play()
 	music = preload("res://scripts/effects/native_music.gd").new()
 	add_child(music)
-	music.setup()
+	await music.setup(budget)
 	music.set_world_volume(volume)
 	music.set_enabled(enabled)
 	for kind in ["tweet", "tweet", "trill", "whistle", "chirp"]:
-		bird_songs.append(Birds.call_song(kind))
-	cricket_song = Birds.cricket()
+		var song = await budget.background(Birds.call_song.bind(kind)) if budget else Birds.call_song(kind)
+		bird_songs.append(song)
+	cricket_song = await budget.background(Birds.cricket) if budget else Birds.cricket()
 	for i in 4:
 		var voice := AudioStreamPlayer.new()
 		add_child(voice)
@@ -116,20 +122,20 @@ func _process(delta: float) -> void:
 	if probe_timer <= 0:
 		probe_timer = 0.4
 		water_proximity = _water_nearby()
-	var night := 1.0 - smoothstep(-0.16, -0.035, sin(TAU * (time_of_day - 0.25)))
+	var night := night_factor if night_factor >= 0 else 1.0 - smoothstep(-0.16, -0.035, sin(TAU * (time_of_day - 0.25)))
 	if music:
 		music.night_amount = night
 	var height := clampf((player_position.y - 10) / 22, 0, 1)
-	_gain("wind", (0.05 + 0.1 * height + 0.06 * gust) * (1 + 0.3 * night), delta, 0.8)
+	_gain("wind", (0.05 + 0.1 * height + 0.06 * gust) * (1 + 0.3 * night) * weather_wind_gain, delta, 0.8)
 	# Gust boundaries must not abruptly change the looping waveform's pitch.
 	loops.wind.pitch_scale = lerpf(loops.wind.pitch_scale, (300 + 450 * gust + 350 * height) / 500, 1.0 - exp(-delta / 1.2))
-	_gain("rustle", 0.012 * gust * gust * (1 - height * 0.5), delta, 0.6)
+	_gain("rustle", 0.012 * gust * gust * (1 - height * 0.5) * weather_wind_gain, delta, 0.6)
 	_gain("brook", 0.1 * water_proximity * water_proximity, delta, 0.5)
 	loops.brook.pitch_scale = 1.0 + sin(clock * 1.7) * 0.08
 	_gain("lap", 0.22 * water_proximity * (0.6 + 0.4 * sin(TAU * clock * 0.13)), delta, 0.6)
 	bird_timer -= delta
 	var dawn := exp(-pow((time_of_day - 0.29) / 0.06, 2))
-	var bird_activity := (1 - night) * (0.25 + 0.9 * dawn)
+	var bird_activity := (1 - night) * (0.25 + 0.9 * dawn) * weather_bird_gain
 	if bird_timer <= 0 and bird_activity > 0.02:
 		bird_timer = randf_range(0.6, 2.2) / bird_activity
 		_play(bird_songs.pick_random(), randf_range(0.035, 0.075) * (1 - night * 0.4))

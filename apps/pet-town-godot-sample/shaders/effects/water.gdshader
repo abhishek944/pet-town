@@ -1,5 +1,6 @@
 shader_type spatial;
-render_mode unshaded, cull_disabled, depth_draw_opaque;
+// Refraction uses the transparent pass; postprocessing still needs surface depth.
+render_mode unshaded, cull_disabled, depth_draw_always;
 #include "water_common.gdshaderinc"
 uniform sampler2D water_fields : filter_linear, repeat_disable;
 uniform sampler2D shore_field : filter_linear, repeat_disable;
@@ -17,6 +18,7 @@ uniform vec3 sun_direction = vec3(0.4,0.8,0.3);
 uniform float night = 0.0;
 uniform vec4 ripples[32];
 uniform float clock = 0.0;
+uniform bool reduced_motion = false;
 varying vec3 world_position;
 #include "ocean.gdshaderinc"
 void vertex() {
@@ -39,12 +41,13 @@ void fragment() {
 	float ring_foam=0.0;
 	for(int i=0;i<32;i++) {
 		vec4 r=ripples[i];float age=clock-r.z;
-		if(r.w<=0.0||age<0.0||age>3.2) continue;
+		float duration=mix(2.4,1.8,smoothstep(0.6,1.0,r.w));
+		if(reduced_motion||r.w<=0.0||age<0.0||age>duration) continue;
 		vec2 d=p-r.xy;float dist=length(d)+0.0001;
 		float front=age*2.2*(0.75+0.25*min(r.w,2.0)),x=dist-front;
-		float life=1.0-age/3.2,env=min(r.w,2.0)*life*life/(1.0+dist*0.35),sig=5.0/(1.0+age*1.5);
-		float impact=smoothstep(0.9,1.3,r.w),gauss=exp(-x*x*sig);
-		g+=(d/dist)*mix(0.025,0.07,impact)*env*(8.5*cos(8.5*x)-2.0*sig*x*sin(8.5*x))*gauss;
+		float life=1.0-age/duration,env=min(r.w,2.0)*life*life/(1.0+dist*0.35),sig=5.0/(1.0+age*1.5);
+		float impact=smoothstep(0.6,1.0,r.w),gauss=exp(-x*x*sig);
+		g+=(d/dist)*mix(0.012,0.025,impact)*env*(8.5*cos(8.5*x)-2.0*sig*x*sin(8.5*x))*gauss;
 		ring_foam+=impact*env*exp(-x*x*90.0/(1.0+age*0.9))*smoothstep(0.0,0.15,age);
 	}
 	vec3 normal=normalize(vec3(-g.x,1.0,-g.y));
@@ -82,7 +85,7 @@ void fragment() {
 	float breaks=smoothstep(0.35,0.65,water_noise(p*1.3+vec2(clock*0.05)));
 	lap*=alive*breaks*0.35;
 	float foam=max(max(edge*0.45,glow),lap);
-	foam=max(foam,min(ring_foam,1.0)*0.75);
+	foam=max(foam,min(ring_foam,1.0)*0.22);
 	color=mix(color,foam_color.rgb,min(foam,0.78));
 	vec3 halfway=normalize(sun_direction+view);
 	float highlight=pow(max(dot(normal,halfway),0.0),900.0)*0.3;

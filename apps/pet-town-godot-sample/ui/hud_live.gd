@@ -58,6 +58,7 @@ func setup(hud: CanvasLayer) -> void:
 	move_child(touch, 0)
 	ocean = preload("res://ui/ocean_controls.gd").new()
 	add_child(ocean)
+	ocean.swim.host = host
 	ocean.action_requested.connect(func(_id: String) -> void: host.ocean_interact.emit())
 	ocean.helm_requested.connect(func(action: String, held: bool) -> void: host.ocean_helm.emit(action, held))
 	var manifest_file := "res://assets/companion-manifest.json"
@@ -75,7 +76,8 @@ func _process(_delta: float) -> void:
 func layout() -> void:
 	if not is_instance_valid(usage): return
 	usage.size = Vector2(minf(276, maxf(0, size.x)), usage.get_combined_minimum_size().y)
-	usage.position = Vector2(0, maxf(0, size.y - usage.size.y))
+	var toolbar_clearance := 86.0 if size.x < 1000 else 0.0
+	usage.position = Vector2(0, maxf(0, size.y - usage.size.y - toolbar_clearance))
 
 func forward_action(id: String, action: String, payload: Dictionary) -> void:
 	if action == "settings":
@@ -117,8 +119,13 @@ func set_companions(data: Array, selected: String) -> void:
 	sync_visibility()
 
 func set_usage(data: Dictionary, selected: Dictionary = {}) -> void:
-	usage_snapshot = data
+	var next := data.duplicate(true)
+	if not preload("res://ui/coin_format.gd").known(next.get("coins", {})) and preload("res://ui/coin_format.gd").known(usage_snapshot.get("coins", {})):
+		next.coins = usage_snapshot.coins.duplicate()
+		next.coinSyncUnavailable = true
+	usage_snapshot = next
 	selected_usage = selected
+	host.modal.set_usage_snapshot(usage_snapshot)
 	_render_usage()
 
 func _render_usage() -> void:

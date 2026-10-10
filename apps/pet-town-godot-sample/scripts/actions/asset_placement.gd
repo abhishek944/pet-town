@@ -9,20 +9,22 @@ var placed: Array = []
 var records: Array = []
 var save_blocked := false
 var lighting_delay := 0.0
+var support := preload("support_index.gd").new()
 var replacements: Node3D
 var ghost := preload("asset_ghost.gd").new()
-
-func setup(value: Node3D, source: Array) -> void:
+func setup(value: Node3D, source: Array, budget: RefCounted = null) -> void:
 	sample = value
-	catalog = preload("asset_catalog.gd").build(sample.world.manifest, source)
+	catalog = await preload("asset_catalog.gd").build(sample.world.manifest, source, budget)
 	replacements = preload("asset_replacements.gd").new()
 	add_child(replacements)
 	replacements.setup(self)
+	add_child(support)
+	support.setup(self)
 	ghost.host = self
 	add_child(ghost)
-	sample.hud.set_asset_catalog(catalog.values())
-	restore.call_deferred()
-
+	await sample.hud.set_asset_catalog(catalog.values(), budget)
+	if budget: await restore(budget)
+	else: restore.call_deferred()
 func preview(id: String, yaw: float, distance: float) -> void:
 	var check := candidate(id, yaw, distance)
 	if check.has("error"):
@@ -32,7 +34,6 @@ func preview(id: String, yaw: float, distance: float) -> void:
 		ghost.present(catalog[id], check.position, yaw)
 		var p: Vector3 = check.position
 		sample.hud.set_asset_placement_result("Clear, level ground · %.1f, %.1f · Ready to place" % [p.x, p.z], true)
-
 func candidate(id: String, yaw: float, distance: float) -> Dictionary:
 	if not catalog.has(id) or save_blocked:
 		return {"error": "The saved asset file needs attention before adding another asset."}
@@ -48,7 +49,6 @@ func candidate(id: String, yaw: float, distance: float) -> Dictionary:
 	if not clearance(entry, fitted.position, yaw):
 		return {"error": "This spot overlaps your explorer, a tree, a build, or another asset. Choose a clear patch."}
 	return fitted
-
 func place(id: String, yaw: float, distance: float) -> void:
 	var fitted := candidate(id, yaw, distance)
 	if fitted.has("error"):
@@ -69,8 +69,9 @@ func place(id: String, yaw: float, distance: float) -> void:
 	records = next
 	ghost.clear()
 	placed.append(create_asset(entry, point, yaw))
+	support.track(placed.back(),record)
+	sample.world.invalidate_collision()
 	sample.hud.set_asset_placement_result(entry.name + " added. Walk over and make yourself at home.", false)
-
 func clearance(entry: Dictionary, point: Vector3, yaw: float, include_actor := true) -> bool:
 	if not Safe.clear_box(sample.world, point, entry.hw, entry.hd, entry.height, yaw + entry.source_angle, include_actor):
 		return false
@@ -83,7 +84,6 @@ func clearance(entry: Dictionary, point: Vector3, yaw: float, include_actor := t
 		if absf(delta.y) < entry.height + object.get_meta("height") and Vector2(delta.x, delta.z).length() < radius + float(object.get_meta("radius")):
 			return false
 	return true
-
 func create_asset(entry: Dictionary, point: Vector3, yaw: float) -> Node3D:
 	var wrapper := Node3D.new()
 	wrapper.name = str(entry.name).validate_node_name()
@@ -105,11 +105,9 @@ func create_asset(entry: Dictionary, point: Vector3, yaw: float) -> Node3D:
 		light.omni_range = 4.5
 		wrapper.add_child(light)
 	return wrapper
-
 func undo() -> void:
 	replacements.undo()
-
-func restore() -> void:
+func restore(budget: RefCounted = null) -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var saved := Save.read(PATH)
@@ -133,23 +131,14 @@ func restore() -> void:
 		if not record is Dictionary or not catalog.has(record.get("id", "")) or not valid_record(record):
 			save_blocked = true
 			continue
-		var point := Vector3(record.position[0], record.position[1], record.position[2])
-		var entry: Dictionary = catalog[record.id]
-		var fitted := Safe.ground_fit(sample.world, point, entry.hw, entry.hd, record.yaw + entry.source_angle)
-		var supported: bool = not fitted.has("error") and absf(point.y - fitted.position.y) < 0.2
 		records.append(record)
-		var restored := create_asset(entry, point, record.yaw)
-		placed.append(restored)
-		if not supported:
-			restored.hide()
-			preload("asset_support.gd").collision(restored, false)
-	replacements.rebuild()
+		if budget: await budget.checkpoint()
+	await replacements.rebuild(budget)
 	if not placed.is_empty():
 		await get_tree().physics_frame
 		sample.actor.respawn()
 	if save_blocked:
 		sample.hud.show_toast("Some saved assets could not fit safely. The save is preserved; reset to start fresh.")
-
 func valid_record(record: Dictionary) -> bool:
 	if not record.get("position") is Array or record.position.size() != 3 or not (record.get("yaw") is float or record.get("yaw") is int):
 		return false
@@ -157,7 +146,6 @@ func valid_record(record: Dictionary) -> bool:
 		if not (coordinate is int or coordinate is float) or not is_finite(float(coordinate)):
 			return false
 	return is_finite(record.yaw) and absf(record.yaw) <= TAU + 0.01
-
 func reset() -> void:
 	if not Save.write(PATH, {"version": 1, "assets": []}):
 		result("The asset reset could not be saved. Your assets have been kept.")
@@ -172,18 +160,14 @@ func reset() -> void:
 	replacements.history.clear()
 	replacements.rebuild()
 	save_blocked = false
-
 func result(message: String) -> void:
 	sample.hud.set_asset_result(message)
-
 func _process(delta: float) -> void:
 	ghost.sync_visibility()
 	lighting_delay -= delta
 	if not sample or lighting_delay > 0:
 		return
 	lighting_delay = 0.5
-	preload("asset_support.gd").update(self)
-	replacements.update_support()
 	if sample.hud.has_method("set_asset_targets") and sample.hud.active_panel == "Asset library": sample.hud.set_asset_targets(replacements.targets())
 	var night := float(sample.world.effects.daylight.sample.get("stars", 0.0))
 	for object in placed:

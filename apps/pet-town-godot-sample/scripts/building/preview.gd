@@ -1,5 +1,6 @@
 extends Node3D
 # Original Three.js build preview colors, easing, pulse, idle fade and denial shake.
+const INACTIVITY_TIMEOUT_MSEC := 10000
 var host: Node3D
 var ghost: MeshInstance3D
 var target_outline: MeshInstance3D
@@ -32,7 +33,6 @@ func setup(owner_builder: Node3D) -> void:
 	target_outline.scale = Vector3.ONE*1.008
 	ghost = instance(mesh,texture_material,11)
 	placement_outline = instance(mesh,outline_material,12)
-	wake()
 
 func outline(color: Color,width: float,glow: float) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
@@ -53,7 +53,10 @@ func instance(mesh: ArrayMesh,material: ShaderMaterial,priority: int) -> MeshIns
 	return node
 
 func wake() -> void:
-	active_until = Time.get_ticks_msec()+6000
+	active_until = Time.get_ticks_msec()+INACTIVITY_TIMEOUT_MSEC
+
+func is_awake() -> bool:
+	return Time.get_ticks_msec() < active_until
 
 func denied() -> void:
 	denial_shake = 1.0
@@ -72,12 +75,11 @@ func set_selection() -> void:
 	texture_material.set_shader_parameter("overlays",Vector2(definition.get("topOver",-1),definition.get("exposedSideOver",-1)))
 	texture_material.set_shader_parameter("glass",id == host.store.GLASS)
 	texture_material.set_shader_parameter("emission_amount",1.1 if definition.get("emissive",0) else 0.5)
-	wake()
 
 func update(delta: float,hit: Dictionary,enabled: bool) -> void:
 	set_selection()
 	elapsed += delta
-	var show := enabled and not hit.is_empty() and Time.get_ticks_msec() < active_until
+	var show := enabled and not hit.is_empty() and is_awake()
 	var show_ghost := show and not overlaps_actor(hit.place)
 	fade += (float(show)-fade)*(1.0-exp(-delta*(12.0 if show else 6.0)))
 	ghost_fade += (float(show_ghost)-ghost_fade)*(1.0-exp(-delta*(12.0 if show_ghost else 8.0)))

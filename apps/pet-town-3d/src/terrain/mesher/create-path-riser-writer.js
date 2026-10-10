@@ -23,7 +23,7 @@ export function createPathRiserWriter(chunk, state) {
       chunk.cornerAo[2] = chunk.cornerAo[3] = 0.97;
     }
     chunk.ensureCapacity(4, 6);
-    let result146 = 0.915;
+    let result146 = 1 - terrainState.pathSurfaceDrop;
     let callback16 = (value72, value73) => chunk.emitVertex(value72, value73);
     let result147;
     let result148;

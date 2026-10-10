@@ -7,10 +7,11 @@ const Storage=preload("storage.gd")
 const Habitat=preload("habitat.gd")
 const Journal=preload("journal.gd")
 var world: Node3D
-var actor: CharacterBody3D
+var actor: RigidBody3D
 var source: Dictionary={}
 var progress:=Storage.new()
 var habitat:=Habitat.new()
+var activity:=preload("activity.gd").new()
 var journal:=Journal.new()
 var scenery: Node3D
 var dolphins: Node3D
@@ -27,7 +28,7 @@ var available: bool:
 var error: String:
 	get: return progress.error
 
-func setup(owner_world: Node3D, owner_actor: CharacterBody3D) -> void:
+func setup(owner_world: Node3D, owner_actor: RigidBody3D) -> void:
 	world=owner_world
 	source=preload("res://scripts/region/buffers.gd").read_json(world.manifest.get("oceanFile","ocean-manifest.json"))
 	if source.is_empty():
@@ -71,20 +72,25 @@ func setup(owner_world: Node3D, owner_actor: CharacterBody3D) -> void:
 	set_actor(owner_actor)
 	if not progress.error.is_empty(): message.emit(progress.error)
 
-func set_actor(body: CharacterBody3D) -> void:
+func set_actor(body: RigidBody3D) -> void:
 	actor=body
 	if dolphins: dolphins.actor=body
 	if swim_effects: swim_effects.actor=body
 	if boat: boat.set_actor(body)
 
+func _physics_process(delta: float) -> void:
+	if source.is_empty() or not actor or get_tree().paused: return
+	time += delta
+	activity.update(self)
+	dolphins.update(delta,time,activity)
+	fish.step(delta,time,activity)
+	turtles.update(delta,time,activity)
+
 func _process(delta: float) -> void:
 	if source.is_empty() or not actor or get_tree().paused: return
 	var step:=clampf(delta,0,0.1)
-	time+=step
 	scenery.update(step)
-	dolphins.update(step,time)
 	fish.update(step,time)
-	turtles.update(step,time)
 	var night:=0.0
 	if world.effects and world.effects.daylight:
 		night=1.0-smoothstep(-0.16,-0.035,float(world.effects.daylight.sample.get("sun_elevation_radians",1.0)))
@@ -102,7 +108,7 @@ func check_discoveries() -> void:
 		if discoveries().has(place.id): continue
 		if Vector2(place.x-actor.position.x,place.z-actor.position.z).length()>place.radius: continue
 		var surface: float=world.water_at(actor.position)
-		var found: bool=actor.is_on_floor() and world.ground_at(actor.position)>float(world.manifest.waterLevel) if place.id=="island" else motion.swimming and surface>-999 and (place.id=="lagoon" or actor.position.y+1.1<surface-0.2)
+		var found: bool=actor.is_grounded() and world.ground_at(actor.position)>float(world.manifest.waterLevel) if place.id=="island" else motion.swimming and surface>-999 and (place.id=="lagoon" or actor.position.y+1.1<surface-0.2)
 		if not found: continue
 		var next: Array=discoveries().duplicate()
 		next.append(place.id)
@@ -140,7 +146,7 @@ func compass() -> Dictionary:
 	var offset:=Vector2(place.x-actor.position.x,place.z-actor.position.z)
 	var depth:=maxf(0,world.water_at(actor.position)-actor.position.y-1.1)
 	return {"title":place.name+" · "+Journal.cardinal(offset)+" · "+str(roundi(offset.length()))+" m",
-		"hint":"F to board or take the helm · WASD to steer" if place.get("transport",false) else ("%.1f m underwater · Space to rise"%depth if depth>0.3 else "Control to dive · J for destinations")}
+		"hint":"F to board or take the helm · WASD to steer" if place.get("transport",false) else ("%.1f m underwater · Space to rise"%depth if depth>0.3 else "X to dive · J for destinations")}
 
 func journal_data() -> Dictionary:
 	return journal.data() if not source.is_empty() else {"places":[],"experiences":[],"collection":[]}
@@ -156,16 +162,16 @@ func action() -> String:
 func interact() -> bool:
 	return boat.interact() if boat else false
 
-func aboard(body: CharacterBody3D=null) -> bool:
+func aboard(body: RigidBody3D=null) -> bool:
 	return boat and boat.active and boat.passengers.aboard(body if body else actor)
 
 func piloting() -> bool:
 	return boat and boat.passengers.pilot==actor and actor!=null
 
-func before_body_step(body: CharacterBody3D, _delta: float=0.0) -> bool:
+func before_body_step(body: RigidBody3D, _delta: float=0.0) -> bool:
 	return boat.before_body_step(body) if boat else false
 
-func after_body_step(body: CharacterBody3D) -> void:
+func after_body_step(body: RigidBody3D) -> void:
 	if boat: boat.after_body_step(body)
 
 func release_controls() -> void:

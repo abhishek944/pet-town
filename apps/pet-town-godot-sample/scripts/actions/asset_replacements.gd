@@ -117,7 +117,7 @@ func undo() -> void:
 	rebuild()
 	host.result("Latest asset change undone.")
 
-func rebuild() -> void:
+func rebuild(budget: RefCounted = null) -> void:
 	host.ghost.clear()
 	for key in models:
 		models[key].get_parent().remove_child(models[key])
@@ -132,6 +132,7 @@ func rebuild() -> void:
 	host.placed.clear()
 	for record in host.records:
 		host.placed.append(host.create_asset(host.catalog[record.id], Vector3(record.position[0], record.position[1], record.position[2]), record.yaw))
+		if budget: await budget.checkpoint()
 	for record in records:
 		if not valid(record):
 			host.save_blocked = true
@@ -140,19 +141,12 @@ func rebuild() -> void:
 		preload("asset_support.gd").collision(originals[record.target].node, false)
 		var model: Node3D = host.create_asset(host.catalog[record.id], Vector3(record.position[0], record.position[1], record.position[2]), record.yaw)
 		models[record.target] = model
-	preload("asset_support.gd").update(host)
+		if budget: await budget.checkpoint()
+	await host.support.rebuild(budget)
+	host.sample.world.invalidate_collision()
 
 func valid(record: Variant) -> bool:
 	return record is Dictionary and originals.has(record.get("target", "")) and host.catalog.has(record.get("id", "")) and host.valid_record(record)
-
-func update_support() -> void:
-	for record in records:
-		if not valid(record) or not models.has(record.target): continue
-		var object: Node3D = models[record.target]
-		var entry: Dictionary = host.catalog[record.id]
-		var fitted := Safe.ground_fit(host.sample.world, object.position, entry.hw, entry.hd, record.yaw + entry.source_angle)
-		object.visible = not fitted.has("error") and absf(object.position.y - fitted.position.y) < 0.2
-		preload("asset_support.gd").collision(object, object.visible)
 
 func preview(id: String, target: String, yaw: float) -> void:
 	var check := checked(id, target, yaw)

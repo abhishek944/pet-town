@@ -30,6 +30,21 @@ static func clock(host: CanvasLayer) -> void:
 	time_row.add_child(host.clock_period)
 	host.weather_label = Style.text("Sunny · Day 1", 11, "657354")
 	column.add_child(host.weather_label)
+	host.clock_entry = Style.button("",Vector2(192,64))
+	host.clock_entry.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	host.clock_entry.accessibility_name = "Time and weather settings"
+	host.clock_entry.tooltip_text = "Time & weather · choose your town atmosphere"
+	for state in ["normal","pressed"]: host.clock_entry.add_theme_stylebox_override(state,StyleBoxEmpty.new())
+	var hover := Style.panel("ffffff18",18,"b5c6a0",false)
+	host.clock_entry.add_theme_stylebox_override("hover",hover)
+	host.clock_entry.pressed.connect(host.open_atmosphere)
+	panel.add_child(host.clock_entry)
+	var gear := TextureRect.new()
+	gear.texture = Style.icon("settings-gear")
+	gear.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	gear.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	Style.position(gear,Rect2(176,6,10,10))
+	panel.add_child(gear)
 	host.companions = Style.button("Companions · 0     ⌥ A", Vector2(166, 39))
 	host.companions.add_theme_font_size_override("font_size", 12)
 	host.companions.add_theme_font_override("font", Style.HEAVY)
@@ -140,6 +155,7 @@ static func lift_cookie(button: Button, offset: float) -> void:
 static func key_input(host: CanvasLayer, event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
+	if event.keycode == KEY_SPACE or event.physical_keycode == KEY_SPACE: return
 	if host.active_panel == "Welcome":
 		host.close_panel()
 		host.get_viewport().set_input_as_handled()

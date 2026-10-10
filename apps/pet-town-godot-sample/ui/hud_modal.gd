@@ -1,4 +1,5 @@
 extends ColorRect
+signal atmosphere_changed(field: String, value: Variant)
 signal closed
 signal reset_requested
 signal sound_toggled(enabled: bool)
@@ -6,10 +7,14 @@ signal volume_changed(value: float)
 signal usage_toggled(value: bool)
 signal camera_requested(first_person: bool)
 signal companion_action(id: String, action: String, payload: Dictionary)
+signal wildlife_find_requested(id: String)
 const Style = preload("res://ui/hud_style.gd")
 const Pages = preload("res://ui/settings_pages.gd")
 var card: Panel
 var contents: VBoxContainer
+var body_margin: MarginContainer
+var title_label: Label
+var subtitle_label: Label
 var tabs: Array[Button] = []
 var sound_enabled := true
 var usage_visible := false
@@ -23,7 +28,7 @@ var gallery: Control
 var close_button: Button
 var scroll_body: ScrollContainer
 var tabs_scroll: ScrollContainer
-var tabs_row: VBoxContainer
+var tabs_row: GridContainer
 var category_panel: Panel
 var header_divider: ColorRect
 var footer_bar: Panel
@@ -36,10 +41,22 @@ var page_scroll: Dictionary = {}
 var visible_page: Control
 var visible_page_key := ""
 var gallery_open := false
+var usage_snapshot: Dictionary = {}
+var atmosphere_snapshot := preload("res://scripts/atmosphere/state.gd").DEFAULTS.duplicate()
+var atmosphere_page: Control
+var atmosphere_saved := true
+var coins_page: Control
+var wildlife_data: Array = []
+var wildlife_page: Control
+var wildlife_detail: Control
 func _ready() -> void:
 	preload("res://ui/settings_chrome.gd").build(self)
+	wildlife_detail = preload("res://ui/wildlife_detail.gd").new()
+	add_child(wildlife_detail)
+	wildlife_detail.find_requested.connect(func(id: String) -> void: wildlife_find_requested.emit(id))
 
 func _panel_visibility_changed() -> void:
+	if not visible and is_instance_valid(wildlife_detail): wildlife_detail.dismiss(false)
 	if visible or not is_instance_valid(gallery): return
 	if gallery.get_parent() == contents: contents.remove_child(gallery)
 	gallery.queue_free()
@@ -51,40 +68,15 @@ func _panel_visibility_changed() -> void:
 		visible_page_key = ""
 
 func layout() -> void:
-	card.size = Vector2(minf(680, maxf(0, size.x - 24)), minf(470, maxf(0, size.y - 24)))
-	card.position = (size - card.size) / 2
-	var category_width := minf(172, card.size.x * 0.34)
-	var footer_y := card.size.y - 54
-	Style.position(header_divider, Rect2(2, 96, card.size.x - 4, 1))
-	Style.position(category_panel, Rect2(2, 97, category_width, maxf(0, footer_y - 97)))
-	Style.position(tabs_scroll, Rect2(10, 14, maxf(0, category_width - 20), maxf(0, footer_y - 125)))
-	Style.position(scroll_body, Rect2(category_width + 2, 97, maxf(0, card.size.x - category_width - 4), maxf(0, footer_y - 97)))
-	close_button.position = Vector2(card.size.x - 66, 24)
-	footer_bar.position = Vector2(2, footer_y)
-	footer_bar.size = Vector2(card.size.x - 4, 52)
-	reset_button.position = Vector2(maxf(8, card.size.x - 124), 4)
-	footer_hint.text = "H / Esc  Back to town" if card.size.x >= 320 else ("H / Esc  Back" if card.size.x >= 250 else "H / Esc")
-	footer_hint.add_theme_font_size_override("font_size", 11 if card.size.x >= 320 else 10)
-	var tab_font := 12 if category_width >= 145 else 10
-	for tab in tabs: tab.add_theme_font_size_override("font_size", tab_font)
+	preload("res://ui/settings_chrome.gd").layout(self)
 func open_panel(kind: String) -> void:
-	select_tab("How to play" if kind == "How to play" else "Companions")
+	select_tab(kind if kind in ["How to play","Time & weather"] else "Companions")
 	show()
 func select_tab(tab_name: String) -> void:
 	selected_tab = tab_name
-	for tab in tabs:
-		var selected := tab.text == tab_name
-		for state in ["normal", "hover", "pressed"]:
-			var box := StyleBoxFlat.new()
-			box.bg_color = Color("e4ebd4") if selected else Color.TRANSPARENT
-			if state == "hover" and not selected: box.bg_color = Color("eee4d2")
-			box.set_corner_radius_all(10)
-			box.content_margin_left = 12
-			box.content_margin_right = 8
-			box.content_margin_top = 8
-			box.content_margin_bottom = 8
-			tab.add_theme_stylebox_override(state, box)
-		tab.add_theme_color_override("font_color", Color("426448" if selected else "4c402f"))
+	var chrome := preload("res://ui/settings_chrome.gd")
+	chrome.apply_body_margin(self)
+	chrome.layout(self)
 	var page: Control
 	var page_key := tab_name
 	if tab_name == "Companions" and gallery_open and is_instance_valid(gallery):
@@ -101,11 +93,29 @@ func _get_page(tab_name: String) -> Control:
 	if page_cache.has(tab_name) and is_instance_valid(page_cache[tab_name]): return page_cache[tab_name]
 	var page := VBoxContainer.new()
 	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	page.add_theme_constant_override("separation", 17)
+	page.add_theme_constant_override("separation", 0)
 	contents.add_child(page)
 	page_cache[tab_name] = page
 	match tab_name:
+		"Wildlife":
+			wildlife_page = preload("res://ui/wildlife_page.gd").new()
+			wildlife_page.settings = self
+			page.add_child(wildlife_page)
+			wildlife_page.set_data(wildlife_data)
+			wildlife_page.selected.connect(func(id: String, source: Control) -> void:
+				for entry in wildlife_data:
+					if entry.id == id: wildlife_detail.open_entry(entry, source))
+		"Time & weather":
+			atmosphere_page = preload("res://ui/atmosphere_page.gd").new()
+			page.add_child(atmosphere_page)
+			atmosphere_page.changed.connect(func(field: String,value: Variant): atmosphere_changed.emit(field,value))
+			atmosphere_page.set_state(atmosphere_snapshot)
+			atmosphere_page.set_saved(atmosphere_saved)
 		"World": Pages.world(page, self)
+		"Coins & usage":
+			coins_page = preload("res://ui/coin_settings.gd").new()
+			page.add_child(coins_page)
+			coins_page.set_snapshot(usage_snapshot)
 		"How to play": Pages.help(page)
 		"About":
 			updates = preload("res://ui/app_updates.gd").new()
@@ -169,6 +179,17 @@ func refresh_companions() -> void:
 func set_app_update(state: Dictionary) -> void:
 	update_state = state
 	if is_instance_valid(updates): updates.set_state(state)
+
+func set_usage_snapshot(snapshot: Dictionary) -> void:
+	usage_snapshot = snapshot
+	if is_instance_valid(coins_page): coins_page.set_snapshot(snapshot)
+
+func set_wildlife_data(entries: Array) -> void:
+	wildlife_data = entries
+	if is_instance_valid(wildlife_page): wildlife_page.set_data(entries)
+	if is_instance_valid(wildlife_detail) and wildlife_detail.visible:
+		for entry in entries:
+			if entry.id == wildlife_detail.selected_id: wildlife_detail.refresh(entry)
 
 func confirm_reset() -> void:
 	if not is_instance_valid(confirmation): return

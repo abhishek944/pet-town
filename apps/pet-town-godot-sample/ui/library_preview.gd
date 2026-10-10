@@ -9,8 +9,40 @@ var camera: Camera3D
 var status: Label
 var corner_radius := 0.0
 var fit_to_stage := false
+var pending_entry: Dictionary = {}
+var pending_angle := 0.0
+static var batch_frame := -1
+static var batch_usec := 0
 
 func _ready() -> void:
+	# Hidden catalog cards do not create worlds, load models or retrieve mesh arrays.
+	visibility_changed.connect(_visibility_changed)
+	set_process(false)
+	resized.connect(_fit_camera)
+
+func defer_asset(entry: Dictionary, angle: float) -> void:
+	pending_entry = entry
+	pending_angle = angle
+	_visibility_changed()
+
+func _visibility_changed() -> void:
+	set_process(not pending_entry.is_empty() and is_visible_in_tree())
+
+func _process(_delta: float) -> void:
+	if not is_visible_in_tree():
+		set_process(false)
+		return
+	var frame := Engine.get_process_frames()
+	if batch_frame != frame: batch_frame = frame; batch_usec = 0
+	if batch_usec >= 4000: return
+	var began := Time.get_ticks_usec()
+	show_asset(pending_entry,pending_angle)
+	pending_entry = {}
+	set_process(false)
+	batch_usec += Time.get_ticks_usec()-began
+
+func _ensure_stage() -> void:
+	if is_instance_valid(viewport): return
 	stretch = true
 	if corner_radius > 0:
 		var clipping := ShaderMaterial.new()
@@ -56,10 +88,9 @@ func _ready() -> void:
 	status.add_theme_font_size_override("font_size", 10 if custom_minimum_size.x > 100 else 9)
 	status.text = "Select an asset to preview."
 	status_layer.add_child(status)
-	# stretch=true already owns the child viewport's size.
-	resized.connect(_fit_camera)
 
 func show_asset(entry: Dictionary, angle: float) -> bool:
+	_ensure_stage()
 	_clear_model()
 	status.text = "Loading model…"
 	status.show()
@@ -79,6 +110,13 @@ func show_asset(entry: Dictionary, angle: float) -> bool:
 	var model: Node3D = instance
 	model_root.add_child(model)
 	AssetStyle.apply(model)
+	var pose := str(entry.get("animation", ""))
+	if not pose.is_empty():
+		for player in model.find_children("*", "AnimationPlayer", true, false):
+			if player.has_animation(pose):
+				player.play(pose)
+				player.advance(0)
+				player.pause()
 	var bounds := collect_bounds(model)
 	if bounds.size.length_squared() <= 0.000001:
 		model_root.remove_child(model)
@@ -109,6 +147,7 @@ func _fit_camera() -> void:
 	camera.size = maxf(0.05, maxf(projection.size.y, projection.size.x / aspect)) * 1.2
 
 func show_empty(message: String) -> void:
+	_ensure_stage()
 	_clear_model()
 	status.text = message
 	status.show()

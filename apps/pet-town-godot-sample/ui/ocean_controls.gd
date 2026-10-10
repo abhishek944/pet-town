@@ -9,6 +9,7 @@ var title: Label
 var hint: Label
 var action: Button
 var dive: Button
+var swim: Control
 var helm: GridContainer
 var heading_available := false
 var action_available := false
@@ -88,6 +89,8 @@ func _ready() -> void:
 	dive.button_down.connect(func() -> void: Input.action_press("dive"))
 	dive.button_up.connect(func() -> void: Input.action_release("dive"))
 	add_child(dive)
+	swim = preload("res://ui/swim_controls.gd").new()
+	add_child(swim)
 	helm = GridContainer.new()
 	helm.columns = 2
 	helm.custom_minimum_size = Vector2(180, 92)
@@ -107,13 +110,16 @@ func _ready() -> void:
 func _layout_touch_controls() -> void:
 	var touch := DisplayServer.is_touchscreen_available() or "--touch" in OS.get_cmdline_user_args()
 	var helm_requested := touch and is_piloting and not captured and size.x >= 180.0 and size.y >= 420.0
-	var dive_requested := touch and is_swimming and not is_piloting and not captured and size.x >= 136.0 and size.y >= 420.0
+	var dive_requested := false # Replaced by the shared Dive/Rise edge row.
 	var result: Vector2i = layout_helper.layout(self, compass, action, dive, helm, helm_requested, dive_requested)
 	heading_layout_available = result.x == 1
 	action_layout_available = result.y == 1
 	refresh_visibility()
 
 func set_data(heading: Dictionary, interaction: String, piloting: bool, swimming: bool = false) -> void:
+	var layout_changed := (heading_available != (not heading.is_empty())
+		or is_piloting != piloting or is_swimming != swimming
+		or action.text != interaction or title.text != str(heading.get("title", "")))
 	heading_available = not heading.is_empty()
 	title.text = str(heading.get("title", ""))
 	var heading_hint := str(heading.get("hint", "")).replace("WASD to steer", "Arrow keys to steer")
@@ -122,14 +128,17 @@ func set_data(heading: Dictionary, interaction: String, piloting: bool, swimming
 			heading_hint = "F to take helm · Arrow keys to steer"
 		elif piloting and interaction == "Leave helm":
 			heading_hint = "Arrow keys to steer · F to leave helm"
+	layout_changed = layout_changed or hint.text != heading_hint
 	hint.text = heading_hint
 	action.text = interaction
 	action.tooltip_text = interaction + " (F)" if not interaction.is_empty() else ""
 	action_available = not interaction.is_empty()
 	is_piloting = piloting
 	is_swimming = swimming
+	swim.set_swimming(swimming and not piloting)
+	var was_captured := captured
 	refresh_visibility()
-	_layout_touch_controls()
+	if layout_changed or was_captured != captured: _layout_touch_controls()
 
 func _process(_delta: float) -> void:
 	refresh_visibility()
@@ -145,11 +154,12 @@ func refresh_visibility() -> void:
 	var touch := DisplayServer.is_touchscreen_available() or "--touch" in OS.get_cmdline_user_args()
 	var old_dive_visible := dive.visible
 	var old_helm_visible := helm.visible
-	dive.visible = touch and is_swimming and not is_piloting and not captured and size.x >= 136.0 and size.y >= 420.0 and layout_helper.dive_layout_available
+	dive.visible = false
 	helm.visible = touch and is_piloting and not captured and size.x >= 180.0 and size.y >= 420.0 and layout_helper.helm_layout_available
 	if (old_dive_visible and not dive.visible) or (old_helm_visible and not helm.visible):
 		release_controls()
 
 func release_controls() -> void:
+	if swim: swim.release_controls()
 	if InputMap.has_action("dive"): Input.action_release("dive")
 	for action_name in ["move_forward", "move_back", "move_left", "move_right"]: helm_requested.emit(action_name, false)

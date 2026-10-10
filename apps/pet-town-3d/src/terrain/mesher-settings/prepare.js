@@ -14,7 +14,7 @@ export function prepareTerrainMesherSettings() {
   terrainState.shoreSurfaceBlockHeight = 8;
   terrainState.shoreEdgeDrop = 0.55;
   terrainState.shoreEdgeFalloff = 0.6;
-  terrainState.pathSurfaceDrop = 0.085;
+  terrainState.pathSurfaceDrop = 0.01;
   terrainState.voxelFaceFrames = [
     {
       n: [1, 0, 0],

@@ -1,10 +1,14 @@
 extends VBoxContainer
+# Nearby-target controls for the Asset Library. Only presentation changed for
+# library:B1; the explicit New/Replace/Restore/disappearing-target behavior,
+# option ids and signal emissions stay exactly as before.
 
 signal replace_requested(target: String)
 signal restore_requested(target: String)
 signal target_changed(target: String)
 
 const Style = preload("res://ui/hud_style.gd")
+const Look = preload("res://ui/library_style.gd")
 
 var entries: Array = []
 var selected_id := ""
@@ -15,38 +19,58 @@ var restore: Button
 var status: Label
 var asset_available := false
 var options_initialized := false
+var compact := false
 
 func _ready() -> void:
-	add_theme_constant_override("separation", 4)
-	add_child(Style.label("Nearby original or placed assets", 11))
+	add_theme_constant_override("separation", 0)
+	add_child(Look.heading("Nearby original or placed assets"))
+	add_child(Look.spacer(12))
 	picker = OptionButton.new()
 	picker.custom_minimum_size.y = 44
 	picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	picker.accessibility_name = "Nearby asset target"
-	picker.add_theme_font_size_override("font_size", 12)
+	picker.fit_to_longest_item = false
+	picker.clip_text = true
+	picker.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	picker.add_theme_font_size_override("font_size", 11)
 	for state in ["normal", "hover", "pressed", "disabled"]:
-		picker.add_theme_stylebox_override(state, Style.panel("fffaf0", 11, "d6c19a", false))
+		picker.add_theme_stylebox_override(state, Look.select_box())
 	for state in ["font_color", "font_focus_color", "font_hover_color", "font_pressed_color"]:
-		picker.add_theme_color_override(state, Style.INK)
+		picker.add_theme_color_override(state, Color(Look.INK))
 	picker.item_selected.connect(_select_target)
 	add_child(picker)
+	add_child(Look.spacer(10))
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 8)
 	add_child(actions)
-	replace = Style.flat_button("Replace nearby asset", "e7efd8", "c3d4ae")
+	replace = Style.button("Replace nearby asset")
 	replace.custom_minimum_size.y = 44
 	replace.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	replace.pressed.connect(func() -> void: replace_requested.emit(selected_id))
 	actions.add_child(replace)
-	restore = Style.flat_button("Restore original asset")
+	restore = Style.button("Restore original asset")
 	restore.custom_minimum_size.y = 44
 	restore.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	restore.pressed.connect(func() -> void: restore_requested.emit(selected_id))
 	actions.add_child(restore)
-	status = Style.text("", 10, "777b64")
-	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	add_child(Look.spacer(8))
+	status = Look.hint("")
 	add_child(status)
+	style_buttons()
 	set_data([])
+
+func apply_layout(value: bool) -> void:
+	compact = value
+	style_buttons()
+
+func style_buttons() -> void:
+	if not is_instance_valid(replace) or not is_instance_valid(restore):
+		return
+	var font_size := 12 if compact else 10
+	var pad_h := 10 if compact else 6
+	var pad_v := 10 if compact else 9
+	Look.style_action(replace, not replace.disabled, font_size, pad_h, pad_v)
+	Look.style_action(restore, false, font_size, pad_h, pad_v)
 
 func set_asset_available(available: bool) -> void:
 	asset_available = available
@@ -130,7 +154,12 @@ func update_actions() -> void:
 	if not selected_id.is_empty() and not available:
 		status.text = "Selected target is no longer nearby. Choose another target or explicitly choose New asset."
 	elif entries.is_empty():
-		status.text = "No nearby original or placed assets are available."
+		status.text = "No nearby assets are available."
+	elif selected_replaced:
+		status.text = "The original can be restored."
+	elif not selected_id.is_empty() and not selected_id.begins_with("added:"):
+		status.text = "A nearby original asset is selected."
 	else:
 		status.text = ""
 	status.visible = not status.text.is_empty()
+	style_buttons()

@@ -24,6 +24,16 @@ if grep -Eq '^SCRIPT ERROR:|^ERROR:' "$diagnostics"; then
   cat "$diagnostics"
   exit 1
 fi
+# Derived native data is content-addressed; build it before the pack is exported.
+if ! "$godot_app/Contents/MacOS/Godot" --headless --single-threaded-scene --path "$world_dir" \
+  --script res://tools/prepare-native.gd >"$diagnostics" 2>&1; then
+  cat "$diagnostics"
+  exit 1
+fi
+if grep -Eq '^SCRIPT ERROR:|^ERROR:' "$diagnostics"; then
+  cat "$diagnostics"
+  exit 1
+fi
 if ! "$godot_app/Contents/MacOS/Godot" --headless --single-threaded-scene --path "$world_dir" \
   --export-pack "Pet Town world pack" "$resource_dir/world/PetTown.pck" >"$diagnostics" 2>&1; then
   cat "$diagnostics"

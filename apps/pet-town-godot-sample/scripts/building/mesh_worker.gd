@@ -24,23 +24,33 @@ func run() -> void:
 	for cell in changed:
 		for z in range(-3,4):
 			for x in range(-3,4): dirty[Vector2i(floori((cell.x+x)/16.0),floori((cell.z+z)/16.0))]=true
-	for cell in snapshot.edits:
-		for z in range(-3,4):
-			for y in range(-3,4):
-				for x in range(-3,4):
-					var target: Vector3i=cell+Vector3i(x,y,z)
-					if snapshot.contains(target): replaced[target]=true
 	var groups: Dictionary={}
-	for key in dirty: groups[key]=build_chunk(key,replaced)
+	for key in dirty:
+		var local := influence(key)
+		replaced[key]=local
+		groups[key]=build_chunk(key,local)
 	result={"groups":groups,"replaced":replaced,"geometry_us":Time.get_ticks_usec()-started}
 
-func build_chunk(key: Vector2i,replaced: Dictionary) -> Array:
+func influence(key: Vector2i) -> Dictionary:
+	var local := {}
+	var low := key*16
+	var high := low+Vector2i(15,15)
+	for z in range(key.y-1,key.y+2):
+		for x in range(key.x-1,key.x+2):
+			for cell in snapshot.edits_by_chunk.get(Vector2i(x,z),{}):
+				for dz in range(maxi(-3,low.y-cell.z),mini(3,high.y-cell.z)+1):
+					for dx in range(maxi(-3,low.x-cell.x),mini(3,high.x-cell.x)+1):
+						for dy in range(-3,4):
+							var target: Vector3i=cell+Vector3i(dx,dy,dz)
+							if snapshot.contains(target): local[target]=true
+	return local
+
+func build_chunk(_key: Vector2i,replaced: Dictionary) -> Array:
 	var solid:=FaceMesh.new()
 	var glass:=FaceMesh.new()
 	var lip:=FaceMesh.new()
 	for builder in [solid,glass,lip]: builder.state=state
 	for cell in replaced:
-		if Vector2i(floori(cell.x/16.0),floori(cell.z/16.0))!=key: continue
 		var id: int=snapshot.get_id(cell)
 		if id==0: continue
 		var builder: RefCounted=glass if id==snapshot.GLASS else solid
@@ -65,6 +75,7 @@ static func copy_store(source: RefCounted) -> RefCounted:
 	copy.original=source.original
 	copy.cells=source.cells.duplicate()
 	copy.edits=source.edits.duplicate()
+	copy.edits_by_chunk=source.edits_by_chunk.duplicate()
 	copy.definitions=source.definitions
 	copy.signature=source.signature
 	copy.spawn=source.spawn.duplicate()

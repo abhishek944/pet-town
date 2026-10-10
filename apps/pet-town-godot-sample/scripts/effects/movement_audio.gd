@@ -4,21 +4,27 @@ const Synth = preload("res://scripts/effects/audio_synthesis.gd")
 var clips: Dictionary = {}
 var voices: Array[AudioStreamPlayer] = []
 
-func setup() -> void:
+func setup(budget: RefCounted = null) -> void:
 	if DisplayServer.get_name() == "headless":
 		return
 	for i in 6:
 		var voice := AudioStreamPlayer.new()
 		add_child(voice)
 		voices.append(voice)
-	clips.jump = _clip(300, 640, 0.11, 0.08, 0.06, "pink", 700, 0.07, 0.05)
-	clips.land = _clip(110, 42, 0.14, 0.22, 0.06, "brown", 900, 0.2, 0.04)
-	clips.grass = _clip(120, 70, 0.05, 0.1, 0.03, "pink", 2600, 0.16, 0.04)
-	clips.dirt = _clip(95, 55, 0.06, 0.16, 0.035, "brown", 900, 0.35, 0.04)
-	clips.wood = _clip(190, 140, 0.07, 0.2, 0.055, "white", 1800, 0.08, 0.012)
-	clips.stone = _clip(230, 180, 0.08, 0.06, 0.025, "white", 2700, 0.13, 0.018)
-	clips.water = _clip(600, 1100, 0.05, 0.04, 0.03, "white", 700, 0.14, 0.05)
-	clips.splash = _clip(700, 1500, 0.04, 0.035, 0.025, "white", 1600, 0.22, 0.09)
+	clips = await budget.background(bake_clips) if budget else bake_clips()
+
+static func bake_clips() -> Dictionary:
+	var result := {}
+	result.jump = _clip(300, 640, 0.11, 0.08, 0.06, "pink", 700, 0.07, 0.05)
+	result.land = _clip(110, 42, 0.14, 0.22, 0.06, "brown", 900, 0.2, 0.04)
+	result.grass = _clip(120, 70, 0.05, 0.1, 0.03, "pink", 2600, 0.16, 0.04)
+	result.dirt = _clip(95, 55, 0.06, 0.16, 0.035, "brown", 900, 0.35, 0.04)
+	result.wood = _clip(190, 140, 0.07, 0.2, 0.055, "white", 1800, 0.08, 0.012)
+	result.stone = _clip(230, 180, 0.08, 0.06, 0.025, "white", 2700, 0.13, 0.018)
+	result.water = _clip(600, 1100, 0.05, 0.04, 0.03, "white", 700, 0.14, 0.05)
+	result.splash = _clip(700, 1500, 0.04, 0.035, 0.025, "white", 1600, 0.22, 0.09)
+
+	return result
 
 func play_action(action: String, volume := 0.75, strength := 1.0) -> void:
 	if not clips.has(action):
@@ -31,7 +37,7 @@ func play_action(action: String, volume := 0.75, strength := 1.0) -> void:
 			voice.play()
 			return
 
-func _clip(start: float, finish: float, glide: float, peak: float, decay: float, kind: String, frequency: float, noise_peak: float, noise_decay: float) -> AudioStreamWAV:
+static func _clip(start: float, finish: float, glide: float, peak: float, decay: float, kind: String, frequency: float, noise_peak: float, noise_decay: float) -> AudioStreamWAV:
 	var noise := Synth.noise(kind, frequency, 0.8).data
 	var samples := PackedFloat32Array()
 	samples.resize(int(Synth.RATE * 0.5))

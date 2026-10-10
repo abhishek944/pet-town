@@ -2,6 +2,7 @@ extends VBoxContainer
 
 signal back_requested
 signal action_requested(id: String, action: String, payload: Dictionary)
+const Palette = preload("res://ui/settings_style.gd")
 const Style = preload("res://ui/hud_style.gd")
 var catalog: Array = []
 var target_id := ""
@@ -20,11 +21,10 @@ var colors: HBoxContainer
 
 func _ready() -> void:
 	add_theme_constant_override("separation", 12)
-	var back := Style.flat_button("← Companion controls")
+	var back := Palette.action("← Companion controls")
 	back.pressed.connect(func() -> void: back_requested.emit())
 	add_child(back)
-	add_child(Style.title("Choose a pet"))
-	add_child(Style.text("Woodland + storybook · Eight friends, one town.", 12))
+	preload("res://ui/settings_content.gd").intro(self, "A FRIEND TO CALL YOUR OWN", "Choose a pet", "Woodland + adventurers · Friends for every journey.")
 	var stage := HFlowContainer.new()
 	stage.add_theme_constant_override("h_separation", 18)
 	add_child(stage)
@@ -38,7 +38,7 @@ func _ready() -> void:
 	preview = preload("res://ui/library_preview.gd").new()
 	preview.custom_minimum_size = Vector2(270, 200)
 	left.add_child(preview)
-	var turn := Style.flat_button("↻ Turn around")
+	var turn := Palette.action("↻ Turn around")
 	turn.pressed.connect(func() -> void:
 		angle += PI / 2
 		select_pet(draft))
@@ -51,7 +51,7 @@ func _ready() -> void:
 	for node in [species, name_label, description, trait_label]: right.add_child(node)
 	colors = HBoxContainer.new()
 	right.add_child(colors)
-	apply = Style.flat_button("Use pet", "e7efd8", "d0ddbd")
+	apply = Palette.action("Use pet", true)
 	apply.pressed.connect(func() -> void: action_requested.emit(target_id, "pet", {"petId": draft}))
 	right.add_child(apply)
 	notice = Style.text("", 11)
@@ -71,23 +71,31 @@ func setup(entries: Array, id: String, pet_id: String) -> void:
 	current_id = pet_id
 	Style.clear(grid)
 	for pet in catalog:
-		var card := Style.flat_button("", "fffdf2", "d5ddc4")
+		var card := Palette.action("")
+		card.set_meta("pet_id", pet.id)
 		card.custom_minimum_size = Vector2(130, 125)
 		card.size_flags_horizontal = SIZE_EXPAND_FILL
 		var content := VBoxContainer.new()
 		content.mouse_filter = MOUSE_FILTER_IGNORE
+		content.add_theme_constant_override("separation", 2)
 		content.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+		content.offset_left = 6
+		content.offset_right = -6
+		content.offset_top = 6
+		content.offset_bottom = -6
 		card.add_child(content)
 		var portrait := TextureRect.new()
 		var file: String = "res://assets/" + str(pet.get("portraitFile", "companion-%s.png" % pet.id))
 		if ResourceLoader.exists(file): portrait.texture = load(file)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		portrait.custom_minimum_size.y = 76
+		portrait.custom_minimum_size.y = 68
 		portrait.mouse_filter = MOUSE_FILTER_IGNORE
 		content.add_child(portrait)
-		content.add_child(Style.label(pet.name, 13))
-		content.add_child(Style.text(pet.species, 10))
+		for label in [Style.label(pet.name, 13), Style.text(pet.species, 10)]:
+			label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			content.add_child(label)
 		card.pressed.connect(func() -> void: select_pet(pet.id))
 		grid.add_child(card)
 	if not catalog.is_empty():
@@ -98,6 +106,8 @@ func select_pet(id: String) -> void:
 	for pet in catalog:
 		if pet.id != id: continue
 		draft = id
+		for card in grid.get_children():
+			preload("res://ui/atmosphere_style.gd").selected(card, str(card.get_meta("pet_id")) == id)
 		name_label.text = pet.name
 		species.text = pet.species
 		description.text = pet.description
@@ -108,10 +118,10 @@ func select_pet(id: String) -> void:
 			dot.color = Color(color)
 			dot.custom_minimum_size = Vector2(15, 15)
 			colors.add_child(dot)
-		preview.show_asset({"path": pet.get("path", "res://assets/" + str(pet.get("modelFile", "companion-%s.glb" % id)))}, angle)
+		preview.show_asset({"path": pet.get("path", "res://assets/" + str(pet.get("modelFile", "companion-%s.glb" % id))), "animation": "idle"}, angle)
 		apply.text = "Current pet" if id == current_id else "Use " + str(pet.name)
-		apply.disabled = target_id.is_empty() or id == current_id
-		notice.text = "Choose a companion in Companion controls to use a pet." if target_id.is_empty() else "Preview for your selected companion."
+		apply.disabled = target_id.is_empty() or _is_mayor() or id == current_id
+		notice.text = "Mayor keeps his original appearance." if _is_mayor() else "Choose a companion in Companion controls to use a pet." if target_id.is_empty() else "Preview for your selected companion."
 		return
 
 func validate_target(selected: String, entries: Array) -> void:
@@ -120,5 +130,8 @@ func validate_target(selected: String, entries: Array) -> void:
 		for entry in entries:
 			if str(entry.id) == target_id: current_id = str(entry.get("petId", ""))
 		apply.text = "Current pet" if draft == current_id else "Use " + name_label.text
-	apply.disabled = not valid or draft == current_id
+	apply.disabled = not valid or _is_mayor() or draft == current_id
 	if not valid and not target_id.is_empty(): notice.text = "Your companion changed or left. Go back and choose a companion again."
+
+func _is_mayor() -> bool:
+	return target_id == "pet-town-mayor" or current_id == "mayor"

@@ -5,31 +5,50 @@ var voxels: RefCounted
 var terrain: Node3D
 var vegetation: Node3D
 var effects: Node3D
+signal collision_changed
+signal terrain_changed(columns: Array)
+var collision_revision := 0
+var submerged_floors := {}
 var ground := {}
 var props := {}
 var prop_controller: Node3D
 
+signal initialization_finished
+var boot_budget: RefCounted
+var initialized := false
+var initialization_complete := false
+
 func _ready() -> void:
+	await initialize()
+	initialization_complete = true
+	initialization_finished.emit()
+
+func initialize() -> void:
 	manifest=Buffers.read_json("region-manifest.json")
 	if manifest.is_empty():
 		push_error("Original-world export is missing; run the region exporter.")
 		return
 	add_world_boundary()
-	for cell in Buffers.read_json(manifest.groundFile).cells:
+	var cells: Array = Buffers.read_json(manifest.groundFile).cells
+	for i in cells.size():
+		var cell: Array = cells[i]
 		ground[Vector2i(floori(cell[0]),floori(cell[2]))]=Vector2(cell[1],cell[3])
+		if boot_budget and i % 256 == 0: await boot_budget.checkpoint()
 	terrain=load("res://scripts/region/terrain.gd").new()
 	add_child(terrain)
-	terrain.setup(manifest)
+	await terrain.setup(manifest, boot_budget)
 	vegetation=load("res://scripts/region/vegetation.gd").new()
 	add_child(vegetation)
-	vegetation.setup(manifest)
+	await vegetation.setup(manifest, boot_budget)
 	prop_controller=load("res://scripts/region/props.gd").new()
 	add_child(prop_controller)
-	prop_controller.setup(manifest)
+	await prop_controller.setup(manifest, boot_budget)
 	props=prop_controller.props
 	effects=load("res://scripts/effects/world_effects.gd").new()
 	add_child(effects)
+	if boot_budget: await boot_budget.checkpoint(true)
 	effects.setup(manifest)
+	initialized = true
 
 func spawn_point() -> Vector3:
 	var p: Dictionary=manifest.spawn
@@ -37,6 +56,17 @@ func spawn_point() -> Vector3:
 
 func ground_at(point: Vector3) -> float:
 	return ground.get(Vector2i(floori(point.x),floori(point.z)),Vector2(-20,1)).x
+
+func submerged_floor_at(point: Vector3) -> float:
+	var key := Vector2i(floori(point.x), floori(point.z))
+	if not submerged_floors.has(key):
+		submerged_floors[key] = voxels.water_ground_y(key.x, key.y, float(manifest.waterLevel)) if voxels else ground_at(point)
+	return submerged_floors[key]
+
+func invalidate_collision(columns: Array = [], terrain_edit := false) -> void:
+	collision_revision += 1
+	if terrain_edit: terrain_changed.emit(columns)
+	collision_changed.emit()
 
 func water_at(point: Vector3) -> float:
 	var cell: Vector2=ground.get(Vector2i(floori(point.x),floori(point.z)),Vector2(-20,1))

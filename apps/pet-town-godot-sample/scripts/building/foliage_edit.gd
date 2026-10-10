@@ -4,19 +4,15 @@ extends RefCounted
 var columns: Dictionary={}
 var store: RefCounted
 
-func setup(vegetation: Node3D,voxel_store: RefCounted) -> void:
+func setup(vegetation: Node3D,voxel_store: RefCounted,budget: RefCounted = null) -> void:
 	store=voxel_store
-	for node in vegetation.get_children():
-		if not node is MultiMeshInstance3D: continue
-		var name:=str(node.name)
-		if not (name.begins_with("grass") or name.begins_with("tall") or name.begins_with("fl_") or name.begins_with("clover") or name.begins_with("fern")): continue
-		var multi: MultiMesh=node.multimesh
-		for i in multi.instance_count:
-			var original:=multi.get_instance_transform(i)
-			var point: Vector3=node.transform*original.origin
-			var key:=Vector2i(floori(point.x),floori(point.z))
+	# One anchor per plant, shared by all LODs; field variants never depend on node names.
+	for group in vegetation.editable_groups:
+		for anchor in group.anchors:
+			var key: Vector2i=anchor[0]
 			if not columns.has(key): columns[key]=[]
-			columns[key].append([multi,i,original,point.y])
+			columns[key].append([group.meshes,anchor[1],anchor[2],anchor[3]])
+			if budget and int(anchor[1]) % 256 == 0: await budget.checkpoint()
 
 func refresh(cell: Vector3i) -> void:
 	var ranges: Dictionary={}
@@ -30,4 +26,4 @@ func refresh(cell: Vector3i) -> void:
 			ranges[range_key]=blocked
 		var transform: Transform3D=entry[2]
 		if ranges[range_key]: transform.basis=Basis.from_scale(Vector3.ONE*0.00001)
-		entry[0].set_instance_transform(entry[1],transform)
+		for multi in entry[0]: multi.set_instance_transform(entry[1],transform)

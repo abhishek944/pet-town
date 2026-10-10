@@ -37,15 +37,20 @@ func set_data(data: Array, view: Camera3D, selected: String, dimensions := Vecto
 		if not labels.has(id): create_label(id)
 		var button: Button = labels[id]
 		var name := Style.text_or(record.get("label"), "Companion")
-		button.text = name
-		button.tooltip_text = "%s · %s · Follow" % [name, Style.text_or(record.get("status"))]
-		var width := clampf(font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 28, 28, 180)
+		var name_changed := button.text != name
+		if name_changed:
+			button.text = name
+			var width := clampf(font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 28, 28, 180)
+			button.custom_minimum_size = Vector2(width, 32)
+			button.size = Vector2(width, 32)
+		var status := Style.text_or(record.get("status"))
+		if name_changed or button.get_meta("status", null) != status:
+			button.tooltip_text = "%s · %s · Follow" % [name, status]
+			button.set_meta("status", status)
 		if not button.has_meta("selected") or button.get_meta("selected") != (id == selected):
 			var box := background(id == selected)
 			for state in ["normal", "hover", "pressed"]: button.add_theme_stylebox_override(state, box)
 			button.set_meta("selected", id == selected)
-		button.custom_minimum_size = Vector2(width, 32)
-		button.size = Vector2(width, 32)
 
 func create_label(id: String) -> void:
 	var button := Button.new()

@@ -11,6 +11,7 @@ WORLD = ROOT / "apps/pet-town-godot-sample"
 ASSETS = WORLD / "assets"
 EXTENSIONS = r"(?:json|glb|png|jpg|jpeg|webp|ogg|wav|mp3|svg)"
 PETS = {"maple", "clover", "juniper", "scout", "puddle", "moss", "mossback", "fern"}
+ADVENTURERS = {"knight", "mage", "barbarian", "rogue", "ranger"}
 CLIPS = {"idle", "walk", "run", "jump", "glide", "swim"}
 SIZES = {
     "Float32Array": 4,
@@ -102,8 +103,7 @@ def validate():
     visit("region-manifest.json", visited)
     for name in ["wildlife-manifest.json", "manifest.json", "explorer.glb"]:
         visit(name, visited)
-    visit("region-vegetation-ranks.json", visited)
-    visit("region-shadow-mask.png", visited)
+    for name in ["region-vegetation-ranks.json", "region-shadow-mask.png"]: visit(name, visited)
     catalog = json.loads((WORLD / "scripts/actions/source-data.json").read_text())
     dependencies(catalog, visited)
     cells = read(manifest["groundFile"])["cells"]
@@ -152,11 +152,14 @@ def validate():
         and {entry["id"] for entry in companions["catalog"]} == PETS,
         "Incomplete original pet catalog",
     )
-    for entry in [*companions["catalog"], companions["mayor"]]:
+    extras = read("adventurer-companions.json")["catalog"]
+    require(len(extras) == 5 and {entry["id"] for entry in extras} == ADVENTURERS, "Incomplete Adventurers catalog")
+    dependencies(extras, visited)
+    for entry in [*companions["catalog"], companions["mayor"], *extras]:
         model = gltf(asset_path(entry["modelFile"]))
         require(
             {clip["name"] for clip in model.get("animations", [])} >= CLIPS,
-            f"Missing original companion animations: {entry['id']}",
+            f"Missing companion animations: {entry['id']}",
         )
     wildlife = read("wildlife-manifest.json")
     models = {entry["name"] for entry in wildlife["assets"]}
@@ -189,9 +192,8 @@ def validate():
     )
     print(
         f"Full Godot source coverage: {coverage['totalDryLandCells']} dry cells, 100%; "
-        f"{len(visited)} dependencies, {len(expected)} library assets, {len(PETS)} pets"
+        f"{len(visited)} dependencies, {len(expected)} library assets, {len(PETS) + len(extras)} companion appearances"
     )
-
 
 if __name__ == "__main__":
     validate()

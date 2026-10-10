@@ -43,7 +43,8 @@ func add_riser(cell: Vector3i,direction: int,definition: Dictionary) -> void:
 	face.moss=false
 	var upright: bool=FRAMES[direction][1].y==1
 	face.ao=[0.8,0.97,0.8,0.97] if upright else [0.8,0.8,0.97,0.97]
-	var corners:=[Vector2(0.915,0),Vector2(1,0),Vector2(1,1),Vector2(0.915,1)] if upright else [Vector2(0,0.915),Vector2(1,0.915),Vector2(1,1),Vector2(0,1)]
+	var bottom:=1.0-Vertex.PATH_SURFACE_DROP
+	var corners:=[Vector2(bottom,0),Vector2(1,0),Vector2(1,1),Vector2(bottom,1)] if upright else [Vector2(0,bottom),Vector2(1,bottom),Vector2(1,1),Vector2(0,1)]
 	var quad:=[]
 	for corner in corners:
 		var index:=Vertex.emit(self,face,corner.x,corner.y)

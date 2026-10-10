@@ -75,7 +75,8 @@ func _layout_obstacles() -> Array[Rect2]:
 		var reply = live.get("reply")
 		controls.append_array([live.get("usage"), live.get("mayor"), live.get("profile"), reply.get("bubble") if reply is Control else null, live.get("dock")])
 		var ocean = live.get("ocean")
-		if ocean is Control: controls.append_array([ocean.get("compass"), ocean.get("action"), ocean.get("dive"), ocean.get("helm")])
+		if ocean is Control:
+			controls.append_array([ocean.get("compass"), ocean.get("action"), ocean.get("dive"), ocean.get("helm"), ocean.swim.left, ocean.swim.build])
 	for control in controls: _add_obstacle(obstacles, control)
 	return obstacles
 

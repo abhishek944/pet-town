@@ -13,7 +13,7 @@ var elapsed := 0.0
 var following := false
 var discovery_delay := 0.0
 
-func setup(value: Node3D, definitions: Array, shell_definitions: Array = []) -> void:
+func setup(value: Node3D, definitions: Array, shell_definitions: Array = [], budget: RefCounted = null) -> void:
 	sample = value
 	for place in definitions:
 		if sample.world.contains(Vector3(place.x, 0, place.z)): places.append(place)
@@ -22,15 +22,19 @@ func setup(value: Node3D, definitions: Array, shell_definitions: Array = []) -> 
 	garden = preload("land_garden.gd").new()
 	add_child(garden)
 	garden.setup(sample, progress)
+	if budget: await budget.checkpoint()
 	fishing = preload("land_fishing.gd").new()
 	add_child(fishing)
 	fishing.setup(sample, self, progress)
+	if budget: await budget.checkpoint()
 	lanterns = preload("land_lanterns.gd").new()
 	add_child(lanterns)
 	lanterns.setup(sample, progress)
+	if budget: await budget.checkpoint()
 	shells = preload("land_shells.gd").new()
 	add_child(shells)
 	shells.setup(sample, progress, shell_definitions)
+	if budget: await budget.checkpoint()
 	sample.hud.settings_toggled.connect(panel_changed)
 	refresh()
 
@@ -116,9 +120,7 @@ func visit(id: String) -> void:
 			sample.hud.show_toast("This destination is obstructed by builds or scenery. Clear a little space or walk there along the path.")
 			return
 		fishing.cancel()
-		sample.actor.global_position = point
-		sample.actor.velocity = Vector3.ZERO
-		sample.actor.reset_physics_interpolation()
+		sample.actor.relocate(point)
 		sample.hud.close_panel()
 		elapsed = 0
 		return

@@ -62,6 +62,7 @@ func _ready() -> void:
 	modal = preload("res://ui/hud_modal.gd").new()
 	root.add_child(modal)
 	modal.closed.connect(close_panel)
+	modal.atmosphere_changed.connect(func(field: String,value: Variant): atmosphere_changed.emit(field,value))
 	modal.reset_requested.connect(func() -> void: world_reset_requested.emit())
 	modal.sound_toggled.connect(set_sound)
 	modal.volume_changed.connect(set_volume)
@@ -95,8 +96,7 @@ func _ready() -> void:
 	live.dock_width_changed.connect(func(width: float) -> void: dock_width_changed.emit(width))
 	modal.companion_action.connect(func(id: String, action: String, payload: Dictionary) -> void: live.forward_action(id, action, payload))
 	update_clock(10 * 3600 + 32 * 60)
-func set_selected(index: int) -> void:
-	hotbar.set_selected(index)
+func set_selected(index: int) -> void: hotbar.set_selected(index)
 func set_status(text: String) -> void:
 	if not text.is_empty() and not text.begins_with("Explore") and not text.begins_with("Build mode"):
 		show_toast(text)
@@ -130,8 +130,7 @@ func set_pet_prompt(name: String, screen_position: Vector2) -> void:
 		clear_pet_prompt()
 	else:
 		feedback.set_prompt(name, screen_position)
-func clear_pet_prompt() -> void:
-	feedback.clear_prompt()
+func clear_pet_prompt() -> void: feedback.clear_prompt()
 func show_pet_response(name: String, text: String, screen_position: Vector2) -> void:
 	feedback.show_response(name, text, screen_position)
 func show_toast(text: String) -> void:
@@ -146,7 +145,7 @@ func _top_toolbar_bottom() -> float: return maxf(live.profile.size.y if is_insta
 func set_journal_data(places: Array, experiences: Array, collection: Array = []) -> void:
 	journal.set_data(places, experiences, collection)
 func toggle_settings() -> void:
-	if active_panel == "Town settings":
+	if active_panel in ["Town settings","Time & weather"]:
 		close_panel()
 	else:
 		open_panel("Town settings")
@@ -177,6 +176,7 @@ func open_panel(title: String) -> void:
 	settings_toggled.emit(true)
 	if live: live.sync_visibility()
 func close_panel() -> void:
+	var from_atmosphere := active_panel == "Time & weather"
 	modal.dismiss_confirmation()
 	modal.hide()
 	journal.hide()
@@ -186,12 +186,13 @@ func close_panel() -> void:
 	root.show()
 	is_menu_open = false
 	active_panel = ""
+	if from_atmosphere and is_instance_valid(clock_entry): clock_entry.call_deferred("grab_focus")
 	settings_toggled.emit(false)
 	if live: live.sync_visibility()
 func _unhandled_key_input(event: InputEvent) -> void:
 	Chrome.key_input(self, event)
-func set_asset_catalog(entries: Array) -> void:
-	library.set_catalog(entries)
+func set_asset_catalog(entries: Array, budget: RefCounted = null) -> void:
+	await library.set_catalog(entries, budget)
 func set_asset_result(message: String) -> void:
 	library.set_result(message)
 func set_asset_placement_result(message: String, valid: bool) -> void:

@@ -9,6 +9,7 @@ func render() -> void:
 	var welcome = load("res://ui/welcome.gd").new()
 	root.add_child(welcome)
 	welcome.set_loading(true)
+	welcome.picnic.set_motion_enabled(false)
 	await process_frame
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://ui/icons/boot-welcome.png")
