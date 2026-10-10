@@ -1,7 +1,18 @@
 import type { FlowSample } from "./flow-runtime";
 import type { CitizenState } from "./village";
+import { normalizeHerdrState } from "./flow-utils";
 import { syncCitizenVisibility } from "./renderer-visibility";
 import { refreshCitizenLabelPosition, visibleBoundsRatios } from "./renderer-image-bounds";
+
+export const STATUS_LABELS: Readonly<Record<string, string>> = {
+  working: "Working",
+  blocked: "Needs reply",
+  done: "Done",
+  idle: "Ready",
+  unknown: "Unknown",
+  listening: "Listening",
+  speaking: "Speaking",
+};
 export { setPreferenceHidden } from "./renderer-visibility";
 export { refreshCitizenLabelPosition } from "./renderer-image-bounds";
 
@@ -36,6 +47,11 @@ export function createCitizenElement(): HTMLElement {
 
   const project = document.createElement("span");
   project.className = "project";
+  const name = document.createElement("span");
+  name.className = "project-name";
+  const status = document.createElement("span");
+  status.className = "project-status";
+  project.append(name, status);
 
   const stack = document.createElement("span");
   stack.className = "pet-stack";
@@ -56,18 +72,28 @@ export function createCitizenElement(): HTMLElement {
 }
 
 export function updateCitizenElement(element: HTMLElement, citizen: CitizenState): void {
-  element.className = `citizen${citizen.retiring ? " retiring" : ""}`;
+  element.className = "citizen" + (citizen.retiring ? " retiring" : "");
   element.dataset.agentId = citizen.id;
   element.dataset.characterId = citizen.sprite;
   element.dataset.agentSource = citizen.source;
-  element.dataset.status = citizen.status;
+  const normalizedStatus = normalizeHerdrState(citizen.status);
+  const badgeStatus =
+    citizen.source === "orchestrator" &&
+    (citizen.status === "listening" || citizen.status === "speaking")
+      ? citizen.status
+      : normalizedStatus;
+  const statusLabel = STATUS_LABELS[badgeStatus] ?? STATUS_LABELS.unknown;
+  element.dataset.status = badgeStatus;
   element.dataset.doneSinceMs = citizen.doneSinceMs === null ? "" : String(citizen.doneSinceMs);
-  const announced = citizen.source === "orchestrator"
-    ? (citizen.status === "speaking" ? "Speaking" : citizen.status === "listening" ? "Listening" : "Walking") : citizen.status;
-  element.setAttribute("aria-label", `${citizen.label}, ${announced}`);
+  const description = citizen.label + ", " + statusLabel + ". Click to focus this agent.";
+  element.setAttribute("aria-label", description);
 
   const project = element.querySelector<HTMLElement>(".project");
-  if (project && project.textContent !== citizen.label) project.textContent = citizen.label;
+  if (project) project.title = description;
+  const name = element.querySelector<HTMLElement>(".project-name");
+  if (name && name.textContent !== citizen.label) name.textContent = citizen.label;
+  const status = element.querySelector<HTMLElement>(".project-status");
+  if (status && status.textContent !== statusLabel) status.textContent = statusLabel;
 }
 
 function applyPetPresentation(pet: HTMLImageElement, sample: FlowSample): void {

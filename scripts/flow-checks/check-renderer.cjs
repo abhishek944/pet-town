@@ -3,6 +3,9 @@ const {
   ASSET_READY_TIMEOUT_MS,
   distanceWhileAssetPending,
   setPreferenceHidden,
+  createCitizenElement,
+  updateCitizenElement,
+  STATUS_LABELS,
 } = require("./renderer-view.cjs");
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -76,6 +79,78 @@ const sample = (epoch, scale, moving = true, assetUrl = "walk.png") => ({
   held: false,
   failed: false,
 });
+class FakeBadgeElement {
+  constructor(tag) {
+    this.tag = tag;
+    this.className = "";
+    this.children = [];
+    this.dataset = {};
+    this.attributes = {};
+    this.hidden = false;
+    this.title = "";
+    this.textContent = "";
+  }
+  append(...children) {
+    for (const child of children) {
+      child.parent = this;
+      this.children.push(child);
+    }
+  }
+  setAttribute(name, value) {
+    this.attributes[name] = value;
+  }
+  querySelector(selector) {
+    const name = selector.startsWith(".") ? selector.slice(1) : selector;
+    for (const child of this.children) {
+      if (child.className.split(" ").includes(name)) return child;
+      const nested = child.querySelector(selector);
+      if (nested) return nested;
+    }
+    return null;
+  }
+}
+global.document = {
+  createElement: (tag) => new FakeBadgeElement(tag),
+};
+function checkStatusBadge() {
+  const citizen = createCitizenElement();
+  const label = "a-long-assigned-agent-name-that-keeps-its-full-tooltip";
+  updateCitizenElement(citizen, {
+    id: "session:w1:p2",
+    sprite: "cat",
+    source: "herdr",
+    status: "blocked",
+    label,
+    retiring: false,
+    doneSinceMs: null,
+  });
+  const project = citizen.querySelector(".project");
+  assert(project?.title.includes(label), "badge tooltip truncated the full agent name");
+  assert(citizen.querySelector(".project-name")?.textContent === label, "badge lost the full name");
+  assert(
+    citizen.querySelector(".project-status")?.textContent === "Needs reply",
+    "blocked badge label is wrong",
+  );
+  assert(citizen.dataset.status === "blocked", "blocked badge color state is missing");
+  updateCitizenElement(citizen, {
+    id: "session:w1:p2",
+    sprite: "cat",
+    source: "herdr",
+    status: "unrecognized",
+    label,
+    retiring: false,
+    doneSinceMs: null,
+  });
+  assert(
+    citizen.querySelector(".project-status")?.textContent === "Unknown",
+    "unknown state fallback is wrong",
+  );
+  assert(STATUS_LABELS.idle === "Ready", "ready label is wrong");
+  assert(
+    citizen.attributes["aria-label"].includes("Unknown"),
+    "badge accessibility label omitted status",
+  );
+}
 const timers = [];
 global.setTimeout = (callback, milliseconds) => {
   const timer = { callback, milliseconds, active: true };
@@ -164,7 +239,8 @@ const fireLatestTimer = () => {
   latestLoader.resolve();
   await new Promise(setImmediate);
   assert(pet.src === "latest.png", "latest late decode did not commit");
-  console.log("renderer asset transition checks: pass");
+  checkStatusBadge();
+  console.log("renderer asset transition and status badge checks: pass");
 })().catch((error) => {
   console.error(error);
   process.exitCode = 1;

@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "bigfoot-yeti",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "lumbering-lope": {
       "asset": "walk.webp",
@@ -35,8 +35,9 @@
   },
   "states": {
     "idle": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "working": {
       "animation": "lumbering-lope",
@@ -51,8 +52,9 @@
       "action": "idle"
     },
     "unknown": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "listening": {
       "animation": "snow-toss",

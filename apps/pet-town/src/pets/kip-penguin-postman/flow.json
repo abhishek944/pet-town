@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "kip-penguin-postman",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "waddle": {
       "asset": "walk.webp",
@@ -35,8 +35,9 @@
   },
   "states": {
     "idle": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "working": {
       "animation": "waddle",
@@ -51,8 +52,9 @@
       "action": "idle"
     },
     "unknown": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "listening": {
       "animation": "parcel-toss",

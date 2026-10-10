@@ -25,6 +25,7 @@ struct AgentListResult {
 #[derive(Debug, Deserialize)]
 struct RawAgent {
     pane_id: String,
+    name: Option<String>,
     #[serde(default)]
     agent_status: String,
     agent_session: Option<RawAgentSession>,
@@ -84,7 +85,8 @@ pub(crate) fn parse_agent_list(text: &str) -> Result<Vec<ParsedAgent>, serde_jso
                 view: AgentView {
                     id: agent.pane_id,
                     status: normalized_status(&agent.agent_status),
-                    label: safe_project_name(project_path),
+                    label: safe_display_label(agent.name.as_deref())
+                        .unwrap_or_else(|| safe_project_name(project_path)),
                     source: "unknown".to_string(),
                     token_activity: None,
                 },
@@ -97,4 +99,23 @@ pub(crate) fn parse_agent_list(text: &str) -> Result<Vec<ParsedAgent>, serde_jso
     agents.sort_by(|left, right| left.view.id.cmp(&right.view.id));
     agents.dedup_by(|left, right| left.view.id == right.view.id);
     Ok(agents)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn assigned_agent_names_precede_safe_project_fallbacks() {
+        let agents = parse_agent_list(
+            r#"{"result":{"agents":[
+                {"pane_id":"w1:p1","name":"api-worker","agent_status":"blocked","cwd":"/private/project"},
+                {"pane_id":"w1:p2","name":"  \n ","agent_status":"done","cwd":"/private/fallback"}
+            ]}}"#,
+        )
+        .unwrap();
+
+        assert_eq!(agents[0].view.label, "api-worker");
+        assert_eq!(agents[1].view.label, "fallback");
+    }
 }

@@ -80,8 +80,12 @@ for (const pet of petDirectories) {
   const missingAssets = requiredAssets.filter((asset) => !Object.hasOwn(assets, asset));
   if (missingAssets.length)
     throw new Error(`${pet}: missing bundled artwork: ${missingAssets.join(", ")}`);
-  if (result.pack.states.idle.flow.type !== "hide")
-    throw new Error(`${pet}/flow.json: idle visibility is not flow-authored`);
+  if (!result.pack.stateAssignments.idle.visible)
+    throw new Error(pet + "/flow.json: Ready pets must remain visible");
+  if (!result.pack.stateAssignments.unknown.visible)
+    throw new Error(pet + "/flow.json: Unknown pets must remain visible");
+  if (result.pack.states.done.completion !== "restart")
+    throw new Error(pet + "/flow.json: Done animation must repeat");
   if ("actions" in result.pack)
     throw new Error(`${pet}/flow.json: menu animations are not allowed`);
   const restored = restoredPets[pet];
@@ -102,7 +106,5 @@ for (const pet of petDirectories) {
     if (result.pack.stateAssignments[state].action !== "idle")
       throw new Error(`${pet}: ${state} pet moves`);
   }
-  if (result.pack.stateAssignments.unknown.visible)
-    throw new Error(`${pet}: unknown pet is visible`);
 }
 console.log("bundled thirty-character pack checks: pass");

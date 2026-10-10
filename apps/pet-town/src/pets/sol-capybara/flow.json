@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "sol-capybara",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "slow-stroll": {
       "asset": "walk.webp",
@@ -35,8 +35,9 @@
   },
   "states": {
     "idle": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "working": {
       "animation": "slow-stroll",
@@ -51,8 +52,9 @@
       "action": "idle"
     },
     "unknown": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "listening": {
       "animation": "steam-soak",

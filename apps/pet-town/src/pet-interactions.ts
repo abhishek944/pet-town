@@ -14,7 +14,7 @@ function menuIcon(paths: readonly string[]): SVGSVGElement {
 }
 export interface PetInteractionDelegate {
   openPreferences(id: string): void;
-  focusAgent(id: string): void;
+  focusAgent(id: string): void | Promise<void>;
   beginDrag(id: string, clientX: number): boolean;
   moveDrag(id: string, clientX: number): void;
   endDrag(id: string): void;
@@ -23,8 +23,16 @@ export interface PetInteractionDelegate {
 function petTarget(target: EventTarget | null): HTMLElement | null {
   return target instanceof Element ? target.closest<HTMLElement>(".pet, .project") : null;
 }
+function citizenFor(target: EventTarget | null): HTMLElement | null {
+  return target instanceof Element ? target.closest<HTMLElement>(".citizen") : null;
+}
 function agentId(target: EventTarget | null): string | null {
-  return target instanceof Element ? target.closest<HTMLElement>(".citizen")?.dataset.agentId ?? null : null;
+  return citizenFor(target)?.dataset.agentId ?? null;
+}
+function canFocusCitizen(citizen: HTMLElement): boolean {
+  return Boolean(citizen.dataset.agentId) &&
+    !citizen.hidden &&
+    !citizen.classList.contains("retiring");
 }
 export function installPetInteractions(
   root: HTMLElement,
@@ -32,6 +40,8 @@ export function installPetInteractions(
 ): () => void {
   let pointerId: number | null = null;
   let draggedId: string | null = null;
+  let draggedCitizen: HTMLElement | null = null;
+  const pendingFocus = new Set<string>();
   let startX = 0;
   let dragging = false;
   let suppressClick = false;
@@ -51,6 +61,24 @@ export function installPetInteractions(
     menuBackdrop = null;
     menuAgentId = null;
     delegate.geometryChanged();
+  };
+  const requestFocus = (id: string, citizen: HTMLElement): void => {
+    if (!canFocusCitizen(citizen) || citizen.dataset.agentId !== id || pendingFocus.has(id)) return;
+    pendingFocus.add(id);
+    citizen.dataset.focusPending = "true";
+    delete citizen.dataset.focusError;
+    void Promise.resolve()
+      .then(() => delegate.focusAgent(id))
+      .then(() => {
+        if (citizen.dataset.agentId === id) delete citizen.dataset.focusError;
+      })
+      .catch(() => {
+        if (citizen.dataset.agentId === id) citizen.dataset.focusError = "true";
+      })
+      .finally(() => {
+        pendingFocus.delete(id);
+        if (citizen.dataset.agentId === id) delete citizen.dataset.focusPending;
+      });
   };
   const openMenu = (id: string, x: number, y: number): void => {
     closeMenu();
@@ -83,11 +111,13 @@ export function installPetInteractions(
   const onPointerDown = (event: PointerEvent): void => {
     if (event.button !== 0) return;
     if (menu && !(event.target instanceof Node && menu.contains(event.target))) closeMenu();
-    const id = agentId(event.target);
+    const citizen = citizenFor(event.target);
+    const id = citizen?.dataset.agentId ?? null;
     const pet = petTarget(event.target);
-    if (!id || !pet) return;
+    if (!id || !pet || !citizen || !canFocusCitizen(citizen)) return;
     pointerId = event.pointerId;
     draggedId = id;
+    draggedCitizen = citizen;
     startX = event.clientX;
     dragging = false;
     pet.setPointerCapture?.(event.pointerId);
@@ -108,12 +138,17 @@ export function installPetInteractions(
       delegate.endDrag(draggedId);
       suppressNextClick();
       event.preventDefault();
-    } else if (event.type === "pointerup" && draggedId
-      && Math.abs(event.clientX - startX) < DRAG_THRESHOLD_PX) {
-      delegate.focusAgent(draggedId);
+    } else if (
+      event.type === "pointerup" &&
+      draggedId &&
+      draggedCitizen &&
+      Math.abs(event.clientX - startX) < DRAG_THRESHOLD_PX
+    ) {
+      requestFocus(draggedId, draggedCitizen);
     }
     pointerId = null;
     draggedId = null;
+    draggedCitizen = null;
     dragging = false;
   };
   const onClick = (event: MouseEvent): void => {
@@ -132,12 +167,17 @@ export function installPetInteractions(
     const id = (event.target as HTMLElement).dataset.agentId;
     if (id === menuAgentId) closeMenu();
     if (id === draggedId && dragging) { delegate.endDrag(id); suppressNextClick(); }
-    if (id === draggedId) { pointerId = null; draggedId = null; dragging = false; }
+    if (id === draggedId) {
+      pointerId = null;
+      draggedId = null;
+      draggedCitizen = null;
+      dragging = false;
+    }
   };
   const cancelActive = (): void => {
     closeMenu();
     if (draggedId && dragging) { delegate.endDrag(draggedId); suppressNextClick(); }
-    pointerId = null; draggedId = null; dragging = false;
+    pointerId = null; draggedId = null; draggedCitizen = null; dragging = false;
   };
   root.addEventListener("village-pause", cancelActive);
   root.addEventListener("citizen-hidden", onCitizenHidden);

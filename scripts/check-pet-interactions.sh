@@ -14,6 +14,7 @@ class FakeElement {
   constructor(className = "", parent = null) {
     this.tag = "";
     this.className = className;
+    this.hidden = false;
     this.parent = parent;
     this.children = [];
     this.dataset = {};
@@ -24,7 +25,8 @@ class FakeElement {
     this.classList = { contains: (name) => this.className.split(" ").includes(name) };
   }
   closest(selector) {
-    if (this.className.split(" ").includes(selector.slice(1))) return this;
+    const classes = selector.split(",").map((item) => item.trim().slice(1));
+    if (classes.some((name) => this.className.split(" ").includes(name))) return this;
     return this.parent?.closest(selector) ?? null;
   }
   addEventListener(type, listener) { this.listeners.set(type, listener); }
@@ -80,7 +82,7 @@ fire("pointerdown", { button: 0, pointerId: 7, clientX: 20, target: pet });
 fire("pointermove", { pointerId: 7, clientX: 22, target: pet, preventDefault() {} });
 assert(!calls.some(([name]) => name === "begin"), "sub-threshold move started dragging");
 fire("pointermove", { pointerId: 7, clientX: 30, target: pet, preventDefault() {} });
-fire("pointerup", { pointerId: 7, target: pet, preventDefault() {} });
+fire("pointerup", { type: "pointerup", pointerId: 7, target: pet, clientX: 30, preventDefault() {} });
 assert(calls.some(([name]) => name === "begin"), "drag did not begin");
 assert(calls.some(([name]) => name === "move"), "drag position was not updated");
 assert(calls.some(([name]) => name === "end"), "drag did not end");
@@ -123,6 +125,79 @@ assert(!root.children.includes(backdrop), "outside click did not close the menu 
 assert(!root.children.some((child) => child.className === "pet-menu"), "outside click did not close the menu");
 dispose();
 assert(root.listeners.size === 0, "interaction listeners were not disposed");
-console.log("pet interaction checks: pass");
+(async () => {
+  const focusRoot = new FakeElement("village");
+  const focusCitizen = new FakeElement("citizen", focusRoot);
+  focusRoot.children.push(focusCitizen);
+  focusCitizen.dataset.agentId = "session:w1:p2";
+  const badge = new FakeElement("project", focusCitizen);
+  const status = new FakeElement("project-status", badge);
+  let resolveFirstFocus = null;
+  let rejectNextFocus = false;
+  const focusCalls = [];
+  const focusDispose = installPetInteractions(focusRoot, {
+    openPreferences() {},
+    focusAgent(id) {
+      focusCalls.push(id);
+      if (focusCalls.length === 1) {
+        return new Promise((resolve) => { resolveFirstFocus = resolve; });
+      }
+      if (rejectNextFocus) {
+        rejectNextFocus = false;
+        return Promise.reject(new Error("pane disappeared"));
+      }
+      return Promise.resolve();
+    },
+    beginDrag() { return false; },
+    moveDrag() {},
+    endDrag() {},
+    geometryChanged() {},
+  });
+  const clickTarget = (target, pointerId) => {
+    focusRoot.listeners.get("pointerdown")({
+      type: "pointerdown", button: 0, pointerId, clientX: 20, target,
+    });
+    focusRoot.listeners.get("pointerup")({
+      type: "pointerup", pointerId, clientX: 20, target,
+    });
+  };
+  const settle = () => new Promise(setImmediate);
+
+  clickTarget(status, 20);
+  assert(focusCitizen.dataset.focusPending === "true", "badge click did not show pending state");
+  await settle();
+  assert(focusCalls.length === 1 && focusCalls[0] === "session:w1:p2", "badge click lost its pane id");
+  clickTarget(status, 21);
+  await settle();
+  assert(focusCalls.length === 1, "repeated pending badge click was not coalesced");
+  resolveFirstFocus();
+  await settle();
+  assert(!focusCitizen.dataset.focusPending, "successful focus did not clear pending state");
+
+  rejectNextFocus = true;
+  clickTarget(status, 22);
+  await settle();
+  assert(focusCitizen.dataset.focusError === "true", "focus failure did not show retry state");
+  clickTarget(status, 23);
+  await settle();
+  assert(focusCalls.length === 3, "badge retry did not invoke focus again");
+  assert(!focusCitizen.dataset.focusError, "successful retry left the error indicator");
+
+  focusCitizen.hidden = true;
+  clickTarget(status, 24);
+  await settle();
+  assert(focusCalls.length === 3, "hidden citizen received focus");
+  focusCitizen.hidden = false;
+  focusCitizen.className = "citizen retiring";
+  clickTarget(status, 25);
+  await settle();
+  assert(focusCalls.length === 3, "retiring citizen received focus");
+
+  focusDispose();
+  console.log("pet interaction checks: pass");
+})().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
 CHECK
 node "$TMP/check.cjs"

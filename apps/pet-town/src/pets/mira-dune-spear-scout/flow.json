@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "mira-dune-spear-scout",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "dune-patrol": {
       "asset": "walk.webp",
@@ -43,8 +43,9 @@
   },
   "states": {
     "idle": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "working": {
       "animation": "dune-patrol",
@@ -59,8 +60,9 @@
       "action": "idle"
     },
     "unknown": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "listening": {
       "animation": "spear-drill",

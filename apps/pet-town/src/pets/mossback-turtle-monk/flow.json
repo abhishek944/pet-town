@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "mossback-turtle-monk",
-  "packVersion": "3",
+  "packVersion": "4",
   "clips": {
     "staff-walk": {
       "asset": "walk.webp",
@@ -35,8 +35,9 @@
   },
   "states": {
     "idle": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "working": {
       "animation": "staff-walk",
@@ -51,8 +52,9 @@
       "action": "idle"
     },
     "unknown": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "listening": {
       "animation": "gentle-bow",

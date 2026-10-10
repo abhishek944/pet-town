@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "id": "mage",
-  "packVersion": "1",
+  "packVersion": "2",
   "clips": {
     "walk": {
       "asset": "walk.webp",
@@ -46,8 +46,9 @@
   },
   "states": {
     "idle": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "working": {
       "animation": "walk",
@@ -63,8 +64,9 @@
       "action": "idle"
     },
     "unknown": {
+      "animation": "sleep",
       "action": "idle",
-      "visible": false
+      "visible": true
     },
     "listening": {
       "animation": "listen",
