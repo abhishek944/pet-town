@@ -20,8 +20,8 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - name: Install Rust 1.88
-        run: rustup toolchain install 1.88.0 --profile minimal --target ${{ matrix.target }}
+      - name: Install Rust 1.88 with clippy
+        run: rustup toolchain install 1.88.0 --profile minimal --component clippy --target ${{ matrix.target }}
       - run: pnpm install --frozen-lockfile
       - name: Prepare pinned Pi runtime for target
         run: |
@@ -33,6 +33,12 @@ jobs:
           cp "bin/$package/pet-town-pi-runtime.tar.gz" apps/pet-town/src-tauri/resources/
       - run: pnpm run check:flow
       - run: pnpm exec turbo run build internal:build-frontend
+      # The desktop uses macOS-only Tauri, focus, and Keychain APIs.
+      - name: Rust lints
+        env:
+          RUSTUP_TOOLCHAIN: 1.88.0
+          CARGO_BUILD_TARGET: ${{ matrix.target }}
+        run: pnpm exec turbo run lint:rust --env-mode=loose
       - name: Build locked Tauri target at the declared MSRV
         run: cargo +1.88.0 build --locked --manifest-path apps/pet-town/src-tauri/Cargo.toml --release --target ${{ matrix.target }}
       - name: Verify built architecture and Pi runtime
@@ -50,18 +56,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Clippy compiles Tauri's GTK/WebKit dependencies before checking application code.
-      - name: Install Tauri Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            build-essential \
-            pkg-config \
-            libwebkit2gtk-4.1-dev \
-            libxdo-dev \
-            libssl-dev \
-            libayatana-appindicator3-dev \
-            librsvg2-dev
       - uses: pnpm/action-setup@v4
         with:
           version: 10.28.2
@@ -69,8 +63,8 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - name: Install Rust 1.88 with clippy and rustfmt
-        run: rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
+      - name: Install Rust 1.88 with rustfmt
+        run: rustup toolchain install 1.88.0 --profile minimal --component rustfmt
       - run: pnpm install --frozen-lockfile
       # Bare prettier rather than `pnpm run format:check`: the full script also calls ruff, shfmt,
       # taplo, shellcheck and actionlint, which are not repository dependencies.
@@ -82,10 +76,6 @@ jobs:
         run: |
           pnpm run typecheck
           pnpm exec turbo run lint
-      - name: Rust lints
-        env:
-          RUSTUP_TOOLCHAIN: 1.88.0
-        run: pnpm exec turbo run lint:rust
       # check:preferences is excluded: its static architecture lock still asserts assertions from
       # before the settings CSS was split and the settings commands moved to app_commands.rs.
       - name: Repository guards
