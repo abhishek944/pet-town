@@ -24,7 +24,7 @@ class FakeElement {
     this.classList = { contains: (name) => this.className.split(" ").includes(name) };
   }
   closest(selector) {
-    if (this.className.split(" ").includes(selector.slice(1))) return this;
+    if (selector.split(",").some((part) => this.classList.contains(part.trim().slice(1)))) return this;
     return this.parent?.closest(selector) ?? null;
   }
   addEventListener(type, listener) { this.listeners.set(type, listener); }
@@ -60,12 +60,13 @@ const pet = new FakeElement("pet", citizen);
 const calls = [];
 const dispose = installPetInteractions(root, {
   openPreferences: (id) => calls.push(["preferences", id]),
+  focusAgent: (id) => calls.push(["focus", id]),
   beginDrag: (id, x) => { calls.push(["begin", id, x]); return true; },
   moveDrag: (id, x) => calls.push(["move", id, x]),
   endDrag: (id) => calls.push(["end", id]),
   geometryChanged: () => calls.push(["geometry"]),
 });
-const fire = (type, event) => root.listeners.get(type)(event);
+const fire = (type, event) => root.listeners.get(type)({ type, ...event });
 let ordinaryClicksStopped = 0;
 for (let detail = 1; detail <= 2; detail += 1) {
   fire("click", {
@@ -76,11 +77,21 @@ for (let detail = 1; detail <= 2; detail += 1) {
   });
 }
 assert(ordinaryClicksStopped === 0, "ordinary rapid clicks were swallowed");
+for (const target of [pet, new FakeElement("project", citizen)]) {
+  const before = calls.filter(([name]) => name === "focus").length;
+  fire("pointerdown", { button: 0, pointerId: 6, clientX: 20, target });
+  assert(calls.filter(([name]) => name === "focus").length === before, "pointerdown focused an agent");
+  fire("pointerup", { pointerId: 6, clientX: 22, target, preventDefault() {} });
+  assert(calls.filter(([name, id]) => name === "focus" && id === "agent-1").length === before + 1, "pet or badge click did not focus once");
+}
+fire("pointerdown", { button: 0, pointerId: 11, clientX: 20, target: pet });
+fire("pointercancel", { pointerId: 11, clientX: 20, target: pet, preventDefault() {} });
+assert(calls.filter(([name]) => name === "focus").length === 2, "cancelled pointer focused an agent");
 fire("pointerdown", { button: 0, pointerId: 7, clientX: 20, target: pet });
 fire("pointermove", { pointerId: 7, clientX: 22, target: pet, preventDefault() {} });
 assert(!calls.some(([name]) => name === "begin"), "sub-threshold move started dragging");
 fire("pointermove", { pointerId: 7, clientX: 30, target: pet, preventDefault() {} });
-fire("pointerup", { pointerId: 7, target: pet, preventDefault() {} });
+fire("pointerup", { pointerId: 7, clientX: 30, target: pet, preventDefault() {} });
 assert(calls.some(([name]) => name === "begin"), "drag did not begin");
 assert(calls.some(([name]) => name === "move"), "drag position was not updated");
 assert(calls.some(([name]) => name === "end"), "drag did not end");
@@ -121,6 +132,7 @@ assert(backdrop, "menu backdrop was not created");
 fire("pointerdown", { button: 0, pointerId: 8, clientX: 5, target: backdrop });
 assert(!root.children.includes(backdrop), "outside click did not close the menu backdrop");
 assert(!root.children.some((child) => child.className === "pet-menu"), "outside click did not close the menu");
+assert(calls.filter(([name]) => name === "focus").length === 2, "drag or menu interaction focused an agent");
 dispose();
 assert(root.listeners.size === 0, "interaction listeners were not disposed");
 console.log("pet interaction checks: pass");
