@@ -3,12 +3,7 @@ import { createMineArt, createMineProps } from "./activity-mine-art";
 import { createRailwayArt, createRailwayProps } from "./activity-railway-art";
 import { isActivityTheme, type CoasterMode, type PreferencesFile } from "./preferences-types";
 import { applyMotionPosition, type PositionedMotion } from "./renderer-layout";
-import {
-  applyActivityPlacement,
-  activityAssetFor,
-  clearActivityPlacement,
-  syncActivityName,
-} from "./activity-pet";
+import { applyActivityPlacement, activityAssetFor, clearActivityPlacement } from "./activity-pet";
 import { freezeActivityFrame, freezePetFrame, unfreezePetFrame } from "./pet-freeze";
 import { CITIZEN_TRACK_WIDTH, refreshCitizenLabelPosition } from "./renderer-view";
 import "./activity-themes.css";
@@ -108,14 +103,12 @@ export class RendererActivities {
   position(element: HTMLElement, motion: PositionedMotion): void {
     if (!this.theme || element.dataset.agentSource === "orchestrator") {
       element.querySelector(".activity-props")?.remove();
-      element.querySelector(".activity-name")?.remove();
       clearActivityPlacement(element); // Clear a left activity theme's sprite translation.
       delete element.dataset.activityTheme;
       return;
     }
     const themeChanged = element.dataset.activityTheme !== this.theme;
     element.dataset.activityTheme = this.theme;
-    syncActivityName(this.theme, element, this.preferences);
     const scale = (Number.parseFloat(element.style.getPropertyValue("--citizen-size")) || 44) / 44;
     const sizeChanged = element.style.getPropertyValue("--activity-scale") !== String(scale);
     element.style.setProperty("--activity-scale", String(scale));

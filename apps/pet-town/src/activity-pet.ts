@@ -6,10 +6,8 @@ import {
 import {
   behaviorPackForCharacter,
   bundledBehaviorPackForCharacter,
-  characterDisplayName,
   isSystemPet,
 } from "./character-packs";
-import { friendlyPetName, type PreferencesFile } from "./preferences-types";
 import type { CompiledClip } from "./flow-types";
 
 /**
@@ -100,28 +98,6 @@ export function activityPresentationFor(
     element.dataset.status ?? "unknown",
   );
   return assetUrl && presentation?.assetUrl === assetUrl ? presentation : null;
-}
-
-export function syncActivityName(
-  theme: string,
-  element: HTMLElement,
-  preferences: PreferencesFile | null,
-): void {
-  let name = element.querySelector<HTMLElement>(".activity-name");
-  if (theme !== "rollercoaster") {
-    name?.remove();
-    return;
-  }
-  if (!name) {
-    name = element.ownerDocument.createElement("span");
-    name.className = "activity-name";
-    element.querySelector(".pet-stack")?.append(name);
-  }
-  const id = element.dataset.characterId ?? "";
-  name.textContent =
-    preferences?.pets[id]?.customName?.trim() ||
-    characterDisplayName(id) ||
-    friendlyPetName(id).split(" ")[0];
 }
 
 const placements = new WeakMap<HTMLElement, { key: string; y: number }>();

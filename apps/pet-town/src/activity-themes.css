@@ -61,28 +61,6 @@
   font-size: calc(11px * var(--label-scale, 1));
   padding: 4px 8px;
 }
-.activity-name {
-  order: -1;
-  color: #eef3f4;
-  max-width: 104px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  opacity: var(--citizen-opacity, 1);
-  font-size: calc(9px * var(--label-scale, 1));
-  white-space: nowrap;
-  text-shadow: 0 1px 3px #000;
-  pointer-events: none;
-}
-.citizen[data-label-visibility="hidden"] .activity-name {
-  display: none;
-}
-.citizen[data-label-visibility="hover"] .activity-name,
-.citizen[data-label-overlap-hidden="true"] .activity-name {
-  visibility: hidden;
-}
-.citizen:hover .activity-name {
-  visibility: visible;
-}
 .citizen[data-activity-theme="goldmine"] .activity-props {
   bottom: -2px;
 }
@@ -96,8 +74,7 @@
 .citizen[data-activity-theme="rollercoaster"] .project {
   order: -2;
 }
-.citizen[data-activity-theme="rollercoaster"] .project,
-.citizen[data-activity-theme="rollercoaster"] .activity-name {
+.citizen[data-activity-theme="rollercoaster"] .project {
   transform: translateY(
     max(0px, calc(2px + var(--coaster-label-rise, 0px) - var(--coaster-citizen-bottom-y, 100vh)))
   );
