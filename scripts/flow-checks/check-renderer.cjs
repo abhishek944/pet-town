@@ -18,8 +18,9 @@ class FakeStyle {
     this.values.set(key, value);
   }
 }
-class FakePet {
+class FakePet extends EventTarget {
   constructor() {
+    super();
     this.className = "pet";
     this.dataset = {};
     this.hidden = true;
@@ -41,17 +42,21 @@ class FakePet {
     this.srcAssignments += 1;
   }
 }
-class FakeLoader {
+class FakeLoader extends FakePet {
   static pending = [];
   constructor() {
-    this.promise = new Promise((resolve, reject) => {
-      this.resolve = resolve;
-      this.reject = reject;
-    });
+    super();
     FakeLoader.pending.push(this);
   }
+  resolve() {
+    this.naturalWidth = this.naturalHeight = 16;
+    this.dispatchEvent(new Event("load"));
+  }
+  reject() {
+    this.dispatchEvent(new Event("error"));
+  }
   decode() {
-    return this.promise;
+    throw new Error("Renderer readiness must not call Image.decode()");
   }
 }
 global.Image = FakeLoader;
@@ -83,7 +88,7 @@ global.setTimeout = (callback, milliseconds) => {
   return timer;
 };
 global.clearTimeout = (timer) => {
-  timer.active = false;
+  if (timer) timer.active = false;
 };
 const fireLatestTimer = () => {
   const timer = timers.findLast((candidate) => candidate.active);
@@ -94,24 +99,35 @@ const fireLatestTimer = () => {
 };
 (async () => {
   const pet = new FakePet();
-  const element = { dataset: {}, hidden: false, querySelector: () => pet };
-  assert(!applyFlowSample(element, sample(1, 1)), "undecoded first asset was ready");
-  FakeLoader.pending.shift().resolve();
+  const element = {
+    dataset: {},
+    hidden: false,
+    querySelector: (selector) => (selector === "img.pet" ? pet : null),
+  };
+  assert(!applyFlowSample(element, sample(1, 1)), "unloaded first asset was ready");
+  const firstLoader = FakeLoader.pending.shift();
+  assert(firstLoader.decoding === "sync", "preparation enabled asynchronous decode");
+  firstLoader.resolve();
   await new Promise(setImmediate);
-  assert(applyFlowSample(element, sample(1, 1)), "decoded first asset was not ready");
+  assert(firstLoader.src === "", "completed temporary source was not retired");
+  assert(applyFlowSample(element, sample(1, 1)), "loaded first asset was not ready");
   assert(pet.style.getPropertyValue("--clip-scale") === "1", "first scale was not committed");
+  assert(pet.src === "walk.png" && !element.hidden, "loaded first asset was not shown");
   setPreferenceHidden(element, true);
   assert(element.hidden, "preference did not hide a flow-visible citizen");
   applyFlowSample(element, sample(1, 1));
   assert(element.hidden, "flow update overrode preference-hidden visibility");
+  assert(pet.src === "" && pet.hidden, "preference hide did not retire the image source");
   setPreferenceHidden(element, false);
-  assert(!element.hidden, "clearing preference hide did not restore a flow-visible citizen");
-  assert(!applyFlowSample(element, sample(2, 2)), "new clip epoch did not restart loading");
-  assert(pet.style.getPropertyValue("--clip-scale") === "1", "presentation changed before decode");
+  assert(element.hidden, "clearing preference hide revealed an unprepared image");
+  assert(!applyFlowSample(element, sample(1, 1)), "retired source was ready without preparation");
   FakeLoader.pending.shift().resolve();
   await new Promise(setImmediate);
-  assert(applyFlowSample(element, sample(2, 2)), "restarted clip was not ready");
-  assert(pet.srcAssignments === 2, "same-URL clip action did not restart the image");
+  assert(!element.hidden && pet.src === "walk.png", "matching reload did not restore visibility");
+  const assignments = pet.srcAssignments;
+  assert(applyFlowSample(element, sample(2, 2)), "cached epoch unnecessarily awaited a load");
+  assert(FakeLoader.pending.length === 0, "cached epoch created another preparation");
+  assert(pet.srcAssignments === assignments + 1, "same-URL epoch did not restart the image");
   assert(
     pet.style.getPropertyValue("--clip-scale") === "2",
     "new scale was not committed atomically",
@@ -123,6 +139,7 @@ const fireLatestTimer = () => {
   );
   const pending = sample(3, 1.7, true, "work.png");
   assert(!applyFlowSample(element, pending), "new pending asset was ready");
+  assert(pet.style.getPropertyValue("--clip-scale") === "2", "pending metadata leaked early");
   assert(distanceWhileAssetPending(pending, 250) === 5, "pending move lost horizontal travel");
   assert(
     distanceWhileAssetPending(sample(3, 1.7, false), 250) === 0,
@@ -137,16 +154,16 @@ const fireLatestTimer = () => {
   assert(pet.src === "walk.png", "asset timeout replaced the last ready artwork");
   FakeLoader.pending.shift().resolve();
   await new Promise(setImmediate);
-  assert(pet.src === "work.png", "late matching decode did not commit atomically");
+  assert(pet.src === "work.png", "late matching load did not commit atomically");
   assert(!applyFlowSample(element, sample(4, 1.7, true, "bad.png")), "new bad asset was ready");
   assert(
     pet.style.getPropertyValue("--clip-scale") === "1.7",
     "failed asset metadata leaked early",
   );
-  FakeLoader.pending.shift().reject(new Error("decode failed"));
+  FakeLoader.pending.shift().reject();
   await new Promise(setImmediate);
-  assert(applyFlowSample(element, sample(4, 1.7, true, "bad.png")), "decode failure stalled flow");
-  assert(pet.hidden, "decode failure left stale artwork visible");
+  assert(applyFlowSample(element, sample(4, 1.7, true, "bad.png")), "load failure stalled flow");
+  assert(pet.hidden, "load failure left stale artwork visible");
   const stale = sample(5, 1, true, "stale.png");
   assert(!applyFlowSample(element, stale), "stale request began ready");
   const staleLoader = FakeLoader.pending.shift();
@@ -158,12 +175,12 @@ const fireLatestTimer = () => {
   assert(!applyFlowSample(element, latest), "stale timeout released the latest request");
   staleLoader.resolve();
   await new Promise(setImmediate);
-  assert(pet.src !== "stale.png", "stale decode replaced the latest request");
+  assert(pet.src !== "stale.png", "stale load replaced the latest request");
   fireLatestTimer();
   assert(applyFlowSample(element, latest), "latest timeout did not release flow");
   latestLoader.resolve();
   await new Promise(setImmediate);
-  assert(pet.src === "latest.png", "latest late decode did not commit");
+  assert(pet.src === "latest.png", "latest late load did not commit");
   console.log("renderer asset transition checks: pass");
 })().catch((error) => {
   console.error(error);
