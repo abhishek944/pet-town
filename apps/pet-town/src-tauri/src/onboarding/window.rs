@@ -1,5 +1,5 @@
 use super::Onboarding;
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindow};
 pub(crate) const LABEL: &str = "onboarding";
 
 pub(super) fn installation_ready() -> bool {
@@ -44,7 +44,7 @@ pub(crate) fn open(app: &AppHandle) -> Result<(), String> {
             .and_then(|_| window.set_focus())
             .map_err(|e| e.to_string());
     }
-    WebviewWindowBuilder::new(app, LABEL, WebviewUrl::App("onboarding.html".into()))
+    crate::image_decoding::builder(app, LABEL, WebviewUrl::App("onboarding.html".into()))?
         .title("Welcome to Pet Town")
         .inner_size(880.0, 688.0)
         .min_inner_size(880.0, 560.0)

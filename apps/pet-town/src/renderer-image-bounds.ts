@@ -8,8 +8,13 @@ export function visibleBoundsRatios(
   image: HTMLImageElement,
   assetUrl: string,
 ): VisibleBoundsRatios {
-  const cached = visibleBoundsByAsset.get(assetUrl);
-  if (cached) return cached;
+  const cacheable = assetUrl.length <= 2_048 && !assetUrl.startsWith("data:");
+  const cached = cacheable ? visibleBoundsByAsset.get(assetUrl) : undefined;
+  if (cached) {
+    visibleBoundsByAsset.delete(assetUrl);
+    visibleBoundsByAsset.set(assetUrl, cached);
+    return cached;
+  }
   const empty = { top: 0, bottom: 0 };
   try {
     const canvas = document.createElement("canvas");
@@ -36,7 +41,13 @@ export function visibleBoundsRatios(
             top: top / canvas.height,
             bottom: (canvas.height - bottom - 1) / canvas.height,
           };
-    visibleBoundsByAsset.set(assetUrl, ratios);
+    canvas.width = 0;
+    canvas.height = 0;
+    if (cacheable) {
+      visibleBoundsByAsset.set(assetUrl, ratios);
+      if (visibleBoundsByAsset.size > 128)
+        visibleBoundsByAsset.delete(visibleBoundsByAsset.keys().next().value!);
+    }
     return ratios;
   } catch {
     return empty;

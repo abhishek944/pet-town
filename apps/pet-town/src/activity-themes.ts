@@ -1,6 +1,7 @@
-import { createCoasterArt, createCoasterProps } from "./activity-coaster-art";
-import { createMineArt, createMineProps } from "./activity-mine-art";
-import { createRailwayArt, createRailwayProps } from "./activity-railway-art";
+import { createCoasterProps } from "./activity-coaster-art";
+import { createMineProps } from "./activity-mine-art";
+import { createRailwayProps } from "./activity-railway-art";
+import { createActivitySceneSvg, scopeSvg } from "./activity-scene-art";
 import { isActivityTheme, type CoasterMode, type PreferencesFile } from "./preferences-types";
 import { applyMotionPosition, type PositionedMotion } from "./renderer-layout";
 import { applyActivityPlacement, activityAssetFor, clearActivityPlacement } from "./activity-pet";
@@ -11,11 +12,6 @@ import "./activity-themes.css";
 let nextId = 0;
 function bounded(value: number | undefined, fallback: number, min: number, max: number): number {
   return Number.isFinite(value) ? Math.max(min, Math.min(max, Math.round(value!))) : fallback;
-}
-function scopeSvg(markup: string, prefix: string): string {
-  return markup
-    .replace(/\bid="([^"]+)"/g, `id="${prefix}-$1"`)
-    .replace(/url\(#([^)]+)\)/g, `url(#${prefix}-$1)`);
 }
 
 /** Activity presentation shares the village clock and never changes flow visibility or agent state. */
@@ -30,6 +26,8 @@ export class RendererActivities {
   private paused = false;
   private rail: { x: number; y: number }[] = [];
   private propsId = 0;
+  // Four coaster variants, Gold Mine and Railway: reuse stock roots, never actor props.
+  private readonly sceneArt = new Map<string, SVGSVGElement>();
   constructor(private readonly root: HTMLElement) {
     this.scene = root.ownerDocument.createElement("div");
     this.scene.className = "activity-scene";
@@ -45,16 +43,13 @@ export class RendererActivities {
     if (theme !== this.theme || mode !== this.mode) {
       this.theme = theme;
       this.mode = mode;
-      const art =
-        theme === "rollercoaster"
-          ? createCoasterArt(mode)
-          : theme === "goldmine"
-            ? createMineArt()
-            : theme === "railway"
-              ? createRailwayArt()
-              : "";
-      this.scene.innerHTML = scopeSvg(art, `activity-${this.id}`);
-      this.scene.querySelector("svg")?.setAttribute("preserveAspectRatio", "none");
+      const key = theme === "rollercoaster" ? `${theme}:${mode}` : theme;
+      let svg = this.sceneArt.get(key);
+      if (theme && !svg) {
+        svg = createActivitySceneSvg(this.root.ownerDocument, theme, mode, `activity-${this.id}`);
+        if (this.sceneArt.size < 6) this.sceneArt.set(key, svg);
+      }
+      if (this.scene.firstElementChild !== svg) this.scene.replaceChildren(...(svg ? [svg] : []));
       this.readRail();
     }
     this.scene.hidden = !theme;

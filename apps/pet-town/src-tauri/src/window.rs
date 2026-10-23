@@ -41,11 +41,9 @@ pub(crate) fn show_window(window: &WebviewWindow) -> Result<(), String> {
     {
         let target = window.clone();
         window
-            .run_on_main_thread(move || unsafe {
-                use objc2_app_kit::NSWindow;
-                if let Ok(native_window) = target.ns_window() {
-                    let native_window: &NSWindow = &*native_window.cast();
-                    native_window.orderFrontRegardless();
+            .run_on_main_thread(move || {
+                if let Err(error) = crate::window_spaces::show(&target) {
+                    eprintln!("Could not show Pet Street {}: {error}", target.label());
                 }
             })
             .map_err(|error| error.to_string())
@@ -115,7 +113,7 @@ pub(crate) fn create_street_window(
     let _ = app.set_activation_policy(tauri::ActivationPolicy::Regular);
 
     let window =
-        tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::App("index.html".into()))
+        crate::image_decoding::builder(app, label, tauri::WebviewUrl::App("index.html".into()))?
             .title("Pet Street")
             // Additional transparent height lets Ocean water sit below boat hulls.
             // Standard pets retain their existing bottom-anchored on-screen position.

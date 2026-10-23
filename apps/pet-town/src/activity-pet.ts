@@ -84,7 +84,14 @@ export function activityClipFor(theme: string, id: string, state: string): strin
 export function activityAssetFor(theme: string, element: HTMLElement): string | null {
   if (element.dataset.agentSource === "orchestrator") return null;
   const id = element.dataset.characterId ?? "";
-  return activityPoseFor(theme, id, element.dataset.status ?? "unknown")?.assetUrl ?? null;
+  const state = element.dataset.status ?? "unknown";
+  const sidecar = activitySidecarFor(theme, id, state);
+  if (sidecar?.compactAssetUrl) {
+    const size = Number.parseFloat(element.style.getPropertyValue("--citizen-size")) || 44;
+    // Keep original artwork whenever the real display needs more source pixels.
+    if (size * sidecar.scale * window.devicePixelRatio <= 128) return sidecar.compactAssetUrl;
+  }
+  return activityPoseFor(theme, id, state)?.assetUrl ?? null;
 }
 
 export function activityPresentationFor(
@@ -92,12 +99,13 @@ export function activityPresentationFor(
   assetUrl: string | null,
 ): CompiledClip | null {
   const id = element.dataset.characterId ?? "";
-  const presentation = activityPoseFor(
-    element.parentElement?.dataset.stripTheme ?? "",
-    id,
-    element.dataset.status ?? "unknown",
-  );
-  return assetUrl && presentation?.assetUrl === assetUrl ? presentation : null;
+  const theme = element.parentElement?.dataset.stripTheme ?? "";
+  const state = element.dataset.status ?? "unknown";
+  const presentation = activityPoseFor(theme, id, state);
+  const sidecar = activitySidecarFor(theme, id, state);
+  return assetUrl && (presentation?.assetUrl === assetUrl || sidecar?.compactAssetUrl === assetUrl)
+    ? presentation
+    : null;
 }
 
 const placements = new WeakMap<HTMLElement, { key: string; y: number }>();

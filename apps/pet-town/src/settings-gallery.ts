@@ -1,36 +1,13 @@
-import { behaviorPackForCharacter, characterDisplayName, isSystemPet } from "./character-packs";
+import { characterDisplayName, isSystemPet } from "./character-packs";
 import { friendlyPetName, type PreferencesFile } from "./preferences-types";
-import { previewAnimations } from "./settings-preview";
-import { loadImageSource } from "./image-source";
-
-/** A settled first frame, without adding a second set of pet assets. */
-async function drawPortrait(image: HTMLImageElement, petId: string): Promise<void> {
-  try {
-    const canvas = document.createElement("canvas");
-    const options = previewAnimations(behaviorPackForCharacter(petId));
-    const animation = options.find((item) => item.locomotion) ?? options[0];
-    if (!animation) throw new Error("No preview animation");
-    const source = await loadImageSource(animation.assetUrl);
-    canvas.width = source.naturalWidth;
-    canvas.height = source.naturalHeight;
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("Could not draw preview");
-    context.drawImage(source, 0, 0);
-    image.src = canvas.toDataURL("image/png");
-    await image.decode();
-    image.dataset.ready = "true";
-  } catch {
-    const fallback = document.createElement("span");
-    fallback.className = "portrait-error";
-    fallback.textContent = "Preview unavailable";
-    image.replaceWith(fallback);
-  }
-}
+import { drawPortrait } from "./settings-gallery-portrait";
 
 export class SettingsGallery {
   private readonly cards = new Map<string, HTMLButtonElement>();
   private readonly pendingPortraits = new Map<string, HTMLImageElement>();
   private visible = false;
+  private activePortraits = 0;
+  private portraitGeneration = new AbortController();
   private readonly collection = document.getElementById("pet-collection")!;
   private readonly count = document.getElementById("gallery-count")!;
   private ids: readonly string[] = [];
@@ -41,6 +18,7 @@ export class SettingsGallery {
 
   update(ids: readonly string[], draft: PreferencesFile): void {
     if (ids.length !== this.ids.length || ids.some((id, index) => id !== this.ids[index])) {
+      this.cancelPortraits();
       this.ids = [...ids];
       this.cards.clear();
       this.pendingPortraits.clear();
@@ -67,11 +45,30 @@ export class SettingsGallery {
   setVisible(visible: boolean): void {
     this.visible = visible;
     if (visible) this.loadPortraits();
+    else this.cancelPortraits();
+  }
+
+  private cancelPortraits(): void {
+    this.portraitGeneration.abort();
+    this.portraitGeneration = new AbortController();
   }
 
   private loadPortraits(): void {
-    for (const [id, image] of this.pendingPortraits) void drawPortrait(image, id);
-    this.pendingPortraits.clear();
+    while (this.visible && this.activePortraits < 2 && this.pendingPortraits.size > 0) {
+      const [id, image] = this.pendingPortraits.entries().next().value!;
+      this.pendingPortraits.delete(id);
+      const signal = this.portraitGeneration.signal;
+      this.activePortraits += 1;
+      void drawPortrait(image, id, signal)
+        .catch(() => {
+          if (signal.aborted && image.isConnected && this.cards.get(id)?.contains(image))
+            this.pendingPortraits.set(id, image);
+        })
+        .finally(() => {
+          this.activePortraits -= 1;
+          this.loadPortraits();
+        });
+    }
   }
 
   rememberOrigin(id: string): void {

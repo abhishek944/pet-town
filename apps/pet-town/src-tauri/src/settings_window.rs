@@ -2,7 +2,7 @@ use crate::preferences::PreferencesStore;
 use crate::settings_window_lifecycle::{arm_readiness_timeout, cleanup_failed_window};
 use serde::Serialize;
 use std::sync::Mutex;
-use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager, WebviewUrl};
 #[derive(Default)]
 struct SessionState {
     open: bool,
@@ -105,6 +105,19 @@ pub fn open_internal(
     pet_id: Option<String>,
     initial_tab: Option<String>,
 ) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    if tauri_nspanel::objc2::MainThreadMarker::new().is_none() {
+        let (reply, result) = std::sync::mpsc::sync_channel(1);
+        let target = app.clone();
+        app.run_on_main_thread(move || {
+            let _ = reply.try_send(open_internal(&target, pet_id, initial_tab));
+        })
+        .map_err(|error| error.to_string())?;
+        // Preserve this synchronous API; only background callers wait, never the GUI thread.
+        return result
+            .recv()
+            .map_err(|_| "Settings dispatch was interrupted".to_string())?;
+    }
     let updates = app.state::<crate::app_updates::AppUpdates>();
     let _opening = updates.window_opening()?;
     let context = app
@@ -122,19 +135,22 @@ pub fn open_internal(
             Ok(()) => Ok(()),
         }
     } else {
-        WebviewWindowBuilder::new(app, "settings", WebviewUrl::App("settings.html".into()))
-            .title("Pet Town Settings")
-            .inner_size(880.0, 720.0)
-            .min_inner_size(700.0, 560.0)
-            .resizable(true)
-            .decorations(true)
-            .transparent(false)
-            .focusable(true)
-            .visible(false)
-            .center()
-            .build()
-            .map(|_| ())
-            .map_err(|error| error.to_string())
+        crate::image_decoding::builder(app, "settings", WebviewUrl::App("settings.html".into()))
+            .and_then(|builder| {
+                builder
+                    .title("Pet Town Settings")
+                    .inner_size(880.0, 720.0)
+                    .min_inner_size(700.0, 560.0)
+                    .resizable(true)
+                    .decorations(true)
+                    .transparent(false)
+                    .focusable(true)
+                    .visible(false)
+                    .center()
+                    .build()
+                    .map(|_| ())
+                    .map_err(|error| error.to_string())
+            })
     };
     if result.is_err() {
         cleanup_failed_window(app);

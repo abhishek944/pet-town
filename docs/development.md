@@ -149,6 +149,62 @@ lockfiles retain the repository exemptions. Native Godot verification and curren
 limits are recorded under `var/godot-full-sync/`; builds and headless diagnostics
 do not substitute for the live visual, ocean, terminal, focus and voice checks.
 
+## Pet Street image memory
+
+Pet Street, Settings and setup construct image-hosting WebViews through
+`image_decoding::builder`. On macOS it guards and disables WebKit's animated
+and large-image asynchronous decode preferences before construction, rejecting
+unsupported/readback failures instead of silently claiming protection. The
+image-free voice runtime keeps its existing, potentially off-main builder.
+Settings queues its whole open operation onto the GUI thread for off-main
+callers, preserving their result without ever waiting on the GUI thread.
+These are private WebKit preferences; a stored value is not proof of engine
+behavior on a new OS build. Keep image readiness event-based: animated
+`HTMLImageElement.decode()` and forced async hints can bypass the paint policy.
+
+Each pet owns at most one temporary preparation, coalesced across same-source
+epochs. Playback restarts remain separate from resource readiness. The 1.5-second
+motion release is not a load cancellation. Resource replacement, policy hiding
+and removal retire preparation; the DOM image remains stable for pointer input.
+Image readiness keeps per-pet presentation immediate, while the renderer drains
+shared whole-crowd layout/hit-region requests on its existing animation frame,
+including paused frames. This combines notifications from separate image-load
+tasks as well as synchronous playback restarts. Explicit render/preferences
+completion and drag/input hit-region updates remain immediate. Replaced or
+unfrozen canvas backing stores are cleared before their nodes are removed.
+Bounds metadata keeps at most 128 short URL keys and excludes data URLs/keys
+over 2048 characters. Gallery preparation has two workers and cancellation on
+hide/catalog replacement; temporary animated sources are cleared after drawing.
+
+Bundled Goldmine activity loops have optional 128-pixel derivatives. Selection
+uses citizen CSS size × the existing clip scale × actual devicePixelRatio;
+larger requirements keep the original 512-pixel artwork. Timing, normalized
+anchors, facing and custom/extended pack ownership stay unchanged. Global Ocean
+rowing also has 128-pixel derivatives of its 384-pixel originals; its CSS width is
+citizen size directly, independent of Standard clip scale. Per-pet Ocean and
+legacy preview URL calls retain originals. Other Ocean states keep their own
+artwork or the existing rowing fallback. Regenerate these derivatives with
+Pillow installed:
+
+```bash
+python3 scripts/prepare-activity-variants.py --theme goldmine \
+  --output-dir apps/pet-town/src/pets
+python3 scripts/prepare-activity-variants.py --theme ocean \
+  --output-dir apps/pet-town/src/pets
+```
+
+The script preserves originals and validates frame timing/count, loop metadata,
+alpha and visible resized pixels. Transparent-pixel RGB may be discarded by
+animated WebP and is not a visible-pixel mismatch. These assets reduce decode
+work at small display sizes; they do not establish stable total-process memory.
+
+WebContent's footprint is process RAM, not application disk size. These ownership
+bounds are not a total-process memory cap. Verify native decoder counts, physical
+footprint, animation cadence and cleanup on an authorized isolated workload and
+long soak after OS changes. No persistent accumulating `org.webkit.ImageDecoder`
+workers should remain. A build alone cannot prove this. Already-pinned memory in
+a failed renderer needs an explicitly authorized reset, not silent watchdog reloads.
+
 ## Manual visual check
 
 1. Run `./scripts/build.sh` and link the plugin.

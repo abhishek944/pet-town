@@ -19,7 +19,11 @@ export function freezePetFrame(element: HTMLElement): void {
   const existing = element.querySelector<HTMLCanvasElement>("canvas.pet-freeze");
   const key = `${image.dataset.assetReadyKey ?? image.dataset.assetKey ?? ""}:${image.className}`;
   if (existing?.dataset.freezeKey === key) return;
-  existing?.remove();
+  if (existing) {
+    existing.width = 0;
+    existing.height = 0;
+    existing.remove();
+  }
   const canvas = document.createElement("canvas");
   canvas.width = image.naturalWidth;
   canvas.height = image.naturalHeight;
@@ -38,7 +42,12 @@ export function freezePetFrame(element: HTMLElement): void {
 }
 
 export function unfreezePetFrame(element: HTMLElement): void {
-  element.querySelector<HTMLCanvasElement>("canvas.pet-freeze")?.remove();
+  const canvas = element.querySelector<HTMLCanvasElement>("canvas.pet-freeze");
+  if (canvas) {
+    canvas.width = 0;
+    canvas.height = 0;
+    canvas.remove();
+  }
   const image = element.querySelector<HTMLImageElement>("img.pet");
   if (image) image.style.opacity = "";
 }

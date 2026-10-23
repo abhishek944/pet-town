@@ -19,6 +19,7 @@ mod global_mayor_shortcut;
 mod godot_bridge;
 mod herdr_command;
 mod herdr_state;
+mod image_decoding;
 #[cfg(target_os = "macos")]
 mod macos_activation;
 #[cfg(target_os = "macos")]
@@ -51,6 +52,8 @@ mod town_terminal;
 mod town_voice;
 mod village_visibility;
 mod window;
+#[cfg(target_os = "macos")]
+mod window_spaces;
 
 pub use adapter_events::{record_from_stdin, relay_from_stdin};
 pub use adapter_setup::{configure_adapter, setups_json};

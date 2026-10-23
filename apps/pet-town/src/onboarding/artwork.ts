@@ -1,8 +1,10 @@
+import { waitForImage } from "../image-source";
+
 export async function freezeArtwork(root: HTMLElement): Promise<void> {
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   for (const image of root.querySelectorAll<HTMLImageElement>('img[src*="nib-"]')) {
     try {
-      await image.decode();
+      await waitForImage(image);
       if (!image.isConnected) continue;
       const canvas = document.createElement("canvas");
       canvas.width = image.naturalWidth;

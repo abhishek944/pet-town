@@ -56,6 +56,28 @@ busy or disconnected. Do not replace this with background-thread `isActive`
 checks or depend solely on render-loop heartbeats. Showing Pet Street continues
 to use `orderFrontRegardless` without activating Pet Town.
 
+A panel can remain logically visible with correct all-Spaces flags while macOS
+leaves it out of other fullscreen Spaces after town teardown. `window_spaces.rs`
+repairs that observed mismatch using public AppKit behavior: temporarily select
+`MoveToActiveSpace`, order nonactivating, and restore the exact original
+collection flags after a later main-loop turn confirms membership. The existing
+`MainEventsCleared` hook tracks actual loop boundaries and verifies settled
+membership after restoring flags; it does not reorder healthy windows. Healthy
+checks return before cloning Tauri window handles until 80 ms has elapsed, because
+those clones wake Tao's main loop and otherwise create a self-waking cycle.
+Moving and verifying repairs bypass that gate and still advance on actual loop
+turns. Explicit Show is immediate; deferred unhide and stale-window pruning use
+the bounded healthy checks. Application Hide is read from main-thread
+`NSApplication` state rather than synchronous LaunchServices queries. Each
+attempt keeps one bounded deadline through both phases, restores flags on
+cancellation/failure, and suppresses automatic retries after failure until
+explicit Show or a visibility/healthy-state reset.
+Current per-window readiness, requested visibility, application Hide and town
+foreground state are checked before ordering, so a late repair cannot undo Hide.
+Show requested while the application is hidden is deferred until unhide, then
+rechecked against those gates rather than discarded. Recovery state is pruned when display windows disappear. No application activation,
+Dock-policy workaround, private Space-mutation API or new timer is introduced.
+
 Check switching away, returning, minimizing and closing the town, plus explicit
 Hide/Show Pets and direct pet-to-agent focus. Builds do not verify visible timing.
 

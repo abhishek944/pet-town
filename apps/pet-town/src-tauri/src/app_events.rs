@@ -3,6 +3,12 @@ use tauri::Manager;
 
 pub(crate) fn run_event(app: &tauri::AppHandle, event: tauri::RunEvent) {
     match event {
+        #[cfg(target_os = "macos")]
+        tauri::RunEvent::MainEventsCleared => {
+            if let Err(error) = crate::window_spaces::reconcile(app) {
+                eprintln!("Could not reconcile Pet Street Spaces: {error}");
+            }
+        }
         tauri::RunEvent::ExitRequested { api, .. } => {
             let state = app.state::<orchestrator::OrchestratorState>();
             state.mark_exiting();
@@ -42,6 +48,11 @@ pub(crate) fn run_event(app: &tauri::AppHandle, event: tauri::RunEvent) {
 
 pub(crate) fn window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     crate::town_process::window_event(window, event);
+    if crate::street_windows::is_street_label(window.label())
+        && matches!(event, tauri::WindowEvent::Destroyed)
+    {
+        crate::village_visibility::renderer_closed(window);
+    }
     if window.label() == "settings"
         && matches!(
             event,

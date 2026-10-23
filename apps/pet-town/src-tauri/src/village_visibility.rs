@@ -44,6 +44,23 @@ fn any_ready(state: &VillageVisibility) -> bool {
         .unwrap_or(false)
 }
 
+#[cfg(target_os = "macos")]
+pub(crate) fn should_show(window: &WebviewWindow) -> bool {
+    let state = window.state::<VillageVisibility>();
+    state.requested.load(Ordering::SeqCst)
+        && !state.town_active.load(Ordering::SeqCst)
+        && state
+            .ready
+            .lock()
+            .is_ok_and(|ready| ready.contains(window.label()))
+}
+
+pub(crate) fn renderer_closed(window: &tauri::Window) {
+    if let Ok(mut ready) = window.state::<VillageVisibility>().ready.lock() {
+        ready.remove(window.label());
+    }
+}
+
 pub(crate) fn set(app: &AppHandle, visible: bool) -> Result<bool, String> {
     let state = app.state::<VillageVisibility>();
     state.requested.store(visible, Ordering::SeqCst);

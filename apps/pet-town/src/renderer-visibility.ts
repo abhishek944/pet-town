@@ -1,3 +1,5 @@
+import { disposePetImage } from "./renderer-image";
+
 export function syncCitizenVisibility(
   element: HTMLElement,
   pet: HTMLImageElement,
@@ -21,6 +23,7 @@ export function setPreferenceHidden(
   onGeometryChange: () => void = () => {},
 ): void {
   element.dataset.preferenceHidden = String(hidden);
+  if (hidden) disposePetImage(element);
   const pet = element.querySelector<HTMLImageElement>("img.pet");
   if (pet) syncCitizenVisibility(element, pet, onGeometryChange);
 }

@@ -2,7 +2,9 @@ import type { FlowSample } from "./flow-runtime";
 import { activityPresentationFor } from "./activity-pet";
 import type { CitizenState } from "./village";
 import { syncCitizenVisibility } from "./renderer-visibility";
-import { refreshCitizenLabelPosition as refreshSpriteBounds, visibleBoundsRatios } from "./renderer-image-bounds";
+import { refreshCitizenLabelPosition as refreshSpriteBounds } from "./renderer-image-bounds";
+import { applyPetImage, disposePetImage } from "./renderer-image";
+export { ASSET_READY_TIMEOUT_MS } from "./renderer-image";
 export { setPreferenceHidden } from "./renderer-visibility";
 export function refreshCitizenLabelPosition(element: HTMLElement): void {
   refreshSpriteBounds(element);
@@ -22,7 +24,6 @@ export interface HitRegion {
   height: number;
 }
 
-export const ASSET_READY_TIMEOUT_MS = 1_500;
 export const CITIZEN_TRACK_WIDTH = 104;
 export const SUSPENSION_GAP_MS = 250;
 
@@ -52,6 +53,7 @@ export function createCitizenElement(): HTMLElement {
 
   const pet = document.createElement("img");
   pet.className = "pet";
+  pet.decoding = "sync";
   pet.alt = "";
   pet.draggable = false;
   pet.hidden = true;
@@ -111,7 +113,8 @@ export function applyFlowSample(
   if (element.dataset.oceanAsset !== oceanAsset) element.dataset.oceanAsset = oceanAsset;
 
   element.dataset.flowVisible = String(sample.visible);
-  if (!sample.visible) {
+  if (!sample.visible || element.dataset.preferenceHidden === "true") {
+    disposePetImage(element);
     syncCitizenVisibility(element, pet, onGeometryChange);
     return true;
   }
@@ -123,62 +126,21 @@ export function applyFlowSample(
   const assetUrl = themedAssetUrl ?? (sample.held ? clip?.holdAssetUrl : clip?.assetUrl)
     ?? clip?.assetUrl
     ?? fallbackAssetUrl;
-  const assetKey = JSON.stringify(dedicated ? [assetUrl] : [assetUrl, sample.clipEpoch, sample.held]);
-  if (pet.dataset.assetKey !== assetKey) {
-    const request = String((Number(pet.dataset.assetRequest) || 0) + 1);
-    const hasVisibleAsset = Boolean(pet.getAttribute("src")) && !pet.hidden;
-    pet.dataset.assetRequest = request;
-    pet.dataset.assetKey = assetKey;
-    if (assetUrl) {
-      if (!hasVisibleAsset) pet.hidden = true;
-      syncCitizenVisibility(element, pet, onGeometryChange);
-      const loader = new Image();
-      loader.src = assetUrl;
-      const releaseTimer = globalThis.setTimeout(() => {
-        if (pet.dataset.assetRequest !== request) return;
-        pet.dataset.assetReleasedKey = assetKey;
-      }, ASSET_READY_TIMEOUT_MS);
-      void loader.decode().then(() => {
-        globalThis.clearTimeout(releaseTimer);
-        if (pet.dataset.assetRequest !== request) return;
-        applyPetPresentation(pet, sample, presentationClip, dedicated);
-        pet.removeAttribute("src");
-        pet.src = assetUrl;
-        pet.hidden = false;
-        const bounds = visibleBoundsRatios(loader, assetUrl);
-        pet.dataset.visibleTopRatio = String(bounds.top);
-        pet.dataset.visibleBottomRatio = String(bounds.bottom);
-        pet.dataset.assetReadyKey = assetKey;
-        // Reveal before measuring padding; hidden image boxes otherwise report zero height.
-        syncCitizenVisibility(element, pet, () => {});
-        refreshCitizenLabelPosition(element);
-        onGeometryChange();
-      }).catch(() => {
-        globalThis.clearTimeout(releaseTimer);
-        if (pet.dataset.assetRequest !== request) return;
-        pet.hidden = true;
-        pet.removeAttribute("src");
-        delete pet.dataset.visibleTopRatio;
-        delete pet.dataset.visibleBottomRatio;
-        refreshCitizenLabelPosition(element);
-        pet.dataset.assetReadyKey = assetKey;
-        syncCitizenVisibility(element, pet, onGeometryChange);
-      });
-    } else {
+  const ready = applyPetImage(
+    element, assetUrl, dedicated ? null : sample.clipEpoch, dedicated ? false : sample.held,
+    () => {
       applyPetPresentation(pet, sample, presentationClip, dedicated);
-      pet.hidden = true;
-      pet.removeAttribute("src");
-      delete pet.dataset.visibleTopRatio;
-      delete pet.dataset.visibleBottomRatio;
+      // Reveal before measuring padding; hidden image boxes otherwise report zero height.
+      syncCitizenVisibility(element, pet, () => {});
       refreshCitizenLabelPosition(element);
-      pet.dataset.assetReadyKey = assetKey;
-      syncCitizenVisibility(element, pet, onGeometryChange);
-    }
-  } else if (pet.dataset.assetReadyKey === assetKey) {
+      onGeometryChange();
+    },
+  );
+  if (pet.dataset.assetReadyKey === pet.dataset.assetKey) {
     applyPetPresentation(pet, sample, presentationClip, dedicated);
-    syncCitizenVisibility(element, pet, onGeometryChange);
   }
-  return pet.dataset.assetReadyKey === assetKey || pet.dataset.assetReleasedKey === assetKey;
+  syncCitizenVisibility(element, pet, onGeometryChange);
+  return ready;
 }
 
 export function regionFor(element: Element): HitRegion | null {

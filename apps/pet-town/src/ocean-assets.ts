@@ -27,9 +27,17 @@ export function oceanRowingUrl(petId: string): string | null {
   return oceanAssets.get(`${petId}/ocean-rowing`) ?? null;
 }
 
-export function oceanStateUrl(petId: string, state: HerdrState): string | null {
+export function oceanStateUrl(
+  petId: string,
+  state: HerdrState,
+  requiredDevicePixels = Infinity,
+): string | null {
   const clip = oceanClipName(state);
-  return clip ? (oceanAssets.get(`${petId}/${clip}`) ?? oceanRowingUrl(petId)) : null;
+  if (!clip) return null;
+  const key = oceanAssets.has(`${petId}/${clip}`) ? `${petId}/${clip}` : `${petId}/ocean-rowing`;
+  const original = oceanAssets.get(key) ?? null;
+  if (!original) return null;
+  return requiredDevicePixels <= 128 ? (oceanAssets.get(`${key}-128`) ?? original) : original;
 }
 
 export function effectivePetTheme(preferences: PreferencesFile | null, petId: string): PetTheme {

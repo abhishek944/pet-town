@@ -14,6 +14,7 @@ export type ActivityState = "working" | "blocked" | "done";
 export interface ActivityClipAsset {
   readonly assetPath: string;
   readonly assetUrl: string;
+  readonly compactAssetUrl?: string;
   readonly durationMs: number;
   readonly scale: number;
   readonly anchorX: number;
@@ -105,7 +106,8 @@ function readClip(value: unknown, theme: string, state: string, assets: Record<s
     anchorY === null
   )
     return null;
-  return { assetPath, assetUrl, durationMs, scale, anchorX, anchorY };
+  const compactAssetUrl = assets[assetPath.replace(".webp", "-128.webp")];
+  return { assetPath, assetUrl, compactAssetUrl, durationMs, scale, anchorX, anchorY };
 }
 
 function readSidecar(

@@ -75,7 +75,11 @@ export class RendererOcean {
     const rowing =
       element.dataset.agentSource === "orchestrator" &&
       (state === "idle" || state === "done" || state === "unknown");
-    return oceanStateUrl(id, rowing ? "working" : state);
+    const size = Number.parseFloat(element.style.getPropertyValue("--citizen-size")) || 44;
+    // Global Ocean CSS uses citizen size directly; per-pet Ocean keeps Standard clip scaling.
+    const devicePixels =
+      this.preferences?.app.stripTheme === "ocean" ? size * window.devicePixelRatio : Infinity;
+    return oceanStateUrl(id, rowing ? "working" : state, devicePixels);
   }
 
   sampler(): Sampler {

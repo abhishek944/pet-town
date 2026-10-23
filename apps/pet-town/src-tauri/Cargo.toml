@@ -1,6 +1,6 @@
 [package]
 name = "pet-town"
-version = "1.2.11"
+version = "1.2.12"
 description = "A transparent desktop village for live Herdr agents"
 authors = ["pet-town contributors"]
 edition = "2021"
@@ -55,4 +55,8 @@ libc = "0.2"
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2-app-kit = { version = "0.3", features = ["NSEvent", "NSRunningApplication", "NSWindow"] }
 tauri-nspanel = "2.1"
+objc2-web-kit = { version = "0.3", default-features = false, features = [
+  "WKPreferences",
+  "WKWebViewConfiguration",
+] }
 security-framework = "3"

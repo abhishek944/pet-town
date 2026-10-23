@@ -3,10 +3,11 @@ import { behaviorPackForCharacter } from "./character-packs"; import { RendererS
 import type { CitizenState } from "./village"; import { freezePetFrame } from "./pet-freeze";
 import type { PreferencesFile } from "./preferences-types";
 import { collectHitRegions } from "./renderer-layout";
+import { createGeometryUpdates } from "./renderer-geometry";
 import { resolveLabelOverlaps } from "./renderer-labels";
 import { applyCitizenPreferences, resizeCitizens, shouldHideCompleted, shouldHideCompletedElement, travelDistanceFor } from "./renderer-preferences";
 import { applyFlowSample, CITIZEN_TRACK_WIDTH, createCitizenElement, distanceWhileAssetPending, type HitRegion, motionSeed, refreshCitizenLabelPosition, SUSPENSION_GAP_MS, updateCitizenElement } from "./renderer-view";
-import { setPreferenceHidden } from "./renderer-visibility"; import { tokenMotionDistance, type TokenMotionState } from "./token-motion";
+import { disposePetImage } from "./renderer-image"; import { setPreferenceHidden } from "./renderer-visibility"; import { tokenMotionDistance, type TokenMotionState } from "./token-motion";
 export type { HitRegion } from "./renderer-view";
 interface MotionState {
   x: number; direction: -1 | 1; maximumX: number;
@@ -36,12 +37,12 @@ export class VillageRenderer {
     for (const [id, element] of this.elements) {
       if (!liveIds.has(id)) {
         element.dispatchEvent(new Event("citizen-hidden", { bubbles: true }));
-        element.remove();
+        disposePetImage(element); element.remove();
         this.elements.delete(id); this.motions.delete(id);
       }
     }
     const maximumX = Math.max(0, width - CITIZEN_TRACK_WIDTH);
-    const waveSampler = this.currentWaveSampler();
+    const waveSampler = this.scenery.sampler();
     for (const citizen of ordered) {
       const pack = this.behaviorPackForCitizen(citizen);
       const fallbackAssetUrl = Object.values(pack.clips)
@@ -68,7 +69,7 @@ export class VillageRenderer {
         motion.fallbackAssetUrl = fallbackAssetUrl; motion.tokenMotion.activity = citizen.tokenActivity;
       }
       updateCitizenElement(element, citizen);
-      setPreferenceHidden(element, shouldHideCompleted(citizen, this.preferences), this.refreshGeometry);
+      setPreferenceHidden(element, shouldHideCompleted(citizen, this.preferences), this.geometry.request);
       applyCitizenPreferences(element, this.currentCitizenSize, this.preferences);
       refreshCitizenLabelPosition(element);
       if (maximumX !== motion.maximumX) {
@@ -78,10 +79,10 @@ export class VillageRenderer {
       if (motion.behavior.setStatus(citizen.status)) motion.pendingElapsedMs = 0;
       const sample = motion.behavior.advance(0).sample;
       applyFlowSample(element, sample,
-        motion.fallbackAssetUrl, this.refreshGeometry, this.themeAssetFor(element, sample.state));
-      this.applyDirectionAndPosition(element, motion, waveSampler);
+        motion.fallbackAssetUrl, this.geometry.request, this.scenery.assetFor(element, sample.state));
+      this.scenery.position(element, motion, waveSampler);
     }
-    this.refreshGeometry();
+    this.geometry.flush();
   }
   private readonly animate = (timestamp: number): void => {
     const frameGap = this.lastTimestamp === 0 ? 0 : timestamp - this.lastTimestamp;
@@ -93,22 +94,23 @@ export class VillageRenderer {
     const oceanChanged = this.scenery.advance(this.paused || shouldPause ? 0 : elapsedMs, this.systemReducedMotion);
     if (this.paused) {
       if (oceanChanged) this.refreshOceanWakes();
+      this.geometry.flushPending();
       for (const element of this.elements.values()) freezePetFrame(element);
       window.requestAnimationFrame(this.animate);
       return;
     }
-    const waveSampler = this.currentWaveSampler();
+    const waveSampler = this.scenery.sampler();
     for (const [id, element] of this.elements) {
       const motion = this.motions.get(id);
       if (!motion || element.classList.contains("retiring")) continue;
       const currentSample = motion.behavior.sample();
-      const themedAssetUrl = this.themeAssetFor(element, currentSample.state);
+      const themedAssetUrl = this.scenery.assetFor(element, currentSample.state);
       if (motion.dragging) {
-        applyFlowSample(element, currentSample, motion.fallbackAssetUrl, this.refreshGeometry, themedAssetUrl);
-        this.applyDirectionAndPosition(element, motion, waveSampler);
+        applyFlowSample(element, currentSample, motion.fallbackAssetUrl, this.geometry.request, themedAssetUrl);
+        this.scenery.position(element, motion, waveSampler);
         continue;
       }
-      const assetReady = applyFlowSample(element, currentSample, motion.fallbackAssetUrl, this.refreshGeometry, themedAssetUrl);
+      const assetReady = applyFlowSample(element, currentSample, motion.fallbackAssetUrl, this.geometry.request, themedAssetUrl);
       const advance = assetReady
         ? motion.behavior.advance(elapsedMs + motion.pendingElapsedMs, true)
         : {
@@ -121,11 +123,12 @@ export class VillageRenderer {
       const position = advanceTrack(motion.x, motion.direction, distance, motion.maximumX);
       motion.x = position.x;
       motion.direction = position.direction;
-      applyFlowSample(element, advance.sample, motion.fallbackAssetUrl, this.refreshGeometry,
-        this.themeAssetFor(element, advance.sample.state));
-      this.applyDirectionAndPosition(element, motion, waveSampler, distance !== 0 && advance.sample.moving);
+      applyFlowSample(element, advance.sample, motion.fallbackAssetUrl, this.geometry.request,
+        this.scenery.assetFor(element, advance.sample.state));
+      this.scenery.position(element, motion, waveSampler, distance !== 0 && advance.sample.moving);
     }
     this.refreshOceanWakes();
+    this.geometry.flushPending();
     if (timestamp - this.lastHitRegionUpdate >= 50) {
       this.lastHitRegionUpdate = timestamp;
       this.publishHitRegions();
@@ -134,20 +137,20 @@ export class VillageRenderer {
   };
   refreshPreferenceVisibility(citizens: ReadonlyMap<string, CitizenState>): void {
     for (const [id, element] of this.elements) { const citizen = citizens.get(id);
-      if (citizen) setPreferenceHidden(element, shouldHideCompleted(citizen, this.preferences), this.refreshGeometry); }
+      if (citizen) setPreferenceHidden(element, shouldHideCompleted(citizen, this.preferences), this.geometry.request); }
   }
   setPreferences(preferences: PreferencesFile): void {
     this.preferences = preferences;
     this.scenery.setPreferences(preferences);
-    const waveSampler = this.currentWaveSampler();
+    const waveSampler = this.scenery.sampler();
     for (const [id, element] of this.elements) {
-      setPreferenceHidden(element, shouldHideCompletedElement(element, this.preferences), this.refreshGeometry);
+      setPreferenceHidden(element, shouldHideCompletedElement(element, this.preferences), this.geometry.request);
       applyCitizenPreferences(element, this.currentCitizenSize, this.preferences);
       refreshCitizenLabelPosition(element);
       const motion = this.motions.get(id);
-      if (motion) this.applyDirectionAndPosition(element, motion, waveSampler);
+      if (motion) this.scenery.position(element, motion, waveSampler);
     }
-    this.refreshGeometry();
+    this.geometry.flush();
   }
   setSystemReducedMotion(reduced: boolean): void {
     this.systemReducedMotion = reduced;
@@ -173,7 +176,7 @@ export class VillageRenderer {
     const element = this.elements.get(id);
     if (!motion || !element || !motion.dragging) return;
     motion.x = Math.max(0, Math.min(motion.maximumX, clientX - motion.dragOffsetX));
-    this.applyDirectionAndPosition(element, motion, this.currentWaveSampler());
+    this.scenery.position(element, motion, this.scenery.sampler());
     this.publishHitRegions();
   }
   endDrag(id: string): void {
@@ -181,15 +184,12 @@ export class VillageRenderer {
     if (motion) { motion.dragging = false; this.publishHitRegions(); }
   }
   refreshHitRegions(): void { this.publishHitRegions(); }
-  private themeAssetFor(element: HTMLElement, state: import("./flow-types").HerdrState): string | null { return this.scenery.assetFor(element, state); }
-  private currentWaveSampler(): ((x: number) => number) | null { return this.scenery.sampler(); }
-  private applyDirectionAndPosition(element: HTMLElement, motion: MotionState, sampler: ((x: number) => number) | null, walking?: boolean): void { this.scenery.position(element, motion, sampler, walking); }
   private refreshOceanWakes(): void { this.scenery.updateWakes(this.elements, this.motions, this.currentCitizenSize); }
-  private readonly refreshGeometry = (): void => {
+  private readonly geometry = createGeometryUpdates(() => {
     this.currentCitizenSize = resizeCitizens(this.root, this.elements.values(), this.currentWidth, this.preferences, this.currentCitizenSize);
     this.refreshOceanWakes();
     this.publishHitRegions();
-  };
+  });
   private readonly publishHitRegions = (): void => {
     if (this.paused) { this.updateHitRegions([]); return; }
     const dragging = [...this.motions.values()].some((motion) => motion.dragging);
