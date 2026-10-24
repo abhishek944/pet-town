@@ -90,7 +90,7 @@ installPetInteractions(village, {
 
 function render(whilePaused = false): void {
   if (villagePaused && !whilePaused) return;
-  renderer.render(citizens, window.innerWidth);
+  renderer.render(streets.select(citizens), window.innerWidth);
   if (villagePaused) renderer.setPaused(true);
 
   for (const citizen of citizens.values()) {
@@ -117,11 +117,9 @@ async function poll(): Promise<void> {
     const snapshot = await invoke<AgentSnapshot>("list_agents");
     citizens = reconcileCitizens(citizens, snapshot.agents, activePetIds);
     citizens = applyOrchestratorCitizen(citizens, orchestratorView);
-    streets.retain(citizens);
     renderPolledSnapshot();
   } catch {
     citizens = reconcileCitizens(citizens, [], activePetIds);
-    streets.retain(citizens);
     renderPolledSnapshot();
   } finally {
     window.setTimeout(poll, POLL_INTERVAL_MS);
@@ -134,7 +132,6 @@ function adoptReloadedPacks(reloaded: ReloadedPacks | null): void {
   citizens = reloaded.citizens;
   orchestratorView = reloaded.view;
   activePetIds = reloaded.activeIds;
-  streets.retain(citizens);
   render(true);
 }
 
@@ -150,13 +147,9 @@ async function start(): Promise<void> {
     pendingOrchestratorView = event.payload;
     orchestratorView = validOrchestratorView(event.payload);
     citizens = applyOrchestratorCitizen(citizens, orchestratorView);
-    streets.retain(citizens);
     render(true);
   });
-  await watchStreetChanges(streets, () => {
-    streets.retain(citizens);
-    render(true);
-  });
+  await watchStreetChanges(streets, () => render(true));
   adoptReloadedPacks(await reloadUserPacks(citizens, pendingOrchestratorView, latestPreferences));
   try {
     pendingOrchestratorView = await invoke<OrchestratorView>("get_orchestrator_pet_state");
@@ -166,7 +159,6 @@ async function start(): Promise<void> {
     orchestratorView = null;
   }
   citizens = applyOrchestratorCitizen(citizens, orchestratorView);
-  streets.retain(citizens);
   await installVillagePreferences(
     renderer,
     () => {
@@ -183,7 +175,6 @@ async function start(): Promise<void> {
         (id) => preferences.pets[id]?.includedInRandomCast ?? true,
       );
       citizens = applyActiveCast(citizens, activePetIds);
-      streets.retain(citizens);
       render(true);
     },
   );

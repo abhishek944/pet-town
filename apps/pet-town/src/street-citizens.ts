@@ -4,13 +4,14 @@ import type { CitizenState } from "./village";
 
 export interface StreetMembership {
   fetch(): Promise<void>;
-  retain(citizens: Map<string, CitizenState>): void;
+  select(citizens: ReadonlyMap<string, CitizenState>): Map<string, CitizenState>;
   isPrimary(): boolean;
 }
 
 /** Which street this window serves. Every window computes the same split:
  * sorted citizen ids dealt round-robin across streets. The orchestrator pet
- * stays on the primary street instead of duplicating on every display. */
+ * stays on the primary street instead of duplicating on every display.
+ * Selection never mutates the complete roster owned by the caller. */
 export function createStreetMembership(): StreetMembership {
   let index = 0;
   let total = 1;
@@ -25,18 +26,16 @@ export function createStreetMembership(): StreetMembership {
         total = 1;
       }
     },
-    retain(citizens: Map<string, CitizenState>): void {
+    select(citizens: ReadonlyMap<string, CitizenState>): Map<string, CitizenState> {
       const regular = [...citizens.keys()]
         .filter((id) => citizens.get(id)?.source !== "orchestrator")
         .sort();
-      for (const [position, id] of regular.entries()) {
-        if (position % total !== index) citizens.delete(id);
-      }
-      if (index !== 0) {
-        for (const [id, citizen] of citizens) {
-          if (citizen.source === "orchestrator") citizens.delete(id);
-        }
-      }
+      const selected = new Set(regular.filter((_, position) => position % total === index));
+      return new Map(
+        [...citizens].filter(([id, citizen]) =>
+          citizen.source === "orchestrator" ? index === 0 : selected.has(id),
+        ),
+      );
     },
     isPrimary(): boolean {
       return index === 0;
