@@ -60,7 +60,7 @@ pub(crate) fn set_onboarding_appearance(
     let _operation = state.begin()?;
     let theme = match theme.as_str() {
         "standard" | "ocean" | "rainforest" | "snowy" | "desert" | "rollercoaster" | "goldmine"
-        | "railway" => serde_json::from_value(serde_json::Value::String(theme))
+        | "railway" | "canopy" => serde_json::from_value(serde_json::Value::String(theme))
             .map_err(|_| "Unsupported scenery.")?,
         _ => return Err("Choose one of the available desktop looks.".into()),
     };
@@ -68,6 +68,7 @@ pub(crate) fn set_onboarding_appearance(
     let mut snapshot = store.snapshot();
     snapshot.preferences.app.strip_theme = theme;
     let snapshot = store.apply(snapshot.preferences, snapshot.revision)?;
+    crate::street_windows::refresh_geometry(&app);
     crate::street_windows::emit_to_streets(app.clone(), "preferences-applied", &snapshot).map_err(
         |_| "The look was saved, but the desktop could not be refreshed. Reopen Pet Town.".into(),
     )

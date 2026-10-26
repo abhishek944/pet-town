@@ -118,7 +118,7 @@ pub(crate) fn create_street_window(
             // Additional transparent height lets Ocean water sit below boat hulls.
             // Standard pets retain their existing bottom-anchored on-screen position.
             .inner_size(1100.0, 290.0)
-            .min_inner_size(320.0, 290.0)
+            .min_inner_size(160.0, 160.0)
             .resizable(true)
             .transparent(true)
             .decorations(false)
@@ -131,6 +131,7 @@ pub(crate) fn create_street_window(
             .visible(false)
             .visible_on_all_workspaces(true)
             .build()?;
+    crate::street_windows::register_street_layout(&window);
     Ok(window)
 }
 

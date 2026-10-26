@@ -60,10 +60,12 @@ export function bindAppControls(
     const preservePetThemes =
       theme === "snowy" ||
       theme === "desert" ||
+      theme === "canopy" ||
       isActivityTheme(theme) ||
       (theme === "standard" &&
         (previousTheme === "snowy" ||
           previousTheme === "desert" ||
+          previousTheme === "canopy" ||
           isActivityTheme(previousTheme)));
     if (!preservePetThemes) {
       for (const [id, item] of Object.entries(draft().pets)) {

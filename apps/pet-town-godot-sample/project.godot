@@ -14,6 +14,10 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Pet Town Godot Sample"
 
+[autoload]
+NativeRenderBudget="*res://scripts/render_budget.gd"
+NativeDiagnostics="*res://scripts/diagnostics/native_performance.gd"
+
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720

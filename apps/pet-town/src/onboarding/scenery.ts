@@ -1,3 +1,5 @@
+import { climbingFrame } from "../moonlit-pet";
+import { RendererMoonlit } from "../moonlit-canopy";
 import { RendererRainforest } from "../rainforest";
 import { RendererSnowy } from "../snow";
 import { RendererDesert } from "../desert";
@@ -15,6 +17,7 @@ const names: Record<StripTheme, string> = {
   rollercoaster: "Rollercoaster",
   goldmine: "Gold Mine",
   railway: "Tiny Railway",
+  canopy: "Moonlit Canopy",
 };
 export function renderScenery(
   root: HTMLElement,
@@ -22,7 +25,7 @@ export function renderScenery(
   defaults: PreferencesFile,
 ): void {
   root
-    .querySelectorAll(".rainforest-scene,.snow-scene,.desert-scene,.ocean-water,.activity-scene")
+    .querySelectorAll(".rainforest-scene,.snow-scene,.desert-scene,.ocean-water,.activity-scene,.moonlit-scene")
     .forEach((n) => n.remove());
   const prefs = { ...defaults, app: { ...defaults.app, stripTheme: theme } };
   const frozen = root.querySelector<HTMLCanvasElement>("canvas.scene-pet");
@@ -33,10 +36,15 @@ export function renderScenery(
     frozen.replaceWith(image);
   }
   const portrait = root.querySelector<HTMLImageElement>("img.scene-pet");
-  if (portrait)
-    portrait.src = theme === "ocean" ? "/onboarding/nib-ocean.png" : "/onboarding/nib-walk.png";
+  if (portrait) {
+    portrait.src = theme === "canopy" ? climbingFrame(0)
+      : theme === "ocean" ? "/onboarding/nib-ocean.png" : "/onboarding/nib-walk.png";
+    portrait.alt = theme === "canopy" ? "Cat climbing preview" : "Sample pet on your desktop";
+  }
   const Scenery =
-    theme === "rainforest"
+    theme === "canopy"
+      ? RendererMoonlit
+      : theme === "rainforest"
       ? RendererRainforest
       : theme === "snowy"
         ? RendererSnowy

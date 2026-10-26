@@ -15,8 +15,8 @@ function menuIcon(paths: readonly string[]): SVGSVGElement {
 export interface PetInteractionDelegate {
   openPreferences(id: string): void;
   focusAgent(id: string): void;
-  beginDrag(id: string, clientX: number): boolean;
-  moveDrag(id: string, clientX: number): void;
+  beginDrag(id: string, clientX: number, clientY: number): boolean;
+  moveDrag(id: string, clientX: number, clientY: number): void;
   endDrag(id: string): void;
   geometryChanged(): void;
 }
@@ -33,6 +33,8 @@ export function installPetInteractions(
   let pointerId: number | null = null;
   let draggedId: string | null = null;
   let startX = 0;
+  let startY = 0;
+  let exceededThreshold = false;
   let dragging = false;
   let suppressClick = false;
   let menu: HTMLElement | null = null;
@@ -89,17 +91,20 @@ export function installPetInteractions(
     pointerId = event.pointerId;
     draggedId = id;
     startX = event.clientX;
+    startY = event.clientY;
+    exceededThreshold = false;
     dragging = false;
     pet.setPointerCapture?.(event.pointerId);
   };
   const onPointerMove = (event: PointerEvent): void => {
     if (event.pointerId !== pointerId || !draggedId) return;
-    if (!dragging && Math.abs(event.clientX - startX) >= DRAG_THRESHOLD_PX) {
-      dragging = delegate.beginDrag(draggedId, event.clientX);
+    if (!dragging && Math.hypot(event.clientX - startX, event.clientY - startY) >= DRAG_THRESHOLD_PX) {
+      exceededThreshold = true;
+      dragging = delegate.beginDrag(draggedId, startX, startY);
     }
     if (dragging) {
       event.preventDefault();
-      delegate.moveDrag(draggedId, event.clientX);
+      delegate.moveDrag(draggedId, event.clientX, event.clientY);
     }
   };
   const finishDrag = (event: PointerEvent): void => {
@@ -108,8 +113,8 @@ export function installPetInteractions(
       delegate.endDrag(draggedId);
       suppressNextClick();
       event.preventDefault();
-    } else if (event.type === "pointerup" && draggedId
-      && Math.abs(event.clientX - startX) < DRAG_THRESHOLD_PX) {
+    } else if (event.type === "pointerup" && draggedId && !exceededThreshold
+      && Math.hypot(event.clientX - startX, event.clientY - startY) < DRAG_THRESHOLD_PX) {
       delegate.focusAgent(draggedId);
     }
     pointerId = null;
@@ -126,6 +131,7 @@ export function installPetInteractions(
     const id = agentId(event.target);
     if (!id) return;
     event.preventDefault();
+    cancelActive();
     openMenu(id, event.clientX, event.clientY);
   };
   const onCitizenHidden = (event: Event): void => {
@@ -145,6 +151,7 @@ export function installPetInteractions(
   root.addEventListener("pointermove", onPointerMove);
   root.addEventListener("pointerup", finishDrag);
   root.addEventListener("pointercancel", finishDrag);
+  root.addEventListener("lostpointercapture", cancelActive);
   root.addEventListener("click", onClick, true);
   root.addEventListener("contextmenu", onContextMenu);
   return () => {
@@ -155,6 +162,7 @@ export function installPetInteractions(
     root.removeEventListener("pointermove", onPointerMove);
     root.removeEventListener("pointerup", finishDrag);
     root.removeEventListener("pointercancel", finishDrag);
+    root.removeEventListener("lostpointercapture", cancelActive);
     root.removeEventListener("click", onClick, true);
     root.removeEventListener("contextmenu", onContextMenu);
   };

@@ -4,6 +4,7 @@ const WORLD := "res://scenes/sample.tscn"
 var welcome: Control
 
 func _ready() -> void:
+	NativeDiagnostics.phase("scene_loading")
 	preload("res://ui/dpi_scale.gd").apply(get_window())
 	# Stay above the town HUD while asynchronous construction adds new layers.
 	var overlay := CanvasLayer.new()
@@ -24,6 +25,7 @@ func _process(_delta: float) -> void:
 		launch.call_deferred()
 
 func fail() -> void:
+	NativeDiagnostics.phase("startup_failed")
 	set_process(false)
 	welcome.set_loading(true, welcome.FAILURE)
 
@@ -33,6 +35,7 @@ func launch() -> void:
 	if not scene:
 		fail()
 		return
+	NativeDiagnostics.phase("world_instantiation")
 	var town := scene.instantiate()
 	get_tree().root.add_child(town)
 	if not town.initialization_complete: await town.initialization_finished
@@ -49,4 +52,5 @@ func launch() -> void:
 	welcome.world_rendering_suspended = false
 	if not town.hud.welcome.is_visible_in_tree(): town.hud.welcome.resume_world_rendering()
 	get_tree().current_scene = town
+	NativeDiagnostics.phase("ready")
 	queue_free()

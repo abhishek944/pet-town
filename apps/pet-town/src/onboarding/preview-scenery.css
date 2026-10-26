@@ -69,6 +69,22 @@
 .step-2 .appearance-preview[data-theme="ocean"] .scene-pet {
   bottom: 32px;
 }
+.step-2 .appearance-preview[data-theme="canopy"] {
+  background: #18252b;
+}
+.step-2 .appearance-preview[data-theme="canopy"] .scene-pet {
+  left: auto;
+  right: 36px;
+  bottom: 38%;
+}
+.step-2 .appearance-preview[data-theme="canopy"] .preview-label {
+  color: #b4c8c5;
+}
+.step-2 .appearance-preview[data-theme="canopy"] .sample-window {
+  background: #203139;
+  border-color: #40585c;
+  color: #b4c8c5;
+}
 .step-2 .scenery {
   position: absolute;
   inset: 0;
@@ -80,7 +96,7 @@
   right: 117px;
   top: 495px;
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
   gap: 6px;
 }
 .step-2 .theme-choice {

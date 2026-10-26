@@ -48,8 +48,14 @@ export function collectHitRegions(
   }
   return [
     ...[...elements]
-      .filter((element) => !element.classList.contains("retiring"))
-      .flatMap((element) => [element.querySelector(".pet"), element.querySelector(".project")]),
+      .filter((element) => !element.hidden && !element.classList.contains("retiring")
+        && element.style.getPropertyValue("--canopy-fade") !== "0")
+      .flatMap((element) => [
+        element.style.getPropertyValue("--citizen-opacity") === "0" ? null : element.querySelector(".pet"),
+        element.dataset.labelVisibility === "hidden" ||
+          (element.dataset.labelOverlapHidden === "true" || element.dataset.labelVisibility === "hover")
+            && !element.matches(":hover")
+          ? null : element.querySelector(".project")]),
     ...root.querySelectorAll(".pet-menu, .pet-menu-backdrop"),
   ]
     .filter((element): element is Element => element !== null)

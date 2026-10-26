@@ -17,6 +17,7 @@ static func run(town: Node) -> void:
 	if not town.world.initialization_complete: await town.world.initialization_finished
 	if not town.world.initialized: return
 	await budget.checkpoint(true)
+	NativeDiagnostics.phase("player_and_building")
 	town.actor=load("res://scripts/actor.gd").new()
 	town.actor.name="Explorer"
 	town.actor.world=town.world
@@ -42,11 +43,13 @@ static func run(town: Node) -> void:
 	town.rig.touch_claim = town.claim_world
 	town.rig.touch_excluded = town.hud.touch_contains_point
 	town.rig.palette_scrolled.connect(func(step: int): town.select_block(posmod(town.builder.selected+step,12)))
+	NativeDiagnostics.phase("wildlife")
 	town.wildlife=load("res://scripts/wildlife/system.gd").new()
 	town.add_child(town.wildlife)
 	await town.wildlife.setup(town.actor,town.world.manifest,budget)
 	await budget.checkpoint(true)
 	town.wildlife.petted.connect(town.pet_feedback)
+	NativeDiagnostics.phase("audio")
 	town.ambience=load("res://scripts/effects/native_ambience.gd").new()
 	town.add_child(town.ambience)
 	await town.ambience.setup(town.world.manifest, budget)
@@ -76,6 +79,7 @@ static func run(town: Node) -> void:
 	town.hud.ocean_interact.connect(town.ocean.interact)
 	town.hud.ocean_helm.connect(town.ocean.touch_helm)
 	town.hud.dock_width_changed.connect(func(width: float): town.rig.dock_width = width)
+	NativeDiagnostics.phase("activities")
 	town.region_actions=load("res://scripts/region_actions.gd").new()
 	town.add_child(town.region_actions)
 	await town.region_actions.setup(town,budget)
@@ -90,6 +94,7 @@ static func run(town: Node) -> void:
 	ui_audio.setup(town.hud,town.ambience)
 	town.hud.set_volume(town.hud.volume)
 	town.set_sound(town.hud.sound_enabled)
+	NativeDiagnostics.phase("postprocessing")
 	town.post=load("res://scripts/post/cozy_post.gd").new()
 	town.add_child(town.post)
 	town.post.setup(town.world.effects.daylight.get_child(0))
@@ -110,9 +115,11 @@ static func run(town: Node) -> void:
 	town.hud.welcome.dismissed.connect(func():
 		if town.builder.store.write_blocked: town.hud.show_toast(town.builder.store.load_error))
 	town.hud.show_welcome()
+	NativeDiagnostics.phase("atmosphere")
 	town.atmosphere = preload("res://scripts/atmosphere/driver.gd").new()
 	town.add_child(town.atmosphere)
 	await town.atmosphere.setup(town,budget)
+	NativeDiagnostics.phase("battle_preparation")
 	town.battle = preload("res://scripts/battle/session.gd").new()
 	town.add_child(town.battle)
 	town.battle.setup(town)

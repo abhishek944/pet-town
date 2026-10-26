@@ -9,7 +9,8 @@ export type StripTheme =
   | "desert"
   | "rollercoaster"
   | "goldmine"
-  | "railway";
+  | "railway"
+  | "canopy";
 export type CoasterMode = "low-rolling" | "twilight-carnival" | "firefly-gardens" | "cloudline";
 export function isActivityTheme(theme: string | undefined): boolean {
   return theme === "rollercoaster" || theme === "goldmine" || theme === "railway";
@@ -30,6 +31,7 @@ export interface AppPreferences {
   coasterHeightPx: number;
   goldmineOpacityPercent: number;
   railwayOpacityPercent: number;
+  canopyOpacityPercent: number;
   rainforestMode: RainforestMode;
   rainforestOpacityPercent: number;
   snowMode: SnowMode;

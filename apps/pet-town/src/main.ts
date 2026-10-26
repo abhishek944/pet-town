@@ -82,8 +82,8 @@ installPetInteractions(village, {
     const petId = citizens.get(id)?.sprite;
     if (petId) void invoke("open_preferences", { petId });
   },
-  beginDrag: (id, clientX) => renderer.beginDrag(id, clientX),
-  moveDrag: (id, clientX) => renderer.moveDrag(id, clientX),
+  beginDrag: (id, clientX, clientY) => renderer.beginDrag(id, clientX, clientY),
+  moveDrag: (id, clientX, clientY) => renderer.moveDrag(id, clientX, clientY),
   endDrag: (id) => renderer.endDrag(id),
   geometryChanged: () => renderer.refreshHitRegions(),
 });

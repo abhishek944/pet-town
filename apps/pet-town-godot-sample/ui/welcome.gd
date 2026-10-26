@@ -177,6 +177,7 @@ func _gui_input(event: InputEvent) -> void:
 
 func finish() -> void:
 	if not is_visible_in_tree() or is_loading: return
+	NativeDiagnostics.phase("playing")
 	preload("res://scripts/town_input.gd").clear_gameplay()
 	resume_world_rendering()
 	hide()

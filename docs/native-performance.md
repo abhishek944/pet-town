@@ -4,6 +4,29 @@ These optimizations apply to the native Pet Town runtime in
 `apps/pet-town-godot-sample`. The public browser game is separate. Authored
 placements, geometry, materials, save coordinates and storage keys are preserved.
 
+## Native drawing budgets
+
+The native town fits its 3D scene inside a 1920×1080 envelope while retaining the
+existing lower DPI-derived scale when applicable. A 3840×2160 game window therefore
+uses a 0.5 scene scale (1920×1080 internal 3D rendering), rather than shading the world
+and full-scene postprocessing at 4K. Menus, text and other CanvasLayer UI retain their
+existing resolution and content scaling. The existing DPI owner recomputes only the
+3D budget after window size or DPI changes; aspect ratio is preserved and small
+windows are never upscaled.
+
+`NativeRenderBudget` bounds foreground drawing at 60 FPS and unfocused/minimized
+drawing at 15 FPS, respecting a stricter explicit engine/CLI cap in either state.
+Root-window focus signals change the budget without a polling timer. It does not
+pause the scene tree, physics, audio, Mayor voice or the desktop bridge, and restores
+the original engine cap on teardown. The diagnostic recorder logs the effective
+render scale and cap for a later comparison.
+
+These mitigations follow the recorded full-resolution, unthrottled background run;
+they are not a measured native GPU-speedup guarantee. Headless viewport/focus smoke
+checks cover the budget values, continued physics and cap restoration. Actual native
+Metal GPU savings, sharp UI and visual quality require a later user-chosen run.
+The GPU-heavy native GUI is not reopened automatically for verification.
+
 ## Committed collision changes
 
 `world.gd` owns `collision_revision`, `collision_changed` and
@@ -146,6 +169,42 @@ start/home positions are checked again before each match. Already queued terrain
 changes must finish before entry. Maple is instantiated directly, avoiding the old
 create-explorer/remove-explorer/create-Maple path. Frame yielding reduces blocking
 work; it does not promise shorter total preparation wall time.
+
+## Automatic after-the-fact performance recording
+
+The native town starts `NativeDiagnostics` before its opening scene. No interaction or
+external profiler is needed. It records fixed startup phases, elapsed phase times and
+roughly one technical sample per second. Samples include real monotonic frame gaps,
+50/250 ms slow-frame/stall counts, observed FPS, CPU/physics time, viewport CPU/GPU
+render timestamps when available, draw calls/primitives, engine memory counters,
+pipeline-compilation counters, window focus/minimized state, resolution, render scale,
+VSync and frame cap. GPU render milliseconds are **not** whole-device GPU utilization;
+headless/unsupported/not-yet-ready GPU timings are null with an explicit status.
+
+On macOS, inspect these files **after closing the town**:
+
+```text
+~/Library/Application Support/Pet Town Godot Sample/diagnostics/native-performance.jsonl
+~/Library/Application Support/Pet Town Godot Sample/diagnostics/native-performance.previous.jsonl
+```
+
+The two local JSONL files are capped at 2 MiB each and rotate on reopening or reaching
+the size limit. Low-frequency events flush immediately; a force-close can leave the
+last sample but no `session_end`. That absence means no clean shutdown was recorded,
+not proof of a crash. A fully stalled main thread cannot emit new samples; the last
+flushed phase/sample identifies the last observed work. GPU timestamps use the last
+available completed viewport timing; they cannot capture a GPU hang that never completes.
+Engine/device failures before the autoload starts remain in the desktop's existing
+`~/Library/Logs/dev.pet.town/native-town.log` instead.
+
+The recorder writes no per-frame disk output, screenshots, voice, prompts, agent data,
+credentials, environment dumps or save contents, and starts no subprocesses. Log I/O
+failure warns once and disables recording/render-time measurement without blocking the
+town. This is diagnostic instrumentation, **not** a fix for GPU load or grass shading.
+Headless lifecycle, stall, rotation, I/O-failure and force-close checks pass; native Metal
+GPU-timestamp overhead and the reported native issue still need a later safe user run.
+The agent must not reopen the GPU-heavy GUI just to collect evidence when the user has
+asked to leave it closed.
 
 ## Verification and live review
 

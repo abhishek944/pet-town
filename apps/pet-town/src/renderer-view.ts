@@ -122,7 +122,8 @@ export function applyFlowSample(
   const clip = sample.clip;
   const presentation = activityPresentationFor(element, themedAssetUrl);
   const presentationClip = presentation ?? clip;
-  const dedicated = presentation?.name === `activity:${element.parentElement?.dataset.stripTheme}:${element.dataset.status}`;
+  const dedicated = element.parentElement?.dataset.stripTheme === "canopy" && Boolean(themedAssetUrl)
+    || presentation?.name === `activity:${element.parentElement?.dataset.stripTheme}:${element.dataset.status}`;
   const assetUrl = themedAssetUrl ?? (sample.held ? clip?.holdAssetUrl : clip?.assetUrl)
     ?? clip?.assetUrl
     ?? fallbackAssetUrl;

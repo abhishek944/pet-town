@@ -110,6 +110,7 @@ pub fn run() {
         .manage(onboarding::Onboarding::default())
         .manage(pet_town_agent_broker::RemoteMonitor::start())
         .manage(window::HitRegions::default())
+        .manage(street_windows::StreetLayouts::default())
         .manage(village_visibility::VillageVisibility::default())
         .manage(preferences::PreferencesStore::load_default())
         .manage(pet_studio::PetStudioState::load())

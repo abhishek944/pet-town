@@ -58,6 +58,7 @@ pub enum StripTheme {
     Rollercoaster,
     Goldmine,
     Railway,
+    Canopy,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]

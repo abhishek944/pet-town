@@ -25,3 +25,7 @@ pub fn default_coaster_height_px() -> u16 {
 pub fn default_activity_opacity_percent() -> u8 {
     100
 }
+
+pub fn default_canopy_opacity_percent() -> u8 {
+    100
+}

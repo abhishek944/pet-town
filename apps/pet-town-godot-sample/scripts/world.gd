@@ -24,6 +24,7 @@ func _ready() -> void:
 	initialization_finished.emit()
 
 func initialize() -> void:
+	NativeDiagnostics.phase("terrain_data")
 	manifest=Buffers.read_json("region-manifest.json")
 	if manifest.is_empty():
 		push_error("Original-world export is missing; run the region exporter.")
@@ -34,16 +35,20 @@ func initialize() -> void:
 		var cell: Array = cells[i]
 		ground[Vector2i(floori(cell[0]),floori(cell[2]))]=Vector2(cell[1],cell[3])
 		if boot_budget and i % 256 == 0: await boot_budget.checkpoint()
+	NativeDiagnostics.phase("terrain_meshes")
 	terrain=load("res://scripts/region/terrain.gd").new()
 	add_child(terrain)
 	await terrain.setup(manifest, boot_budget)
+	NativeDiagnostics.phase("vegetation")
 	vegetation=load("res://scripts/region/vegetation.gd").new()
 	add_child(vegetation)
 	await vegetation.setup(manifest, boot_budget)
+	NativeDiagnostics.phase("props")
 	prop_controller=load("res://scripts/region/props.gd").new()
 	add_child(prop_controller)
 	await prop_controller.setup(manifest, boot_budget)
 	props=prop_controller.props
+	NativeDiagnostics.phase("environment")
 	effects=load("res://scripts/effects/world_effects.gd").new()
 	add_child(effects)
 	if boot_budget: await boot_budget.checkpoint(true)
