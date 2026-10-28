@@ -4,8 +4,6 @@ const SHADERS := {
 	"grade": preload("res://shaders/post/grade.glsl"),
 	"downsample": preload("res://shaders/post/downsample.glsl"),
 	"kawase": preload("res://shaders/post/kawase.glsl"),
-	"ao": preload("res://shaders/post/ao.glsl"),
-	"ao_blur": preload("res://shaders/post/ao_blur.glsl"),
 	"shafts": preload("res://shaders/post/shafts.glsl"),
 	"bloom": preload("res://shaders/post/bloom.glsl"),
 	"composite": preload("res://shaders/post/composite.glsl"),

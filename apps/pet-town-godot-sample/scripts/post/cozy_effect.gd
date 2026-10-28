@@ -63,7 +63,7 @@ func _render_callback(callback_type: int, render_data: RenderData) -> void:
 		var q2: RID = gpu.target("q2_%s"%view,quarter)
 		var constants := focus_values.duplicate()
 		constants.append_array(PackedFloat32Array([half_size.x,half_size.y,size.x,size.y]))
-		gpu.dispatch("downsample",[gpu.image_uniform(0,half1),gpu.texture_uniform(1,prepared.source),gpu.texture_uniform(2,depth,true),gpu.texture_uniform(3,prepared.ao)],constants,half_size)
+		gpu.dispatch("downsample",[gpu.image_uniform(0,half1),gpu.texture_uniform(1,prepared.source),gpu.texture_uniform(2,depth,true)],constants,half_size)
 		_blur(half1,half2,half_size,half_size,.5)
 		_blur(half2,q1,half_size,quarter,1)
 		_blur(q1,q2,quarter,quarter,1)

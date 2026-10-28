@@ -4,7 +4,6 @@ layout(local_size_x=8,local_size_y=8,local_size_z=1) in;
 layout(rgba16f,set=0,binding=0) uniform writeonly image2D target;
 layout(set=0,binding=1) uniform sampler2D scene;
 layout(set=0,binding=2) uniform sampler2D depth;
-layout(set=0,binding=3) uniform sampler2D ao_texture;
 layout(set=0,binding=4) uniform sampler2D blur1;
 layout(set=0,binding=5) uniform sampler2D blur2;
 layout(set=0,binding=6) uniform sampler2D shafts;
@@ -27,13 +26,6 @@ float coc(vec2 uv,float z,float depth_value){
  // Only empty depth is sky. Extended ocean writes a real, near-far depth.
  float c=max(max(tilt,far_blur),near_blur);return clamp(depth_value<=.000001?c*.15:c,0.,1.);
 }
-float up_ao(vec2 uv,float z){
- vec2 res=vec2(textureSize(ao_texture,0));vec2 pixel=uv*res-.5,fracture=fract(pixel),t=1./res,b=(floor(pixel)+.5)*t;
- vec4 aa=textureLod(ao_texture,b,0),bb=textureLod(ao_texture,b+vec2(t.x,0),0),cc=textureLod(ao_texture,b+vec2(0,t.y),0),dd=textureLod(ao_texture,b+t,0);
- vec4 w=vec4((1.-fracture.x)*(1.-fracture.y),fracture.x*(1.-fracture.y),(1.-fracture.x)*fracture.y,fracture.x*fracture.y);
- w*=1./(1.+16.*abs(vec4(aa.g,bb.g,cc.g,dd.g)-z)/(z*.04+.03))+1.e-4;
- return dot(w,vec4(aa.r,bb.r,cc.r,dd.r))/dot(w,vec4(1));
-}
 void main(){
  ivec2 pixel=ivec2(gl_GlobalInvocationID.xy);if(any(greaterThanEqual(pixel,ivec2(p.size.xy))))return;
  vec2 uv=(vec2(pixel)+.5)/p.size.xy,tx=1./p.size.xy;
@@ -48,8 +40,6 @@ void main(){
  else if(luma(col)>1.&&luma(col)>2.5*luma(mx))col=mx*1.25;
  vec3 sh=col+(col-.25*(n+s+e+w))*a.quality.y*(1.-blur);
  col=clamp(sh,min(col,mn),max(col,mx));
- float ao=mix(1.,up_ao(uv,z),smoothstep(.7,.8,scene4.a));
- col*=mix(vec3(1),vec3(.52,.5,.68),1.-ao);
  vec4 b1=textureLod(blur1,uv,0),b2=textureLod(blur2,uv,0);
  vec3 heavy=b2.rgb/max(b2.a,1.e-5);
  col=mix(col,b1.rgb/max(b1.a,1.e-5),smoothstep(0.,.45,blur));

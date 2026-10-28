@@ -18,6 +18,9 @@ func setup(manifest: Dictionary, budget: RefCounted = null) -> void:
 		if not blob:
 			materials.append(material)
 			apply_density(material,field)
+			if field.name in ["grass","tall"]:
+				# Avoid dark cut-out-looking blades; retain instance/patch tint and lighting.
+				material.set_shader_parameter("uTierTint",1.0)
 		var ranks: Dictionary=rank_fields.get("%s:%s" % [field.name,field.variant],{})
 		var prepared: Dictionary = await preload("vegetation_buffers.gd").prepare(field,ranks,budget)
 		missing_ranks+=int(prepared.missing)

@@ -33,14 +33,9 @@ func setup(manifest: Dictionary) -> void:
 	environment.sky.sky_material = sky_material
 	add_child(holder)
 	sunlight = DirectionalLight3D.new()
-	sunlight.shadow_enabled = true
-	sunlight.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
-	sunlight.directional_shadow_max_distance = 100.0
-	sunlight.shadow_bias = 0.025
-	sunlight.shadow_normal_bias = 0.6
-	# Godot's low PCF kernel radius is 2 texels; source Three PCF radius is 2.4.
-	RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_LOW)
-	sunlight.shadow_blur = 1.2
+	# Remove the camera-relative ground-shadow layer, not just its contrast.
+	# Keep directional lighting, but do not render cast sun shadows.
+	sunlight.shadow_enabled = false
 	sunlight.light_angular_distance = 0.0
 	add_child(sunlight)
 	set_time_of_day(float(manifest.get("timeOfDay", 0.38)))
@@ -83,7 +78,6 @@ func apply_sample(value: Dictionary) -> void:
 	var elevation: float = sample.sun_elevation_radians
 	sunlight.light_color = sample.sun
 	sunlight.light_energy = float(sample.sunI)/PI
-	sunlight.shadow_opacity = lerpf(0.72, 0.85, smoothstep(0.12, 0.45, elevation)) if elevation > -0.035 else 0.6
 	environment.tonemap_exposure = 1.0
 	environment.ambient_light_color = sample.hSky
 	environment.ambient_light_energy = float(sample.hI)/PI

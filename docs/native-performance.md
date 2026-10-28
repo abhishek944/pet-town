@@ -27,6 +27,17 @@ checks cover the budget values, continued physics and cap restoration. Actual na
 Metal GPU savings, sharp UI and visual quality require a later user-chosen run.
 The GPU-heavy native GUI is not reopened automatically for verification.
 
+## Shadow-free native ground
+
+The native sun still lights surfaces and follows the day/night cycle, but no longer
+renders cast shadows. This removes the camera-relative sun-shadow layer entirely,
+including tree, building and character cast sun shadows, rather than lowering its
+opacity. Custom screen-space ambient occlusion is also removed from both the main
+composite and the blur inputs; its GPU generation/blur passes are not dispatched.
+Fog, depth of field, bloom, grading, surface/hemisphere lighting and world-anchored
+blob masks remain. Grass geometry, user saves and the desktop bridge are unchanged.
+This does not make every surface unshaded or remove the grass blades themselves.
+
 ## Committed collision changes
 
 `world.gd` owns `collision_revision`, `collision_changed` and

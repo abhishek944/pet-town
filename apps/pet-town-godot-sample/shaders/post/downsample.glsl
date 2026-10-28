@@ -4,7 +4,6 @@ layout(local_size_x=8,local_size_y=8,local_size_z=1) in;
 layout(rgba16f,set=0,binding=0) uniform restrict writeonly image2D target;
 layout(set=0,binding=1) uniform sampler2D scene;
 layout(set=0,binding=2) uniform sampler2D depth;
-layout(set=0,binding=3) uniform sampler2D ao_texture;
 layout(push_constant,std430) uniform Params { vec4 focus; vec4 camera; vec4 size; } p;
 float coc(vec2 uv,float z,float depth_value) {
  float dy=1.-uv.y-p.focus.x;
@@ -21,7 +20,6 @@ vec4 tap(vec2 uv) {
  if(any(isnan(c))||any(isinf(c)))c=vec3(0);
  float m=max(c.r,max(c.g,c.b));
  c=m>12.?c*(12./m):max(c,0.);
- c*=mix(vec3(1),vec3(.52,.5,.68),(1.-textureLod(ao_texture,uv,0).r)*smoothstep(.7,.8,src.a));
  float d=textureLod(depth,uv,0).r;
  float z=p.camera.x*p.camera.y/(p.camera.x+d*(p.camera.y-p.camera.x));
  float w=coc(uv,z,d)+.002;
