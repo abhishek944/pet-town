@@ -26,9 +26,8 @@ output_name=pet-town
 product_name="Pet Town"
 
 if [ -n "$rust_target" ]; then
-  "$ROOT/scripts/prepare-godot-runtime.sh" "$package"
-  "$ROOT/scripts/prepare-pi-runtime.sh" "$package" \
-    "$ROOT/apps/pet-town/src-tauri/resources/godot/Pet Town.app"
+  # Pet Street ships only Pi. Town is a separately verified optional component.
+  "$ROOT/scripts/prepare-pi-runtime.sh" "$package"
   runtime_archive="$ROOT/bin/$package/pet-town-pi-runtime.tar.gz"
   mkdir -p "$ROOT/apps/pet-town/src-tauri/resources"
   cp "$runtime_archive" "$ROOT/apps/pet-town/src-tauri/resources/pet-town-pi-runtime.tar.gz"

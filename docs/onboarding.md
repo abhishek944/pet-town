@@ -10,6 +10,12 @@ Release builds launched outside `/Applications` or `~/Applications` show move-to
 
 `~/.pet-town/onboarding.json` stores progress separately from preferences with private permissions and atomic replacement. Closing and reopening resumes the current screen. Explore-first and Continue later retain the skipped step for reopening through **Settings → General → Open setup**, the Pet Town menu, or **Help → Welcome & setup**. Help includes the tips within the welcome flow. Scenery previews do not save until Keep this look. Corrupt or unavailable progress is preserved and writes fail with recovery guidance.
 
+## Optional 3D download
+
+**Explore Pet Street first** finishes the skip route without opening or downloading
+Godot. The tips focus on Pet Street; Town download and removal live only in
+**Settings → App**. Onboarding never requires the optional 3D component.
+
 ## Herdr and tool readiness
 
 Herdr checks distinguish a missing executable, supported launch capabilities, and a ready host. Existing unready installations get an Open Herdr/repair path; they are never overwritten. Only the explicit **Install Herdr** action downloads the official stable macOS asset for the current architecture, validates the official release URL, size and SHA-256, and installs without replacing an existing executable. It uses `~/.local/bin`, without sudo or shell-profile changes.

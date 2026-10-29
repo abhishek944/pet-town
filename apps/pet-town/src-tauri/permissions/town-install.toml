@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-town-install"
+description = "Manage the optional signed Pet Town component from local Settings only."
+commands.allow = ["get_town_install_state", "install_town_component", "cancel_town_install", "remove_town_component"]

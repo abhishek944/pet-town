@@ -12,7 +12,7 @@ Only one Settings window opens. Opening it freezes every visible pet while Herdr
 
 The **Pets** section opens an **All pets** gallery showing every bundled or Pet Studio character, not just characters currently assigned to agents. Excluded characters stay visible with an **Excluded** overlay and can still be opened. Click any card to adjust that character; **All pets**, above the preview, returns to the gallery without saving or discarding edits. The gallery count and overlays reflect the current draft.
 
-Opening Preferences from a desktop pet goes directly to that character's settings. General Settings entry and the **Pets** toolbar button open the gallery. The detail view has a character selector and a **Pet Street agent states** list. Each row shows the state's APNG playing, its clip name, and its action. Pet Town settings live in Pet Town itself, not here. Select a visible state to preview its assigned APNG and movement action. Previewing a state does not change the character's behavior or save another preference. Use **+ Add** or **Replace** on a row to choose an APNG for that state in Pet Studio. If the same character appears more than once, every copy shares these settings:
+Opening Preferences from a desktop pet goes directly to that character's settings. General Settings entry and the **Pets** toolbar button open the gallery. The detail view has a character selector and a **Pet Street agent states** list. Each row shows the state's APNG playing, its clip name, and its action. Pet Town gameplay settings live in Pet Town itself; its optional download is managed under App. Select a visible state to preview its assigned APNG and movement action. Previewing a state does not change the character's behavior or save another preference. Use **+ Add** or **Replace** on a row to choose an APNG for that state in Pet Studio. If the same character appears more than once, every copy shares these settings:
 
 - whether the character is included in random assignment;
 - its 2D animation theme (Standard or, for bundled pets, Ocean);
@@ -42,6 +42,16 @@ The macOS **Reduce motion** accessibility setting keeps pets in place. It also f
 Controls edit a draft. The Settings preview reflects that draft, including walking speed. Enable **Stop walking while hovered**, then hover the preview pet to see it pause its travel while its sprite keeps animating. The frozen desktop village changes only after **Apply** succeeds. Apply validates and saves the complete draft and keeps Settings open. Closing silently discards later unapplied changes.
 
 **Reset pet** restores only the selected character in the draft and still requires Apply. **Reset Everything…** asks for confirmation and saves defaults for the app and every character.
+
+## Optional Pet Town download
+
+**App → Pet Town** downloads the 3D world only when you choose **Download Pet Town**.
+It shows progress, cancellation and retry, then **Open Pet Town** and **Remove download**.
+These actions take effect immediately and do not use the preference draft or Apply.
+Close Pet Town before removing or replacing its download. Saved worlds, care, battle
+history and preferences are kept. Menu bar and Dock Town actions stay hidden until
+the component is ready; an app update may require downloading its matching version.
+There is no second application to install. See [delivery and verification](optional-town.md).
 
 ## Create characters and actions
 

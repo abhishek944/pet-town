@@ -8,7 +8,7 @@ From the repository root:
 
 ```bash
 pnpm run dev    # install dependencies, build frontend assets, launch native development
-pnpm run build  # build the desktop app and DMG with the native Godot world
+pnpm run build  # build the Pet Street desktop app and DMG (without Godot)
 ```
 
 These desktop commands stop only this checkout's desktop and frontend processes,
@@ -26,7 +26,8 @@ The desktop frontend build includes only the Pet Street/Settings frontend.
 It does not build or copy the unused Three.js browser town into the installer;
 stale `apps/pet-town/dist/town` output is removed. The public website still builds
 its browser game, and `pnpm run dev:town` retains standalone browser development.
-`scripts/build.sh` also runs `scripts/prepare-godot-runtime.sh`: it checks the
+The separate release component build, `scripts/package-town-component.sh`, runs
+`scripts/prepare-godot-runtime.sh`: it checks the
 source export with `scripts/validate-godot-export.py`, imports the Godot resources,
 exports `PetTown.pck`, deduplicates identical resource payloads, and stages a
 branded **game-only release runtime** as `resources/godot/Pet Town.app`.
@@ -49,15 +50,21 @@ and `--main-pack` overrides, so release launches use automatic bundle-pack
 discovery. The old external `resources/godot/world` copy is removed to avoid
 duplicating the world data. Development without a package argument retains
 the branded editor.
-For signed releases, `prepare-pi-runtime.sh` also signs that native app with the
-release identity while its temporary signing keychain is available; Tauri does
-not re-sign nested apps copied into resources. Release **Open Pet Town** loads that bundled pack. Set
-`GODOT_APP` to an official stable universal macOS Godot 4.7+ editor when packaging;
-its exact version must have matching official export templates. To prepare only
-the native release resources, run `sh scripts/prepare-godot-runtime.sh macos-arm64`
-or `sh scripts/prepare-godot-runtime.sh macos-x64`. `check-dmg.sh` rejects a native
-runtime with the wrong or multiple architectures, a non-release-template
-executable, or a missing bundled world pack.
+The host resource allowlist excludes Godot, including stale staging directories.
+`check-dmg.sh` rejects a host containing the native engine/world. For signed releases,
+`package-town-component.sh` independently signs, notarizes and staples the native app,
+then archives it with product-version/architecture metadata and signs the compressed
+bytes using the updater key. It is an internal Settings download, not a second DMG.
+Release **Open Pet Town** resolves the verified component from app data, never a
+bundled fallback. The component version must match the current host release.
+Set `GODOT_APP` to an official stable universal macOS Godot 4.7+ editor when packaging;
+its exact version must have matching official export templates. To prepare unsigned
+native release resources only, run `sh scripts/prepare-godot-runtime.sh macos-arm64`
+or `sh scripts/prepare-godot-runtime.sh macos-x64`. For release component packaging,
+use `sh scripts/package-town-component.sh macos-arm64` (or `macos-x64`) with the
+same Apple and Tauri signing credentials as release CI. This accesses Apple's
+notary service; it is not a local-only verification command.
+See [optional Town delivery](optional-town.md) for installation and release checks.
 The release executable is written to
 `apps/pet-town/src-tauri/target/<rust-target>/release/pet-town` and copied into the
 matching `bin/macos-*` plugin package directory. The same build produces
@@ -102,7 +109,8 @@ Use the launch-only command instead of targeting the app menu:
 The command forwards to the running desktop, or starts that executable when no
 updated desktop is running. The desktop uses the same native launch/focus owner
 as **Open Pet Town**, preserving live companions and the authenticated bridge.
-Repeated calls reuse the owned game process. Restart an older desktop before
+Repeated calls reuse the owned game process. A missing or incompatible component
+returns a Settings download instruction; this command never downloads it. Restart an older desktop before
 using the new command; its singleton lock cannot accept launch requests.
 
 A successful command exits zero and prints JSON with `ok: true` and

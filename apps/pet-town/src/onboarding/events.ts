@@ -28,7 +28,6 @@ export function bind(root: HTMLElement, ctx: Context, actions: Actions): void {
   on("[data-stop-sample]", actions.stop);
   on("[data-continue-later]", actions.later);
   on("[data-own]", () => actions.handoff("own"));
-  on(".town-link button", () => actions.handoff("town"));
   on("[data-check-again]", actions.check);
   const dialog = root.querySelector<HTMLElement>("[data-dialog]");
   on("[data-mayor]", () => {

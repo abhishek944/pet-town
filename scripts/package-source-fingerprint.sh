@@ -51,6 +51,10 @@ for path in (
     root / "scripts" / "prepare-godot-template.py",
     root / "scripts" / "prepare-pet-town-runtime.sh",
     root / "scripts" / "prepare-pi-runtime.sh",
+    root / "scripts" / "macos-signing-keychain.sh",
+    root / "scripts" / "package-town-component.sh",
+    root / "scripts" / "town-component-archive.py",
+    root / "scripts" / "create-update-manifest.mjs",
     root / "scripts" / "pi-runtime-package-lock.json",
 ):
     if path.is_file():

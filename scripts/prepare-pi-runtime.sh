@@ -27,21 +27,14 @@ CACHE="${TMPDIR:-/tmp}/pet-town-runtime-cache"
 ARCHIVE="$CACHE/node-v$NODE_VERSION-darwin-$ARCH.tar.xz"
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/pet-town-pi-runtime.XXXXXX")
 SIGN_KEYCHAIN=""
-ORIGINAL_KEYCHAINS="$WORK/original-keychains.txt"
+. "$ROOT/scripts/macos-signing-keychain.sh"
 cleanup() {
-  if [ -n "$SIGN_KEYCHAIN" ]; then
-    if [ -f "$ORIGINAL_KEYCHAINS" ]; then
-      python3 - "$ORIGINAL_KEYCHAINS" <<'PY' || true
-import shlex,subprocess,sys
-keychains=shlex.split(open(sys.argv[1],encoding="utf-8").read())
-subprocess.run(["security","list-keychains","-d","user","-s",*keychains],check=False)
-PY
-    fi
-    security delete-keychain "$SIGN_KEYCHAIN" >/dev/null 2>&1 || true
-  fi
+  cleanup_signing_keychain
   rm -rf "$WORK"
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' HUP TERM
 mkdir -p "$CACHE" "$WORK/runtime/bin" "$WORK/runtime/package"
 
 if [ ! -f "$ARCHIVE" ]; then
@@ -71,40 +64,7 @@ SH
 chmod 755 "$WORK/runtime/bin/pi"
 
 if [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
-  if security find-identity -v -p codesigning 2>/dev/null | grep -qF "$APPLE_SIGNING_IDENTITY"; then
-    echo "using installed signing identity: $APPLE_SIGNING_IDENTITY" >&2
-  elif [ -n "${APPLE_CERTIFICATE:-}" ]; then
-    [ -n "${APPLE_CERTIFICATE_PASSWORD:-}" ] || {
-      echo "APPLE_CERTIFICATE_PASSWORD is required when APPLE_CERTIFICATE is set" >&2
-      exit 1
-    }
-    SIGN_KEYCHAIN="$WORK/runtime-signing.keychain-db"
-    sign_keychain_password=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
-    sign_p12="$WORK/runtime-signing.p12"
-    printf '%s' "$APPLE_CERTIFICATE" | base64 -d >"$sign_p12"
-    chmod 600 "$sign_p12"
-    security create-keychain -p "$sign_keychain_password" "$SIGN_KEYCHAIN"
-    security set-keychain-settings -lut 21600 "$SIGN_KEYCHAIN"
-    security unlock-keychain -p "$sign_keychain_password" "$SIGN_KEYCHAIN"
-    security import "$sign_p12" -k "$SIGN_KEYCHAIN" \
-      -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-    security set-key-partition-list -S apple-tool:,apple:,codesign: -s \
-      -k "$sign_keychain_password" "$SIGN_KEYCHAIN" >/dev/null
-    security list-keychains -d user >"$ORIGINAL_KEYCHAINS"
-    python3 - "$ORIGINAL_KEYCHAINS" "$SIGN_KEYCHAIN" <<'PY'
-import shlex,subprocess,sys
-keychains=shlex.split(open(sys.argv[1],encoding="utf-8").read())
-subprocess.run(["security","list-keychains","-d","user","-s",sys.argv[2],*keychains],check=True)
-PY
-    rm -f "$sign_p12"
-    security find-identity -v -p codesigning "$SIGN_KEYCHAIN" | grep -qF "$APPLE_SIGNING_IDENTITY" || {
-      echo "APPLE_SIGNING_IDENTITY was not found in APPLE_CERTIFICATE" >&2
-      exit 1
-    }
-  else
-    echo "APPLE_SIGNING_IDENTITY is missing and APPLE_CERTIFICATE was not provided" >&2
-    exit 1
-  fi
+  setup_signing_keychain
 
   echo "signing nested runtime binaries" >&2
   find "$WORK/runtime" -type f >"$WORK/runtime-files.txt"
@@ -134,8 +94,8 @@ except subprocess.TimeoutExpired:
 raise SystemExit(result.returncode)
 PY
   done <"$WORK/runtime-files.txt"
-  # Tauri does not re-sign app bundles stored in resources. Reuse this build's
-  # temporary signing keychain before it closes, preserving engine entitlements.
+  # Preserve the optional legacy development caller. Release packaging signs
+  # and notarizes Town independently via package-town-component.sh.
   if [ -n "$NATIVE_APP" ]; then
     codesign --force --sign "$APPLE_SIGNING_IDENTITY" --timestamp --options runtime \
       --preserve-metadata=entitlements,flags "$NATIVE_APP"

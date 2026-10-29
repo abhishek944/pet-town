@@ -1,51 +1,8 @@
-use std::{
-    path::PathBuf,
-    process::{Child, Command, Stdio},
-};
+use std::process::{Child, Command, Stdio};
 use tauri::{AppHandle, Manager};
 
 pub(super) fn spawn(app: &AppHandle, port: u16, token: &str) -> Result<Child, String> {
-    let resource = app
-        .path()
-        .resource_dir()
-        .map_err(|e| e.to_string())?
-        .join("resources/godot");
-    let bundled = resource.join("PetTown");
-    let (executable, project) = if bundled.is_file() {
-        (bundled, None)
-    } else if !cfg!(debug_assertions)
-        && resource
-            .join("Pet Town.app/Contents/Resources/Godot.pck")
-            .is_file()
-    {
-        // Release templates discover their signed bundle pack automatically.
-        // Official 4.7+ templates reject --main-pack and --path overrides.
-        (resource.join("Pet Town.app/Contents/MacOS/Godot"), None)
-    } else {
-        let checkout = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../..");
-        let project = if cfg!(debug_assertions) {
-            checkout.join("apps/pet-town-godot-sample")
-        } else {
-            resource.join("world")
-        };
-        if !project.join("project.godot").is_file() && !project.join("PetTown.pck").is_file() {
-            return Err("The native Godot town is missing from this installation.".into());
-        }
-        let executable = if cfg!(debug_assertions) {
-            std::env::var_os("PET_TOWN_GODOT_EXECUTABLE")
-                .map(PathBuf::from)
-                .unwrap_or_else(|| {
-                    if cfg!(target_os = "macos") {
-                        checkout.join("var/godot-runtime/Pet Town.app/Contents/MacOS/Godot")
-                    } else {
-                        PathBuf::from("godot")
-                    }
-                })
-        } else {
-            resource.join("Pet Town.app/Contents/MacOS/Godot")
-        };
-        (executable, Some(project))
-    };
+    let (executable, project) = crate::town_install::launch_path(app)?;
     if executable.components().count() > 1 && !executable.is_file() {
         return Err("The Pet Town runtime is missing. Run pnpm run dev or rebuild the app.".into());
     }

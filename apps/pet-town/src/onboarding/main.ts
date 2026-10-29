@@ -119,7 +119,7 @@ const actions: Actions = {
   skip: () =>
     perform(async () => {
       await save(6, true);
-      await invoke("onboarding_handoff", { destination: "town" });
+      await invoke("onboarding_handoff", { destination: "desktop" });
       await invoke("finish_onboarding");
     }),
   later: () => perform(() => save(6, true)),

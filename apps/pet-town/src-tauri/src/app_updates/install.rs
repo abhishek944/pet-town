@@ -41,6 +41,9 @@ pub(crate) async fn install(app: AppHandle) -> Result<(), String> {
         if inner.snapshot.phase != "ready" || inner.archive.is_none() || inner.update.is_none() {
             return Err("Download an update before installing it.".into());
         }
+        if inner.component_busy {
+            return Err("Wait for the Pet Town component operation.".into());
+        }
         if inner.window_openers != 0 {
             return Err(
                 "A Pet Town window is still opening. Try installing again in a moment.".into(),

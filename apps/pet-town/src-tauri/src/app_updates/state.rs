@@ -31,6 +31,7 @@ pub(super) struct RuntimeState {
     pub preparation: Option<Preparation>,
     pub restart: bool,
     pub window_openers: usize,
+    pub component_busy: bool,
 }
 
 pub(crate) struct AppUpdates {
@@ -57,6 +58,7 @@ impl Default for AppUpdates {
                 preparation: None,
                 restart: false,
                 window_openers: 0,
+                component_busy: false,
             }),
             prepared: Condvar::new(),
         }
@@ -99,6 +101,15 @@ impl AppUpdates {
         Ok(WindowOpening(self))
     }
 
+    pub(crate) fn component_operation(&self) -> Result<ComponentOperation<'_>, String> {
+        let mut inner = self.lock();
+        if matches!(inner.snapshot.phase, "preparing" | "installing") || inner.component_busy {
+            return Err("Wait for the current app update before changing Pet Town.".into());
+        }
+        inner.component_busy = true;
+        Ok(ComponentOperation(self))
+    }
+
     pub(crate) fn native_snapshot(&self) -> Snapshot {
         self.lock().snapshot.clone()
     }
@@ -115,6 +126,13 @@ impl AppUpdates {
 
     pub(crate) fn restart_requested(&self) -> bool {
         self.lock().restart
+    }
+}
+
+pub(crate) struct ComponentOperation<'a>(&'a AppUpdates);
+impl Drop for ComponentOperation<'_> {
+    fn drop(&mut self) {
+        self.0.lock().component_busy = false;
     }
 }
 

@@ -44,14 +44,17 @@ if [ -n "$architecture" ]; then
   cp "$world_pack" "$app/Contents/Resources/Godot.pck"
 fi
 cp "$repo_dir/apps/pet-town/src-tauri/icons/icon.icns" "$app/Contents/Resources/pet-town.icns"
-python3 - "$app/Contents/Info.plist" "$source_app" "$destination" <<'PY'
+python3 - "$app/Contents/Info.plist" "$source_app" "$destination" \
+  "$repo_dir/apps/pet-town/src-tauri/tauri.conf.json" <<'PY'
+import json
 import plistlib
 import subprocess
 import sys
 from pathlib import Path
 
 path = sys.argv[1]
-source_app, destination = (Path(value).resolve() for value in sys.argv[2:])
+source_app, destination = (Path(value).resolve() for value in sys.argv[2:4])
+version = json.loads(Path(sys.argv[4]).read_text())["version"]
 if source_app == destination or destination in source_app.parents:
     raise SystemExit("The branded copy must not replace the source engine")
 with open(path, "rb") as source:
@@ -61,6 +64,8 @@ info.update({
     "CFBundleDisplayName": "Pet Town",
     "CFBundleIdentifier": "dev.pet.town.native",
     "CFBundleIconFile": "pet-town.icns",
+    "CFBundleShortVersionString": version,
+    "CFBundleVersion": version,
 })
 # A game runtime should not advertise the editor's document types or protocols.
 for key in ("CFBundleDocumentTypes", "CFBundleURLTypes", "CFBundleIconName"):

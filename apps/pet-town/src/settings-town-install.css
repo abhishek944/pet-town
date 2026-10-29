@@ -1,0 +1,20 @@
+.town-install {
+  padding: 16px;
+}
+.town-install p {
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+.town-install-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.town-install progress {
+  width: 100%;
+  margin-bottom: 12px;
+}
+.town-install .hint {
+  margin-bottom: 0;
+}

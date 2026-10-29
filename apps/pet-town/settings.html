@@ -113,9 +113,13 @@
         <section id="panel-app" class="panel" data-panel="app" role="tabpanel" aria-labelledby="tab-app" hidden>
           <h1>App</h1>
           <h2>Pet Town</h2>
-          <div class="group">
-            <div class="row"><span>Pet Town<small>Explore the full town with your live agents.</small></span><button id="open-3d-town" class="primary" type="button">Open Pet Town</button></div>
-          </div>
+          <section class="group town-install" aria-label="Pet Town download">
+            <p>Keep Pet Street light. Download the optional 3D world here to explore with your live agents. No separate app is needed.</p>
+            <p id="town-install-status" role="status" aria-live="polite">Checking local installation…</p>
+            <progress id="town-install-progress" aria-label="Pet Town download progress" hidden></progress>
+            <div class="town-install-actions"><button id="download-pet-town" class="primary" type="button" hidden>Download Pet Town</button><button id="open-3d-town" class="primary" type="button" hidden>Open Pet Town</button><button id="cancel-town-download" class="secondary" type="button" hidden>Cancel download</button><button id="remove-pet-town" class="secondary" type="button" hidden>Remove download</button><button id="retry-town-state" class="secondary" type="button" hidden>Check again</button></div>
+            <p class="hint">Downloads need an internet connection and extra disk space. Download and removal take effect immediately, without Apply. Removing the download keeps your saved games.</p>
+          </section>
           <h2>Pet Street</h2>
           <div class="group">
             <div class="row"><span>Pet Street visibility<small id="town-visibility-status">Checking current state…</small></span><button id="town-visibility-toggle" class="secondary" type="button">Hide Pet Street</button></div>

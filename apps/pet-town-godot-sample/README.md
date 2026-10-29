@@ -1,6 +1,6 @@
 # Pet Town — native Godot town
 
-The desktop's **Open Pet Town** launches this native Godot reconstruction of the complete original Three.js world. To explore it without a desktop connection, run from the repository root:
+In the desktop app, first use **Settings → App → Download Pet Town**. The optional component stays inside the same app experience; **Open Pet Town** launches this native Godot reconstruction of the complete original Three.js world. Removing the download preserves native saves. To explore it without a desktop connection, run from the repository root:
 
 ```sh
 sh apps/pet-town-godot-sample/tools/run.sh

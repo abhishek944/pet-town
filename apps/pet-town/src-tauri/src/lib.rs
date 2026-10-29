@@ -44,6 +44,7 @@ mod settings_window;
 mod settings_window_lifecycle;
 mod street_windows;
 mod town_commands;
+mod town_install;
 #[cfg(unix)]
 mod town_launch_cli;
 mod town_process;
@@ -120,6 +121,7 @@ pub fn run() {
         .manage(settings_window::SettingsSession::default())
         .manage(town_process::TownWindowState::default())
         .manage(godot_bridge::GodotState::default())
+        .manage(town_install::TownInstall::default())
         .manage(town_terminal::TownTerminalState::default())
         .on_window_event(app_events::window_event)
         .setup(|app| {

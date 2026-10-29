@@ -45,7 +45,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Install dmgbuild
         run: PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install dmgbuild
-      - name: Build DMG
+      - name: Build slim host DMG and optional signed Town component
         timeout-minutes: 45
         env:
           PACKAGE: ${{ matrix.package }}
@@ -59,7 +59,9 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           REQUIRE_SIGNED: "1"
           EXPECTED_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-        run: ./scripts/build.sh
+        run: |
+          ./scripts/build.sh
+          sh scripts/package-town-component.sh "$PACKAGE"
       - name: Stage installer and signed updater
         run: |
           asset="${{ matrix.asset }}"
@@ -71,6 +73,8 @@ jobs:
           cp "bin/${{ matrix.package }}/pet-town.dmg" "$asset"
           cp "$bundle/Pet Town.app.tar.gz" "${asset%.dmg}.app.tar.gz"
           cp "$bundle/Pet Town.app.tar.gz.sig" "${asset%.dmg}.app.tar.gz.sig"
+          cp bin/${{ matrix.package }}/Pet-Town-World-macOS-*.tar.gz .
+          cp bin/${{ matrix.package }}/Pet-Town-World-macOS-*.tar.gz.sig .
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset }}
@@ -78,6 +82,8 @@ jobs:
             ${{ matrix.asset }}
             Pet-Town-macOS-*.app.tar.gz
             Pet-Town-macOS-*.app.tar.gz.sig
+            Pet-Town-World-macOS-*.tar.gz
+            Pet-Town-World-macOS-*.tar.gz.sig
           if-no-files-found: error
 
   publish:
@@ -88,18 +94,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - uses: actions/download-artifact@v4
         with:
           pattern: Pet-Town-macOS-*.dmg
           merge-multiple: true
           path: dist
-      - name: Generate updater manifest after both Mac builds
+      - name: Validate both component archives and generate release manifests
         run: node scripts/create-update-manifest.mjs dist
       - name: Publish complete release and updater manifest
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          assets=(dist/*.dmg dist/*.app.tar.gz dist/*.app.tar.gz.sig)
+          assets=(dist/*.dmg dist/*.app.tar.gz dist/*.app.tar.gz.sig
+            dist/Pet-Town-World-macOS-*.tar.gz dist/Pet-Town-World-macOS-*.tar.gz.sig
+            dist/town-component.json)
           if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             draft=$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)
             if [[ "$draft" != true ]]; then

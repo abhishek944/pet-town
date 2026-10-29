@@ -69,6 +69,16 @@ pub(crate) fn install(app: &tauri::AppHandle) -> tauri::Result<()> {
             return Err(std::io::Error::other("Could not install Pet Town Dock menu").into());
         }
         let _ = APP.set(app.clone());
+    }
+    refresh(crate::town_install::available(app) || crate::godot_bridge::running(app));
+    Ok(())
+}
+
+/// Called only on the main thread; tags keep their action identity when items are omitted.
+pub(crate) fn refresh(town: bool) {
+    unsafe {
+        let application: &AnyObject = msg_send![class!(NSApplication), sharedApplication];
+        let delegate: &AnyObject = msg_send![application, delegate];
         let menu: Retained<AnyObject> = msg_send![class!(NSMenu), new];
         let _: () = msg_send![&*menu, setAutoenablesItems: false];
         for (tag, title) in [
@@ -81,6 +91,9 @@ pub(crate) fn install(app: &tauri::AppHandle) -> tauri::Result<()> {
         .iter()
         .enumerate()
         {
+            if !town && matches!(tag, 1 | 2) {
+                continue;
+            }
             let item: Allocated<AnyObject> = msg_send![class!(NSMenuItem), alloc];
             let item: Retained<AnyObject> = msg_send![
                 item, initWithTitle: &*NSString::from_str(title),
@@ -92,5 +105,4 @@ pub(crate) fn install(app: &tauri::AppHandle) -> tauri::Result<()> {
         }
         MENU.with(|stored| *stored.borrow_mut() = Some(menu));
     }
-    Ok(())
 }

@@ -10,6 +10,7 @@ import { VillageVisibilitySettings } from "./settings-village";
 import { bindAppControls } from "./settings/app-controls";
 import { SettingsDraft } from "./settings/draft";
 import { SettingsUpdates } from "./settings-updates";
+import { SettingsTownInstall } from "./settings-town-install";
 import { bindPetControls } from "./settings/pet-controls";
 import { SettingsPetPreview } from "./settings/pet-preview";
 import { renderPetControls } from "./settings/pet-view";
@@ -68,6 +69,14 @@ const settingsUpdates = new SettingsUpdates(
   },
 );
 settingsUpdates.start();
+const townInstall = new SettingsTownInstall(
+  (message) => {
+    state.message = message;
+    state.messageTone = "error";
+    if (state.snapshot) render();
+  },
+  () => settingsUpdates.syncInteractionLock(),
+);
 
 function selectPreviewAnimations(): void {
   petPreview.selectAnimations();
@@ -86,6 +95,7 @@ function render(): void {
   assistantSettings.render();
   scenePreviews.render(draft, snapshot.readOnly);
   state.renderActions();
+  townInstall?.render();
   settingsUpdates?.syncInteractionLock();
 }
 

@@ -12,7 +12,6 @@ use std::{
     },
 };
 use tauri::{AppHandle, Manager};
-
 pub(super) struct Process {
     child: Child,
     cancel: Arc<AtomicBool>,
@@ -28,14 +27,13 @@ pub(crate) struct GodotState {
     update_error: Mutex<Option<String>>,
     window_serial: AtomicU64,
 }
-
 pub(crate) fn focus_from_cli(pid: u32, parent: u32) -> Result<(), String> {
     focus::activate(pid, parent)
 }
-
 pub(crate) fn open(app: &AppHandle) -> Result<(), String> {
     let updates = app.state::<crate::app_updates::AppUpdates>();
     let _opening = updates.window_opening()?;
+    let _launching = crate::town_install::launching(app)?;
     let state = app.state::<GodotState>();
     let mut process = state
         .process
@@ -56,7 +54,14 @@ pub(crate) fn open(app: &AppHandle) -> Result<(), String> {
     let listener = std::net::TcpListener::bind("127.0.0.1:0").map_err(|e| e.to_string())?;
     let port = listener.local_addr().map_err(|e| e.to_string())?.port();
     let token = format!("{}{}", uuid::Uuid::new_v4(), uuid::Uuid::new_v4());
-    let child = launch::spawn(app, port, &token)?;
+    let child = match launch::spawn(app, port, &token) {
+        Ok(child) => child,
+        Err(error) => {
+            drop(process);
+            let _ = crate::app_menu::refresh(app);
+            return Err(error);
+        }
+    };
     let cancel = Arc::new(AtomicBool::new(false));
     *process = Some(Process {
         child,
@@ -66,9 +71,9 @@ pub(crate) fn open(app: &AppHandle) -> Result<(), String> {
     server::start(app.clone(), listener, token, cancel);
     drop(process);
     set_focused(app, false);
+    let _ = crate::app_menu::refresh(app);
     Ok(())
 }
-
 pub(crate) fn running(app: &AppHandle) -> bool {
     app.state::<GodotState>()
         .process
@@ -124,7 +129,6 @@ pub(super) fn set_focused(app: &AppHandle, active: bool) {
     #[cfg(not(target_os = "macos"))]
     apply_focused(app, active);
 }
-
 fn apply_focused(app: &AppHandle, active: bool) {
     let state = app.state::<GodotState>();
     if state.focused.swap(active, Ordering::SeqCst) != active {
@@ -151,6 +155,7 @@ pub(crate) fn reap(app: &AppHandle) {
         }
     };
     if ended {
+        let _ = crate::app_menu::refresh(app);
         set_focused(app, false);
         terminal::release(app);
     } else {

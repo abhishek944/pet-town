@@ -46,7 +46,7 @@ export function bindAppControls(
     draft().app.openWithHerdr = checked;
   });
   bindVillageVisibility();
-  bindTownActions(showError);
+  bindTownActions();
   byId<HTMLSelectElement>("settings-appearance").addEventListener("change", (event) => {
     draft().app.settingsAppearance = (event.currentTarget as HTMLSelectElement)
       .value as SettingsAppearance;

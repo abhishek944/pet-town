@@ -16,7 +16,8 @@ experience along the bottom of your desktop. **Pet Town** is the 3D world.
 
 The desktop is a **Tauri v2 application** with a Rust backend and a
 TypeScript/CSS interface. Pet Street uses one lightweight window for the whole
-village, with no arbitrary agent limit. **Open Pet Town** opens the editable
+village, with no arbitrary agent limit. Download the optional 3D world from
+**Settings → App → Download Pet Town**. Then **Open Pet Town** opens the editable
 native Godot world with the same live agents and Mayor. Its terrain, scenery and
 characters are exported from the original Three.js town, retaining all 27,037
 source dry-land cells. The [Godot guide](apps/pet-town-godot-sample/README.md)
@@ -42,6 +43,12 @@ menu, or the tray menu without quitting the monitor. The application bundle
 includes the private Node/Pi runtime used by the optional voice orchestrator;
 users do not install Node.js, Pi, or Rust. The village discovers configured
 coding-agent connections without requiring Herdr.
+
+The Mac download does not include Godot or the 3D world. Download Pet Town from
+**Settings → App** when wanted; it remains part of the same app. Town menu and Dock
+actions appear only when the component is ready. Removing its download preserves
+saved games. After an app update, Settings may ask for the matching Town download;
+it is never downloaded automatically. See [optional Town delivery](docs/optional-town.md).
 
 Herdr users can additionally install the optional Herdr adapter:
 
