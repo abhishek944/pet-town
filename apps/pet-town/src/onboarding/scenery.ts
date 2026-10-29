@@ -25,7 +25,9 @@ export function renderScenery(
   defaults: PreferencesFile,
 ): void {
   root
-    .querySelectorAll(".rainforest-scene,.snow-scene,.desert-scene,.ocean-water,.activity-scene,.moonlit-scene")
+    .querySelectorAll(
+      ".rainforest-scene,.snow-scene,.desert-scene,.ocean-water,.activity-scene,.moonlit-scene",
+    )
     .forEach((n) => n.remove());
   const prefs = { ...defaults, app: { ...defaults.app, stripTheme: theme } };
   const frozen = root.querySelector<HTMLCanvasElement>("canvas.scene-pet");
@@ -37,20 +39,24 @@ export function renderScenery(
   }
   const portrait = root.querySelector<HTMLImageElement>("img.scene-pet");
   if (portrait) {
-    portrait.src = theme === "canopy" ? climbingFrame(0)
-      : theme === "ocean" ? "/onboarding/nib-ocean.png" : "/onboarding/nib-walk.png";
+    portrait.src =
+      theme === "canopy"
+        ? climbingFrame(0)
+        : theme === "ocean"
+          ? "/onboarding/nib-ocean.png"
+          : "/onboarding/nib-walk.png";
     portrait.alt = theme === "canopy" ? "Cat climbing preview" : "Sample pet on your desktop";
   }
   const Scenery =
     theme === "canopy"
       ? RendererMoonlit
       : theme === "rainforest"
-      ? RendererRainforest
-      : theme === "snowy"
-        ? RendererSnowy
-        : theme === "desert"
-          ? RendererDesert
-          : null;
+        ? RendererRainforest
+        : theme === "snowy"
+          ? RendererSnowy
+          : theme === "desert"
+            ? RendererDesert
+            : null;
   if (Scenery) {
     const scenery = new Scenery(root);
     scenery.setPreferences(prefs);

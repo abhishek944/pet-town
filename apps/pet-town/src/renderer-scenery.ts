@@ -75,7 +75,11 @@ export class RendererScenery {
   }
 
   assetFor(element: HTMLElement, state?: HerdrState): string | null {
-    return this.canopy.assetFor(element) ?? this.activities.assetFor(element) ?? this.ocean.assetFor(element, state);
+    return (
+      this.canopy.assetFor(element) ??
+      this.activities.assetFor(element) ??
+      this.ocean.assetFor(element, state)
+    );
   }
 
   sampler(): ((x: number) => number) | null {
@@ -101,14 +105,18 @@ export class RendererScenery {
   }
 
   travelDistance(distance: number, element: HTMLElement): number {
-    return this.canopy.active ? this.canopy.travelDistance(distance, element) : this.activities.travelDistance(distance, element);
+    return this.canopy.active
+      ? this.canopy.travelDistance(distance, element)
+      : this.activities.travelDistance(distance, element);
   }
 
   travelSpan(width: number): number {
     return this.canopy.active ? this.canopy.span() : Math.max(0, width - 104);
   }
 
-  get vertical(): boolean { return this.canopy.active; }
+  get vertical(): boolean {
+    return this.canopy.active;
+  }
 
   advancePet(element: HTMLElement, elapsedMs: number): void {
     this.canopy.advancePet(element, elapsedMs);

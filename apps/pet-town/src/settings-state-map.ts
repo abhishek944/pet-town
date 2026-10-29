@@ -84,9 +84,10 @@ export function renderStateMap(
         theme === "railway" ||
         (theme === "rollercoaster" && (state === "blocked" || state === "done"));
       const presentationAction = stationary ? "idle" : assignment.action;
-      action.textContent = theme === "canopy"
-        ? `Action: ${state === "working" && hasClimbingArt(petId) ? "Climbing" : "Perched"}`
-        : `Action: ${presentationAction === "walking" ? "Walking" : "Idle"}`;
+      action.textContent =
+        theme === "canopy"
+          ? `Action: ${state === "working" && hasClimbingArt(petId) ? "Climbing" : "Perched"}`
+          : `Action: ${presentationAction === "walking" ? "Walking" : "Idle"}`;
       const heading = document.createElement("span");
       heading.className = "state-heading";
       heading.append(name, action);

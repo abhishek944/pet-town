@@ -48,9 +48,10 @@ export function resizeCitizens(
 ): number {
   const citizens = [...elements];
   const visibleCount = citizens.filter((element) => !element.hidden).length;
-  const size = preferences?.app.stripTheme === "canopy"
-    ? Math.max(0.1, Math.min(77, width / Math.max(1, visibleCount) * 0.82 / (84 / 44)))
-    : citizenSize(visibleCount, width, preferences?.app.stripTheme === "ocean" ? 96 : 77);
+  const size =
+    preferences?.app.stripTheme === "canopy"
+      ? Math.max(0.1, Math.min(77, ((width / Math.max(1, visibleCount)) * 0.82) / (84 / 44)))
+      : citizenSize(visibleCount, width, preferences?.app.stripTheme === "ocean" ? 96 : 77);
   if (size !== previousSize) {
     root.style.setProperty("--citizen-size", `${size}px`);
     for (const element of citizens) {
