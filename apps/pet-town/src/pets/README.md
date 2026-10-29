@@ -12,7 +12,7 @@ The restored pets are Bao Panda Chef, Bigfoot Yeti, Brassbell Automaton Porter, 
 
 ## Activity artwork
 
-A bundled folder may publish the six Pet Street action loops for Rollercoaster and Tiny Railway. Each loop is `activity-<theme>-<state>.webp` for the `working`, `blocked` and `done` states, and `activity.json` describes them:
+A bundled folder may publish the three Pet Street action loops for Rollercoaster. Each loop is `activity-<theme>-<state>.webp` for the `working`, `blocked` and `done` states, and `activity.json` describes them:
 
 ```json
 {
@@ -28,7 +28,7 @@ A bundled folder may publish the six Pet Street action loops for Rollercoaster a
 }
 ```
 
-The sidecar must contain exactly those six keys. `durationMs` equals the encoded loop duration, `scale` is the canvas width relative to the shared 44px citizen size, and `anchorNormalized` is the measured support pixel in the full square canvas: hips/seat for Rollercoaster, feet or grounded-knee support for Tiny Railway. The build validates every entry and URL at build time; the runtime aligns the sprite on the theme support line through the anchor, plays the loop in place, and omits the detached wrench prop when the sprite already holds it. Missing or invalid metadata falls back to the state clips. Installed Pet Studio extensions keep their own clips and state assignments.
+The sidecar must contain exactly those three keys. `durationMs` equals the encoded loop duration, `scale` is the canvas width relative to the shared 44px citizen size, and `anchorNormalized` is the measured support pixel in the full square canvas: hips/seat for Rollercoaster. The build validates every entry and URL at build time; the runtime aligns the sprite on the theme support line through the anchor, plays the loop in place, and keeps the cart aligned. Missing or invalid metadata falls back to the state clips. Installed Pet Studio extensions keep their own clips and state assignments.
 
 ## Ocean and KayKit artwork
 

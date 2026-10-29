@@ -1,24 +1,6 @@
 {
   "formatVersion": 1,
   "clips": {
-    "railway-blocked": {
-      "asset": "activity-railway-blocked.webp",
-      "durationMs": 1200,
-      "scale": 0.914,
-      "anchorNormalized": [0.4231, 0.9404]
-    },
-    "railway-done": {
-      "asset": "activity-railway-done.webp",
-      "durationMs": 1200,
-      "scale": 0.9573,
-      "anchorNormalized": [0.3984, 0.9375]
-    },
-    "railway-working": {
-      "asset": "activity-railway-working.webp",
-      "durationMs": 960,
-      "scale": 0.9244,
-      "anchorNormalized": [0.4834, 0.9346]
-    },
     "rollercoaster-blocked": {
       "asset": "activity-rollercoaster-blocked.webp",
       "durationMs": 1440,

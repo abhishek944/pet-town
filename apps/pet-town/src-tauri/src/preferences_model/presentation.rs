@@ -50,14 +50,13 @@ pub enum SettingsAppearance {
 #[serde(rename_all = "lowercase")]
 pub enum StripTheme {
     #[default]
-    #[serde(alias = "canopy", alias = "goldmine")]
+    #[serde(alias = "canopy", alias = "goldmine", alias = "railway")]
     Standard,
     Ocean,
     Rainforest,
     Snowy,
     Desert,
     Rollercoaster,
-    Railway,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]

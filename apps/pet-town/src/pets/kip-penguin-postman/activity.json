@@ -18,24 +18,6 @@
       "durationMs": 1200,
       "scale": 0.73,
       "anchorNormalized": [0.4297, 0.8438]
-    },
-    "railway-working": {
-      "asset": "activity-railway-working.webp",
-      "durationMs": 960,
-      "scale": 0.821,
-      "anchorNormalized": [0.5889, 0.9258]
-    },
-    "railway-blocked": {
-      "asset": "activity-railway-blocked.webp",
-      "durationMs": 1200,
-      "scale": 0.827,
-      "anchorNormalized": [0.5527, 0.9238]
-    },
-    "railway-done": {
-      "asset": "activity-railway-done.webp",
-      "durationMs": 1200,
-      "scale": 0.761,
-      "anchorNormalized": [0.5264, 0.9219]
     }
   }
 }

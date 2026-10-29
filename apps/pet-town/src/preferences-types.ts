@@ -1,11 +1,10 @@
 export const ASSISTANT_PET_ID = "knight";
 
 export type SettingsAppearance = "system" | "light" | "dark";
-export type StripTheme =
-  "standard" | "ocean" | "rainforest" | "snowy" | "desert" | "rollercoaster" | "railway";
+export type StripTheme = "standard" | "ocean" | "rainforest" | "snowy" | "desert" | "rollercoaster";
 export type CoasterMode = "low-rolling" | "twilight-carnival" | "firefly-gardens" | "cloudline";
 export function isActivityTheme(theme: string | undefined): boolean {
-  return theme === "rollercoaster" || theme === "railway";
+  return theme === "rollercoaster";
 }
 export type PetTheme = "standard" | "ocean";
 export type RainforestMode = "after-rain" | "firefly";
@@ -21,7 +20,6 @@ export interface AppPreferences {
   stripTheme: StripTheme;
   coasterMode: CoasterMode;
   coasterHeightPx: number;
-  railwayOpacityPercent: number;
   rainforestMode: RainforestMode;
   rainforestOpacityPercent: number;
   snowMode: SnowMode;

@@ -1,5 +1,4 @@
 import { createCoasterArt } from "./activity-coaster-art";
-import { createRailwayArt } from "./activity-railway-art";
 import type { CoasterMode } from "./preferences-types";
 
 export function scopeSvg(markup: string, prefix: string): string {
@@ -15,12 +14,7 @@ export function createActivitySceneSvg(
   mode: CoasterMode,
   prefix: string,
 ): SVGSVGElement {
-  const art =
-    theme === "rollercoaster"
-      ? createCoasterArt(mode)
-      : theme === "railway"
-        ? createRailwayArt()
-        : "";
+  const art = theme === "rollercoaster" ? createCoasterArt(mode) : "";
   const container = ownerDocument.createElement("div");
   container.innerHTML = scopeSvg(art, prefix);
   const svg = container.querySelector<SVGSVGElement>("svg");

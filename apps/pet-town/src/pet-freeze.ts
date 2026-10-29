@@ -3,14 +3,9 @@
  * for a frozen frame. Pets without accepted sidecar art keep the legacy still frame because their
  * blocked and done fallbacks are locomotion clips that would otherwise walk in place.
  */
-export function freezeActivityFrame(
-  frozen: boolean,
-  theme: string,
-  state: string,
-  dedicated: boolean,
-): boolean {
+export function freezeActivityFrame(frozen: boolean, state: string, dedicated: boolean): boolean {
   if (frozen) return true;
-  return !dedicated && (state === "blocked" || (state === "done" && theme !== "railway"));
+  return !dedicated && (state === "blocked" || state === "done");
 }
 
 export function freezePetFrame(element: HTMLElement): void {

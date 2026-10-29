@@ -1,5 +1,4 @@
 import { createCoasterProps } from "./activity-coaster-art";
-import { createRailwayProps } from "./activity-railway-art";
 import { createActivitySceneSvg, scopeSvg } from "./activity-scene-art";
 import { isActivityTheme, type CoasterMode, type PreferencesFile } from "./preferences-types";
 import { applyMotionPosition, type PositionedMotion } from "./renderer-layout";
@@ -20,12 +19,11 @@ export class RendererActivities {
   private theme = "";
   private mode: CoasterMode = "low-rolling";
   private preferences: PreferencesFile | null = null;
-  private elapsed = 0;
   private reduced = false;
   private paused = false;
   private rail: { x: number; y: number }[] = [];
   private propsId = 0;
-  // Four coaster variants and Railway: reuse stock roots, never actor props.
+  // Four coaster variants: reuse stock roots, never actor props.
   private readonly sceneArt = new Map<string, SVGSVGElement>();
   constructor(private readonly root: HTMLElement) {
     this.scene = root.ownerDocument.createElement("div");
@@ -46,7 +44,7 @@ export class RendererActivities {
       let svg = this.sceneArt.get(key);
       if (theme && !svg) {
         svg = createActivitySceneSvg(this.root.ownerDocument, theme, mode, `activity-${this.id}`);
-        if (this.sceneArt.size < 5) this.sceneArt.set(key, svg);
+        if (this.sceneArt.size < 4) this.sceneArt.set(key, svg);
       }
       if (this.scene.firstElementChild !== svg) this.scene.replaceChildren(...(svg ? [svg] : []));
       this.readRail();
@@ -58,16 +56,11 @@ export class RendererActivities {
       "--coaster-height-scale",
       String(theme === "rollercoaster" ? height / 88 : 1),
     );
-    const opacity = theme === "railway" ? preferences.app.railwayOpacityPercent : 100;
-    this.scene.style.opacity = String(bounded(opacity, 100, 0, 100) / 100);
   }
 
-  advance(elapsedMs: number, reduced: boolean, paused: boolean): void {
+  advance(_elapsedMs: number, reduced: boolean, paused: boolean): void {
     this.reduced = reduced;
     this.paused = paused;
-    if (this.theme && !reduced && !paused && !document.hidden) {
-      this.elapsed = (this.elapsed + elapsedMs) % 1700;
-    }
   }
 
   get active(): boolean {
@@ -80,7 +73,6 @@ export class RendererActivities {
 
   travelDistance(distance: number, element: HTMLElement): number {
     if (element.dataset.agentSource === "orchestrator") return distance;
-    if (this.theme === "railway") return 0;
     if (
       this.theme === "rollercoaster" &&
       ["blocked", "done"].includes(element.dataset.status ?? "")
@@ -111,10 +103,7 @@ export class RendererActivities {
       props.className = "activity-props";
       props.dataset.key = key;
       props.setAttribute("aria-hidden", "true");
-      const art =
-        this.theme === "rollercoaster"
-          ? createCoasterProps(state, this.mode)
-          : createRailwayProps(state, dedicated);
+      const art = createCoasterProps(state, this.mode);
       props.innerHTML = scopeSvg(art, `activity-${this.id}-pet-${this.propsId++}`);
       element.append(props);
     }
@@ -123,27 +112,14 @@ export class RendererActivities {
       this.preferences?.pets[element.dataset.characterId ?? ""]?.motion.pauseOnHover,
     );
     const frozen = this.reduced || this.paused || document.hidden || (hovered && pauseOnHover);
-    if (freezeActivityFrame(frozen, this.theme, state, dedicated)) freezePetFrame(element);
+    if (freezeActivityFrame(frozen, state, dedicated)) freezePetFrame(element);
     else unfreezePetFrame(element);
-    if (!frozen && this.theme !== "rollercoaster") {
-      const swing = Math.sin((this.elapsed / 1700) * Math.PI * 2) * 27;
-      for (const tool of props.querySelectorAll<SVGElement>("[data-activity-tool]")) {
-        tool.setAttribute(
-          "transform",
-          `rotate(${state === "working" ? swing : 0} ${tool.dataset.pivotX ?? 52} ${tool.dataset.pivotY ?? 70})`,
-        );
-      }
-    }
     if (this.theme === "rollercoaster" && (themeChanged || sizeChanged))
       refreshCitizenLabelPosition(element);
     const centerX = motion.x + CITIZEN_TRACK_WIDTH / 2;
     const railY = this.railHeight(centerX);
     const offset =
-      this.theme === "rollercoaster"
-        ? railY - (this.root.clientHeight - 14) + (this.mode === "cloudline" ? 50 * scale : 0)
-        : this.theme === "railway"
-          ? 236 * (this.root.clientHeight / 290) - (this.root.clientHeight - 14)
-          : 0;
+      railY - (this.root.clientHeight - 14) + (this.mode === "cloudline" ? 50 * scale : 0);
     // Existing citizen bottom is 4px; only labels consume this viewport-space anchor.
     element.style.setProperty(
       "--coaster-citizen-bottom-y",

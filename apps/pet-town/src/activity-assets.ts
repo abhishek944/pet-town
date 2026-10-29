@@ -1,14 +1,14 @@
 /**
  * Pet Street activity artwork: per-pet sidecars discovered from the bundled pet folders.
  *
- * `pets/<id>/activity.json` publishes the six approved action loops (Rollercoaster and
- * Tiny Railway for working, blocked and done) as `activity-<theme>-<state>.webp` with the encoded
+ * `pets/<id>/activity.json` publishes the three approved Rollercoaster action loops
+ * (working, blocked and done) as `activity-<theme>-<state>.webp` with the encoded
  * loop duration, the citizen-relative scale and the measured normalized support anchor. Discovery
  * runs at build time: invalid metadata is reported by activitySidecarDiagnostics() and never
  * rendered, so staged folders can arrive one at a time.
  */
 
-export type ActivityTheme = "rollercoaster" | "railway";
+export type ActivityTheme = "rollercoaster";
 export type ActivityState = "working" | "blocked" | "done";
 
 export interface ActivityClipAsset {
@@ -28,7 +28,7 @@ export interface ActivitySpriteOffset {
   readonly y: number;
 }
 
-const THEMES: readonly ActivityTheme[] = ["rollercoaster", "railway"];
+const THEMES: readonly ActivityTheme[] = ["rollercoaster"];
 const STATES: readonly ActivityState[] = ["working", "blocked", "done"];
 const CLIP_KEYS = THEMES.flatMap((theme) => STATES.map((state) => `${theme}-${state}`));
 
@@ -37,17 +37,15 @@ const SCALE_RANGE = [0.25, 4] as const;
 
 /**
  * Support line of the shared 104x100 prop frame where each clip anchor must rest, measured from the
- * approved selected scenes: the seated Coaster cart rim and the approved 25% Railway deck support.
+ * approved seated Coaster cart rim.
  */
 const SUPPORT_Y: Readonly<Record<string, number>> = {
   rollercoaster: 71.02,
-  railway: 84.25,
 };
 
 /** Prop frame baseline y90 sits 10px above the citizen bottom. */
 const BASELINE_PX: Readonly<Record<string, number>> = {
   rollercoaster: 10,
-  railway: 10,
 };
 
 const FRAME_BASELINE = 90;

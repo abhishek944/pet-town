@@ -74,15 +74,6 @@
   );
 }
 /*
- * The approved 25% Railway machine keeps the wheel floor at y90 but moves the deck top from y61 to
- * y82.75, so pets without accepted sidecar art rest on that derived deck support instead of
- * floating above the shrunken trolley.
- */
-.citizen[data-activity-theme="railway"] .pet-stack {
-  bottom: calc(10px + 5.75px * var(--activity-scale, 1) - var(--foot-offset-y, 0px));
-}
-
-/*
  * Dedicated action loops align their measured support anchor with the theme support line and the
  * scene centre. Only the sprite moves, so the shared stack, labels and prop frame keep the
  * approved geometry; the frozen frame follows the same offset for paused rendering.

@@ -16,13 +16,6 @@ export class SettingsActivities {
       },
       render,
     );
-    bindRange(
-      "railway-opacity",
-      (value) => {
-        draft().app.railwayOpacityPercent = value;
-      },
-      render,
-    );
     this.mode.addEventListener("change", () => {
       if (
         !["low-rolling", "twilight-carnival", "firefly-gardens", "cloudline"].includes(
@@ -39,21 +32,13 @@ export class SettingsActivities {
     this.mode.value = draft.app.coasterMode ?? "low-rolling";
     this.mode.disabled = readOnly || !coaster;
     byId<HTMLElement>("coaster-mode-row").hidden = !coaster;
-    for (const [id, theme, value, unit] of [
-      ["coaster-height", "rollercoaster", draft.app.coasterHeightPx ?? 88, "px"],
-      ["railway-opacity", "railway", draft.app.railwayOpacityPercent ?? 100, "%"],
-    ] as const) {
-      const active = draft.app.stripTheme === theme;
-      const slider = byId<HTMLInputElement>(id);
-      slider.value = String(value);
-      slider.disabled = readOnly || !active;
-      slider.setAttribute(
-        "aria-valuetext",
-        unit === "px" ? `${value}px ride height` : `${value}% opaque, ${100 - value}% transparent`,
-      );
-      byId<HTMLOutputElement>(`${id}-value`).value = `${value}${unit}`;
-      byId<HTMLElement>(`${id}-row`).hidden = !active;
-    }
+    const height = draft.app.coasterHeightPx ?? 88;
+    const slider = byId<HTMLInputElement>("coaster-height");
+    slider.value = String(height);
+    slider.disabled = readOnly || !coaster;
+    slider.setAttribute("aria-valuetext", `${height}px ride height`);
+    byId<HTMLOutputElement>("coaster-height-value").value = `${height}px`;
+    byId<HTMLElement>("coaster-height-row").hidden = !coaster;
     this.preview.hidden = !isActivityTheme(draft.app.stripTheme);
     this.scene.setPreferences(draft);
     this.scene.advance(0, true, true);

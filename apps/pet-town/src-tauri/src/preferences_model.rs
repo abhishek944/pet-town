@@ -37,8 +37,8 @@ pub struct AppPreferences {
     // Discard the retired setting without relaxing unrelated field validation.
     #[serde(default, skip_serializing, rename = "goldmineOpacityPercent")]
     legacy_goldmine_opacity: serde::de::IgnoredAny,
-    #[serde(default = "default_activity_opacity_percent")]
-    pub railway_opacity_percent: u8,
+    #[serde(default, skip_serializing, rename = "railwayOpacityPercent")]
+    legacy_railway_opacity: serde::de::IgnoredAny,
     // Discard this retired setting without accepting unrelated unknown fields.
     #[serde(default, skip_serializing, rename = "canopyOpacityPercent")]
     legacy_canopy_opacity: serde::de::IgnoredAny,
@@ -119,7 +119,7 @@ impl PreferencesFile {
                 coaster_mode: CoasterMode::LowRolling,
                 coaster_height_px: default_coaster_height_px(),
                 legacy_goldmine_opacity: serde::de::IgnoredAny,
-                railway_opacity_percent: default_activity_opacity_percent(),
+                legacy_railway_opacity: serde::de::IgnoredAny,
                 legacy_canopy_opacity: serde::de::IgnoredAny,
                 rainforest_mode: RainforestMode::AfterRain,
                 rainforest_opacity_percent: default_rainforest_opacity_percent(),

@@ -77,9 +77,7 @@ export function renderStateMap(
       const name = document.createElement("strong");
       name.textContent = labels[state];
       const action = document.createElement("small");
-      const stationary =
-        theme === "railway" ||
-        (theme === "rollercoaster" && (state === "blocked" || state === "done"));
+      const stationary = theme === "rollercoaster" && (state === "blocked" || state === "done");
       const presentationAction = stationary ? "idle" : assignment.action;
       action.textContent = `Action: ${presentationAction === "walking" ? "Walking" : "Idle"}`;
       const heading = document.createElement("span");

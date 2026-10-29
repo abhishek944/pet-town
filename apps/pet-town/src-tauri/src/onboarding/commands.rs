@@ -59,7 +59,7 @@ pub(crate) fn set_onboarding_appearance(
     let _update_admission = updates.window_opening()?;
     let _operation = state.begin()?;
     let theme = match theme.as_str() {
-        "standard" | "ocean" | "rainforest" | "snowy" | "desert" | "rollercoaster" | "railway" => {
+        "standard" | "ocean" | "rainforest" | "snowy" | "desert" | "rollercoaster" => {
             serde_json::from_value(serde_json::Value::String(theme))
                 .map_err(|_| "Unsupported scenery.")?
         }
