@@ -16,7 +16,9 @@ python3 "$repo_dir/scripts/validate-godot-export.py"
 mkdir -p "$resource_dir/world"
 diagnostics=$(mktemp)
 trap 'rm -f "$diagnostics"' EXIT HUP INT TERM
-if ! "$godot_app/Contents/MacOS/Godot" --headless --single-threaded-scene --path "$world_dir" --editor --import --quit >"$diagnostics" 2>&1; then
+echo "Godot packaging: importing project resources"
+if ! "$godot_app/Contents/MacOS/Godot" --headless --single-threaded-scene --path "$world_dir" \
+  --log-file "$diagnostics" --editor --import --quit; then
   cat "$diagnostics"
   exit 1
 fi
@@ -24,9 +26,11 @@ if grep -Eq '^SCRIPT ERROR:|^ERROR:' "$diagnostics"; then
   cat "$diagnostics"
   exit 1
 fi
+# Keep output live in CI as well as on disk so a stalled script does not hide its error.
 # Derived native data is content-addressed; build it before the pack is exported.
+echo "Godot packaging: preparing native data"
 if ! "$godot_app/Contents/MacOS/Godot" --headless --single-threaded-scene --path "$world_dir" \
-  --script res://tools/prepare-native.gd >"$diagnostics" 2>&1; then
+  --log-file "$diagnostics" --script res://tools/prepare-native.gd; then
   cat "$diagnostics"
   exit 1
 fi
@@ -34,8 +38,9 @@ if grep -Eq '^SCRIPT ERROR:|^ERROR:' "$diagnostics"; then
   cat "$diagnostics"
   exit 1
 fi
+echo "Godot packaging: exporting world pack"
 if ! "$godot_app/Contents/MacOS/Godot" --headless --single-threaded-scene --path "$world_dir" \
-  --export-pack "Pet Town world pack" "$resource_dir/world/PetTown.pck" >"$diagnostics" 2>&1; then
+  --log-file "$diagnostics" --export-pack "Pet Town world pack" "$resource_dir/world/PetTown.pck"; then
   cat "$diagnostics"
   exit 1
 fi

@@ -5,7 +5,8 @@ func _initialize() -> void:
 func prepare() -> void:
 	preload("res://scripts/region/native_cache.gd").baking = true
 	var budget := preload("res://scripts/startup/budget.gd").new(self)
-	var world := preload("res://scripts/world.gd").new()
+	# --script compiles before autoload globals exist; load the world after startup.
+	var world = load("res://scripts/world.gd").new()
 	world.boot_budget = budget
 	root.add_child(world)
 	if not world.initialization_complete: await world.initialization_finished
