@@ -19,24 +19,6 @@
       "scale": 0.8366,
       "anchorNormalized": [0.3467, 0.87305]
     },
-    "goldmine-working": {
-      "asset": "activity-goldmine-working.webp",
-      "durationMs": 960,
-      "scale": 0.8366,
-      "anchorNormalized": [0.5029, 0.94141]
-    },
-    "goldmine-blocked": {
-      "asset": "activity-goldmine-blocked.webp",
-      "durationMs": 960,
-      "scale": 0.8366,
-      "anchorNormalized": [0.4055, 0.91113]
-    },
-    "goldmine-done": {
-      "asset": "activity-goldmine-done.webp",
-      "durationMs": 960,
-      "scale": 0.8366,
-      "anchorNormalized": [0.5647, 0.90918]
-    },
     "railway-working": {
       "asset": "activity-railway-working.webp",
       "durationMs": 960,

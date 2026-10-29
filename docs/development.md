@@ -184,19 +184,17 @@ Bounds metadata keeps at most 128 short URL keys and excludes data URLs/keys
 over 2048 characters. Gallery preparation has two workers and cancellation on
 hide/catalog replacement; temporary animated sources are cleared after drawing.
 
-Bundled Goldmine activity loops have optional 128-pixel derivatives. Selection
-uses citizen CSS size × the existing clip scale × actual devicePixelRatio;
-larger requirements keep the original 512-pixel artwork. Timing, normalized
-anchors, facing and custom/extended pack ownership stay unchanged. Global Ocean
-rowing also has 128-pixel derivatives of its 384-pixel originals; its CSS width is
+Activity loops support optional 128-pixel derivatives. Selection uses citizen
+CSS size × the existing clip scale × actual devicePixelRatio; larger requirements
+keep the original 512-pixel artwork. Timing, normalized anchors, facing and
+custom/extended pack ownership stay unchanged. Global Ocean rowing has
+128-pixel derivatives of its 384-pixel originals; its CSS width is
 citizen size directly, independent of Standard clip scale. Per-pet Ocean and
 legacy preview URL calls retain originals. Other Ocean states keep their own
 artwork or the existing rowing fallback. Regenerate these derivatives with
 Pillow installed:
 
 ```bash
-python3 scripts/prepare-activity-variants.py --theme goldmine \
-  --output-dir apps/pet-town/src/pets
 python3 scripts/prepare-activity-variants.py --theme ocean \
   --output-dir apps/pet-town/src/pets
 ```

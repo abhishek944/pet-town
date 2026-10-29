@@ -78,7 +78,6 @@ export function renderStateMap(
       name.textContent = labels[state];
       const action = document.createElement("small");
       const stationary =
-        theme === "goldmine" ||
         theme === "railway" ||
         (theme === "rollercoaster" && (state === "blocked" || state === "done"));
       const presentationAction = stationary ? "idle" : assignment.action;

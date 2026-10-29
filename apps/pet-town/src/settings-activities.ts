@@ -17,13 +17,6 @@ export class SettingsActivities {
       render,
     );
     bindRange(
-      "goldmine-opacity",
-      (value) => {
-        draft().app.goldmineOpacityPercent = value;
-      },
-      render,
-    );
-    bindRange(
       "railway-opacity",
       (value) => {
         draft().app.railwayOpacityPercent = value;
@@ -48,7 +41,6 @@ export class SettingsActivities {
     byId<HTMLElement>("coaster-mode-row").hidden = !coaster;
     for (const [id, theme, value, unit] of [
       ["coaster-height", "rollercoaster", draft.app.coasterHeightPx ?? 88, "px"],
-      ["goldmine-opacity", "goldmine", draft.app.goldmineOpacityPercent ?? 100, "%"],
       ["railway-opacity", "railway", draft.app.railwayOpacityPercent ?? 100, "%"],
     ] as const) {
       const active = draft.app.stripTheme === theme;

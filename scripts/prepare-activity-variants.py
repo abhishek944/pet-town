@@ -32,9 +32,7 @@ def same_visible_pixels(left, right):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument(
-        "--theme", choices=("goldmine", "railway", "rollercoaster", "ocean"), default="goldmine"
-    )
+    parser.add_argument("--theme", choices=("railway", "rollercoaster", "ocean"), required=True)
     args = parser.parse_args()
     count = 0
     ocean = args.theme == "ocean"

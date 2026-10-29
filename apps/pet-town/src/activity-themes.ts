@@ -1,5 +1,4 @@
 import { createCoasterProps } from "./activity-coaster-art";
-import { createMineProps } from "./activity-mine-art";
 import { createRailwayProps } from "./activity-railway-art";
 import { createActivitySceneSvg, scopeSvg } from "./activity-scene-art";
 import { isActivityTheme, type CoasterMode, type PreferencesFile } from "./preferences-types";
@@ -26,7 +25,7 @@ export class RendererActivities {
   private paused = false;
   private rail: { x: number; y: number }[] = [];
   private propsId = 0;
-  // Four coaster variants, Gold Mine and Railway: reuse stock roots, never actor props.
+  // Four coaster variants and Railway: reuse stock roots, never actor props.
   private readonly sceneArt = new Map<string, SVGSVGElement>();
   constructor(private readonly root: HTMLElement) {
     this.scene = root.ownerDocument.createElement("div");
@@ -47,7 +46,7 @@ export class RendererActivities {
       let svg = this.sceneArt.get(key);
       if (theme && !svg) {
         svg = createActivitySceneSvg(this.root.ownerDocument, theme, mode, `activity-${this.id}`);
-        if (this.sceneArt.size < 6) this.sceneArt.set(key, svg);
+        if (this.sceneArt.size < 5) this.sceneArt.set(key, svg);
       }
       if (this.scene.firstElementChild !== svg) this.scene.replaceChildren(...(svg ? [svg] : []));
       this.readRail();
@@ -59,12 +58,7 @@ export class RendererActivities {
       "--coaster-height-scale",
       String(theme === "rollercoaster" ? height / 88 : 1),
     );
-    const opacity =
-      theme === "goldmine"
-        ? preferences.app.goldmineOpacityPercent
-        : theme === "railway"
-          ? preferences.app.railwayOpacityPercent
-          : 100;
+    const opacity = theme === "railway" ? preferences.app.railwayOpacityPercent : 100;
     this.scene.style.opacity = String(bounded(opacity, 100, 0, 100) / 100);
   }
 
@@ -86,7 +80,7 @@ export class RendererActivities {
 
   travelDistance(distance: number, element: HTMLElement): number {
     if (element.dataset.agentSource === "orchestrator") return distance;
-    if (this.theme === "goldmine" || this.theme === "railway") return 0;
+    if (this.theme === "railway") return 0;
     if (
       this.theme === "rollercoaster" &&
       ["blocked", "done"].includes(element.dataset.status ?? "")
@@ -120,9 +114,7 @@ export class RendererActivities {
       const art =
         this.theme === "rollercoaster"
           ? createCoasterProps(state, this.mode)
-          : this.theme === "goldmine"
-            ? createMineProps(state, dedicated)
-            : createRailwayProps(state, dedicated);
+          : createRailwayProps(state, dedicated);
       props.innerHTML = scopeSvg(art, `activity-${this.id}-pet-${this.propsId++}`);
       element.append(props);
     }

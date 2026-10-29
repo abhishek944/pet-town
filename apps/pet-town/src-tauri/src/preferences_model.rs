@@ -34,8 +34,9 @@ pub struct AppPreferences {
     pub coaster_mode: CoasterMode,
     #[serde(default = "default_coaster_height_px")]
     pub coaster_height_px: u16,
-    #[serde(default = "default_activity_opacity_percent")]
-    pub goldmine_opacity_percent: u8,
+    // Discard the retired setting without relaxing unrelated field validation.
+    #[serde(default, skip_serializing, rename = "goldmineOpacityPercent")]
+    legacy_goldmine_opacity: serde::de::IgnoredAny,
     #[serde(default = "default_activity_opacity_percent")]
     pub railway_opacity_percent: u8,
     // Discard this retired setting without accepting unrelated unknown fields.
@@ -117,7 +118,7 @@ impl PreferencesFile {
                 strip_theme: StripTheme::Standard,
                 coaster_mode: CoasterMode::LowRolling,
                 coaster_height_px: default_coaster_height_px(),
-                goldmine_opacity_percent: default_activity_opacity_percent(),
+                legacy_goldmine_opacity: serde::de::IgnoredAny,
                 railway_opacity_percent: default_activity_opacity_percent(),
                 legacy_canopy_opacity: serde::de::IgnoredAny,
                 rainforest_mode: RainforestMode::AfterRain,

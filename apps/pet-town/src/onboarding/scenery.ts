@@ -13,7 +13,6 @@ const names: Record<StripTheme, string> = {
   snowy: "Snow",
   desert: "Desert Oasis",
   rollercoaster: "Rollercoaster",
-  goldmine: "Gold Mine",
   railway: "Tiny Railway",
 };
 export function renderScenery(

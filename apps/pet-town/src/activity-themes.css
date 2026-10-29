@@ -61,12 +61,6 @@
   font-size: calc(11px * var(--label-scale, 1));
   padding: 4px 8px;
 }
-.citizen[data-activity-theme="goldmine"] .activity-props {
-  bottom: -2px;
-}
-.citizen[data-activity-theme="goldmine"] .project {
-  transform: translateY(calc(var(--label-offset-y, 0px) - 18px * var(--activity-scale, 1)));
-}
 .citizen[data-activity-theme="rollercoaster"] .pet-stack {
   bottom: calc(10px + 15px * var(--activity-scale, 1) - var(--foot-offset-y, 0px));
   gap: 3px;

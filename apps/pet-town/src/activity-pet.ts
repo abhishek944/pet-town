@@ -39,7 +39,7 @@ function dedicatedClip(theme: string, state: string, clip: ActivityClipAsset): C
 export function activityPoseFor(theme: string, id: string, state: string): CompiledClip | null {
   const sidecar = activitySidecarFor(theme, id, state);
   if (sidecar) return dedicatedClip(theme, state, sidecar);
-  if (!["rollercoaster", "goldmine", "railway"].includes(theme) || !isSystemPet(id)) return null;
+  if (!["rollercoaster", "railway"].includes(theme) || !isSystemPet(id)) return null;
   // Installed Pet Studio extensions own their clips and state assignments.
   if (behaviorPackForCharacter(id) !== bundledBehaviorPackForCharacter(id)) return null;
   const stem =
@@ -51,17 +51,13 @@ export function activityPoseFor(theme: string, id: string, state: string): Compi
           : state === "done"
             ? "done"
             : null
-      : theme === "railway"
-        ? state === "working"
-          ? "work"
-          : state === "blocked"
-            ? "done"
-            : state === "done"
-              ? "wave"
-              : null
-        : state === "working" || state === "blocked" || state === "done"
-          ? "walk"
-          : null;
+      : state === "working"
+        ? "work"
+        : state === "blocked"
+          ? "done"
+          : state === "done"
+            ? "wave"
+            : null;
   if (!stem) return null;
   const clips = Object.values(behaviorPackForCharacter(id).clips);
   const clip = clips.find((item) => item.assetPath === `${stem}.webp` && item.assetUrl);
