@@ -75,14 +75,21 @@ func stat_row(values: Array) -> void:
 		column.add_child(Style.title(str(value[1]), 26))
 
 func entry() -> void:
-	heading("Solo · Five minutes", "Battle Mode", "Help Maple protect the wildlife.\nKeep moving while Maple shoots automatically.")
-	var best: int = session.store.best(session.arena.VERSION)
-	stat_row([["Duration", "05:00"], ["Best score", str(best) if best >= 0 else "No best yet"], ["Starter pet", "Maple"]])
+	heading("Solo · %d min" % (session.duration / 60), "Battle Mode", "Help Maple protect the wildlife.\nExplore the town freely while Maple shoots automatically.")
+	Layout.text(body, "Choose your battle duration", 15)
+	var durations := actions()
+	for seconds in session.Store.DURATIONS:
+		var choice := Layout.button(durations, "%d min" % (seconds / 60), "duration:%d" % seconds, session.command, seconds == session.duration)
+		choice.toggle_mode = true
+		choice.button_pressed = seconds == session.duration
+		choice.disabled = session.preparation.busy
+	var best: int = session.store.best(session.arena.VERSION, session.duration)
+	stat_row([["Duration", "%02d:00" % (session.duration / 60)], ["Best score", str(best) if best >= 0 else "No best yet"], ["Starter pet", "Maple"]])
 	Layout.text(body, "WASD move · Shift run · Space jump\nOne life. No healing. Pause anytime with Esc.\nScore from kills, health left and wildlife protected.", 15)
-	Layout.text(body, "Wildlife recovers after the match. Your town is restored.", 14)
+	Layout.text(body, "No battle fences. Wildlife stays near its home—keep it protected!\nWildlife recovers after the match. Your town is restored.", 14)
 	if not session.arena_ready: Layout.text(body, session.arena.error, 14).add_theme_color_override("font_color", Color("9b542e"))
 	var row := actions()
-	primary = Layout.button(row, "Start five-minute battle", "start", session.command, true)
+	primary = Layout.button(row, "Start %d-minute battle" % (session.duration / 60), "start", session.command, true)
 	primary.disabled = not session.arena_ready
 	Layout.button(row, "Back to town", "return", session.command)
 	Layout.button(row, "History", "history", session.command)
@@ -91,13 +98,13 @@ func entry() -> void:
 func result() -> void:
 	var data: Dictionary = session.result
 	var complete: bool = data.outcome == "Completed"
-	heading("Five minutes complete" if complete else "One life · Match ended", "Wildlife protected!" if complete else "Match ended", "Maple’s final score")
+	heading("%d-minute battle complete" % (data.get("duration", 300) / 60) if complete else "%d-minute battle · Match ended" % (data.get("duration", 300) / 60), "Wildlife protected!" if complete else "Match ended", "Maple’s final score")
 	var score := Style.title(str(int(data.score)), 68, "355b43")
 	body.add_child(score)
 	stat_row([["Skeletons defeated", str(int(data.kills))], ["Maple health", "%d%%" % ceili(data.pet)], ["Wildlife protected", "%d%%" % ceili(data.wildlife)]])
 	Layout.text(body, "Kills  %d\nPet health  %d\nWildlife health  %d\nCompletion  %d" % [10 * int(data.kills), floori(3 * data.pet) if complete else 0, floori(2 * data.wildlife) if complete else 0, 500 if complete else 0], 15)
 	var status := "Saved on this device" if session.saved else "Unsaved · Your score is kept here. Retry saving before leaving."
-	if session.saved and complete and data.score == session.store.best(session.arena.VERSION): status += " · Personal best"
+	if session.saved and complete and data.score == session.store.best(session.arena.VERSION, int(data.get("duration", 300))): status += " · Personal best"
 	Layout.text(body, status, 14).add_theme_color_override("font_color", Color("426448" if session.saved else "9b542e"))
 	var row := actions()
 	if not session.saved: primary = Layout.button(row, "Retry save", "save", session.command, true)
@@ -107,12 +114,12 @@ func result() -> void:
 	Layout.button(row, "History", "history", session.command)
 
 func history() -> void:
-	heading("Saved on this device · Latest 20", "Battle history", "Personal bests compare completed runs with the same arena and rules.")
-	var best: int = session.store.best(session.arena.VERSION)
-	Layout.text(body, "Best score: " + (str(best) if best >= 0 else "No best yet"), 22)
+	heading("Saved on this device · Latest 20", "Battle history", "Personal bests compare completed runs with the same duration, arena and rules.")
+	var best: int = session.store.best(session.arena.VERSION, session.duration)
+	Layout.text(body, "%d-minute best: " % (session.duration / 60) + (str(best) if best >= 0 else "No best yet"), 22)
 	if not session.store.notice.is_empty(): Layout.text(body, session.store.notice, 14)
 	if session.store.history.is_empty(): Layout.text(body, "No matches saved yet. Your first result will appear here.")
 	for data in session.store.history:
 		var points := "No score" if data.outcome == "Abandoned" else "%d points" % int(data.score)
-		Layout.text(body, "%s · %s\n%s · %d kills · Pet %d%% · Wildlife %d%%\n%s / %s" % [data.timestamp, data.outcome, points, data.kills, data.pet, data.wildlife, data.arena, data.rules], 15)
+		Layout.text(body, "%s · %s · %d min\n%s · %d kills · Pet %d%% · Wildlife %d%%\n%s / %s" % [data.timestamp, data.outcome, int(data.get("duration", 300)) / 60, points, data.kills, data.pet, data.wildlife, data.arena, data.rules], 15)
 	primary = Layout.button(actions(), "Back", "back", session.command, true)

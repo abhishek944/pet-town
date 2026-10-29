@@ -1,7 +1,8 @@
 extends RefCounted
 ## Battle records never share a world/care/usage file. Publish only after atomic rename.
 const FILE := "user://battle-results.json"
-const RULES := "solo-v1"
+const RULES := "solo-v3"
+const DURATIONS := [60, 180, 300, 600]
 var history: Array = []
 var bests := {}
 var notice := ""
@@ -38,7 +39,10 @@ func valid_row(row: Variant) -> bool:
 	if row.outcome not in ["Completed", "Defeated", "Abandoned"]: return false
 	for key in ["kills", "pet", "wildlife", "elapsed"]:
 		if not (row.get(key) is float or row.get(key) is int) or not is_finite(float(row[key])) or row[key] < 0: return false
-	if row.pet > 100 or row.wildlife > 100 or row.elapsed > 300 or row.kills != floor(row.kills): return false
+	var duration: Variant = row.get("duration", 300)
+	if not (duration is int or duration is float) or duration not in DURATIONS: return false
+	if row.rules in ["solo-v2", RULES] and not row.has("duration"): return false
+	if row.pet > 100 or row.wildlife > 100 or row.elapsed > duration or row.kills != floor(row.kills): return false
 	if row.outcome == "Abandoned": return row.get("score") == null
 	if not (row.get("score") is int or row.get("score") is float): return false
 	return row.score == score(row.outcome, row.kills, row.pet, row.wildlife)
@@ -47,10 +51,12 @@ static func score(outcome: String, kills: int, pet: float, wildlife: float) -> i
 	return floori(10 * kills + (3 * pet + 2 * wildlife + 500 if outcome == "Completed" else 0))
 
 static func version(row: Dictionary) -> String:
-	return str(row.arena) + ":" + str(row.rules)
+	var key := str(row.arena) + ":" + str(row.rules)
+	# Keep existing v1 best keys readable without rewriting or discarding old scores.
+	return key + ":" + str(int(row.duration)) if row.has("duration") else key
 
-func best(arena: String) -> int:
-	return int(bests.get(arena + ":" + RULES, {}).get("score", -1))
+func best(arena: String, duration := 300) -> int:
+	return int(bests.get(version({"arena": arena, "rules": RULES, "duration": duration}), {}).get("score", -1))
 
 func save(row: Dictionary) -> bool:
 	if blocked or not valid_row(row): return false

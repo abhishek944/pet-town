@@ -15,6 +15,7 @@ var state := "Town"
 var previous := "Playing"
 var countdown := 3.0
 var elapsed := 0.0
+var duration := 300
 var kills := 0
 var result := {}
 var saved := false
@@ -49,11 +50,11 @@ func _physics_process(delta: float) -> void:
 			state = "Playing"
 			runtime.set_frozen(false)
 	elif state == "Playing":
-		var step := minf(minf(delta, 0.1), 300 - elapsed)
+		var step := minf(minf(delta, 0.1), duration - elapsed)
 		runtime.step(step)
 		elapsed += step
 		if avatar.health.value <= 0: finish("Defeated")
-		elif elapsed >= 300: finish("Completed")
+		elif elapsed >= duration: finish("Completed")
 
 func pause(automatic := false) -> void:
 	if state not in ["Playing", "Countdown"]: return
@@ -81,7 +82,7 @@ func finish(outcome: String) -> void:
 	preload("res://scripts/town_input.gd").clear_gameplay()
 	var wildlife: float = runtime.wildlife_health()
 	result = {"id": match_id, "timestamp": Time.get_datetime_string_from_system(true), "starter": "Maple",
-		"arena": arena.VERSION, "rules": Store.RULES, "outcome": outcome, "elapsed": elapsed,
+		"arena": arena.VERSION, "rules": Store.RULES, "duration": duration, "outcome": outcome, "elapsed": elapsed,
 		"kills": kills, "pet": avatar.health.value, "wildlife": wildlife,
 		"score": Store.score(outcome, kills, avatar.health.value, wildlife)}
 	saved = store.save(result)
@@ -90,7 +91,7 @@ func finish(outcome: String) -> void:
 func abandon() -> void:
 	if state != "Paused": return
 	var record := {"id": match_id, "timestamp": Time.get_datetime_string_from_system(true), "starter": "Maple",
-		"arena": arena.VERSION, "rules": Store.RULES, "outcome": "Abandoned", "elapsed": elapsed,
+		"arena": arena.VERSION, "rules": Store.RULES, "duration": duration, "outcome": "Abandoned", "elapsed": elapsed,
 		"kills": kills, "pet": avatar.health.value, "wildlife": runtime.wildlife_health(), "score": null}
 	var recorded := store.save(record)
 	return_town()
@@ -114,6 +115,12 @@ func clear_runtime() -> void:
 	enemies.clear()
 
 func command(action: String) -> void:
+	if action.begins_with("duration:"):
+		var seconds := int(action.get_slice(":", 1))
+		if state == "Preparing" and not preparation.busy and seconds in Store.DURATIONS:
+			duration = seconds
+			ui.entry()
+		return
 	match action:
 		"enter": enter()
 		"start":

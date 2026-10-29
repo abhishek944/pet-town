@@ -1,19 +1,15 @@
-import { advanceTrack, BehaviorMachine, remapTrackPosition, type CompiledBehaviorPack } from "./flow-runtime";
+import { BehaviorMachine, remapTrackPosition, type CompiledBehaviorPack } from "./flow-runtime";
 import { behaviorPackForCharacter } from "./character-packs"; import { RendererScenery } from "./renderer-scenery";
 import type { CitizenState } from "./village"; import { freezePetFrame } from "./pet-freeze";
 import type { PreferencesFile } from "./preferences-types";
 import { collectHitRegions } from "./renderer-layout";
 import { createGeometryUpdates } from "./renderer-geometry";
 import { resolveLabelOverlaps } from "./renderer-labels";
-import { applyCitizenPreferences, resizeCitizens, shouldHideCompleted, shouldHideCompletedElement, travelDistanceFor } from "./renderer-preferences";
-import { applyFlowSample, createCitizenElement, distanceWhileAssetPending, type HitRegion, motionSeed, refreshCitizenLabelPosition, SUSPENSION_GAP_MS, updateCitizenElement } from "./renderer-view";
-import { disposePetImage } from "./renderer-image"; import { setPreferenceHidden } from "./renderer-visibility"; import { tokenMotionDistance, type TokenMotionState } from "./token-motion";
+import { applyCitizenPreferences, resizeCitizens, shouldHideCompleted, shouldHideCompletedElement } from "./renderer-preferences";
+import { applyFlowSample, createCitizenElement, type HitRegion, motionSeed, refreshCitizenLabelPosition, SUSPENSION_GAP_MS, updateCitizenElement } from "./renderer-view";
+import { disposePetImage } from "./renderer-image"; import { setPreferenceHidden } from "./renderer-visibility";
+import { advanceMotions, type MotionState } from "./renderer-motion";
 export type { HitRegion } from "./renderer-view";
-interface MotionState {
-  x: number; direction: -1 | 1; maximumX: number;
-  behavior: BehaviorMachine; packFingerprint: string; fallbackAssetUrl: string;
-  pendingElapsedMs: number; dragging: boolean; dragOffsetX: number; tokenMotion: TokenMotionState;
-}
 export class VillageRenderer {
   private readonly scenery: RendererScenery;
   private readonly elements = new Map<string, HTMLElement>();
@@ -101,37 +97,13 @@ export class VillageRenderer {
       window.requestAnimationFrame(this.animate);
       return;
     }
-    const waveSampler = this.scenery.sampler();
-    for (const [id, element] of this.elements) {
-      const motion = this.motions.get(id);
-      if (!motion || element.classList.contains("retiring")) continue;
-      if (!motion.dragging) this.scenery.advancePet(element, elapsedMs);
-      const currentSample = motion.behavior.sample();
-      const themedAssetUrl = this.scenery.assetFor(element, currentSample.state);
-      if (motion.dragging) {
-        applyFlowSample(element, currentSample, motion.fallbackAssetUrl, this.geometry.request, themedAssetUrl);
-        this.scenery.position(element, motion, waveSampler);
-        continue;
-      }
-      const assetReady = applyFlowSample(element, currentSample, motion.fallbackAssetUrl, this.geometry.request, themedAssetUrl);
-      const advance = assetReady
-        ? motion.behavior.advance(elapsedMs + motion.pendingElapsedMs, true)
-        : {
-            distancePx: distanceWhileAssetPending(currentSample, elapsedMs),
-            remainingMs: motion.pendingElapsedMs,
-            sample: currentSample,
-          };
-      motion.pendingElapsedMs = advance.remainingMs;
-      const distance = this.scenery.travelDistance(travelDistanceFor(element, tokenMotionDistance(motion.tokenMotion, advance.distancePx, element.dataset.status === "working", elapsedMs), this.preferences, this.systemReducedMotion), element);
-      if (!this.scenery.moveAlongPath(motion, distance)) {
-        const position = advanceTrack(motion.x, motion.direction, distance, motion.maximumX);
-        motion.x = position.x;
-        motion.direction = position.direction;
-      }
-      applyFlowSample(element, advance.sample, motion.fallbackAssetUrl, this.geometry.request,
-        this.scenery.assetFor(element, advance.sample.state));
-      this.scenery.position(element, motion, waveSampler, distance !== 0 && advance.sample.moving);
-    }
+    advanceMotions(this.elements, this.motions, {
+      scenery: this.scenery,
+      elapsedMs,
+      preferences: this.preferences,
+      systemReducedMotion: this.systemReducedMotion,
+      requestGeometry: this.geometry.request,
+    });
     this.refreshOceanWakes();
     this.geometry.flushPending();
     if (timestamp - this.lastHitRegionUpdate >= 50) {

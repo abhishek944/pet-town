@@ -1,8 +1,7 @@
 extends Node3D
-## A fixed clearing over existing terrain. Navigation is rebuilt from current collision.
+## Enemy and wildlife paths over existing dry terrain, rebuilt from current collision.
 const CENTER := Vector3(8, 9, 12)
-const RADIUS := 30.0
-const VERSION := "village-clearing-v1"
+const VERSION := "open-town-v2"
 const START := Vector3(5, 9, 6)
 const ANIMALS := ["nimbaa", "fiddlekit", "tuftlet"]
 const HOMES := [Vector3(7, 9, 8), Vector3(12, 9, 17), Vector3(0.5, 9, 18)]
@@ -29,10 +28,11 @@ func prepare(host: Node3D, budget: RefCounted = null, valid := Callable()) -> bo
 	error = ""
 	shape.radius = 0.55
 	shape.height = 1.8
-	for x in range(-20, 21):
+	var bounds: Dictionary = world.manifest.bounds
+	for x in range(floori((bounds.minX - CENTER.x) / CELL), ceili((bounds.maxX - CENTER.x) / CELL)):
 		if valid.is_valid() and not valid.call(): return false
 		if budget: await budget.checkpoint()
-		for z in range(-20, 21):
+		for z in range(floori((bounds.minZ - CENTER.z) / CELL), ceili((bounds.maxZ - CENTER.z) / CELL)):
 			var p := CENTER + Vector3(x * CELL, 0, z * CELL)
 			if not dry(p): continue
 			p.y = world.ground_at(p) + 0.06
@@ -49,21 +49,9 @@ func prepare(host: Node3D, budget: RefCounted = null, valid := Callable()) -> bo
 			var b: int = cells[cell + offset]
 			if segment(graph.get_point_position(a), graph.get_point_position(b)):
 				graph.connect_points(a, b)
-	var origin := nearest(START)
-	if origin < 0: return unavailable()
-	# Retain only the connected playable component, excluding isolated roofs/islands.
-	var reachable := {origin: true}
-	var queue: Array[int] = [origin]
-	var cursor := 0
-	while cursor < queue.size():
-		for id in graph.get_point_connections(queue[cursor]):
-			if not reachable.has(id):
-				reachable[id] = true
-				queue.append(id)
-		cursor += 1
+	# Keep all dry-ground components: Maple can jump or swim between them.
 	for id in graph.get_point_ids():
-		if not reachable.has(id): graph.remove_point(id)
-		else: points.append(graph.get_point_position(id))
+		points.append(graph.get_point_position(id))
 	if points.size() < 100 or not safe(START): return unavailable()
 	for home in HOMES:
 		if not safe(home): return unavailable()
@@ -75,7 +63,7 @@ func unavailable() -> bool:
 	return false
 
 func dry(p: Vector3) -> bool:
-	return Vector2(p.x - CENTER.x, p.z - CENTER.z).length() < RADIUS - 0.8 and world.contains(p) and world.water_at(p) < -100 and absf(world.ground_at(p) - CENTER.y) <= 2
+	return world.contains(p) and world.water_at(p) < -100
 
 func clear(p: Vector3, mask := 1) -> bool:
 	var q := PhysicsShapeQueryParameters3D.new()
@@ -98,14 +86,18 @@ func visible_line(a: Vector3, b: Vector3) -> bool:
 func nearest(p: Vector3) -> int:
 	if graph.get_point_count() == 0: return -1
 	var ground := Vector3(p.x, world.ground_at(p) + 0.06, p.z)
-	var id := graph.get_closest_point(ground)
-	if connects(ground, id): return id
 	var cell := Vector2i(roundi((p.x - CENTER.x) / CELL), roundi((p.z - CENTER.z) / CELL))
+	var nearest_id := -1
+	var distance := 2.0
 	for x in range(-1, 2):
 		for z in range(-1, 2):
 			var other: int = cells.get(cell + Vector2i(x, z), -1)
-			if other >= 0 and graph.has_point(other) and connects(ground, other): return other
-	return -1
+			if other < 0: continue
+			var candidate := ground.distance_to(graph.get_point_position(other))
+			if candidate < distance and connects(ground, other):
+				nearest_id = other
+				distance = candidate
+	return nearest_id
 
 func connects(p: Vector3, id: int) -> bool:
 	var node := graph.get_point_position(id)
@@ -120,14 +112,21 @@ func path(a: Vector3, b: Vector3) -> PackedVector3Array:
 	if first < 0 or last < 0: return PackedVector3Array()
 	return graph.get_point_path(first, last)
 
-func spawn_point(pet: Node3D, animals: Array, enemies: Array) -> Variant:
+func spawn_point(anchor: Node3D, animals: Array, enemies: Array, player: Node3D) -> Variant:
+	# Sample locally so a larger world does not make nearby spawn attempts rare.
 	for attempt in range(28):
-		var p: Vector3 = points.pick_random()
-		var distance := p.distance_to(pet.position)
-		if distance < 8 or distance > 24: continue
+		var angle := randf() * TAU
+		var distance_from_target := randf_range(9, 22)
+		var sample := anchor.position + Vector3(cos(angle), 0, sin(angle)) * distance_from_target
+		var cell := Vector2i(roundi((sample.x - CENTER.x) / CELL), roundi((sample.z - CENTER.z) / CELL))
+		var id: int = cells.get(cell, -1)
+		if id < 0: continue
+		var p := graph.get_point_position(id)
+		var distance := p.distance_to(anchor.position)
+		if distance < 8 or distance > 24 or p.distance_to(player.position) < 8: continue
 		var occupied := false
 		for body in animals + enemies:
 			if is_instance_valid(body) and p.distance_to(body.position) < 3: occupied = true
-		if occupied or not clear(p, 7) or path(p, pet.position).is_empty(): continue
+		if occupied or not clear(p, 7) or path(p, anchor.position).is_empty(): continue
 		return p
 	return null

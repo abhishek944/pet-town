@@ -35,7 +35,7 @@ func rebuild() -> void:
 	var stats := HBoxContainer.new()
 	stats.add_theme_constant_override("separation", 20)
 	body.add_child(stats)
-	var time_left := ceili(300 - session.elapsed)
+	var time_left := maxi(0, ceili(session.duration - session.elapsed))
 	for value in [["Time left", "%02d:%02d" % [time_left / 60, time_left % 60]], ["Maple health", "%d%%" % session.avatar.health.value], ["Kills", str(session.kills)]]:
 		var column := VBoxContainer.new()
 		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL

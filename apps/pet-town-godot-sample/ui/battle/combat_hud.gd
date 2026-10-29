@@ -9,7 +9,7 @@ var kills: Label
 var animals: Label
 var condition: Label
 var countdown: Label
-var hints: Label
+var awareness: Control
 var health_marks: Array = []
 var cards: Array[Control] = []
 var pause_button: Button
@@ -46,17 +46,11 @@ func _ready() -> void:
 	cards.append(card)
 	animals = Layout.label(card, "Wildlife · 3 of 3 standing", Rect2(16, 12, 266, 22), 13)
 	condition = Layout.label(card, "100%   100%   100%", Rect2(16, 42, 266, 28), 17)
-	hints = Layout.label(self, "WASD move · Shift run · Space jump · Shooting is automatic", Rect2(-225, -53, 450, 34), 12)
-	hints.anchor_left = 0.5
-	hints.anchor_right = 0.5
-	hints.anchor_top = 1
-	hints.anchor_bottom = 1
-	hints.offset_left = -225
-	hints.offset_right = 225
-	hints.offset_top = -53
-	hints.offset_bottom = -19
-	hints.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hints.add_theme_stylebox_override("normal", Style.panel("fff8e9de", 20, "fff8e9de", false))
+	# guide-ui:B5 removes only the instruction strip, not input or automatic fire.
+	awareness = preload("awareness.gd").new()
+	awareness.session = session
+	add_child(awareness)
+	Layout.full(awareness)
 	countdown = Style.title("3", 96, "fff8e9")
 	add_child(countdown)
 	Layout.full(countdown)
@@ -74,6 +68,12 @@ func _ready() -> void:
 	resized.connect(layout)
 	layout()
 
+func warning_mode(source: Node3D, victim: Node3D, aim: Vector3) -> String:
+	return awareness.warning_mode(source, victim, aim)
+
+func warning_available(info: Dictionary) -> bool:
+	return awareness.warning_available(info)
+
 func offsets(node: Control, rectangle: Rect2) -> void:
 	node.offset_left = rectangle.position.x
 	node.offset_top = rectangle.position.y
@@ -90,10 +90,46 @@ func layout() -> void:
 	offsets(pause_button, Rect2(-172 if compact else -180, 128 if size.x < 500 else 16 if compact else 24, 156, 44))
 	offsets(cards[2], Rect2(16 if compact else 24, -222 if size.x < 570 else -120, 200, 92))
 	offsets(cards[3], Rect2(-314 if compact else -322, -120, 298, 92))
+	if size.x < 700 or size.y < 560:
+		# Narrow-only reflow keeps the selected guide type and all essential values.
+		# The regular 800/1280 layouts and the camera/window minimum are unchanged.
+		offsets(cards[0], Rect2(12, 12, 230, 84))
+		Style.position(cards[0].get_child(0), Rect2(12, 12, 60, 60))
+		Style.position(cards[0].get_child(1), Rect2(82, 4, 140, 20))
+		Style.position(health, Rect2(82, 24, 140, 34))
+		Style.position(health_bar, Rect2(82, 64, 132, 9))
+		cards[1].anchor_left = 0
+		cards[1].anchor_right = 0
+		offsets(cards[1], Rect2(254, 12, size.x - 266, 84))
+		Style.position(cards[1].get_child(0), Rect2(0, 4, cards[1].size.x, 20))
+		Style.position(timer, Rect2(0, 22, cards[1].size.x, 40))
+		Style.position(cards[1].get_child(2), Rect2(0, 62, cards[1].size.x, 18))
+		offsets(pause_button, Rect2(-168, 108, 156, 44))
+		offsets(cards[2], Rect2(12, 104 - size.y, 200, 52))
+		Style.position(cards[2].get_child(0), Rect2(12, 3, 180, 20))
+		Style.position(kills, Rect2(12, 22, 174, 30))
+		kills.add_theme_font_size_override("font_size", 25)
+		offsets(cards[3], Rect2(12 - size.x, -76, size.x - 24, 64))
+		Style.position(animals, Rect2(16, 4, cards[3].size.x - 32, 22))
+		Style.position(condition, Rect2(16, 30, cards[3].size.x - 32, 28))
+	else:
+		# Restore internal positions as well as outer anchors when widening again.
+		Style.position(cards[0].get_child(0), Rect2(14, 20, 60, 60))
+		Style.position(cards[0].get_child(1), Rect2(88, 10, 158, 20))
+		Style.position(health, Rect2(88, 30, 155, 34))
+		Style.position(health_bar, Rect2(88, 73, 152, 9))
+		Style.position(cards[1].get_child(0), Rect2(0, 10, 180, 20))
+		Style.position(timer, Rect2(0, 30, 180, 42))
+		Style.position(cards[1].get_child(2), Rect2(0, 80, 180, 20))
+		Style.position(cards[2].get_child(0), Rect2(16, 10, 174, 20))
+		Style.position(kills, Rect2(16, 34, 160, 45))
+		kills.add_theme_font_size_override("font_size", 32)
+		Style.position(animals, Rect2(16, 12, 266, 22))
+		Style.position(condition, Rect2(16, 42, 266, 28))
 
 func refresh() -> void:
 	if not is_instance_valid(session.avatar): return
-	var remaining := ceili(300 - session.elapsed)
+	var remaining := maxi(0, ceili(session.duration - session.elapsed))
 	timer.text = "%02d:%02d" % [remaining / 60, remaining % 60]
 	health.text = "%d / 100" % ceili(session.avatar.health.value)
 	health_bar.value = session.avatar.health.value
@@ -107,10 +143,10 @@ func refresh() -> void:
 	condition.text = "   ".join(values)
 	countdown.visible = session.state == "Countdown"
 	countdown.text = str(ceili(session.countdown))
-	hints.visible = size.x >= 980
+	awareness.refresh()
 	for record in health_marks:
 		var point: Vector3 = record.body.head_position() + Vector3.UP * 0.35
-		record.mark.visible = record.body.health.value < 100 and not session.town.rig.camera.is_position_behind(point)
+		record.mark.visible = awareness.health_visible(record.body)
 		record.mark.position = session.town.rig.camera.unproject_position(point) - Vector2(38, 20)
 		record.bar.value = record.body.health.value
 		record.label.text = str(record.body.entry.name) + (" · Out" if record.body.health.value <= 0 else " · %d%%" % ceili(record.body.health.value))

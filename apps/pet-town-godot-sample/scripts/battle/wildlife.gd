@@ -5,6 +5,7 @@ var health := preload("health.gd").new()
 var rethink := 0.0
 var route := PackedVector3Array()
 var last_safe := Vector3.ZERO
+var out_at := -INF
 
 func _physics_process(_delta: float) -> void:
 	pass
@@ -63,8 +64,9 @@ func play(clip: String) -> void:
 
 func hurt(amount: float) -> void:
 	if not health.hurt(amount): return
-	session.feedback.number(head_position(), "−10")
+	session.feedback.number(head_position(), "−%d" % ceili(amount))
 	if health.value <= 0:
+		out_at = session.elapsed
 		freeze = true
 		collision_layer = 0
 		collision_mask = 0
