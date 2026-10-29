@@ -37,7 +37,7 @@ export class VillageRenderer {
         this.elements.delete(id); this.motions.delete(id);
       }
     }
-    const maximumX = this.scenery.travelSpan(width);
+    const maximumX = Math.max(0, width - 104);
     const waveSampler = this.scenery.sampler();
     for (const citizen of ordered) {
       const pack = this.behaviorPackForCitizen(citizen);
@@ -53,9 +53,7 @@ export class VillageRenderer {
       if (!motion || motion.packFingerprint !== pack.fingerprint) {
         const seed = motionSeed(citizen.id);
         motion = {
-          x: motion?.x ?? maximumX * (this.scenery.vertical
-            ? (ordered.indexOf(citizen) + 0.5) / ordered.length
-            : ((seed >>> 16) % 1_000) / 1_000),
+          x: motion?.x ?? maximumX * (((seed >>> 16) % 1_000) / 1_000),
           direction: motion?.direction ?? ((seed & 1) === 0 ? 1 : -1),
           maximumX: motion?.maximumX ?? maximumX,
           behavior: new BehaviorMachine(pack, citizen.id, citizen.status),
@@ -126,7 +124,7 @@ export class VillageRenderer {
       refreshCitizenLabelPosition(element);
       const motion = this.motions.get(id);
       if (motion) {
-        const maximumX = this.scenery.travelSpan(this.currentWidth);
+        const maximumX = Math.max(0, this.currentWidth - 104);
         motion.x = remapTrackPosition(motion.x, motion.maximumX, maximumX);
         motion.maximumX = maximumX;
         applyFlowSample(element, motion.behavior.sample(), motion.fallbackAssetUrl,
@@ -147,20 +145,19 @@ export class VillageRenderer {
     this.lastTimestamp = 0;
     this.publishHitRegions();
   }
-  beginDrag(id: string, clientX: number, clientY = 0): boolean {
+  beginDrag(id: string, clientX: number): boolean {
     const motion = this.motions.get(id);
     if (this.paused || !motion) return false;
     motion.dragging = true;
-    motion.dragOffsetX = (this.scenery.vertical ? -clientY : clientX) - motion.x;
+    motion.dragOffsetX = clientX - motion.x;
     this.publishHitRegions();
     return true;
   }
-  moveDrag(id: string, clientX: number, clientY = 0): void {
+  moveDrag(id: string, clientX: number): void {
     const motion = this.motions.get(id);
     const element = this.elements.get(id);
     if (!motion || !element || !motion.dragging) return;
-    motion.x = Math.max(0, Math.min(motion.maximumX,
-      (this.scenery.vertical ? -clientY : clientX) - motion.dragOffsetX));
+    motion.x = Math.max(0, Math.min(motion.maximumX, clientX - motion.dragOffsetX));
     this.scenery.position(element, motion, this.scenery.sampler());
     this.publishHitRegions();
   }
@@ -168,17 +165,14 @@ export class VillageRenderer {
     const motion = this.motions.get(id);
     if (motion) {
       motion.dragging = false;
-      if (this.scenery.vertical) this.geometry.flush();
-      else this.publishHitRegions();
+      this.publishHitRegions();
     }
   }
   refreshHitRegions(): void { this.publishHitRegions(); }
   private refreshOceanWakes(): void { this.scenery.updateWakes(this.elements, this.motions, this.currentCitizenSize); }
   private readonly geometry = createGeometryUpdates(() => {
     this.currentCitizenSize = resizeCitizens(this.root, this.elements.values(),
-      this.scenery.vertical ? this.scenery.travelSpan(this.currentWidth) : this.currentWidth,
-      this.preferences, this.currentCitizenSize);
-    this.scenery.settleNooks(this.elements, this.motions);
+      this.currentWidth, this.preferences, this.currentCitizenSize);
     const sampler = this.scenery.sampler();
     for (const [id, element] of this.elements) {
       const motion = this.motions.get(id);

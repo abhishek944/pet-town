@@ -3,10 +3,8 @@ use std::time::Duration;
 use tauri::{AppHandle, Emitter, Manager, Monitor, WebviewWindow};
 
 mod geometry;
+pub(crate) use geometry::place_street_window;
 use geometry::window_geometry_matches;
-pub(crate) use geometry::{
-    forget_street_layout, place_street_window, register_street_layout, StreetLayouts,
-};
 
 pub(crate) const STREET_PREFIX: &str = "street-";
 

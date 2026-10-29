@@ -48,12 +48,7 @@ export function collectHitRegions(
   }
   return [
     ...[...elements]
-      .filter(
-        (element) =>
-          !element.hidden &&
-          !element.classList.contains("retiring") &&
-          element.style.getPropertyValue("--canopy-fade") !== "0",
-      )
+      .filter((element) => !element.hidden && !element.classList.contains("retiring"))
       .flatMap((element) => [
         element.style.getPropertyValue("--citizen-opacity") === "0"
           ? null

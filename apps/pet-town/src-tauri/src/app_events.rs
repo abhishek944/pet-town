@@ -51,7 +51,6 @@ pub(crate) fn window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     if crate::street_windows::is_street_label(window.label())
         && matches!(event, tauri::WindowEvent::Destroyed)
     {
-        crate::street_windows::forget_street_layout(window);
         crate::village_visibility::renderer_closed(window);
     }
     if window.label() == "settings"

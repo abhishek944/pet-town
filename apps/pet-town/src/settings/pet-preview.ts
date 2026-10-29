@@ -40,17 +40,12 @@ export class SettingsPetPreview {
         this.render();
       },
       this.editState,
-      isActivityTheme(draft.app.stripTheme) || draft.app.stripTheme === "canopy"
+      isActivityTheme(draft.app.stripTheme)
         ? draft.app.stripTheme
         : effectivePetTheme(draft, selectedPetId),
     );
     const preferred = this.selectedAnimationByPet.get(selectedPetId);
-    this.selectedAnimationId = selectedPreviewAnimationId(
-      this.animationOptions,
-      draft.app.stripTheme === "canopy" && !preferred?.startsWith("clip:canopy:")
-        ? "clip:canopy:working"
-        : preferred,
-    );
+    this.selectedAnimationId = selectedPreviewAnimationId(this.animationOptions, preferred);
     this.selectedAnimationByPet.set(selectedPetId, this.selectedAnimationId);
   }
 

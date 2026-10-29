@@ -20,9 +20,6 @@ impl PreferencesFile {
         if self.app.railway_opacity_percent > 100 {
             return Err("railwayOpacityPercent must be 0–100".to_string());
         }
-        if self.app.canopy_opacity_percent > 100 {
-            return Err("canopyOpacityPercent must be 0–100".to_string());
-        }
         if self.app.rainforest_opacity_percent > 100 {
             return Err("rainforestOpacityPercent must be 0–100".to_string());
         }

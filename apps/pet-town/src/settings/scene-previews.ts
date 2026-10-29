@@ -1,9 +1,7 @@
-import { RendererMoonlit } from "../moonlit-canopy";
 import { createOceanWater, updateOceanWater } from "../ocean-water";
 import { startOceanPreview } from "../ocean-preview";
 import type { PreferencesFile } from "../preferences-types";
 import { byId } from "../settings-dom";
-import { bindRange } from "../settings-range";
 import { SettingsRainforest } from "../settings-rainforest";
 import { SettingsSnow } from "../settings-snow";
 import { SettingsDesert } from "../settings-desert";
@@ -11,8 +9,6 @@ import { SettingsActivities } from "../settings-activities";
 
 export class SettingsScenePreviews {
   private readonly oceanPreview = byId<HTMLElement>("ocean-preview");
-  private readonly canopyPreview = byId<HTMLElement>("canopy-preview");
-  private readonly canopyScene = new RendererMoonlit(this.canopyPreview);
   private readonly oceanPreviewWater = createOceanWater();
   private readonly rainforestSettings: SettingsRainforest;
   private readonly snowSettings: SettingsSnow;
@@ -20,13 +16,6 @@ export class SettingsScenePreviews {
   private readonly activitySettings: SettingsActivities;
 
   constructor(draft: () => PreferencesFile, render: () => void) {
-    bindRange(
-      "canopy-opacity",
-      (value) => {
-        draft().app.canopyOpacityPercent = value;
-      },
-      render,
-    );
     this.rainforestSettings = new SettingsRainforest(draft, render);
     this.snowSettings = new SettingsSnow(draft, render);
     this.desertSettings = new SettingsDesert(draft, render);
@@ -49,20 +38,6 @@ export class SettingsScenePreviews {
     this.snowSettings.render(draft, readOnly);
     this.desertSettings.render(draft, readOnly);
     this.activitySettings.render(draft, readOnly);
-    const canopyActive = draft.app.stripTheme === "canopy";
-    const canopyOpacity = draft.app.canopyOpacityPercent ?? 100;
-    const canopySlider = byId<HTMLInputElement>("canopy-opacity");
-    canopySlider.value = String(canopyOpacity);
-    canopySlider.disabled = readOnly || !canopyActive;
-    canopySlider.setAttribute(
-      "aria-valuetext",
-      `${canopyOpacity}% opaque, ${100 - canopyOpacity}% transparent`,
-    );
-    byId<HTMLOutputElement>("canopy-opacity-value").value = `${canopyOpacity}%`;
-    byId<HTMLElement>("canopy-opacity-row").hidden = !canopyActive;
-    this.canopyPreview.hidden = !canopyActive;
-    this.canopyScene.setPreferences(draft);
-    this.canopyScene.advance(0, true, true);
     const waterlineSlider = byId<HTMLInputElement>("ocean-waterline");
     waterlineSlider.value = String(draft.app.oceanWaterlineHeightPx);
     waterlineSlider.disabled = readOnly || draft.app.stripTheme !== "ocean";

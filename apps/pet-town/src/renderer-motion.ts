@@ -37,7 +37,6 @@ export function advanceMotions(
   for (const [id, element] of elements) {
     const motion = motions.get(id);
     if (!motion || element.classList.contains("retiring")) continue;
-    if (!motion.dragging) scenery.advancePet(element, elapsedMs);
     const currentSample = motion.behavior.sample();
     const themedAssetUrl = scenery.assetFor(element, currentSample.state);
     if (motion.dragging) {
@@ -80,11 +79,9 @@ export function advanceMotions(
       ),
       element,
     );
-    if (!scenery.moveAlongPath(motion, distance)) {
-      const position = advanceTrack(motion.x, motion.direction, distance, motion.maximumX);
-      motion.x = position.x;
-      motion.direction = position.direction;
-    }
+    const position = advanceTrack(motion.x, motion.direction, distance, motion.maximumX);
+    motion.x = position.x;
+    motion.direction = position.direction;
     applyFlowSample(
       element,
       advance.sample,

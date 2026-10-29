@@ -1,4 +1,3 @@
-import { canopyPreviewPose } from "./moonlit-pet";
 import {
   activitySidecarClip,
   activitySpriteOffset,
@@ -38,7 +37,6 @@ function dedicatedClip(theme: string, state: string, clip: ActivityClipAsset): C
 }
 
 export function activityPoseFor(theme: string, id: string, state: string): CompiledClip | null {
-  if (theme === "canopy") return canopyPreviewPose(id, state);
   const sidecar = activitySidecarFor(theme, id, state);
   if (sidecar) return dedicatedClip(theme, state, sidecar);
   if (!["rollercoaster", "goldmine", "railway"].includes(theme) || !isSystemPet(id)) return null;

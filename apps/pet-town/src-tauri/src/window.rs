@@ -131,7 +131,6 @@ pub(crate) fn create_street_window(
             .visible(false)
             .visible_on_all_workspaces(true)
             .build()?;
-    crate::street_windows::register_street_layout(&window);
     Ok(window)
 }
 

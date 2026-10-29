@@ -1,4 +1,3 @@
-import { RendererMoonlit } from "./moonlit-canopy";
 import { RendererOcean } from "./renderer-ocean";
 import { RendererActivities } from "./activity-themes";
 import { RendererRainforest } from "./rainforest";
@@ -15,7 +14,6 @@ type Motions = ReadonlyMap<string, PositionedMotion>;
 /** Presentation facade: all scenery shares the village clock, never agent state. */
 export class RendererScenery {
   private readonly ocean: RendererOcean;
-  private readonly canopy: RendererMoonlit;
   private readonly activities: RendererActivities;
   private readonly forest: RendererRainforest;
   private readonly snow: RendererSnowy;
@@ -25,7 +23,6 @@ export class RendererScenery {
 
   constructor(root: HTMLElement) {
     this.ocean = new RendererOcean(root);
-    this.canopy = new RendererMoonlit(root);
     this.activities = new RendererActivities(root);
     this.forest = new RendererRainforest(root);
     this.snow = new RendererSnowy(root);
@@ -34,7 +31,6 @@ export class RendererScenery {
 
   setPreferences(preferences: PreferencesFile): void {
     this.ocean.setPreferences(preferences);
-    this.canopy.setPreferences(preferences);
     this.activities.setPreferences(preferences);
     this.forest.setPreferences(preferences);
     this.forest.advance(0, this.reduced, this.paused);
@@ -46,7 +42,6 @@ export class RendererScenery {
 
   advance(elapsedMs: number, reduced: boolean): boolean {
     this.reduced = reduced;
-    this.canopy.advance(elapsedMs, reduced, this.paused || document.hidden);
     this.activities.advance(elapsedMs, reduced, this.paused || document.hidden);
     this.forest.advance(elapsedMs, reduced, this.paused || document.hidden);
     this.snow.advance(elapsedMs, reduced, this.paused || document.hidden);
@@ -56,7 +51,6 @@ export class RendererScenery {
 
   setReduced(reduced: boolean, elements: Elements, motions: Motions): void {
     this.reduced = reduced;
-    this.canopy.advance(0, reduced, this.paused);
     this.forest.advance(0, reduced, this.paused);
     this.snow.advance(0, reduced, this.paused);
     this.desert.advance(0, reduced, this.paused);
@@ -66,7 +60,6 @@ export class RendererScenery {
 
   setPaused(paused: boolean, elements: Elements, motions: Motions): void {
     this.paused = paused;
-    this.canopy.advance(0, this.reduced, paused);
     this.forest.advance(0, this.reduced, paused);
     this.snow.advance(0, this.reduced, paused);
     this.desert.advance(0, this.reduced, paused);
@@ -75,11 +68,7 @@ export class RendererScenery {
   }
 
   assetFor(element: HTMLElement, state?: HerdrState): string | null {
-    return (
-      this.canopy.assetFor(element) ??
-      this.activities.assetFor(element) ??
-      this.ocean.assetFor(element, state)
-    );
+    return this.activities.assetFor(element) ?? this.ocean.assetFor(element, state);
   }
 
   sampler(): ((x: number) => number) | null {
@@ -92,12 +81,6 @@ export class RendererScenery {
     sampler: ((x: number) => number) | null,
     walking?: boolean,
   ): void {
-    if (this.canopy.active) {
-      this.activities.position(element, motion); // Its inactive path owns old props/anchor cleanup.
-      this.canopy.position(element, motion);
-      return;
-    }
-    this.canopy.position(element, motion);
     if (!this.activities.active || element.dataset.agentSource === "orchestrator")
       this.ocean.position(element, motion, sampler);
     this.activities.position(element, motion);
@@ -105,41 +88,14 @@ export class RendererScenery {
   }
 
   travelDistance(distance: number, element: HTMLElement): number {
-    return this.canopy.active
-      ? this.canopy.travelDistance(distance, element)
-      : this.activities.travelDistance(distance, element);
-  }
-
-  travelSpan(width: number): number {
-    return this.canopy.active ? this.canopy.span() : Math.max(0, width - 104);
-  }
-
-  get vertical(): boolean {
-    return this.canopy.active;
-  }
-
-  advancePet(element: HTMLElement, elapsedMs: number): void {
-    this.canopy.advancePet(element, elapsedMs);
-  }
-
-  settleNooks(elements: Elements, motions: Motions): void {
-    this.canopy.settleNooks(elements, motions);
-  }
-
-  moveAlongPath(motion: PositionedMotion, distance: number): boolean {
-    if (!this.canopy.active) return false;
-    this.canopy.move(motion, distance);
-    return true;
+    return this.activities.travelDistance(distance, element);
   }
 
   private positionActivities(elements: Elements, motions: Motions): void {
     this.activities.advance(0, this.reduced, this.paused);
     for (const [id, element] of elements) {
       const motion = motions.get(id);
-      if (motion) {
-        this.activities.position(element, motion);
-        if (this.canopy.active) this.canopy.position(element, motion);
-      }
+      if (motion) this.activities.position(element, motion);
     }
   }
 

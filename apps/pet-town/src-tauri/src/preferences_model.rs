@@ -38,8 +38,9 @@ pub struct AppPreferences {
     pub goldmine_opacity_percent: u8,
     #[serde(default = "default_activity_opacity_percent")]
     pub railway_opacity_percent: u8,
-    #[serde(default = "default_canopy_opacity_percent")]
-    pub canopy_opacity_percent: u8,
+    // Discard this retired setting without accepting unrelated unknown fields.
+    #[serde(default, skip_serializing, rename = "canopyOpacityPercent")]
+    legacy_canopy_opacity: serde::de::IgnoredAny,
     #[serde(default)]
     pub rainforest_mode: RainforestMode,
     #[serde(default = "default_rainforest_opacity_percent")]
@@ -118,7 +119,7 @@ impl PreferencesFile {
                 coaster_height_px: default_coaster_height_px(),
                 goldmine_opacity_percent: default_activity_opacity_percent(),
                 railway_opacity_percent: default_activity_opacity_percent(),
-                canopy_opacity_percent: default_canopy_opacity_percent(),
+                legacy_canopy_opacity: serde::de::IgnoredAny,
                 rainforest_mode: RainforestMode::AfterRain,
                 rainforest_opacity_percent: default_rainforest_opacity_percent(),
                 snow_mode: SnowMode::FreshSnow,
