@@ -15,6 +15,19 @@ pub(crate) fn verify_existing_herdr_agent(pane_id: String) -> Result<(), String>
 
 fn run_focus_route(herdr: &OsString, target: &FocusRoute) -> Result<(), String> {
     match target {
+        FocusRoute::HerdrCore { target } => {
+            let route = pet_town_agent_broker::FocusRoute::HerdrCore {
+                target: target.clone(),
+            };
+            pet_town_agent_broker::focus_route(&route)?;
+            #[cfg(target_os = "macos")]
+            {
+                let activation = crate::macos_activation::activate_herdr_core();
+                pet_town_agent_broker::focus_route(&route)?;
+                activation?;
+            }
+            Ok(())
+        }
         FocusRoute::Herdr {
             pane_id,
             socket,
@@ -91,6 +104,8 @@ fn run_user_focus_route(herdr: &OsString, target: &FocusRoute) -> Result<(), Str
 pub(crate) fn focus_current_agent(id: &str) -> Result<(), String> {
     let route = if matches!(id, "pet-town-assistant" | "pet-town-mayor") {
         crate::sessions::mayor_primary_route()
+    } else if id.starts_with("herdr-core:") {
+        pet_town_agent_broker::core_focus_route(id)
     } else if id.starts_with("herdr:machine:") {
         pet_town_agent_broker::remote_focus_route(id)
     } else {
@@ -103,6 +118,7 @@ pub(crate) fn focus_current_agent(id: &str) -> Result<(), String> {
         "route {id}: {}",
         match &target {
             FocusRoute::Herdr { .. } => "herdr",
+            FocusRoute::HerdrCore { .. } => "herdr-core",
             FocusRoute::Codex { thread_id, .. } =>
                 if thread_id.is_some() {
                     "codex thread"

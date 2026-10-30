@@ -116,6 +116,7 @@ pub fn focus_route(route: &FocusRoute) -> Result<(), String> {
 /// Returns whether Codex Desktop itself was activated (rather than a fallback app).
 pub fn focus_route_with_codex_activation(route: &FocusRoute) -> Result<bool, String> {
     match route {
+        FocusRoute::HerdrCore { target } => crate::core::focus(target).map(|_| false),
         FocusRoute::Herdr {
             pane_id,
             socket,

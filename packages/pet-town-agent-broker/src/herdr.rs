@@ -32,7 +32,7 @@ pub(crate) fn binary() -> OsString {
         .unwrap_or_else(|| "herdr".into())
 }
 
-fn opaque(value: &str) -> String {
+pub(crate) fn opaque(value: &str) -> String {
     let mut hash = 0xcbf29ce484222325_u64;
     for byte in value.as_bytes() {
         hash ^= u64::from(*byte);

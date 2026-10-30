@@ -61,7 +61,8 @@ fn collect_with_activity() -> BrokerSnapshot {
     let mut collected = collect_visible();
     // Pet Street must not depend on Pet Town being open for Codex telemetry.
     let usage = if collected.snapshot.agents.iter().any(|agent| {
-        agent.status == "working" && matches!(agent.source.as_str(), "codex" | "herdr")
+        agent.status == "working"
+            && matches!(agent.source.as_str(), "codex" | "herdr" | "herdr-core")
     }) {
         crate::codex_usage::refresh()
     } else {

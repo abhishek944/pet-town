@@ -1,7 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-
 export interface AdapterSetupView {
-  id: "herdr" | "claude" | "codex" | "opencode" | "pi" | "factory" | "cursor";
+  id: "herdr" | "herdr-core" | "claude" | "codex" | "opencode" | "pi" | "factory" | "cursor";
   name: string;
   mechanism: string;
   status: "builtIn" | "installed" | "verificationRequired" | "disabled" | "notInstalled" | "needsUpdate" | "error" | "conflict";
@@ -20,7 +19,8 @@ interface OverviewCard {
 }
 
 const overviewCards: OverviewCard[] = [
-  { ids: ["herdr"], name: "Herdr", glyph: "H", subtitle: () => "Authoritative session host" },
+  { ids: ["herdr"], name: "Herdr TUI", glyph: "H", subtitle: () => "Legacy session host" },
+  { ids: ["herdr-core"], name: "Herdr Core", glyph: "H", subtitle: () => "Live status and existing app focus" },
   { ids: ["claude"], name: "Claude Code", glyph: "C", subtitle: ([item]) => item.status === "installed" ? "Hooks installed" : "Hooks available" },
   { ids: ["codex"], name: "Codex", glyph: "◎", subtitle: ([item]) => item.status === "verificationRequired" ? "Hooks installed; verify trust" : item.status === "installed" ? "Hooks installed" : "Not configured", directConnect: "codex" },
   { ids: ["opencode"], name: "OpenCode", glyph: "O", subtitle: ([item]) => item.status === "installed" ? "Plugin installed" : "Plugin available", directConnect: "opencode" },

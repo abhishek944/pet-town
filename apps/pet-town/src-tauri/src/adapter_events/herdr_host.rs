@@ -31,6 +31,10 @@ fn herdr_binary() -> OsString {
 }
 
 pub(super) fn owner_key(native_session: &str) -> Option<String> {
+    legacy_owner_key(native_session).or_else(pet_town_agent_broker::core_hosted_owner_key)
+}
+
+fn legacy_owner_key(native_session: &str) -> Option<String> {
     if std::env::var("HERDR_ENV").ok().as_deref() != Some("1") {
         return None;
     }

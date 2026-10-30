@@ -113,7 +113,7 @@ export function bindCompanionControls(root, context) {
         : "Opening…"
       : selected?.remoteMachine
         ? "Select remote pane"
-        : selected?.source === "herdr" || selected?.isMayor
+        : ["herdr", "herdr-core"].includes(selected?.source) || selected?.isMayor
           ? "Open in Herdr ↗"
           : "Open agent ↗";
     control("focus").title = selected?.remoteMachine

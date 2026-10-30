@@ -20,7 +20,7 @@ fn terminate(child: &mut Child) {
 }
 
 #[cfg(unix)]
-fn collect_output(
+pub(crate) fn collect_output(
     child: &mut Child,
     mut stdout: ChildStdout,
     timeout: Duration,
@@ -92,7 +92,7 @@ fn collect_output(
 }
 
 #[cfg(not(unix))]
-fn collect_output(
+pub(crate) fn collect_output(
     child: &mut Child,
     mut stdout: ChildStdout,
     timeout: Duration,

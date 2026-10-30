@@ -1,11 +1,13 @@
 use crate::herdr_command::run_herdr_command;
-use objc2_app_kit::{NSApplicationActivationOptions, NSRunningApplication};
+mod application;
+pub(crate) use application::activate_herdr_core;
+use objc2_app_kit::NSRunningApplication;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use std::ffi::OsString;
 use std::path::Path;
 use std::process::Command;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 const MAX_PROCESS_OUTPUT_BYTES: usize = 1024 * 1024;
 // Switching from another app's full-screen Space can outlast a short focus request.
@@ -149,25 +151,5 @@ pub(crate) fn activate_herdr_host_with_timeout(
     .ok_or_else(|| "could not identify one Herdr UI application".to_string())?;
     let application = NSRunningApplication::runningApplicationWithProcessIdentifier(host_pid)
         .ok_or_else(|| "the Herdr UI application exited".to_string())?;
-    crate::focus_trace::application("Herdr host before", &application);
-    // Raising every host window exposes the unrelated default window first.
-    let options = NSApplicationActivationOptions::empty();
-    application.unhide();
-    if !application.activateWithOptions(options) {
-        return Err("macOS refused to activate the Herdr UI application".to_string());
-    }
-    let deadline = Instant::now() + timeout;
-    while !application.isActive() {
-        if Instant::now() >= deadline {
-            return Err("the Herdr UI application did not become active".to_string());
-        }
-        // NSRunningApplication updates its properties through the main run
-        // loop. The headless focus helper has no Tauri loop to service it.
-        use tauri_nspanel::objc2_foundation::{NSDate, NSRunLoop};
-        NSRunLoop::currentRunLoop().runUntilDate(&NSDate::dateWithTimeIntervalSinceNow(0.01));
-    }
-    // The host can report active before macOS finishes raising its key window.
-    std::thread::sleep(Duration::from_millis(150));
-    crate::focus_trace::application("Herdr host after", &application);
-    Ok(())
+    application::activate(&application, timeout)
 }

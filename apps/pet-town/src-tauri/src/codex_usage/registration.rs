@@ -156,9 +156,14 @@ pub(crate) fn register(session_id: &str, agent_id: &str, owner: Option<&str>, pa
         // This describes the current hook, never historical price attribution.
         session.hook_model = Some(model);
     }
-    let hosted = owner
-        .and_then(|key| key.strip_prefix("herdr-session:"))
-        .map(|suffix| format!("herdr:{suffix}"));
+    let hosted = owner.and_then(|key| {
+        key.strip_prefix("herdr-session:")
+            .map(|suffix| format!("herdr:{suffix}"))
+            .or_else(|| {
+                key.strip_prefix("herdr-core-program:")
+                    .map(|suffix| format!("herdr-core:{suffix}"))
+            })
+    });
     for alias in std::iter::once(agent_id.to_string()).chain(hosted) {
         if !session.agents.contains(&alias) {
             session.agents.push(alias);

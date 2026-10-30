@@ -78,7 +78,9 @@ pub fn relay(source: &str, event: &str, install_epoch: Option<&str>) -> Result<(
         event.to_ascii_lowercase().as_str(),
         "sessionstart" | "session_start" | "sessionend" | "session_end"
     );
-    if boundary {
+    // Keep the verified harness ancestry alive until Core host binding finishes.
+    // Otherwise this worker can be reparented before ingestion checks ownership.
+    if boundary || std::env::var_os("HC_TERMINAL_ID").is_some() {
         child
             .wait()
             .map_err(|_| "adapter event worker did not finish".to_string())?;

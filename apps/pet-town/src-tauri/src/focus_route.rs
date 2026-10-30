@@ -1,5 +1,8 @@
 #[derive(Clone, Debug)]
 pub(crate) enum FocusRoute {
+    HerdrCore {
+        target: pet_town_agent_broker::CoreTarget,
+    },
     Herdr {
         pane_id: String,
         socket: Option<String>,
@@ -18,6 +21,7 @@ pub(crate) enum FocusRoute {
 impl From<pet_town_agent_broker::FocusRoute> for FocusRoute {
     fn from(route: pet_town_agent_broker::FocusRoute) -> Self {
         match route {
+            pet_town_agent_broker::FocusRoute::HerdrCore { target } => Self::HerdrCore { target },
             pet_town_agent_broker::FocusRoute::Herdr {
                 pane_id,
                 socket,

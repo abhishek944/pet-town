@@ -63,9 +63,14 @@ struct CachedLabels {
 
 static CACHE: OnceLock<Mutex<HashMap<String, CachedLabels>>> = OnceLock::new();
 
-fn space_tab_label(space_name: &str, tab: &RawTabLabel) -> String {
-    let tab_name = safe_display_label(tab.label.as_deref())
-        .or_else(|| tab.number.map(|number| number.to_string()))
+/// Shared legacy label contract; callers supply a sanitized space name.
+pub(crate) fn space_tab_label(
+    space_name: &str,
+    tab_label: Option<&str>,
+    tab_number: Option<u32>,
+) -> String {
+    let tab_name = safe_display_label(tab_label)
+        .or_else(|| tab_number.map(|number| number.to_string()))
         .unwrap_or_else(|| "?".to_string());
     format!("{space_name}-{tab_name}")
 }
@@ -115,9 +120,10 @@ fn query(herdr: &OsString, socket: Option<&str>, workspaces: &[String]) -> Sessi
         {
             for tab in envelope.result.tabs {
                 if let Some(space_name) = spaces.get(workspace) {
-                    labels
-                        .tab_fallback_labels
-                        .insert(tab.tab_id.clone(), space_tab_label(space_name, &tab));
+                    labels.tab_fallback_labels.insert(
+                        tab.tab_id.clone(),
+                        space_tab_label(space_name, tab.label.as_deref(), tab.number),
+                    );
                 }
             }
         }

@@ -175,7 +175,44 @@ Pet Studio does not contact an image provider. Users supply their own APNGs, whi
 
 MIT
 
-### Remote Herdr companions
+### Herdr Core adapter
+
+Pet Street and Pet Town discover live status-reporting programs from an already
+running [Herdr Core](https://herdr.dev/core/) (`hc`, protocol generation 1).
+This is separate from the legacy Herdr TUI adapter; both can run together.
+Core statuses drive pets without screen scraping. Programs without a current
+status report do not create pets; an `error` report uses the attention state.
+When the app's Core connection is verified, pets use the same naming contract as
+the TUI adapter: an explicit terminal/pane label wins, otherwise `space-tab`
+(for example, `pet-town-1`), with the tab number as its name fallback. Both
+adapters share the formatter. Completed/idle pets follow the app's attention state: unseen finishes
+remain done, and viewed completions become idle so the normal idle flow hides
+them. Core working/blocked/error state always wins over stale app presentation. As in
+the legacy TUI, viewing a genuine unresolved block does not change it to idle;
+only acknowledged completion does.
+If app metadata is unavailable, raw Core status and existing safe labels remain.
+Pane-less children can inherit a listed parent's space-tab label, but retain raw status
+because the current app API does not expose their own viewed-completion state.
+Connected remote Core agents are included through Core's own machine routing.
+
+Clicking a Core pet selects its exact existing agent through `herdr-app` and,
+on macOS, activates the already-running Herdr desktop app. No terminal or app
+is launched as a fallback. Before selection, the app's local space IDs must match
+its existing layout document in the discovery Core. A missing, empty or mismatched
+layout fails safely; keep a local space open in the app connected to that Core.
+Core pet identity follows the terminal's live program,
+not a native harness conversation; a recovered shell does not inherit its route.
+Installed local harness hooks are merged only after verifying their process
+ancestry against that program. Embedded Observe/Control and Mayor/Firstmate
+still require the legacy adapter; they are not enabled for Core pets yet.
+
+The CLIs are resolved from standard installation paths and PATH. Override them
+with `PET_TOWN_HC_BIN` and `PET_TOWN_HERDR_APP_BIN` when needed. Existing legacy
+`PET_TOWN_HERDR_BIN` configuration is unchanged. Connections use `hc`'s normal
+local Core startup behavior; Pet Town never installs, updates, stops, or restarts
+Core.
+
+### Remote Herdr companions (legacy TUI)
 
 Pet Town also monitors enabled saved SSH machines from `herdr machine list --json`.
 Both the local CLI and each remote installation must support Herdr's

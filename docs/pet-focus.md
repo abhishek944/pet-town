@@ -31,6 +31,25 @@ helper completion and native focus-heartbeat probes pass; the final direct
 visible Godot transition still awaits user observation because Computer access
 to that window is unreliable.
 
+## Herdr Core destinations
+
+The separate Core adapter resolves opaque `herdr-core:` pet IDs without querying
+legacy sockets or the harness registry. Its private route binds the owning core,
+terminal creation time, qualified address and live program PID. It revalidates
+before and after `herdr-app do agent.focus --terminal <address>`. Before dispatch,
+the app's nonempty local space-ID set must match the app-owned `herdr-app` layout
+document in the discovery Core; a mismatch or missing anchor fails without
+selection. This avoids treating matching terminal addresses on isolated cores
+as matching destinations. Core remote
+addresses are handled by the app, not the legacy manual machine-selection flow.
+On macOS the same headless helper selects, activates exactly one running
+`dev.herdr.app` with empty activation options while servicing `NSRunLoop`, then
+reselects. A missing app or changed program fails without launching a destination.
+The shared activation loop lives in `macos_activation/application.rs`; the legacy
+host lookup and its activation ordering remain unchanged. Core pets do not yet
+support embedded terminals or Mayor. Verify direct visible transitions for local,
+remote and pane-less Core workers; command success alone is not visual evidence.
+
 ## Preserve these together
 
 | Part                               | Owner                                                                                                    | Why it matters                                                                                                                                                                                                                                                                                                                                                                                                                                         |

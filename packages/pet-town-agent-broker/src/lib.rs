@@ -1,6 +1,10 @@
 mod agents;
 mod application_focus;
 mod command;
+mod core;
+mod core_app;
+mod core_host;
+mod core_io;
 mod event_focus;
 mod events;
 mod focus;
@@ -32,6 +36,13 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 
 pub use agents::AgentView;
+pub use core::CoreTarget;
+pub use core_host::hosted_owner_key as core_hosted_owner_key;
+
+/// Resolve a Core pet without querying legacy TUI sockets or harness registries.
+pub fn core_focus_route(id: &str) -> Option<FocusRoute> {
+    core::resolve(id)
+}
 pub use focus::{focus_route, focus_route_with_codex_activation};
 pub use remote_monitor::RemoteMonitor;
 pub use terminal::{terminal_target, TerminalTarget};
@@ -50,6 +61,9 @@ pub fn refresh_remote() {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum FocusRoute {
+    HerdrCore {
+        target: CoreTarget,
+    },
     Herdr {
         pane_id: String,
         socket: Option<String>,
@@ -91,13 +105,17 @@ struct AdapterAgent {
 
 fn source_priority(source: &str) -> u8 {
     match source {
-        "herdr" => 0,
+        "herdr" | "herdr-core" => 0,
         _ => 1,
     }
 }
 
 pub fn collect() -> BrokerSnapshot {
-    let snapshots = [herdr::snapshot(parse_agent_list), events::snapshot()];
+    let snapshots = [
+        core::snapshot(),
+        herdr::snapshot(parse_agent_list),
+        events::snapshot(),
+    ];
     let mut available = false;
     let mut by_owner = BTreeMap::<String, AdapterAgent>::new();
 

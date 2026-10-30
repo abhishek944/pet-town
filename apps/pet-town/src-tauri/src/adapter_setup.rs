@@ -21,7 +21,7 @@ pub(crate) struct AdapterSetupView {
 
 fn adapter_status(id: &str) -> &'static str {
     match id {
-        "herdr" => "builtIn",
+        "herdr" | "herdr-core" => "builtIn",
         "claude" => json_hooks::status(
             "claude",
             &CLAUDE_EVENTS,
@@ -94,6 +94,12 @@ pub(crate) fn list_adapter_setups() -> Vec<AdapterSetupView> {
             "Herdr",
             "Authoritative session host",
             vec!["Live sessions", "Exact focus"],
+        ),
+        setup_view(
+            "herdr-core",
+            "Herdr Core",
+            "Core status and existing Herdr app focus; no terminal or Mayor support yet",
+            vec!["Live status", "Exact focus"],
         ),
         setup_view(
             "claude",
