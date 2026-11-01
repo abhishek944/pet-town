@@ -50,23 +50,17 @@ pub enum SettingsAppearance {
 #[serde(rename_all = "lowercase")]
 pub enum StripTheme {
     #[default]
-    #[serde(alias = "canopy", alias = "goldmine", alias = "railway")]
+    #[serde(
+        alias = "canopy",
+        alias = "goldmine",
+        alias = "railway",
+        alias = "rollercoaster"
+    )]
     Standard,
     Ocean,
     Rainforest,
     Snowy,
     Desert,
-    Rollercoaster,
-}
-
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
-#[serde(rename_all = "kebab-case")]
-pub enum CoasterMode {
-    #[default]
-    LowRolling,
-    TwilightCarnival,
-    FireflyGardens,
-    Cloudline,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]

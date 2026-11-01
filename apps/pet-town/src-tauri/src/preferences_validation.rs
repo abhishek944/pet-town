@@ -11,9 +11,6 @@ impl PreferencesFile {
         if !self.pets.contains_key(&self.app.last_selected_pet_id) {
             return Err("lastSelectedPetId is not an installed pet".to_string());
         }
-        if !(50..=146).contains(&self.app.coaster_height_px) {
-            return Err("coasterHeightPx must be 50–146".to_string());
-        }
         if self.app.rainforest_opacity_percent > 100 {
             return Err("rainforestOpacityPercent must be 0–100".to_string());
         }

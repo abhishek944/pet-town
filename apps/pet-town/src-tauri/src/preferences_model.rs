@@ -3,9 +3,9 @@ mod scenery;
 pub use scenery::*;
 
 pub use presentation::{
-    AppearancePreferences, CoasterMode, DesertMode, DesertScene, LabelPreferences, LabelVisibility,
-    MotionLevel, MotionPreferences, PetPreferences, PetTheme, RainforestMode, SettingsAppearance,
-    SnowMode, StripTheme,
+    AppearancePreferences, DesertMode, DesertScene, LabelPreferences, LabelVisibility, MotionLevel,
+    MotionPreferences, PetPreferences, PetTheme, RainforestMode, SettingsAppearance, SnowMode,
+    StripTheme,
 };
 
 use serde::{Deserialize, Serialize};
@@ -30,10 +30,11 @@ pub struct AppPreferences {
     pub settings_appearance: SettingsAppearance,
     #[serde(default)]
     pub strip_theme: StripTheme,
-    #[serde(default)]
-    pub coaster_mode: CoasterMode,
-    #[serde(default = "default_coaster_height_px")]
-    pub coaster_height_px: u16,
+    // Consume retired ride settings without weakening unrelated field validation.
+    #[serde(default, skip_serializing, rename = "coasterMode")]
+    legacy_coaster_mode: serde::de::IgnoredAny,
+    #[serde(default, skip_serializing, rename = "coasterHeightPx")]
+    legacy_coaster_height: serde::de::IgnoredAny,
     // Discard the retired setting without relaxing unrelated field validation.
     #[serde(default, skip_serializing, rename = "goldmineOpacityPercent")]
     legacy_goldmine_opacity: serde::de::IgnoredAny,
@@ -116,8 +117,8 @@ impl PreferencesFile {
                 open_with_herdr: true,
                 settings_appearance: SettingsAppearance::System,
                 strip_theme: StripTheme::Standard,
-                coaster_mode: CoasterMode::LowRolling,
-                coaster_height_px: default_coaster_height_px(),
+                legacy_coaster_mode: serde::de::IgnoredAny,
+                legacy_coaster_height: serde::de::IgnoredAny,
                 legacy_goldmine_opacity: serde::de::IgnoredAny,
                 legacy_railway_opacity: serde::de::IgnoredAny,
                 legacy_canopy_opacity: serde::de::IgnoredAny,

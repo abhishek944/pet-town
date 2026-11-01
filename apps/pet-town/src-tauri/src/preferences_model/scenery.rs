@@ -17,7 +17,3 @@ pub fn default_ocean_opacity_percent() -> u8 {
 pub fn default_ocean_waterline_height_px() -> u16 {
     88
 }
-
-pub fn default_coaster_height_px() -> u16 {
-    88
-}

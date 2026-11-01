@@ -1,5 +1,4 @@
 import { oceanRowingUrl } from "../ocean-assets";
-import { isActivityTheme } from "../preferences-types";
 import type {
   PreferencesFile,
   RainforestMode,
@@ -60,11 +59,7 @@ export function bindAppControls(
     const preservePetThemes =
       theme === "snowy" ||
       theme === "desert" ||
-      isActivityTheme(theme) ||
-      (theme === "standard" &&
-        (previousTheme === "snowy" ||
-          previousTheme === "desert" ||
-          isActivityTheme(previousTheme)));
+      (theme === "standard" && (previousTheme === "snowy" || previousTheme === "desert"));
     if (!preservePetThemes) {
       for (const [id, item] of Object.entries(draft().pets)) {
         if (oceanRowingUrl(id)) item.theme = theme === "ocean" ? "ocean" : "standard";

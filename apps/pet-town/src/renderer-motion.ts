@@ -65,19 +65,16 @@ export function advanceMotions(
           sample: currentSample,
         };
     motion.pendingElapsedMs = advance.remainingMs;
-    const distance = scenery.travelDistance(
-      travelDistanceFor(
-        element,
-        tokenMotionDistance(
-          motion.tokenMotion,
-          advance.distancePx,
-          element.dataset.status === "working",
-          elapsedMs,
-        ),
-        preferences,
-        systemReducedMotion,
-      ),
+    const distance = travelDistanceFor(
       element,
+      tokenMotionDistance(
+        motion.tokenMotion,
+        advance.distancePx,
+        element.dataset.status === "working",
+        elapsedMs,
+      ),
+      preferences,
+      systemReducedMotion,
     );
     const position = advanceTrack(motion.x, motion.direction, distance, motion.maximumX);
     motion.x = position.x;

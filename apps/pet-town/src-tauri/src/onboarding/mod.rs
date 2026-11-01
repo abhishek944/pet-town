@@ -71,7 +71,6 @@ impl Onboarding {
         let theme = saved.strip_theme;
         let mut preview_preferences = crate::preferences_model::PreferencesFile::defaults(&[]);
         preview_preferences.app.strip_theme = theme.clone();
-        preview_preferences.app.coaster_mode = saved.coaster_mode;
         let mut sample = runtime.sample.clone();
         if progress.own_baseline.is_some() && sample.phase == "idle" {
             sample.phase = "own".into();

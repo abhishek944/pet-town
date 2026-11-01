@@ -1,21 +1,11 @@
 import type { FlowSample } from "./flow-runtime";
-import { activityPresentationFor } from "./activity-pet";
 import type { CitizenState } from "./village";
 import { syncCitizenVisibility } from "./renderer-visibility";
-import { refreshCitizenLabelPosition as refreshSpriteBounds } from "./renderer-image-bounds";
+import { refreshCitizenLabelPosition } from "./renderer-image-bounds";
 import { applyPetImage, disposePetImage } from "./renderer-image";
 export { ASSET_READY_TIMEOUT_MS } from "./renderer-image";
 export { setPreferenceHidden } from "./renderer-visibility";
-export function refreshCitizenLabelPosition(element: HTMLElement): void {
-  refreshSpriteBounds(element);
-  if (element.dataset.activityTheme !== "rollercoaster" || element.hidden) return;
-  const stack = element.querySelector<HTMLElement>(".pet-stack");
-  const label = element.querySelector<HTMLElement>(".project");
-  if (!stack || !label) return;
-  // Cache layout-only distance from the citizen bottom, unaffected by label transforms.
-  element.style.setProperty("--coaster-label-rise",
-    `${element.offsetHeight - stack.offsetTop - label.offsetTop}px`);
-}
+export { refreshCitizenLabelPosition } from "./renderer-image-bounds";
 
 export interface HitRegion {
   x: number;
@@ -85,12 +75,13 @@ export function updateCitizenElement(element: HTMLElement, citizen: CitizenState
   if (project && project.textContent !== citizen.label) project.textContent = citizen.label;
 }
 
-function applyPetPresentation(pet: HTMLImageElement, sample: FlowSample, clip = sample.clip, dedicated = false): void {
+function applyPetPresentation(pet: HTMLImageElement, sample: FlowSample): void {
+  const clip = sample.clip;
   const className = [
     "pet",
     clip?.mirror ? "clip-mirror-safe" : "clip-fixed-facing",
     clip?.sourceFacing === "left" ? "clip-source-left" : "clip-source-right",
-    !dedicated && sample.moving ? "flow-moving" : "flow-stationary",
+    sample.moving ? "flow-moving" : "flow-stationary",
     sample.failed ? "flow-failed" : "",
   ].filter(Boolean).join(" ");
   if (pet.className !== className) pet.className = className;
@@ -120,16 +111,13 @@ export function applyFlowSample(
   }
 
   const clip = sample.clip;
-  const presentation = activityPresentationFor(element, themedAssetUrl);
-  const presentationClip = presentation ?? clip;
-  const dedicated = presentation?.name === `activity:${element.parentElement?.dataset.stripTheme}:${element.dataset.status}`;
   const assetUrl = themedAssetUrl ?? (sample.held ? clip?.holdAssetUrl : clip?.assetUrl)
     ?? clip?.assetUrl
     ?? fallbackAssetUrl;
   const ready = applyPetImage(
-    element, assetUrl, dedicated ? null : sample.clipEpoch, dedicated ? false : sample.held,
+    element, assetUrl, sample.clipEpoch, sample.held,
     () => {
-      applyPetPresentation(pet, sample, presentationClip, dedicated);
+      applyPetPresentation(pet, sample);
       // Reveal before measuring padding; hidden image boxes otherwise report zero height.
       syncCitizenVisibility(element, pet, () => {});
       refreshCitizenLabelPosition(element);
@@ -137,7 +125,7 @@ export function applyFlowSample(
     },
   );
   if (pet.dataset.assetReadyKey === pet.dataset.assetKey) {
-    applyPetPresentation(pet, sample, presentationClip, dedicated);
+    applyPetPresentation(pet, sample);
   }
   syncCitizenVisibility(element, pet, onGeometryChange);
   return ready;

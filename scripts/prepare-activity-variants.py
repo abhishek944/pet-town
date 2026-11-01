@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare verified small-display activity loops without changing source artwork."""
+"""Prepare verified small-display Ocean loops without changing source artwork."""
 
 import argparse
 from pathlib import Path
@@ -32,16 +32,13 @@ def same_visible_pixels(left, right):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--theme", choices=("rollercoaster", "ocean"), required=True)
+    parser.add_argument("--theme", choices=("ocean",), required=True)
     args = parser.parse_args()
     count = 0
-    ocean = args.theme == "ocean"
-    pattern = "*/ocean-rowing.webp" if ocean else f"*/activity-{args.theme}-*.webp"
+    pattern = "*/ocean-rowing.webp"
     for source in sorted((ROOT / "apps/pet-town/src/pets").glob(pattern)):
-        if not ocean and source.stem.rsplit("-", 1)[-1] not in ("working", "blocked", "done"):
-            continue
         with Image.open(source) as original:
-            if original.size != ((384, 384) if ocean else (512, 512)):
+            if original.size != (384, 384):
                 raise ValueError(f"Unexpected source size: {source}")
             loop = original.info.get("loop", 0)
             frames, durations = frames_and_timing(original)
