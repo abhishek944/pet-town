@@ -169,12 +169,6 @@ pub fn preferences_changed(
         let _ = app.emit_to("orchestrator", "orchestrator-reset", ());
         state.shutdown();
     } else if configured.wake_enabled {
-        // Extract and verify the bundled runtime before a wake phrase arrives.
-        tauri::async_runtime::spawn_blocking(|| {
-            if let Err(error) = super::runtime::directory() {
-                eprintln!("[assistant runtime] {error}");
-            }
-        });
         let voice_active = {
             let runtime = state.0.lock().unwrap_or_else(|error| error.into_inner());
             runtime.live_connected || runtime.connecting || runtime.wake_activated

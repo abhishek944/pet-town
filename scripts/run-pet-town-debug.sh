@@ -35,11 +35,6 @@ sleep 1
 mkdir -p "$(dirname "$staged_binary")" "$resources"
 cp "$binary" "$staged_binary"
 cp "$source_dir/icons/icon.icns" "$resources/icon.icns"
-runtime_archive="$resources/pet-town-pi-runtime.tar.gz"
-if [ -L "$runtime_archive" ]; then
-  unlink "$runtime_archive"
-fi
-cp "$source_dir/resources/pet-town-pi-runtime.tar.gz" "$runtime_archive"
 python3 - "$source_dir/Info.plist" "$staged_bundle/Contents/Info.plist" <<'PY'
 import plistlib
 import sys
@@ -63,7 +58,6 @@ with open(sys.argv[2], "wb") as destination:
     plistlib.dump(info, destination)
 PY
 
-# The resource archive must be inside the bundle before macOS seals it.
 # Keep the old app launchable until the replacement is fully signed.
 # A stable development signature lets Keychain recognize the app after rebuilds.
 signing_identity=${PET_TOWN_DEBUG_SIGNING_IDENTITY:-}

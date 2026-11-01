@@ -23,9 +23,8 @@ impl AgentSession {
         selected_workspace_id: &str,
         herdr_workspace_id: &str,
         preferences: &OrchestratorPreferences,
-        runtime_path: Option<&str>,
     ) -> Result<Self, String> {
-        let mut arguments = vec![
+        let arguments = vec![
             "tab".into(),
             "create".into(),
             "--workspace".into(),
@@ -36,9 +35,6 @@ impl AgentSession {
             "--env".into(),
             "OPENAI_API_KEY=".into(),
         ];
-        if let Some(path) = runtime_path {
-            arguments.extend(["--env".into(), format!("PATH={path}")]);
-        }
         let created = herdr::command(&arguments, Duration::from_secs(10))?;
         let tab_id = string(&created, &["result", "tab", "tab_id"])?;
         let pane_id = string(&created, &["result", "root_pane", "pane_id"])?;

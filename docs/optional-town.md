@@ -46,7 +46,8 @@ are removed/replaced. The existing host-update save/close handshake still applie
 CI builds the ordinary host DMG/updater archives and optional world archives for
 Apple Silicon and Intel. There is no Town-specific DMG or public second-app flow.
 The host's resource allowlist excludes Godot even if stale assets remain staged.
-The separate private Node/Pi voice runtime is not changed by this split.
+The host also excludes the former private Node/Pi archive. Mayor launches its
+agent through Herdr's configured Pi; installing Town does not install an agent runtime.
 
 The release-pinned `town-component.json` describes both `darwin-aarch64` and
 `darwin-x86_64` with version, exact asset URL, compressed size, SHA-256 and the

@@ -39,10 +39,10 @@ not live agents or Mayor integration. Click a preview to watch the MP4.
 Pet Town is a standalone macOS desktop app. Download the DMG for your Mac,
 open it, and drag **Pet Town.app** into **Applications**. Launching the app opens
 Settings and shows Pet Street; use **Show Pet Street / Hide Pet Street** in Settings, the app
-menu, or the tray menu without quitting the monitor. The application bundle
-includes the private Node/Pi runtime used by the optional voice orchestrator;
-users do not install Node.js, Pi, or Rust. The village discovers configured
-coding-agent connections without requiring Herdr.
+menu, or the tray menu without quitting the monitor. Pet Street does not bundle
+Node.js or Pi, and displaying pets needs neither tool nor Rust installed.
+The optional Mayor uses Pi configured in Herdr rather than installing a private copy.
+The village discovers configured coding-agent connections without requiring Herdr.
 
 The Mac download does not include Godot or the 3D world. Download Pet Town from
 **Settings → App** when wanted; it remains part of the same app. Town menu and Dock

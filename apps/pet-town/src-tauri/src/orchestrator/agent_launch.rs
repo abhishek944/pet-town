@@ -17,14 +17,8 @@ pub async fn start(
     herdr_workspace_id: String,
     preferences: crate::preferences_model::OrchestratorPreferences,
 ) -> Result<AgentSession, String> {
-    let runtime_path = super::runtime::path_environment()?;
     tauri::async_runtime::spawn_blocking(move || {
-        AgentSession::start(
-            &workspace_id,
-            &herdr_workspace_id,
-            &preferences,
-            runtime_path.as_deref(),
-        )
+        AgentSession::start(&workspace_id, &herdr_workspace_id, &preferences)
     })
     .await
     .map_err(|_| "Could not start the Pi agent.".to_string())?

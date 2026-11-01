@@ -81,7 +81,7 @@ pub(crate) async fn download(app: AppHandle) -> Result<Snapshot, String> {
             return Err("Check for an available update before downloading.".into());
         }
         let mut update = inner.update.clone().ok_or("No update is available.")?;
-        // The bundled Node/Pi runtime makes these larger than the landing-page assets.
+        // Allow full application archives to complete on slower connections.
         update.timeout = Some(Duration::from_secs(15 * 60));
         inner.snapshot.phase = "downloading";
         inner.snapshot.error = None;

@@ -16,6 +16,7 @@ apps/pet-town-godot/assets/cozy-island/
 apps/pet-town-godot/navigation/*.res
 !apps/pet-town-godot/navigation/build_land_collision.res
 bin/macos-*/pet-town.dmg
+bin/macos-*/pet-town-pi-runtime.tar.gz
 *.log
 *.local
 __pycache__/
@@ -23,6 +24,7 @@ __pycache__/
 
 # Rust/Tauri output
 apps/*/src-tauri/target/
+# Legacy generated archives/fixtures remain local; the app no longer bundles them.
 apps/*/src-tauri/resources/pet-town-pi-runtime/
 apps/*/src-tauri/resources/pet-town-pi-runtime.tar.gz
 apps/*/src-tauri/resources/godot/

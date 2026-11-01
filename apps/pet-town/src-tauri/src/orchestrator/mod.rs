@@ -17,8 +17,8 @@ mod launch;
 mod launch_replace;
 mod launcher;
 pub(crate) mod openai;
-pub(crate) mod runtime;
-mod runtime_install;
+// Preserve the historical archive-fixture test; no private runtime ships or runs.
+#[cfg(test)]
 mod runtime_verify;
 mod state;
 mod state_publication;

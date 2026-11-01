@@ -69,8 +69,9 @@ The release executable is written to
 `apps/pet-town/src-tauri/target/<rust-target>/release/pet-town` and copied into the
 matching `bin/macos-*` plugin package directory. The same build produces
 **Pet Town.app** and a drag-to-Applications DMG at `bin/macos-*/pet-town.dmg`.
-Tagged release builds upload those installers as GitHub Release assets. The build
-also bundles a pinned Node release and Pi package for the existing voice runtime.
+Tagged release builds upload those installers as GitHub Release assets. Neither
+the host nor its debug bundle includes Node/Pi. Mayor's agent sessions use Pi
+configured in Herdr; Node remains a frontend development/build dependency only.
 
 The pnpm/Turborepo workspace contains the Tauri desktop in `apps/pet-town`, the
 native Godot project in `apps/pet-town-godot-sample`, the retained Three.js game

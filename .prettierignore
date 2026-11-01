@@ -11,7 +11,6 @@ apps/*/src-tauri/resources/
 apps/*/src-tauri/target/
 var/
 pnpm-lock.yaml
-scripts/pi-runtime-package-lock.json
 
 # Godot owns formatting for its project files and documentation.
 apps/pet-town-godot/
